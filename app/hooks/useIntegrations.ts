@@ -5,7 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTenant } from '@/context/TenantContext';
 import { toast } from '@/lib/toast';
 import { extractErrorMessage } from '@/lib/errorUtils';
-import type { Integration, SyncJob, SyncLog, IntegrationStatus } from '@/types/integrations';
+import type { Integration, SyncJob, SyncLog, IntegrationStatus, IntegrationStatusResponse } from '@/types/integrations';
 
 // --- Query Keys ---
 const getIntegrationsKey = (tenantId: string | null) => ['integrations', tenantId];
@@ -58,25 +58,68 @@ export const useIntegrations = () => {
 
 /**
  * Hämtar realtidsstatus för en specifik integration
+ * 
+ * Optimized according to best practices:
+ * - 60s staleTime (status changes slowly)
+ * - Retry on 503/5xx (service unavailable is retryable)
+ * - 60s polling interval (not too aggressive)
  */
 export const useIntegrationStatus = (integrationId: string) => {
   const { tenantId } = useTenant();
   
-  return useQuery<IntegrationStatus>({
+  return useQuery<IntegrationStatusResponse>({
     queryKey: getIntegrationStatusKey(integrationId),
     queryFn: async () => {
       if (!tenantId) throw new Error('Tenant ID saknas');
-      const res = await fetch(`/api/integrations/${integrationId}/status`);
+      
+      const res = await fetch(`/api/integrations/${integrationId}/status`, {
+        credentials: 'include',
+        cache: 'no-store',
+      });
+      
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Failed to fetch integration status');
+        let errorMessage = 'Kunde inte hämta status.';
+        let status = res.status;
+        
+        try {
+          const error = await res.json();
+          errorMessage = error.error || error.message || errorMessage;
+          // Extract status from error object if available
+          if (error.status) status = error.status;
+        } catch {
+          // Om JSON-parsing misslyckas, använd status text
+          errorMessage = res.status === 503 
+            ? 'Tjänsten är tillfälligt otillgänglig. Försök igen senare.'
+            : `HTTP ${res.status}: ${res.statusText}`;
+        }
+        
+        const e: any = new Error(errorMessage);
+        e.status = status;
+        throw e;
       }
+      
       return res.json();
     },
-    enabled: !!tenantId && !!integrationId,
-    refetchInterval: 30000, // Auto-refresh var 30:e sekund
-  });
-};
+        enabled: !!tenantId && !!integrationId,
+        staleTime: 30_000, // Data is fresh for 30s (reduced for faster updates)
+        refetchInterval: 60_000, // Poll every 60 seconds (not too aggressive)
+        refetchOnWindowFocus: true, // Refetch when window regains focus
+        refetchOnMount: true, // Always refetch on mount
+        retry: (failureCount, error: any) => {
+          // Don't retry 404 (not found)
+          if (error?.status === 404) return false;
+          
+          // Retry 503 and 5xx errors (service issues are retryable)
+          if (error?.status === 503 || (error?.status >= 500 && error?.status < 600)) {
+            return failureCount < 3; // Max 3 retries for server errors
+          }
+          
+          // Don't retry other errors (4xx client errors)
+          return false;
+        },
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 5000), // Exponential backoff
+      });
+    };
 
 /**
  * Hämtar synkroniseringsjobb för en integration
@@ -189,19 +232,42 @@ export const useDisconnectIntegration = () => {
   return useMutation<void, Error, string>({
     mutationFn: async (integrationId) => {
       if (!tenantId) throw new Error('Tenant ID saknas');
+      if (!integrationId || integrationId === 'undefined') {
+        throw new Error('Integration ID saknas');
+      }
+      
       const res = await fetch(`/api/integrations/${integrationId}`, {
         method: 'DELETE',
+        credentials: 'include',
       });
+      
       if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Failed to disconnect');
+        let errorMessage = 'Failed to disconnect';
+        try {
+          const error = await res.json();
+          errorMessage = error.error || error.message || errorMessage;
+        } catch {
+          errorMessage = `HTTP ${res.status}: ${res.statusText}`;
+        }
+        throw new Error(errorMessage);
       }
     },
-    onSuccess: (_, integrationId) => {
+    onSuccess: async (_, integrationId) => {
       toast.success('Integrationen har kopplats bort');
-      // Invalidera alla relaterade queries
-      queryClient.invalidateQueries({ queryKey: getIntegrationsKey(tenantId) });
-      queryClient.invalidateQueries({ queryKey: getIntegrationStatusKey(integrationId) });
+      
+      // Invalidera och refetch alla relaterade queries omedelbart
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: getIntegrationsKey(tenantId) }),
+        queryClient.invalidateQueries({ queryKey: getIntegrationStatusKey(integrationId) })
+      ]);
+      
+      // Refetch integrations-listan omedelbart för att uppdatera UI
+      await queryClient.refetchQueries({ queryKey: getIntegrationsKey(tenantId) });
+      
+      // Refetch status omedelbart om integrationId är giltigt
+      if (integrationId && integrationId !== 'undefined') {
+        await queryClient.refetchQueries({ queryKey: getIntegrationStatusKey(integrationId) });
+      }
     },
     onError: (error) => {
       toast.error(`Bortkoppling misslyckades: ${extractErrorMessage(error)}`);

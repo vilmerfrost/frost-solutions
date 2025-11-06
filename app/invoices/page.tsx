@@ -7,6 +7,8 @@ import Sidebar from '@/components/Sidebar'
 import SearchBar from '@/components/SearchBar'
 import FilterSortBar from '@/components/FilterSortBar'
 import { toast } from '@/lib/toast'
+import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
+import { PermissionGuard } from '@/components/rbac/PermissionGuard'
 
 type Invoice = {
   id: string,
@@ -129,12 +131,25 @@ export default function InvoicesPage() {
               <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-1 sm:mb-2">Fakturor</h1>
               <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Hantera dina fakturor</p>
             </div>
-            <button
-              onClick={() => router.push('/invoices/new')}
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-sm sm:text-base"
-            >
-              + Ny faktura
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {filteredInvoices.length > 0 && (
+                <ExportToIntegrationButton
+                  type="invoice"
+                  resourceId={filteredInvoices[0].id}
+                  resourceIds={filteredInvoices.map(inv => inv.id)}
+                  variant="button"
+                  className="w-full sm:w-auto"
+                />
+              )}
+              <PermissionGuard resource="invoices" action="create">
+                <button
+                  onClick={() => router.push('/invoices/new')}
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-sm sm:text-base"
+                >
+                  + Ny faktura
+                </button>
+              </PermissionGuard>
+            </div>
           </div>
 
           {!tenantId ? (

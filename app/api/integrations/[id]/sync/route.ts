@@ -4,14 +4,15 @@ import { createAdminClient } from '@/utils/supabase/admin';
 import { getTenantId } from '@/lib/work-orders/helpers';
 import { extractErrorMessage } from '@/lib/errorUtils';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: integrationId } = await params;
     const tenantId = await getTenantId();
     const admin = createAdminClient();
     const { job_type, payload } = await req.json();
     const { error } = await admin.from('integration_jobs').insert({
       tenant_id: tenantId,
-      integration_id: params.id,
+      integration_id: integrationId,
       job_type,
       payload: payload ?? {},
       status: 'queued',

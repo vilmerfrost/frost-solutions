@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
+import { InvoiceAISuggestion } from '@/components/ai/InvoiceAISuggestion'
 
 export default function NewInvoiceContent() {
   const router = useRouter()
@@ -337,6 +338,34 @@ export default function NewInvoiceContent() {
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-600 dark:border-purple-400 border-t-transparent"></div>
                 <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Laddar projektdata...</p>
               </div>
+            </div>
+          )}
+
+          {/* AI Invoice Suggestion */}
+          {projectId && (
+            <div className="mb-6 sm:mb-8">
+              <InvoiceAISuggestion 
+                projectId={projectId} 
+                onUseSuggestion={(suggestion) => {
+                  // Fill in the form with AI suggestion
+                  if (suggestion.totalAmount) {
+                    setAmount(suggestion.totalAmount);
+                  }
+                  
+                  // Build description from invoice rows
+                  if (suggestion.invoiceRows && suggestion.invoiceRows.length > 0) {
+                    const descParts = suggestion.invoiceRows.map((row: any) => {
+                      if (row.quantity && row.unitPrice) {
+                        return `${row.description || 'Arbetstid'}: ${row.quantity} ${row.unit === 'tim' ? 'tim' : ''} @ ${row.unitPrice} kr`;
+                      }
+                      return row.description || '';
+                    });
+                    setDesc(descParts.join('\n'));
+                  } else if (suggestion.notes) {
+                    setDesc(suggestion.notes);
+                  }
+                }}
+              />
             </div>
           )}
 

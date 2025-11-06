@@ -3,6 +3,8 @@ import { createClient } from '@/utils/supabase/server'
 import { getTenantId } from '@/lib/serverTenant'
 import ExportCSV from './ExportCSV'
 import Link from 'next/link'
+import { ExportPayrollButton } from '@/components/integrations/ExportPayrollButton'
+import PayrollPageClient from './PayrollPageClient'
 
 function sek(n: number) {
   try { return Number(n ?? 0).toLocaleString('sv-SE', { style: 'currency', currency: 'SEK' }) }
@@ -47,13 +49,35 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Rec
   )
 
   // Entries - använd hours_total och ob_type (data sparas så från reports/new)
-  const { data: entriesData } = await supabase
+  // Use admin client to bypass RLS and ensure all entries are fetched
+  const { createAdminClient } = await import('@/utils/supabase/admin')
+  const admin = createAdminClient()
+  
+  const { data: entriesData, error: entriesError } = await admin
     .from('time_entries')
     .select('employee_id, hours_total, ob_type, amount_total, date')
     .eq('tenant_id', tenantId)
     .gte('date', start.split('T')[0])
     .lt('date', end.split('T')[0])
+  
+  if (entriesError) {
+    console.error('❌ Payroll: Error fetching entries:', entriesError)
+  }
+  
   const entries = entriesData ?? []
+  
+  // Debug logging
+  console.log('📊 Payroll: Fetched entries', {
+    tenantId,
+    period: { start: start.split('T')[0], end: end.split('T')[0] },
+    entriesCount: entries.length,
+    sample: entries.slice(0, 3).map((e: any) => ({
+      employee_id: e.employee_id,
+      date: e.date,
+      hours: e.hours_total,
+      ob_type: e.ob_type,
+    })),
+  })
 
   type Agg = {
     employee_id: string
@@ -113,13 +137,30 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Rec
     'Belopp (SEK)': Number(r.amount ?? 0).toFixed(2),
   }))
 
+  // Check if user is admin
+  const { data: employeeData } = await supabase
+    .from('employees')
+    .select('role')
+    .eq('auth_user_id', user.id)
+    .eq('tenant_id', tenantId)
+    .maybeSingle()
+  
+  const isAdmin = employeeData?.role === 'admin' || 
+                 employeeData?.role === 'Admin' || 
+                 employeeData?.role?.toLowerCase() === 'admin'
+
   return (
     <div className="mx-auto max-w-6xl p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl sm:text-3xl font-bold">Lönespec – {label}</h1>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Link href="/admin" className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50">Admin</Link>
           <ExportCSV rows={csv} fileName={`payroll-${label}.csv`} />
+          {isAdmin && (
+            <PayrollPageClient month={label}>
+              <ExportPayrollButton month={label} />
+            </PayrollPageClient>
+          )}
         </div>
       </div>
 

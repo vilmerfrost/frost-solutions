@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import FrostLogo from '@/components/FrostLogo'
 import { toast } from '@/lib/toast'
 import supabase from '@/utils/supabase/supabaseClient'
+import AISummary from '@/components/AISummary'
 
 export default function FeedbackPage() {
   const router = useRouter()
@@ -95,6 +96,28 @@ export default function FeedbackPage() {
               Rapportera buggar, föreslå funktioner eller dela din feedback
             </p>
           </div>
+
+          {/* AI Help for Feedback */}
+          {(subject || message) && (
+            <div className="mb-6 sm:mb-8">
+              <AISummary
+                type="admin-dashboard"
+                data={{
+                  employees: 0,
+                  activeProjects: 0,
+                  unpaidInvoices: 0,
+                  totalRevenue: 0,
+                  projects: [],
+                  invoices: [],
+                  feedback: {
+                    type: feedbackType,
+                    subject,
+                    message,
+                  },
+                }}
+              />
+            </div>
+          )}
 
           {/* Feedback Form */}
           <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 sm:p-8 lg:p-10">

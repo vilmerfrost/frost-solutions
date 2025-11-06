@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
+import { DashboardAnalytics } from '@/components/analytics/DashboardAnalytics'
+import AISummary from '@/components/AISummary'
 
 interface Employee {
   id: string
@@ -200,6 +202,32 @@ export default function AdminPage() {
               <div className="text-3xl font-black text-green-600 mb-1">{totalRevenue.toLocaleString('sv-SE')} kr</div>
               <div className="text-sm text-gray-500">Total omsättning</div>
             </div>
+          </div>
+
+          {/* Dashboard Analytics */}
+          <div className="mb-6 sm:mb-8">
+            <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
+                Analytics & KPI
+              </h2>
+              <DashboardAnalytics />
+            </div>
+          </div>
+
+          {/* AI Insights for Admin */}
+          <div className="mb-6 sm:mb-8">
+            <AISummary
+              type="admin-dashboard"
+              data={{
+                employees: employees.length,
+                activeProjects,
+                unpaidInvoices,
+                totalRevenue,
+                projects: projects.slice(0, 10), // Limit for performance
+                invoices: invoices.slice(0, 10),
+              }}
+              className="mb-6 sm:mb-8"
+            />
           </div>
 
           {/* Employees */}

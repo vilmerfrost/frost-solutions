@@ -2,7 +2,7 @@
 
 export type IntegrationProvider = 'fortnox' | 'visma_eaccounting' | 'visma_payroll';
 
-export type IntegrationStatus = 'disconnected' | 'connected' | 'error';
+export type IntegrationStatus = 'disconnected' | 'connected' | 'error' | 'misconfigured' | 'loading';
 
 export type SyncJobStatus = 'queued' | 'running' | 'success' | 'failed' | 'retry';
 

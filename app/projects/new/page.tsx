@@ -108,6 +108,16 @@ export default function NewProjectPage() {
             <FrostLogo size={32}/>
             <div className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Nytt projekt</div>
           </div>
+
+          {/* AI KMA Suggestion */}
+          {name && (
+            <div className="mb-6">
+              <KMAIISuggestion projectType={name.toLowerCase().includes('elektriker') ? 'elektriker' : name.toLowerCase().includes('rörmokare') ? 'rörmokare' : name.toLowerCase().includes('målare') ? 'målare' : 'bygg'} />
+            </div>
+          )}
+
+          {/* Note: AI Projektplanering visas på projekt-detaljsidan efter att projektet är skapat */}
+
           <form onSubmit={handleSubmit} className="flex flex-col gap-5">
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-2">Projektnamn *</label>

@@ -187,6 +187,9 @@ export function ScheduleCalendar({ projectId, employeeId }: ScheduleCalendarProp
   // Schedule reminders for non-admin employees
   useScheduleReminders();
 
+  // Local loading state for async operations
+  const [isCreatingSchedule, setIsCreatingSchedule] = useState(false);
+
   // Mutation hooks
   const updateSchedule = useUpdateSchedule(filters);
   const createSchedule = useCreateSchedule(filters);
@@ -428,7 +431,7 @@ export function ScheduleCalendar({ projectId, employeeId }: ScheduleCalendarProp
     const selectedShiftType = shiftTypeMap[shiftType] || 'day';
 
     // Skapa schema för varje dag i veckan
-    setIsLoading(true);
+    setIsCreatingSchedule(true);
     try {
       const schedulesToCreate = weekDays.map(day => {
         const times = selectedShiftType === 'day' 
@@ -458,7 +461,7 @@ export function ScheduleCalendar({ projectId, employeeId }: ScheduleCalendarProp
     } catch (error) {
       toast.error(`Fel vid skapande av veckoschema: ${extractErrorMessage(error)}`);
     } finally {
-      setIsLoading(false);
+      setIsCreatingSchedule(false);
     }
   };
 
@@ -479,7 +482,7 @@ export function ScheduleCalendar({ projectId, employeeId }: ScheduleCalendarProp
     setCurrentDate(new Date());
   };
 
-  const isLoading = isLoadingSchedules || isLoadingEmployees || isLoadingProjects;
+  const isLoading = isLoadingSchedules || isLoadingEmployees || isLoadingProjects || isCreatingSchedule;
 
   return (
     <DndContext

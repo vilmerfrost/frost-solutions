@@ -1,6 +1,6 @@
 {
   "node": {
-    "40762f3a43e71821816a0b691531a89e1a714eb017": {
+    "40db401f59c81290451245587df3548fd72d7b5c90": {
       "workers": {
         "app/projects/page": {
           "moduleId": "[project]/frost-demo/.next-internal/server/app/projects/page/actions.js { ACTIONS_MODULE0 => \"[project]/frost-demo/app/projects/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",

@@ -10,6 +10,7 @@ import { toast } from '@/lib/toast'
 import SearchBar from '@/components/SearchBar'
 import FilterSortBar from '@/components/FilterSortBar'
 import { useAdmin } from '@/hooks/useAdmin'
+import { PermissionGuard } from '@/components/rbac/PermissionGuard'
 
 function Notice({
   type = 'info',
@@ -473,14 +474,14 @@ export default function ProjectsContent() {
               <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-2">Projekt</h1>
               <p className="text-gray-500 dark:text-gray-400">Hantera dina projekt</p>
             </div>
-            {isAdmin && (
+            <PermissionGuard resource="projects" action="create">
               <button
                 onClick={() => router.push('/projects/new')}
                 className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
               >
                 + Nytt projekt
               </button>
-            )}
+            </PermissionGuard>
           </div>
 
           {searchParams?.get('created') === 'true' && (

@@ -4,7 +4,20 @@ import { storeToken, getToken, isExpired } from '@/lib/integrations/token-storag
 const FORTNOX_AUTH_URL = 'https://apps.fortnox.se/oauth-v1/auth';     // auth screen
 const FORTNOX_TOKEN_URL = 'https://apps.fortnox.se/oauth-v1/token';   // token exchange
 
-export function getAuthorizationUrl(integrationId: string, state: string, scope = 'invoice:read invoice:write customer:read customer:write') {
+/**
+ * Get Fortnox OAuth authorization URL
+ * 
+ * Fortnox scopes format: space-separated list of scope names
+ * Valid scopes: invoice, customer, salary, timereporting, offer, etc.
+ * NOT: invoice:read invoice:write (that format is not supported)
+ * 
+ * NOTE: Start with minimal scopes (invoice) and add more as needed.
+ * Some scopes may require special configuration in Fortnox Developer Portal.
+ * 
+ * IMPORTANT: "invoice" scope is available in all Fortnox packages.
+ * "customer" scope may require Fortnox Fakturering or higher package.
+ */
+export function getAuthorizationUrl(integrationId: string, state: string, scope = 'invoice') {
   const params = new URLSearchParams({
     client_id: process.env.FORTNOX_CLIENT_ID!,
     redirect_uri: process.env.FORTNOX_REDIRECT_URI!,

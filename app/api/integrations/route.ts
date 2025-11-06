@@ -67,6 +67,35 @@ export async function GET(req: NextRequest) {
     }
 
     console.log('✅ Successfully fetched integrations:', data?.length || 0, 'items');
+    
+    // Filtrera bort dubbletter - visa endast en integration per provider
+    // Prioritera: 1) Anslutna integrationer, 2) Senaste skapade
+    if (data && data.length > 0) {
+      const providerMap = new Map<string, typeof data[0]>();
+      
+      // Sortera integrationer: anslutna först, sedan efter created_at (nyaste först)
+      const sorted = [...data].sort((a, b) => {
+        // Anslutna integrationer först
+        if (a.status === 'connected' && b.status !== 'connected') return -1;
+        if (a.status !== 'connected' && b.status === 'connected') return 1;
+        // Sedan sortera efter created_at (nyaste först)
+        const aTime = new Date(a.created_at).getTime();
+        const bTime = new Date(b.created_at).getTime();
+        return bTime - aTime;
+      });
+      
+      // Ta första integrationen per provider
+      for (const integration of sorted) {
+        if (!providerMap.has(integration.provider)) {
+          providerMap.set(integration.provider, integration);
+        }
+      }
+      
+      const uniqueIntegrations = Array.from(providerMap.values());
+      console.log('✅ Unique integrations after filtering:', uniqueIntegrations.length, 'items');
+      return NextResponse.json(uniqueIntegrations);
+    }
+    
     return NextResponse.json(data || []);
   } catch (e: any) {
     console.error('💥 Exception in integrations route:', {

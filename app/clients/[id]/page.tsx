@@ -7,6 +7,7 @@ import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import { useAdmin } from '@/hooks/useAdmin'
+import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
 
 interface Client {
   id: string
@@ -218,6 +219,16 @@ export default function ClientDetailPage() {
                 >
                   ✏️ Redigera
                 </button>
+                {/* AI-stöd Export-knapp */}
+                {client && (
+                  <ExportToIntegrationButton
+                    type="customer"
+                    resourceId={client.id}
+                    resourceName={client.name}
+                    variant="button"
+                    className="mr-2"
+                  />
+                )}
                 <button
                   onClick={async () => {
                     if (confirm(`Vill du arkivera kunden "${client.name}"?`)) {

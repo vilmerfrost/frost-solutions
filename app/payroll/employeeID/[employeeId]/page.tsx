@@ -122,20 +122,31 @@ export default function PayslipPage() {
         if (!currentEmployee) {
           console.warn('⚠️ No employee record found for current user, checking if they can access requested employee...')
           
-          // Try to fetch the requested employee to see if user has access
-          const { data: requestedEmployee, error: reqError } = await supabase
-            .from('employees')
-            .select('id, tenant_id')
-            .eq('id', employeeId)
-            .maybeSingle()
-          
-          if (!reqError && requestedEmployee && requestedEmployee.tenant_id === tenantId) {
-            // User can access employee in same tenant - might be admin or employee record issue
-            // For now, allow access but log warning
-            console.warn('⚠️ Allowing access despite missing employee record - employee exists in same tenant')
-            setIsAuthorized(true)
-          } else {
-            console.error('❌ Cannot access requested employee:', reqError)
+          // Try to fetch the requested employee via API to bypass RLS
+          try {
+            const empResponse = await fetch(`/api/employees/${employeeId}`, {
+              cache: 'no-store',
+            });
+            
+            if (empResponse.ok) {
+              const empData = await empResponse.json();
+              if (empData.tenant_id === tenantId) {
+                console.warn('⚠️ Allowing access despite missing employee record - employee exists in same tenant')
+                setIsAuthorized(true)
+              } else {
+                console.error('❌ Employee belongs to different tenant')
+                setIsAuthorized(false)
+                setLoading(false)
+                return
+              }
+            } else {
+              console.error('❌ Cannot access requested employee via API')
+              setIsAuthorized(false)
+              setLoading(false)
+              return
+            }
+          } catch (apiError) {
+            console.error('❌ Error checking employee access:', apiError)
             setIsAuthorized(false)
             setLoading(false)
             return
@@ -218,33 +229,24 @@ export default function PayslipPage() {
 
         const { start, end } = monthRange(selectedMonth || undefined)
         
-        // Try fetching time entries
-        let { data: entriesData, error: entriesError } = await supabase
-          .from('time_entries')
-          .select('hours_total, ob_type, amount_total, date')
-          .eq('tenant_id', tenantId)
-          .eq('employee_id', employeeId)
-          .gte('date', start.split('T')[0])
-          .lt('date', end.split('T')[0])
+        // Fetch time entries via API route (server-side with admin client)
+        const response = await fetch(`/api/payroll/employee/${employeeId}?month=${selectedMonth || ''}`, {
+          cache: 'no-store',
+        })
 
-        // If date column doesn't exist, try without it
-        if (entriesError && (entriesError.code === '42703' || entriesError.message?.includes('date'))) {
-          const fallback = await supabase
-            .from('time_entries')
-            .select('hours_total, ob_type, amount_total')
-            .eq('tenant_id', tenantId)
-            .eq('employee_id', employeeId)
-          
-          if (!fallback.error) {
-            entriesData = fallback.data
-            entriesError = null
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}))
+          console.error('Error fetching time entries:', errorData.error || 'Failed to fetch')
+          setEntries([])
+        } else {
+          const result = await response.json()
+          if (result.success && result.entries) {
+            setEntries(result.entries)
+          } else {
+            console.error('Invalid response format:', result)
+            setEntries([])
           }
         }
-
-        if (entriesError) {
-          console.error('Error fetching time entries:', entriesError)
-        }
-        setEntries(entriesData || [])
       } catch (err) {
         console.error('Error fetching payslip data:', err)
       } finally {

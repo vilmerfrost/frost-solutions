@@ -8,6 +8,7 @@ import Toaster from "@/components/Toaster";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { SafeSyncComponents } from "@/components/SafeSyncComponents";
 import { SyncInitializer } from "@/components/SyncInitializer";
+import AIChatbotClient from "@/components/ai/AIChatbotClient";
 
 // INTE "use client"! Ingen useEffect här!
 
@@ -24,8 +25,8 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="sv">
-      <body className="min-h-screen bg-background text-foreground antialiased">
+    <html lang="sv" style={{ overflow: 'visible' }}>
+      <body className="min-h-screen bg-background text-foreground antialiased" style={{ overflow: 'visible', position: 'relative' }}>
         <ErrorBoundary>
           <QueryProvider>
             <ThemeProvider>
@@ -37,6 +38,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 {children}
                 <Toaster />
                 <ServiceWorkerRegister />
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <AIChatbotClient />
+                </div>
               </TenantProvider>
             </ThemeProvider>
           </QueryProvider>

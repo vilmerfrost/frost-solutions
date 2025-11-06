@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
+import AISummary from '@/components/AISummary'
 
 interface RotApplication {
   id: string
@@ -143,6 +144,24 @@ export default function RotApplicationsPage() {
               + Ny ROT-ansökan
             </button>
           </div>
+
+          {/* AI Insights for ROT Applications */}
+          {applications.length > 0 && (
+            <div className="mb-6 sm:mb-8">
+              <AISummary
+                type="admin-dashboard"
+                data={{
+                  employees: 0,
+                  activeProjects: applications.filter(a => a.status === 'under_review' || a.status === 'submitted').length,
+                  unpaidInvoices: 0,
+                  totalRevenue: applications.reduce((sum, a) => sum + (a.total_cost_sek || 0), 0),
+                  projects: [],
+                  invoices: [],
+                  rotApplications: applications.slice(0, 10),
+                }}
+              />
+            </div>
+          )}
 
           {/* Filter */}
           <div className="mb-6 flex gap-2 flex-wrap">

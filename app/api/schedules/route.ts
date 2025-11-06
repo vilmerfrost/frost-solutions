@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/utils/supabase/server';
-import { createClient as createAdminClient } from '@supabase/supabase-js';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { extractErrorMessage } from '@/lib/errorUtils';
 import { getTenantId } from '@/lib/serverTenant';
 import { createScheduleSchema } from '@/lib/validation/scheduling';
@@ -61,7 +61,9 @@ export async function POST(req: NextRequest) {
       insertPayload.transport_time_minutes = parsed.transport_time_minutes;
     }
 
-    const { data, error } = await supabase
+    // Use admin client to write to app.schedule_slots (bypasses RLS)
+    const admin = createAdminClient();
+    const { data, error } = await admin
       .from('schedule_slots')
       .insert(insertPayload)
       .select()
@@ -76,53 +78,46 @@ export async function POST(req: NextRequest) {
 
     // Send notification to the employee about the new schedule
     try {
-      const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-      
-      if (supabaseUrl && serviceKey) {
-        const adminSupabase = createAdminClient(supabaseUrl, serviceKey);
-        
-        // Get employee info to send notification
-        const { data: employeeData } = await adminSupabase
-          .from('employees')
-          .select('auth_user_id, full_name')
-          .eq('id', parsed.employee_id)
+      // Get employee info to send notification
+      const { data: employeeData } = await admin
+        .from('employees')
+        .select('auth_user_id, full_name')
+        .eq('id', parsed.employee_id)
+        .eq('tenant_id', tenantId)
+        .maybeSingle();
+
+      if (employeeData?.auth_user_id) {
+        // Get project name for notification
+        const { data: projectData } = await admin
+          .from('projects')
+          .select('name')
+          .eq('id', parsed.project_id)
           .eq('tenant_id', tenantId)
           .maybeSingle();
 
-        if (employeeData?.auth_user_id) {
-          // Get project name for notification
-          const { data: projectData } = await adminSupabase
-            .from('projects')
-            .select('name')
-            .eq('id', parsed.project_id)
-            .eq('tenant_id', tenantId)
-            .maybeSingle();
+        const projectName = projectData?.name || 'Ett projekt';
+        const startDate = new Date(parsed.start_time).toLocaleDateString('sv-SE', {
+          weekday: 'short',
+          day: 'numeric',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit',
+        });
 
-          const projectName = projectData?.name || 'Ett projekt';
-          const startDate = new Date(parsed.start_time).toLocaleDateString('sv-SE', {
-            weekday: 'short',
-            day: 'numeric',
-            month: 'short',
-            hour: '2-digit',
-            minute: '2-digit',
+        // Create notification
+        await admin
+          .from('notifications')
+          .insert({
+            tenant_id: tenantId,
+            created_by: user.id,
+            recipient_id: employeeData.auth_user_id,
+            recipient_employee_id: parsed.employee_id,
+            type: 'info',
+            title: 'Du har schemalagts på ett pass',
+            message: `Du har schemalagts på ${projectName} den ${startDate}`,
+            link: `/calendar`,
+            read: false,
           });
-
-          // Create notification
-          await adminSupabase
-            .from('notifications')
-            .insert({
-              tenant_id: tenantId,
-              created_by: user.id,
-              recipient_id: employeeData.auth_user_id,
-              recipient_employee_id: parsed.employee_id,
-              type: 'info',
-              title: 'Du har schemalagts på ett pass',
-              message: `Du har schemalagts på ${projectName} den ${startDate}`,
-              link: `/calendar`,
-              read: false,
-            });
-        }
       }
     } catch (notifError) {
       // Log but don't fail the schedule creation if notification fails
@@ -138,7 +133,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient();
+    // Use admin client to access app.schedule_slots via public view
+    const admin = createAdminClient();
     const tenantId = await getTenantId();
 
     if (!tenantId) {
@@ -153,7 +149,8 @@ export async function GET(req: NextRequest) {
     const end_date    = searchParams.get('end_date');   // YYYY-MM-DD
     const status      = searchParams.get('status');
 
-    let q = supabase.from('schedule_slots').select('*').eq('tenant_id', tenantId);
+    // Use public view (which points to app.schedule_slots)
+    let q = admin.from('schedule_slots').select('*').eq('tenant_id', tenantId);
 
     if (employee_id) q = q.eq('employee_id', employee_id);
     if (project_id)  q = q.eq('project_id', project_id);

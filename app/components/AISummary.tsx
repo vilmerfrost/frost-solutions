@@ -1,49 +1,88 @@
-'use client'
+'use client';
 
-import { useState } from 'react'
-import { toast } from '@/lib/toast'
+import { useState } from 'react';
+import { toast } from '@/lib/toast';
+import { extractErrorMessage } from '@/lib/errorUtils';
+import { AICard } from './ai/ui/AICard';
+import { AIBadge } from './ai/ui/AIBadge';
+import { CachedBadge } from './ai/ui/CachedBadge';
+import { AILoadingSpinner } from './ai/ui/AILoadingSpinner';
+import { AlertCircle, RefreshCw } from 'lucide-react';
 
 interface AISummaryProps {
-  type: 'project' | 'invoice'
-  data: any
-  className?: string
+  type: 'project' | 'invoice' | 'time-reports' | 'admin-dashboard';
+  data: any;
+  className?: string;
 }
 
 export default function AISummary({ type, data, className = '' }: AISummaryProps) {
-  const [summary, setSummary] = useState<string | null>(null)
-  const [loading, setLoading] = useState(false)
-  const [expanded, setExpanded] = useState(false)
+  const [summary, setSummary] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [cached, setCached] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function generateSummary() {
-    setLoading(true)
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch('/api/ai/summarize', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ type, data }),
-      })
+        body: JSON.stringify({ 
+          resourceType: type === 'time-reports' ? 'time-reports' : type === 'admin-dashboard' ? 'admin-dashboard' : type,
+          resourceId: type === 'time-reports' || type === 'admin-dashboard' ? 'summary' : data?.id || 'summary',
+          data: data || {}
+        }),
+      });
 
       if (!res.ok) {
-        throw new Error('Kunde inte generera sammanfattning')
+        const errorData = await res.json().catch(() => ({ error: 'Kunde inte generera sammanfattning' }));
+        throw new Error(errorData.error || 'Kunde inte generera sammanfattning');
       }
 
-      const result = await res.json()
-      setSummary(result.summary || 'Ingen sammanfattning kunde genereras.')
-      setExpanded(true)
+      const result = await res.json();
+      if (!result.success) {
+        throw new Error(result.error || 'Kunde inte generera sammanfattning');
+      }
+
+      setSummary(result.summary || 'Ingen sammanfattning kunde genereras.');
+      setCached(result.cached || false);
+      setExpanded(true);
     } catch (err: any) {
-      toast.error('Kunde inte generera sammanfattning: ' + err.message)
+      const message = extractErrorMessage(err);
+      setError(message);
+      toast.error('Kunde inte generera sammanfattning: ' + message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
+  }
+
+  if (error && !summary) {
+    return (
+      <AICard variant="red" className={className}>
+        <div className="flex flex-col items-center text-center">
+          <AlertCircle className="w-8 h-8 text-red-500" />
+          <h3 className="mt-2 font-semibold text-red-700 dark:text-red-200">Sammanfattning misslyckades</h3>
+          <p className="mt-1 text-sm text-red-600 dark:text-red-300">{error}</p>
+          <button
+            onClick={generateSummary}
+            disabled={loading}
+            className="mt-4 px-3 py-1.5 text-sm font-medium bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Försök igen
+          </button>
+        </div>
+      </AICard>
+    );
   }
 
   if (!summary && !loading) {
     return (
-      <div className={`bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl p-4 sm:p-6 border border-purple-200 dark:border-purple-800 ${className}`}>
+      <AICard className={className}>
         <div className="flex items-center justify-between mb-3">
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-            🤖 AI-sammanfattning
-          </h3>
+          <AIBadge text="AI-sammanfattning" />
           <button
             onClick={generateSummary}
             disabled={loading}
@@ -53,18 +92,20 @@ export default function AISummary({ type, data, className = '' }: AISummaryProps
           </button>
         </div>
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Klicka på "Generera" för att få en AI-genererad sammanfattning av {type === 'project' ? 'projektet' : 'fakturan'}.
+          Klicka på &quot;Generera&quot; för att få en AI-genererad sammanfattning av{' '}
+          {type === 'project' ? 'projektet' : 'fakturan'}.
         </p>
-      </div>
-    )
+      </AICard>
+    );
   }
 
   return (
-    <div className={`bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-xl p-4 sm:p-6 border border-purple-200 dark:border-purple-800 ${className}`}>
+    <AICard className={className}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
-          🤖 AI-sammanfattning
-        </h3>
+        <div className="flex items-center gap-2">
+          <AIBadge text="AI-sammanfattning" />
+          {cached && <CachedBadge />}
+        </div>
         <button
           onClick={() => setExpanded(!expanded)}
           className="px-3 py-1 text-sm text-purple-600 dark:text-purple-400 hover:bg-purple-100 dark:hover:bg-purple-900/30 rounded-lg transition-colors"
@@ -72,30 +113,27 @@ export default function AISummary({ type, data, className = '' }: AISummaryProps
           {expanded ? 'Dölj' : 'Visa'}
         </button>
       </div>
-      
+
       {loading ? (
-        <div className="flex items-center gap-3">
-          <div className="animate-spin rounded-full h-5 w-5 border-2 border-purple-500 border-t-transparent"></div>
-          <p className="text-sm text-gray-600 dark:text-gray-400">Genererar sammanfattning...</p>
-        </div>
-      ) : summary && expanded ? (
-        <div className="prose prose-sm max-w-none dark:prose-invert">
-          <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-            {summary}
-          </p>
-        </div>
-      ) : null}
-      
+        <AILoadingSpinner text="Genererar sammanfattning..." />
+      ) : (
+        summary &&
+        expanded && (
+          <div className="prose prose-sm max-w-none dark:prose-invert">
+            <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">{summary}</p>
+          </div>
+        )
+      )}
+
       {summary && (
         <button
           onClick={generateSummary}
           disabled={loading}
-          className="mt-3 text-sm text-purple-600 dark:text-purple-400 hover:underline"
+          className="mt-3 text-sm text-purple-600 dark:text-purple-400 hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Genererar om...' : 'Generera om'}
         </button>
       )}
-    </div>
-  )
+    </AICard>
+  );
 }
-

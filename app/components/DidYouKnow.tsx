@@ -46,6 +46,18 @@ const facts = [
   "🤝 Kommunikation mellan företag och kunder är nyckeln till framgångsrika projekt.",
   "⚖️ Byggkollektivavtalet reglerar löner, arbetstider och OB-tillägg för anställda i byggbranschen.",
   "📊 Genomsnittlig projektledningstid är 12-18 månader för större byggprojekt.",
+  
+  // AI-specifika fakta
+  "🤖 AI kan sammanfatta dina tidsrapporter - klicka på 'Sammanfatta mina tidsrapporter' i AI-assistenten eller på rapporter-sidan.",
+  "💡 AI Budgetprognos hjälper dig identifiera risk för budgetöverskridning innan det är för sent.",
+  "📸 AI Materialidentifiering kan identifiera byggmaterial från foto - ladda upp en bild på projekt-sidan.",
+  "📝 AI Faktureringsförslag genererar automatiskt faktura-rader baserat på dina tidsrapporter.",
+  "📅 AI Projektplanering föreslår realistiska tidsplaner med faser och riskfaktorer.",
+  "✅ AI KMA-checklista genererar automatiskt checklistor baserat på projekttyp (elektriker, rörmokare, målare, etc.).",
+  "🔍 AI-assistenten kan hjälpa dig hitta rätt sida i appen - klicka på AI-ikonen nere till höger.",
+  "💬 Fråga AI-assistenten 'Sammanfatta mina tidsrapporter' för en snabb översikt över ditt arbete.",
+  "🎯 AI-funktioner använder caching för att vara snabba och kostnadseffektiva - se 'Cache'-badgen på resultat.",
+  "⚡ De flesta AI-funktioner är gratis (template-baserade eller Hugging Face), endast fakturering och projektplanering använder betalda modeller.",
 ]
 
 export default function DidYouKnow() {

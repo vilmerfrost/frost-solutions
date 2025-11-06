@@ -10,6 +10,7 @@ import { sendInvoiceEmail } from './actions'
 import { toast } from '@/lib/toast'
 import FileUpload from '@/components/FileUpload'
 import FileList from '@/components/FileList'
+import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
 
 interface Invoice {
   id: string
@@ -171,9 +172,10 @@ export default function InvoicePage() {
         }
 
         // Hämta fakturarader om de finns - progressive fallback för saknade kolumner
+        // Try without quantity first (column might not exist)
         let { data: linesData, error: linesError } = await supabase
           .from('invoice_lines')
-          .select('id, description, quantity, unit, rate_sek, amount_sek, sort_order')
+          .select('id, description, unit, rate_sek, amount_sek, sort_order')
           .eq('invoice_id', invoiceId)
           .order('sort_order', { ascending: true })
 
@@ -181,11 +183,11 @@ export default function InvoicePage() {
         if (linesError && (linesError.code === '42703' || linesError.code === '400') && linesError.message?.includes('sort_order')) {
           const fallback1 = await supabase
             .from('invoice_lines')
-            .select('id, description, quantity, unit, rate_sek, amount_sek')
+            .select('id, description, unit, rate_sek, amount_sek')
             .eq('invoice_id', invoiceId)
           
           if (!fallback1.error) {
-            linesData = fallback1.data
+            linesData = (fallback1.data || []).map((line: any) => ({ ...line, quantity: 1, sort_order: 0 }))
             linesError = null
           } else {
             linesError = fallback1.error
@@ -196,30 +198,31 @@ export default function InvoicePage() {
         if (linesError && (linesError.code === '42703' || linesError.code === '400') && linesError.message?.includes('unit')) {
           const fallback2 = await supabase
             .from('invoice_lines')
-            .select('id, description, quantity, rate_sek, amount_sek, sort_order')
+            .select('id, description, rate_sek, amount_sek, sort_order')
             .eq('invoice_id', invoiceId)
             .order('sort_order', { ascending: true })
           
           if (!fallback2.error) {
-            linesData = (fallback2.data || []).map((line: any) => ({ ...line, unit: 'tim' }))
+            linesData = (fallback2.data || []).map((line: any) => ({ ...line, unit: 'tim', quantity: 1 }))
             linesError = null
           } else {
             linesError = fallback2.error
           }
         }
 
-        // Fallback 3: Minimal set
+        // Fallback 3: Minimal set (no quantity, no unit, no sort_order)
         if (linesError && (linesError.code === '42703' || linesError.code === '400')) {
           const fallback3 = await supabase
             .from('invoice_lines')
-            .select('id, description, quantity, amount_sek')
+            .select('id, description, amount_sek')
             .eq('invoice_id', invoiceId)
           
           if (!fallback3.error) {
             linesData = (fallback3.data || []).map((line: any) => ({
               ...line,
               unit: 'tim',
-              rate_sek: line.quantity > 0 ? line.amount_sek / line.quantity : 0,
+              quantity: 1,
+              rate_sek: line.amount_sek || 0,
               sort_order: 0,
             }))
             linesError = null
@@ -227,14 +230,22 @@ export default function InvoicePage() {
             linesError = fallback3.error
           }
         }
+        
+        // Add quantity to all lines if missing
+        if (linesData && !linesError) {
+          linesData = linesData.map((line: any) => ({
+            ...line,
+            quantity: line.quantity || 1,
+          }));
+        }
 
         if (linesError) {
-          console.error('Error fetching invoice lines:', {
+          const errorMessage = linesError.message || linesError.code || JSON.stringify(linesError) || 'Okänt fel';
+          console.error('Error fetching invoice lines:', errorMessage, {
             code: linesError.code,
             message: linesError.message,
             details: linesError.details,
             hint: linesError.hint,
-            fullError: linesError
           })
           // Fortsätt ändå - låt användaren se fakturan även om lines misslyckas
         }
@@ -791,6 +802,16 @@ export default function InvoicePage() {
                 >
                   ✓ Markera som betald
                 </button>
+              )}
+              
+              {/* AI-stöd Export-knapp */}
+              {invoice && (
+                <ExportToIntegrationButton
+                  type="invoice"
+                  resourceId={invoice.id}
+                  resourceName={invoice.number || invoice.id}
+                  variant="button"
+                />
               )}
               
               {isAdmin && invoice?.project_id && invoice.status !== 'paid' && (

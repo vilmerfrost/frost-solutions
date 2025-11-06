@@ -9,6 +9,8 @@ import { toast } from '@/lib/toast'
 import { useAdmin } from '@/hooks/useAdmin'
 import SearchBar from '@/components/SearchBar'
 import FilterSortBar from '@/components/FilterSortBar'
+import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
+import { PermissionGuard } from '@/components/rbac/PermissionGuard'
 
 interface Client {
   id: string
@@ -165,12 +167,25 @@ export default function ClientsPage() {
               <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-1 sm:mb-2">Kunder</h1>
               <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Hantera dina kunder</p>
             </div>
-            <button
-              onClick={() => router.push('/clients/new')}
-              className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-sm sm:text-base"
-            >
-              + Lägg till kund
-            </button>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {filteredClients.length > 0 && (
+                <ExportToIntegrationButton
+                  type="customer"
+                  resourceId={filteredClients[0].id}
+                  resourceIds={filteredClients.map(c => c.id)}
+                  variant="button"
+                  className="w-full sm:w-auto"
+                />
+              )}
+              <PermissionGuard resource="clients" action="create">
+                <button
+                  onClick={() => router.push('/clients/new')}
+                  className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-sm sm:text-base"
+                >
+                  + Lägg till kund
+                </button>
+              </PermissionGuard>
+            </div>
           </div>
 
           {!tenantId ? (
@@ -180,12 +195,14 @@ export default function ClientsPage() {
           ) : clients.length === 0 ? (
             <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-lg p-6 sm:p-8 text-center text-gray-500 dark:text-gray-400">
               <p className="mb-4">Inga kunder ännu.</p>
-              <button
-                onClick={() => router.push('/clients/new')}
-                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
-              >
-                + Lägg till första kunden
-              </button>
+              <PermissionGuard resource="clients" action="create">
+                <button
+                  onClick={() => router.push('/clients/new')}
+                  className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all"
+                >
+                  + Lägg till första kunden
+                </button>
+              </PermissionGuard>
             </div>
           ) : (
             <>

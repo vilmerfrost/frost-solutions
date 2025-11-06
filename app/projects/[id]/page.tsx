@@ -15,6 +15,12 @@ import BudgetCard from '@/components/BudgetCard'
 import { ScheduleCalendar } from '@/components/scheduling/ScheduleCalendar'
 import { useProject, useProjectHours } from '@/hooks/useProjects'
 import { useAdmin } from '@/hooks/useAdmin'
+import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
+import { Sparkles } from 'lucide-react'
+import { BudgetAIPrediction } from '@/components/ai/BudgetAIPrediction'
+import { MaterialAIIdentifier } from '@/components/ai/MaterialAIIdentifier'
+import { ProjectAIPlanning } from '@/components/ai/ProjectAIPlanning'
+import { ProjectAnalytics } from '@/components/analytics/ProjectAnalytics'
 
 type ProjectRecord = {
   id: string
@@ -670,6 +676,31 @@ export default function ProjectDetailPage() {
             </div>
           )}
 
+          {/* AI-stöd Export-knapp */}
+          {project && (
+            <div className="mb-6 sm:mb-8">
+              <div className="bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 dark:from-blue-900/20 dark:via-purple-900/20 dark:to-pink-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4 sm:p-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
+                      <Sparkles className="w-5 h-5 text-blue-500" />
+                      Vill du exportera detta projekt?
+                    </h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Exportera projektdata till Fortnox eller Visma för enkel fakturering och bokföring.
+                    </p>
+                  </div>
+                  <ExportToIntegrationButton
+                    type="project"
+                    resourceId={project.id}
+                    resourceName={project.name}
+                    variant="button"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Did You Know */}
           <DidYouKnow />
 
@@ -788,6 +819,37 @@ export default function ProjectDetailPage() {
             className="mb-6 sm:mb-8"
           />
 
+          {/* AI Budget Prediction */}
+          {projectId && (
+            <div className="mb-6 sm:mb-8">
+              <BudgetAIPrediction projectId={projectId as string} />
+            </div>
+          )}
+
+          {/* AI Material Identifier */}
+          <div className="mb-6 sm:mb-8">
+            <MaterialAIIdentifier />
+          </div>
+
+          {/* AI Project Planning */}
+          {projectId && (
+            <div className="mb-6 sm:mb-8">
+              <ProjectAIPlanning projectId={projectId as string} />
+            </div>
+          )}
+
+          {/* Project Analytics */}
+          {projectId && (
+            <div className="mb-6 sm:mb-8">
+              <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
+                  Projektanalys
+                </h2>
+                <ProjectAnalytics projectId={projectId as string} />
+              </div>
+            </div>
+          )}
+
           {/* Files Section */}
           <div className="bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8">
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Bilagor</h2>
@@ -820,6 +882,14 @@ export default function ProjectDetailPage() {
                     >
                       📝 Skapa faktura
                     </button>
+                    {/* AI Invoice Suggestion - Show inline when creating invoice */}
+                    {projectId && (
+                      <div className="sm:col-span-2 lg:col-span-2">
+                        <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                          💡 AI-stöd: Använd AI-förslag när du skapar fakturan
+                        </div>
+                      </div>
+                    )}
                     <button
                       onClick={handleSendInvoice}
                       className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-6 py-3 sm:py-4 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 text-sm sm:text-base"

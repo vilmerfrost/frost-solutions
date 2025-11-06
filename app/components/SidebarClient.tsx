@@ -6,6 +6,7 @@ import { useTheme } from '@/context/ThemeContext'
 import { useAdmin } from '@/hooks/useAdmin'
 import NotificationCenter from '@/components/NotificationCenter'
 import { SafeOnlineStatusIndicator } from '@/components/SafeSyncComponents'
+import { SearchBar } from '@/components/search/SearchBar'
 
 interface NavItem {
   name: string
@@ -93,6 +94,10 @@ export default function SidebarClient() {
               <div className="text-xl sm:text-2xl font-black bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text text-transparent truncate">
                 Frost Solutions
               </div>
+            </div>
+            {/* Global Search Bar */}
+            <div className="mt-4">
+              <SearchBar />
             </div>
           </div>
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
 import FrostLogo from '@/components/FrostLogo'
 
@@ -8,6 +8,7 @@ interface FAQItem {
   question: string
   answer: string
   category: string
+  id?: string
 }
 
 const faqs: FAQItem[] = [
@@ -186,11 +187,210 @@ const faqs: FAQItem[] = [
     question: 'Kan jag arbeta med flera enheter samtidigt?',
     answer: 'Ja! Systemet hanterar synkning från flera enheter. Om samma data redigeras på två enheter används "Last-Write-Wins" - senaste ändringen vinner.'
   },
+  {
+    category: 'Integrationer',
+    question: 'Vilket Fortnox-paket behöver jag för att använda Fortnox-integrationen?',
+    answer: 'Du behöver ett betalt Fortnox-paket (Fakturering, Bokföring, Lön eller Allt-i-ett). Gratis Fortnox-konton saknar API-åtkomst och kan därför inte anslutas. Detta är INTE ett fel i appen - det är en begränsning från Fortnox för gratis konton.',
+    id: 'fortnox-license'
+  },
+  {
+    category: 'Integrationer',
+    question: 'Varför får jag felet "saknar licens" när jag försöker ansluta Fortnox?',
+    answer: 'Detta betyder att ditt Fortnox-konto är gratis och saknar API-åtkomst. Kunder med betalda Fortnox-paket (Fakturering eller högre) kommer att kunna ansluta utan problem. Uppgradera ditt Fortnox-paket eller använd ett kundkonto med betalt paket för att testa integrationen.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad är AI-assistenten och var hittar jag den?',
+    answer: 'AI-assistenten är en chatbot som hjälper dig navigera i appen och sammanfatta data. Du hittar den som en flytande knapp nere till höger på skärmen. Den kan hjälpa dig hitta rätt sida, sammanfatta tidsrapporter och ge tips om funktioner.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Hur sammanfattar jag mina tidsrapporter med AI?',
+    answer: 'Du kan använda AI-assistenten (klicka på AI-ikonen nere till höger) och säg "Sammanfatta mina tidsrapporter", eller gå till "Rapporter"-sidan där du ser en AI-sammanfattning automatiskt. AI-sammanfattningen visar totala timmar, OB-timmar och trender.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad är AI Budgetprognos?',
+    answer: 'AI Budgetprognos analyserar ditt projekts budget och framsteg, predikterar risk för budgetöverskridning och föreslår åtgärder. Du hittar den på projekt-detaljsidan. Den använder statistisk analys (gratis) och visar risk-nivåer med färgkodning (grön/gul/röd).'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Hur fungerar AI Materialidentifiering?',
+    answer: 'AI Materialidentifiering kan identifiera byggmaterial från foto. Gå till ett projekt, scrolla ner till "AI Materialidentifiering", ladda upp en bild av materialet. Systemet identifierar materialet och matchar mot dina supplier_items i databasen. Det använder Hugging Face (gratis).'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad är AI Faktureringsförslag?',
+    answer: 'AI Faktureringsförslag analyserar dina time entries för ett projekt och föreslår faktura-belopp och rader. Du hittar det när du skapar en faktura från ett projekt. Det kan använda Claude AI (betalt, med caching) eller template (gratis fallback).'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Hur använder jag AI Projektplanering?',
+    answer: 'AI Projektplanering föreslår realistiska tidsplaner med faser, riskfaktorer och teamstorlek. Gå till ett projekt och scrolla ner till "AI Projektplanering", klicka på "Generera plan". Den använder Claude AI (betalt, med caching) eller template (gratis fallback).'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad är AI KMA-checklista?',
+    answer: 'AI KMA-checklista genererar automatiskt checklistor baserat på projekttyp (elektriker, rörmokare, målare, etc.). Den visas automatiskt när du skapar ett nytt projekt. Den är template-baserad (gratis) och inkluderar säkerhetsmoment och foto-krav.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad betyder "Cache"-badgen på AI-resultat?',
+    answer: '"Cache"-badgen betyder att resultatet hämtades från cache (tidigare genererat resultat). Detta är snabbare och kostar inget. AI-resultat cachelagras i 7-14 dagar beroende på typ.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vilka AI-funktioner är gratis och vilka kostar?',
+    answer: 'Gratis: Budgetprognos (statistik), Materialidentifiering (Hugging Face), KMA-checklista (template), Sammanfattning (Hugging Face). Betalt (med caching): Faktureringsförslag och Projektplanering (Claude AI). Total kostnad är optimerad med caching och rate limiting.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Hur fungerar AI-assistentens konversationsminne?',
+    answer: 'AI-assistenten kommer ihåg din konversation under sessionen. Var 8-12 meddelanden skapas en sammanfattning som sparas för långtidsminne. Detta gör att assistenten kan ge mer relevanta svar baserat på tidigare diskussioner. Konversationer sparas per användare och tenant.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Kan AI-assistenten utföra åtgärder åt mig?',
+    answer: 'Ja! AI-assistenten kan använda "tools" (funktionsanrop) för att utföra åtgärder som att skapa fakturor, generera KMA-checklistor, hitta tidsrapporter, köra budgetprognoser och identifiera material. När du frågar om något som kräver en åtgärd, kommer assistenten att föreslå att utföra den åt dig.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad är snabbkommandon i AI-assistenten?',
+    answer: 'Efter varje svar föreslår AI-assistenten 3 snabbkommandon (t.ex. "Skapa faktura", "Visa tidsrapporter", "Kör budgetprognos"). Dessa är klickbara knappar som direkt utför åtgärden eller navigerar till rätt sida. Det gör det snabbare att komma vidare efter att ha fått ett svar.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad händer om AI-assistenten upprepar sig?',
+    answer: 'Systemet har ett anti-loop system som upptäcker när samma fråga ställs flera gånger. Om du frågar samma sak mer än 2 gånger på 60 sekunder, kommer assistenten att föreslå en alternativ lösning eller direkt åtgärd istället för att upprepa samma svar.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Hur fungerar intent-detektering?',
+    answer: 'AI-assistenten klassificerar automatiskt din fråga i kategorier (faktura, KMA, arbetsorder, tid, material, budget, allmänt). Detta gör att systemet kan ge mer relevanta svar och föreslå rätt verktyg. Systemet lär sig också från tidigare frågor för att bli bättre över tid.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Kan jag ge feedback på AI-svar?',
+    answer: 'Ja! Varje AI-svar har 👍/👎 knappar för feedback. Din feedback hjälper systemet att lära sig och förbättras. Du kan också ange orsak till varför du gillade eller inte gillade svaret. Feedback sparas anonymt och används för att förbättra AI-assistenten.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad är RAG (Retrieval-Augmented Generation)?',
+    answer: 'RAG är en teknik där AI-assistenten hämtar relevant kontext från dina Frost-data (projekt, fakturor, tidsrapporter) innan den svarar. Detta gör att svaren är mer exakta och baserade på faktisk data istället för generiska svar. Systemet visar alltid källor för siffror och data.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Hur fungerar streaming-svar?',
+    answer: 'När AI-assistenten genererar långa svar, visas texten ord-för-ord (typing effect) i realtid istället för att vänta på hela svaret. Detta gör det kännbart snabbare och mer interaktivt. Du kan också avbryta genereringen om du vill.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad gör AI-assistenten för att undvika felaktig information?',
+    answer: 'Systemet har flera anti-hallucination åtgärder: 1) Visar alltid källor när data refereras, 2) Säger "Jag hittar inte detta i Frost-datan" istället för att gissa, 3) Använder RAG för att hämta faktisk data, 4) Validerar all data innan den visas. Om data saknas, föreslår systemet hur du kan samla in den.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Hur fungerar rate limiting för AI-funktioner?',
+    answer: 'För att hålla kostnaderna nere och säkerställa prestanda finns det rate limits per tenant: Faktureringsförslag (5/min), Projektplanering (3/min). Om du når gränsen får du ett meddelande och kan försöka igen om en minut. Gratis funktioner (budget, material, KMA) har inga rate limits.'
+  },
+  {
+    category: 'AI-funktioner',
+    question: 'Vad händer om AI-tjänsten är nere?',
+    answer: 'Systemet har fallback-strategier: Om AI-tjänsten är otillgänglig används template-baserade svar (gratis, snabba). För faktureringsförslag och projektplanering används enklare templates. Du får alltid ett svar, även om det inte är AI-genererat. Systemet loggar också alla fel för förbättringar.'
+  },
+  {
+    category: 'Integrationer',
+    question: 'Hur ansluter jag till Fortnox eller Visma?',
+    answer: 'Gå till "Inställningar" → "Integrationer" (endast för administratörer). Klicka på "Anslut" för den integration du vill använda. Du kommer att omdirigeras till Fortnox/Visma för att godkänna behörigheterna. Efter godkännande ansluts integrationen automatiskt.'
+  },
+  {
+    category: 'Integrationer',
+    question: 'Vad kan jag göra med Fortnox-integrationen?',
+    answer: 'Med Fortnox-integrationen kan du automatiskt synkronisera fakturor och kunder mellan Frost Solutions och Fortnox. Du kan exportera fakturor och kunder till Fortnox, och importera data från Fortnox till Frost Solutions.'
+  },
+  {
+    category: 'Integrationer',
+    question: 'Hur ansluter jag till Visma?',
+    answer: 'Gå till "Inställningar" → "Integrationer" (endast för administratörer). Klicka på "Anslut" för Visma Payroll eller Visma eAccounting. Du kommer att omdirigeras till Visma för att godkänna behörigheterna. Efter godkännande ansluts integrationen automatiskt.'
+  },
+  {
+    category: 'Integrationer',
+    question: 'Vad är skillnaden mellan Visma Payroll och Visma eAccounting?',
+    answer: 'Visma Payroll används för lönehantering och personaladministration, medan Visma eAccounting används för fakturering och bokföring. Du kan ansluta båda integrationerna samtidigt om du använder båda Visma-tjänsterna.'
+  },
+  {
+    category: 'Integrationer',
+    question: 'Kan jag använda både Fortnox och Visma samtidigt?',
+    answer: 'Ja, du kan ansluta både Fortnox och Visma-integrationer samtidigt. Varje integration fungerar oberoende av varandra. Du kan välja vilken integration du vill använda för varje export eller synkronisering.'
+  },
+  {
+    category: 'Integrationer',
+    question: 'Hur ofta synkroniseras data med Fortnox/Visma?',
+    answer: 'Synkronisering sker manuellt när du klickar på "Exportera" eller "Synkronisera" på relevanta sidor. Automatisk synkronisering kan aktiveras i framtida versioner. För nu, synkronisera manuellt när du behöver uppdatera data.'
+  },
+  {
+    category: 'Integrationer',
+    question: 'Vad händer om jag frånkopplar en integration?',
+    answer: 'När du frånkopplar en integration tas OAuth-token bort och integrationen kan inte längre användas. Dina befintliga data i Frost Solutions påverkas inte, men du kan inte längre exportera eller synkronisera med den integrationen. Du kan alltid ansluta igen senare.'
+  },
+  {
+    category: 'Integrationer',
+    question: 'Vilka behörigheter behöver integrationerna?',
+    answer: 'Fortnox kräver behörighet för fakturering och kunder. Visma Payroll kräver behörighet för lönehantering. Visma eAccounting kräver behörighet för fakturering och bokföring. Alla behörigheter begärs endast för läsning och skrivning av relevant data.'
+  },
 ]
 
 export default function FAQPage() {
+  // Always start with 'Alla' to avoid hydration mismatch
   const [selectedCategory, setSelectedCategory] = useState<string>('Alla')
   const [searchQuery, setSearchQuery] = useState('')
+  const [mounted, setMounted] = useState(false)
+
+  // Handle hash navigation and scrolling on mount (client-side only)
+  useEffect(() => {
+    setMounted(true)
+    const hash = typeof window !== 'undefined' ? window.location.hash : ''
+    if (hash) {
+      const hashValue = hash.replace('#', '')
+      
+      // If hash is a category name (like "integrationer"), filter by that category
+      if (hashValue === 'integrationer' || hashValue === 'Integrationer') {
+        setSelectedCategory('Integrationer')
+        setSearchQuery('')
+        // Scroll to first Integrationer FAQ after render
+        setTimeout(() => {
+          const firstIntegrationFAQ = document.querySelector('[id="fortnox-license"]')
+          if (firstIntegrationFAQ) {
+            firstIntegrationFAQ.scrollIntoView({ behavior: 'smooth', block: 'start' })
+            // Add highlight effect
+            firstIntegrationFAQ.classList.add('ring-4', 'ring-blue-500', 'ring-opacity-50')
+            setTimeout(() => {
+              firstIntegrationFAQ.classList.remove('ring-4', 'ring-blue-500', 'ring-opacity-50')
+            }, 2000)
+          }
+        }, 500)
+      } else {
+        // Find the FAQ with this ID and ensure it's visible
+        const faq = faqs.find(f => f.id === hashValue)
+        if (faq) {
+          setSelectedCategory(faq.category)
+          setSearchQuery('')
+          // Scroll to element after a short delay to ensure it's rendered
+          setTimeout(() => {
+            const element = document.getElementById(hashValue)
+            if (element) {
+              element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+              // Add highlight effect
+              element.classList.add('ring-4', 'ring-blue-500', 'ring-opacity-50')
+              setTimeout(() => {
+                element.classList.remove('ring-4', 'ring-blue-500', 'ring-opacity-50')
+              }, 2000)
+            }
+          }, 500)
+        }
+      }
+    }
+  }, [])
 
   const categories = ['Alla', ...Array.from(new Set(faqs.map(faq => faq.category)))]
 
@@ -230,26 +430,56 @@ export default function FAQPage() {
             />
           </div>
 
-          {/* Category Filter */}
-          <div className="mb-6 flex flex-wrap gap-2">
-            {categories.map((category) => (
-              <button
-                key={category}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-4 py-2 rounded-lg font-semibold transition-all ${
-                  selectedCategory === category
-                    ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
-                    : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300'
-                }`}
-              >
-                {category}
-              </button>
-            ))}
-          </div>
+          {/* Category Filter - Only render after mount to avoid hydration mismatch */}
+          {mounted && (
+            <div className="mb-6 flex flex-wrap gap-2">
+              {categories.map((category) => (
+                <button
+                  key={category}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-all ${
+                    selectedCategory === category
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-500 text-white shadow-lg'
+                      : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300'
+                  }`}
+                >
+                  {category}
+                </button>
+              ))}
+            </div>
+          )}
 
-          {/* FAQ Items */}
+          {/* FAQ Items - Only render filtered results after mount to avoid hydration mismatch */}
           <div className="space-y-4">
-            {filteredFAQs.length === 0 ? (
+            {!mounted ? (
+              // Show all FAQs on initial server render to avoid hydration mismatch
+              faqs.map((faq, index) => (
+                <div
+                  key={index}
+                  id={faq.id}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all scroll-mt-20"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">
+                      ?
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs font-semibold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-900/20 px-2 py-1 rounded">
+                          {faq.category}
+                        </span>
+                      </div>
+                      <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
+                        {faq.question}
+                      </h3>
+                      <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                        {faq.answer}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : filteredFAQs.length === 0 ? (
               <div className="bg-white dark:bg-gray-800 rounded-xl p-8 text-center border border-gray-200 dark:border-gray-700">
                 <p className="text-gray-500 dark:text-gray-400">
                   Inga frågor matchade din sökning.
@@ -259,7 +489,8 @@ export default function FAQPage() {
               filteredFAQs.map((faq, index) => (
                 <div
                   key={index}
-                  className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all"
+                  id={faq.id}
+                  className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all scroll-mt-20"
                 >
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center text-white font-bold">

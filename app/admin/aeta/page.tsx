@@ -6,6 +6,7 @@ import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
+import AISummary from '@/components/AISummary'
 
 interface AetaRequest {
   id: string
@@ -224,6 +225,24 @@ export default function AdminAetaPage() {
               </span>
             )}
           </div>
+
+          {/* AI Insights for ÄTA Requests */}
+          {requests.length > 0 && (
+            <div className="mb-6 sm:mb-8">
+              <AISummary
+                type="admin-dashboard"
+                data={{
+                  employees: 0,
+                  activeProjects: requests.filter(r => r.status === 'pending').length,
+                  unpaidInvoices: 0,
+                  totalRevenue: 0,
+                  projects: [],
+                  invoices: [],
+                  aetaRequests: requests.slice(0, 10),
+                }}
+              />
+            </div>
+          )}
 
           {/* Filter */}
           <div className="mb-6 flex gap-2 flex-wrap">

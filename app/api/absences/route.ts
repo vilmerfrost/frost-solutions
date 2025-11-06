@@ -2,6 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/utils/supabase/server';
+import { createAdminClient } from '@/utils/supabase/admin';
 import { extractErrorMessage } from '@/lib/errorUtils';
 import { getTenantId } from '@/lib/serverTenant';
 import { createAbsenceSchema } from '@/lib/validation/scheduling';
@@ -26,7 +27,9 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'No tenant found' }, { status: 403 });
     }
 
-    const { data, error } = await supabase
+    // Use admin client to write to app.absences via public view
+    const admin = createAdminClient();
+    const { data, error } = await admin
       .from('absences')
       .insert({
         tenant_id: tenantId,
@@ -51,7 +54,8 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const supabase = createClient();
+    // Use admin client to access app.absences via public view
+    const admin = createAdminClient();
     const { searchParams } = new URL(req.url);
 
     const employee_id = searchParams.get('employee_id');
@@ -64,7 +68,8 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: 'No tenant found' }, { status: 403 });
     }
 
-    let q = supabase.from('absences').select('*').eq('tenant_id', tenantId);
+    // Use public view (which points to app.absences)
+    let q = admin.from('absences').select('*').eq('tenant_id', tenantId);
 
     if (employee_id) q = q.eq('employee_id', employee_id);
     if (status)      q = q.eq('status', status);

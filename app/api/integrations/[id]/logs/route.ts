@@ -8,8 +8,9 @@ import { extractErrorMessage } from '@/lib/errorUtils';
  * GET /api/integrations/[id]/logs
  * Lista alla sync logs för en integration
  */
-export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: integrationId } = await params;
     const tenantId = await getTenantId();
     if (!tenantId) {
       return NextResponse.json({ error: 'Tenant ID saknas' }, { status: 401 });
@@ -21,7 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const { data: integration } = await admin
       .from('integrations')
       .select('id')
-      .eq('id', params.id)
+      .eq('id', integrationId)
       .eq('tenant_id', tenantId)
       .single();
 
@@ -32,7 +33,7 @@ export async function GET(req: NextRequest, { params }: { params: { id: string }
     const { data, error } = await admin
       .from('sync_logs')
       .select('*')
-      .eq('integration_id', params.id)
+      .eq('integration_id', integrationId)
       .eq('tenant_id', tenantId)
       .order('created_at', { ascending: false })
       .limit(200);

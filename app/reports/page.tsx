@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import SearchBar from '@/components/SearchBar'
 import FilterSortBar from '@/components/FilterSortBar'
 import { toast } from '@/lib/toast'
+import AISummary from '@/components/AISummary'
 
 interface TimeEntry {
   id: string
@@ -333,6 +334,22 @@ export default function ReportsPage() {
               <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">Varav OB-timmar</div>
             </div>
           </div>
+
+          {/* AI Summary of Time Reports */}
+          {entries.length > 0 && (
+            <div className="mb-6 sm:mb-8">
+              <AISummary
+                type="time-reports"
+                data={{
+                  entries: entries.slice(0, 50), // Limit to first 50 for performance
+                  totalHours,
+                  obHours,
+                  totalEntries: entries.length,
+                }}
+                className="mb-6 sm:mb-8"
+              />
+            </div>
+          )}
 
           {/* Entries */}
           {!tenantId ? (

@@ -4,8 +4,9 @@ import { createAdminClient } from '@/utils/supabase/admin';
 import { getTenantId } from '@/lib/work-orders/helpers';
 import { extractErrorMessage } from '@/lib/errorUtils';
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: integrationId } = await params;
     const tenantId = await getTenantId();
     const admin = createAdminClient();
     const body = await req.json();
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     const { error } = await admin.from('integration_jobs').insert({
       tenant_id: tenantId,
-      integration_id: params.id,
+      integration_id: integrationId,
       job_type,
       payload: type === 'invoice' ? { invoiceId: id } : { customerId: id },
       status: 'queued'
