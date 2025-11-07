@@ -97,10 +97,35 @@ export function DashboardAnalytics() {
   }
 
   if (error || !analytics) {
+    const message = (() => {
+      const raw = error?.message || 'Okänt fel';
+      if (raw === 'offline') {
+        return 'Du är offline. Visar senast cachade data när du är tillbaka online.';
+      }
+      if (raw === 'unauthorized') {
+        return 'Din session verkar ha gått ut. Logga in igen för att se analytics.';
+      }
+      return `Kunde inte ladda analytics: ${raw}`;
+    })();
+
+    const isOffline = error?.message === 'offline';
+
     return (
-      <div className="p-4 bg-red-50 dark:bg-red-900/20 rounded-xl border border-red-200 dark:border-red-800">
-        <p className="text-red-600 dark:text-red-400">
-          Kunde inte ladda analytics: {error?.message || 'Okänt fel'}
+      <div
+        className={`p-4 rounded-xl border ${
+          isOffline
+            ? 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/15 dark:border-yellow-800'
+            : 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+        }`}
+      >
+        <p
+          className={
+            isOffline
+              ? 'text-yellow-700 dark:text-yellow-300'
+              : 'text-red-600 dark:text-red-400'
+          }
+        >
+          {message}
         </p>
       </div>
     );

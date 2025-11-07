@@ -32,19 +32,68 @@ export function useDashboardAnalytics(period: 'week' | 'month' | 'year' = 'month
   return useQuery({
     queryKey: ['dashboard-analytics', tenantId, period],
     queryFn: async (): Promise<DashboardAnalytics> => {
+      const cacheKey = tenantId
+        ? `dashboard-analytics:${tenantId}:${period}`
+        : `dashboard-analytics:anon:${period}`;
+
+      if (typeof window !== 'undefined' && !navigator.onLine) {
+        const cached = window.localStorage.getItem(cacheKey);
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached) as { data: DashboardAnalytics };
+            console.log('📴 Offline - using cached analytics');
+            return parsed.data;
+          } catch (err) {
+            console.warn('⚠️ Failed to parse cached analytics:', err);
+          }
+        }
+        throw new Error('offline');
+      }
+
       const timestamp = Date.now();
       const response = await fetch(`/api/analytics/dashboard?period=${period}&_t=${timestamp}`, {
         cache: 'no-store', // Analytics ska alltid vara färsk
         headers: {
           'Cache-Control': 'no-cache, no-store, must-revalidate',
           'Pragma': 'no-cache',
+          ...(tenantId ? { 'x-tenant-id': tenantId } : {}),
         },
+        credentials: 'include',
       });
 
       if (!response.ok) {
         const errorText = await response.text();
         console.error('❌ Analytics fetch failed:', response.status, errorText);
-        throw new Error('Failed to fetch dashboard analytics');
+
+        let parsedError: any;
+        try {
+          parsedError = JSON.parse(errorText);
+        } catch {
+          parsedError = { error: errorText };
+        }
+
+        if (response.status === 401) {
+          throw new Error('unauthorized');
+        }
+
+        if (
+          response.status === 503 &&
+          typeof window !== 'undefined' &&
+          (parsedError?.error?.includes('Offline') || parsedError?.error?.includes('offline'))
+        ) {
+          const cached = window.localStorage.getItem(cacheKey);
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached) as { data: DashboardAnalytics };
+              console.warn('📴 503 offline - falling back to cached analytics data');
+              return parsed.data;
+            } catch (err) {
+              console.warn('⚠️ Failed to parse cached analytics during 503 fallback:', err);
+            }
+          }
+        }
+
+        throw new Error(parsedError?.error || 'Failed to fetch dashboard analytics');
       }
 
       const result = await response.json();
@@ -59,6 +108,17 @@ export function useDashboardAnalytics(period: 'week' | 'month' | 'year' = 'month
         throw new Error('Invalid analytics response');
       }
       
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.setItem(
+            cacheKey,
+            JSON.stringify({ data: result.data, timestamp: Date.now() })
+          );
+        } catch (err) {
+          console.warn('⚠️ Failed to cache analytics data:', err);
+        }
+      }
+
       return result.data as DashboardAnalytics;
     },
     enabled: !!tenantId,

@@ -67,7 +67,17 @@ export async function syncToServer(tenantId: string): Promise<SyncResult> {
 
       if (!r.ok) {
         const errorText = await r.text();
-        const err: any = new Error(errorText || `HTTP ${r.status}`);
+        let parsed: any = errorText;
+        try {
+          parsed = JSON.parse(errorText);
+        } catch {}
+
+        if (r.status === 403 && (parsed?.error?.includes('Ingen tenant') || typeof parsed === 'string' && parsed.includes('Ingen tenant'))) {
+          console.warn('⚠️ Sync skip: ingen tenant hittad - avbryter syncToServer');
+          return { synced: [], conflicts: [], rejected: [] };
+        }
+
+        const err: any = new Error(parsed?.error || errorText || `HTTP ${r.status}`);
         err.status = r.status;
         throw err;
       }
@@ -179,7 +189,17 @@ export async function syncFromServer(
 
     if (!res.ok) {
       const errorText = await res.text();
-      const err: any = new Error(errorText || `HTTP ${res.status}`);
+      let parsed: any = errorText;
+      try {
+        parsed = JSON.parse(errorText);
+      } catch {}
+
+      if (res.status === 403 && (parsed?.error?.includes('Ingen tenant') || typeof parsed === 'string' && parsed.includes('Ingen tenant'))) {
+        console.warn('⚠️ Sync skip: ingen tenant hittad - avbryter syncFromServer');
+        return { cursor: new Date().toISOString(), data: [] };
+      }
+
+      const err: any = new Error(parsed?.error || errorText || `HTTP ${res.status}`);
       err.status = res.status;
       throw err;
     }

@@ -5,5 +5,12 @@
       "static/chunks/frost-demo_9fdcd698._.js",
       "static/chunks/frost-demo_app_components_ai_AIChatbotWrapper_tsx_5ec2a3a8._.js"
     ]
+  },
+  "[project]/frost-demo/app/components/search/SearchBar.tsx [app-client] (ecmascript, next/dynamic entry)": {
+    "id": "[project]/frost-demo/app/components/search/SearchBar.tsx [app-client] (ecmascript, next/dynamic entry)",
+    "files": [
+      "static/chunks/frost-demo_c39e8d4a._.js",
+      "static/chunks/frost-demo_app_components_search_SearchBar_tsx_d7a892fc._.js"
+    ]
   }
 }
