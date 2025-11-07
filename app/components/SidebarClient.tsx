@@ -2,24 +2,11 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
-import dynamic from 'next/dynamic'
 import { useTheme } from '@/context/ThemeContext'
 import { useAdmin } from '@/hooks/useAdmin'
 import NotificationCenter from '@/components/NotificationCenter'
 import { SafeOnlineStatusIndicator } from '@/components/SafeSyncComponents'
-const SearchBar = dynamic(() => import('@/components/search/SearchBar'), {
-  ssr: false,
-  loading: () => (
-    <div className="relative w-full max-w-2xl mx-auto">
-      <div className="relative animate-pulse">
-        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-          <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700" />
-        </div>
-        <div className="w-full pl-12 pr-24 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800" />
-      </div>
-    </div>
-  ),
-})
+import { SearchBar } from '@/components/search/SearchBar'
 
 interface NavItem {
   name: string
@@ -56,6 +43,7 @@ export default function SidebarClient() {
   const { theme, toggleTheme } = useTheme()
   const { isAdmin, loading: adminLoading } = useAdmin()
   const [isOpen, setIsOpen] = useState(false) // Start closed on mobile
+  const [showSearchBar, setShowSearchBar] = useState(false)
 
   // Debug: Log admin status (bara i development, client-side only)
   useEffect(() => {
@@ -63,6 +51,10 @@ export default function SidebarClient() {
       console.log('🔍 Sidebar - Admin status:', { isAdmin, adminLoading, navItemsCount: adminNavItems.length })
     }
   }, [isAdmin, adminLoading])
+
+  useEffect(() => {
+    setShowSearchBar(true)
+  }, [])
 
   return (
     <>
@@ -110,7 +102,18 @@ export default function SidebarClient() {
             </div>
             {/* Global Search Bar */}
             <div className="mt-4">
-              <SearchBar />
+              {showSearchBar ? (
+                <SearchBar />
+              ) : (
+                <div className="relative w-full max-w-2xl mx-auto">
+                  <div className="relative animate-pulse">
+                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+                      <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700" />
+                    </div>
+                    <div className="w-full pl-12 pr-24 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800" />
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
