@@ -26,7 +26,8 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const admin = createAdminClient(8000, 'public');
+    const adminPublic = createAdminClient(8000, 'public');
+    const adminApp = createAdminClient(8000, 'app');
     const url = new URL(req.url);
     const period = url.searchParams.get('period') || 'month'; // 'week', 'month', 'year'
 
@@ -46,7 +47,7 @@ export async function GET(req: NextRequest) {
     console.log('📊 Dashboard Analytics: Fetching data for tenant:', tenantId);
     
     // Fetch projects directly for stats
-    const { data: projectsForStats } = await admin
+    const { data: projectsForStats } = await adminPublic
       .from('projects')
       .select('id, status, budgeted_hours')
       .eq('tenant_id', tenantId);
@@ -61,10 +62,20 @@ export async function GET(req: NextRequest) {
     );
     
     // Fetch ALL time entries (not just for period) for total hours
-    const { data: allTimeEntries, error: timeEntriesError } = await admin
+    let { data: allTimeEntries, error: timeEntriesError } = await adminApp
       .from('time_entries')
       .select('hours_total, is_billed, date')
       .eq('tenant_id', tenantId);
+
+    if (timeEntriesError) {
+      console.warn('⚠️ time_entries (app schema) lookup failed, retrying via public view:', timeEntriesError);
+      const fallback = await adminPublic
+        .from('time_entries')
+        .select('hours_total, is_billed, date')
+        .eq('tenant_id', tenantId);
+      allTimeEntries = fallback.data ?? [];
+      timeEntriesError = fallback.error;
+    }
     
     if (timeEntriesError) {
       console.error('❌ Error fetching time entries:', timeEntriesError);
@@ -115,7 +126,7 @@ export async function GET(req: NextRequest) {
     }
     
     // Fetch invoices directly
-    const { data: invoicesData } = await admin
+    const { data: invoicesData } = await adminPublic
       .from('invoices')
       .select('amount, status, issue_date')
       .eq('tenant_id', tenantId)
@@ -134,7 +145,7 @@ export async function GET(req: NextRequest) {
     );
     
     // Fetch employees
-    const { data: employeesData } = await admin
+    const { data: employeesData } = await adminPublic
       .from('employees')
       .select('id')
       .eq('tenant_id', tenantId);
@@ -170,7 +181,7 @@ export async function GET(req: NextRequest) {
       : 0;
 
     // Get project performance with actual hours
-    const { data: projectsForPerformance, error: projectsError } = await admin
+    const { data: projectsForPerformance, error: projectsError } = await adminPublic
       .from('projects')
       .select('id, name, status, budgeted_hours, base_rate_sek')
       .eq('tenant_id', tenantId)
@@ -179,7 +190,7 @@ export async function GET(req: NextRequest) {
     // Fetch actual hours for each project
     const projectPerformance = await Promise.all(
       (projectsForPerformance || []).map(async (project) => {
-        const { data: timeEntries } = await admin
+        const { data: timeEntries } = await adminApp
           .from('time_entries')
           .select('hours_total')
           .eq('tenant_id', tenantId)
