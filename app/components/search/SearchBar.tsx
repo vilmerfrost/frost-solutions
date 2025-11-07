@@ -195,3 +195,5 @@ export function SearchBar() {
   );
 }
 
+export default SearchBar;
+

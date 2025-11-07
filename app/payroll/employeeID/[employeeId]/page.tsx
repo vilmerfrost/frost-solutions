@@ -175,57 +175,42 @@ export default function PayslipPage() {
           setIsAuthorized(true)
         }
 
-        // Try to fetch employee with full columns first
-        let { data: empData, error: empError } = await supabase
-          .from('employees')
-          .select('id, full_name, name, email, base_rate_sek, default_rate_sek')
-          .eq('tenant_id', tenantId)
-          .eq('id', employeeId)
-          .maybeSingle()
+        // Fetch employee via server API to avoid RLS issues
+        const employeeResponse = await fetch(`/api/employees/${employeeId}`, {
+          cache: 'no-store',
+        })
 
-        // If error due to missing columns, try progressive fallback
-        if (empError || !empData) {
-          // Try with only base_rate_sek (without default_rate_sek)
-          if (empError?.code === '42703' || empError?.message?.includes('default_rate_sek')) {
-            const fallback1 = await supabase
-              .from('employees')
-              .select('id, full_name, name, email, base_rate_sek')
-              .eq('tenant_id', tenantId)
-              .eq('id', employeeId)
-              .maybeSingle()
-            
-            if (!fallback1.error && fallback1.data) {
-              empData = { ...fallback1.data, default_rate_sek: null }
-              empError = null
-            }
-          }
-
-          // If still error, try minimal select
-          if (empError || !empData) {
-            const fallback = await supabase
-              .from('employees')
-              .select('id, name, full_name')
-              .eq('tenant_id', tenantId)
-              .eq('id', employeeId)
-              .maybeSingle()
-            
-            if (fallback.error || !fallback.data) {
-              console.error('Error fetching employee:', empError || fallback.error)
-              setLoading(false)
-              return
-            }
-            
-            // Use fallback data and add defaults
-            empData = {
-              ...fallback.data,
-              email: null,
-              base_rate_sek: null,
-              default_rate_sek: null,
-            }
-          }
+        if (!employeeResponse.ok) {
+          const errorPayload = await employeeResponse.json().catch(() => ({}))
+          console.error('Error fetching employee via API:', errorPayload.error || 'Failed to fetch employee')
+          setLoading(false)
+          return
         }
 
-        setEmployee(empData)
+        const employeePayload = await employeeResponse.json()
+        if (!employeePayload || employeePayload.success === false) {
+          console.error('Invalid employee response payload:', employeePayload)
+          setLoading(false)
+          return
+        }
+
+        if (employeePayload.tenant_id && employeePayload.tenant_id !== tenantId) {
+          console.error('❌ Employee belongs to different tenant')
+          setIsAuthorized(false)
+          setLoading(false)
+          return
+        }
+
+        const normalizedEmployee = {
+          id: employeePayload.id,
+          full_name: employeePayload.full_name || employeePayload.name || 'Okänd',
+          name: employeePayload.name || employeePayload.full_name || 'Okänd',
+          email: employeePayload.email || null,
+          base_rate_sek: employeePayload.base_rate_sek ?? employeePayload.default_rate_sek ?? null,
+          default_rate_sek: employeePayload.default_rate_sek ?? employeePayload.base_rate_sek ?? null,
+        }
+
+        setEmployee(normalizedEmployee)
 
         const { start, end } = monthRange(selectedMonth || undefined)
         

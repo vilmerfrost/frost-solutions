@@ -2,11 +2,24 @@
 
 import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
 import { useTheme } from '@/context/ThemeContext'
 import { useAdmin } from '@/hooks/useAdmin'
 import NotificationCenter from '@/components/NotificationCenter'
 import { SafeOnlineStatusIndicator } from '@/components/SafeSyncComponents'
-import { SearchBar } from '@/components/search/SearchBar'
+const SearchBar = dynamic(() => import('@/components/search/SearchBar'), {
+  ssr: false,
+  loading: () => (
+    <div className="relative w-full max-w-2xl mx-auto">
+      <div className="relative animate-pulse">
+        <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
+          <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700" />
+        </div>
+        <div className="w-full pl-12 pr-24 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800" />
+      </div>
+    </div>
+  ),
+})
 
 interface NavItem {
   name: string
