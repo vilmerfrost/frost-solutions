@@ -6124,3 +6124,115 @@ It can also happen if the client has a browser extension installed which messes 
 [13:21:33.894] Browser LOG     🔗 Timestamp tie - using server version
 [13:21:33.894] Browser LOG     ✅ Synced 2 updates from server
 [13:21:33.894] Browser LOG     ✅ Sync completed successfully
+[13:22:04.529] Browser LOG     ✅ Synced 0 updates from server
+[13:22:04.529] Browser LOG     ✅ Sync completed successfully
+[13:22:19.074] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:22:19.074] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:22:19.406] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:22:33.938] Browser LOG     ✅ Synced 0 updates from server
+[13:22:33.938] Browser LOG     ✅ Sync completed successfully
+[13:23:03.960] Browser LOG     ✅ Synced 0 updates from server
+[13:23:03.960] Browser LOG     ✅ Sync completed successfully
+[13:23:34.003] Browser LOG     ✅ Synced 0 updates from server
+[13:23:34.003] Browser LOG     ✅ Sync completed successfully
+[13:24:04.027] Browser LOG     ✅ Synced 0 updates from server
+[13:24:04.027] Browser LOG     ✅ Sync completed successfully
+[13:24:33.949] Browser LOG     ✅ Synced 0 updates from server
+[13:24:33.949] Browser LOG     ✅ Sync completed successfully
+[13:24:37.882] Server  ERROR   [API] AI Generate Quote Error: Error: AI service failed
+[13:27:35.249] Browser ERROR   AI Generate Error: {}
+[13:27:35.830] Browser LOG     ✅ Synced 0 updates from server
+[13:27:35.830] Browser LOG     ✅ Sync completed successfully
+[13:28:04.023] Browser LOG     ✅ Synced 0 updates from server
+[13:28:04.023] Browser LOG     ✅ Sync completed successfully
+[13:28:33.951] Browser LOG     ✅ Synced 0 updates from server
+[13:28:33.951] Browser LOG     ✅ Sync completed successfully
+[13:29:04.091] Browser LOG     ✅ Synced 0 updates from server
+[13:29:04.091] Browser LOG     ✅ Sync completed successfully
+[13:29:11.055] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:29:11.055] Browser ERROR   [Supabase Guard] Client-side access to "time_entries" is not allowed. Use a server API route instead.
+[13:29:11.055] Browser ERROR   Error fetching analytics: {}
+[13:29:11.055] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:29:11.055] Browser ERROR   [Supabase Guard] Client-side access to "time_entries" is not allowed. Use a server API route instead.
+[13:29:11.055] Browser ERROR   Error fetching analytics: {}
+[13:29:11.476] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:29:17.488] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:29:17.488] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:29:17.488] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:29:34.050] Browser LOG     ✅ Synced 0 updates from server
+[13:29:34.050] Browser LOG     ✅ Sync completed successfully
+[13:29:45.526] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:45.526] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:45.526] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:29:45.526] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
+[13:29:45.526] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:29:45.526] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
+[13:29:45.664] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:29:45.792] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
+[13:29:45.792] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
+[13:29:45.792] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:29:45.810] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:29:45.823] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:29:45.886] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[13:29:45.887] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[13:29:45.958] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[13:29:45.958] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[13:29:45.959] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[13:29:45.959] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[13:29:45.976] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:29:46.030] Server  LOG     ✅ Selected employee: {}
+[13:29:46.031] Server  LOG     ✅ Returning employee data immediately
+[13:29:46.053] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[13:29:46.053] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[13:29:46.128] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[13:29:46.129] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[13:29:46.129] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[13:29:46.129] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[13:29:46.242] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
+[13:29:46.242] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:46.242] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:46.242] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":0}
+[13:29:46.242] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
+[13:29:46.370] Server  LOG     ✅ Selected employee: {}
+[13:29:46.371] Server  LOG     ✅ Returning employee data immediately
+[13:29:46.457] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:29:46.576] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
+[13:29:46.576] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:46.576] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:46.576] Browser WARN    ⚠️ Active time entry found but missing start_time: ea5e3ff4-4371-49c9-b0b3-361a804add81
+[13:29:46.576] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:46.576] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:46.576] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[13:29:46.576] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
+[13:29:46.576] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:46.576] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:46.576] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
+[13:29:46.770] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:29:46.793] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:29:47.077] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[13:29:47.077] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.077] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.077] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":3}
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.077] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.089] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:29:47.278] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
+[13:29:47.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:29:47.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:30:03.928] Browser LOG     ✅ Synced 0 updates from server
+[13:30:03.928] Browser LOG     ✅ Sync completed successfully
+[13:30:07.959] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:30:07.959] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:30:07.959] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:30:09.665] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:30:09.665] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:30:09.665] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:30:11.053] Server  LOG      ✓ Compiled in 91ms

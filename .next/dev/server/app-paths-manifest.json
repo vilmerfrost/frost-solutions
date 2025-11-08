@@ -1,6 +1,8 @@
 {
   "/_not-found/page": "app/_not-found/page.js",
+  "/analytics/page": "app/analytics/page.js",
   "/api/admin/check/route": "app/api/admin/check/route.js",
+  "/api/ai/summarize/route": "app/api/ai/summarize/route.js",
   "/api/dashboard/stats/route": "app/api/dashboard/stats/route.js",
   "/api/employee/get-current/route": "app/api/employee/get-current/route.js",
   "/api/employees/list/route": "app/api/employees/list/route.js",
@@ -11,11 +13,13 @@
   "/api/projects/list/route": "app/api/projects/list/route.js",
   "/api/quotes/[id]/items/route": "app/api/quotes/[id]/items/route.js",
   "/api/quotes/[id]/route": "app/api/quotes/[id]/route.js",
+  "/api/quotes/ai-generate/route": "app/api/quotes/ai-generate/route.js",
   "/api/quotes/route": "app/api/quotes/route.js",
   "/api/rbac/permissions/route": "app/api/rbac/permissions/route.js",
   "/api/sync/work-orders/route": "app/api/sync/work-orders/route.js",
   "/api/tenant/get-tenant/route": "app/api/tenant/get-tenant/route.js",
   "/api/time-entries/active/route": "app/api/time-entries/active/route.js",
+  "/api/work-orders/route": "app/api/work-orders/route.js",
   "/clients/page": "app/clients/page.js",
   "/dashboard/page": "app/dashboard/page.js",
   "/faq/page": "app/faq/page.js",
@@ -27,5 +31,6 @@
   "/quotes/[id]/page": "app/quotes/[id]/page.js",
   "/quotes/new/page": "app/quotes/new/page.js",
   "/quotes/page": "app/quotes/page.js",
-  "/settings/utseende/page": "app/settings/utseende/page.js"
+  "/settings/utseende/page": "app/settings/utseende/page.js",
+  "/work-orders/page": "app/work-orders/page.js"
 }

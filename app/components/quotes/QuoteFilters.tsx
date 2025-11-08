@@ -48,13 +48,12 @@ export function QuoteFilters({ filters, onFiltersChange }: QuoteFiltersProps) {
   const hasFilters = filters.status || filters.customer_id || filters.search
 
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-6 mb-6 backdrop-blur-sm bg-opacity-95">
+    <div className="bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-800/50 dark:to-gray-800 rounded-xl shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 mb-6 backdrop-blur-sm">
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Select
           label="Status"
           value={filters.status || ''}
           onChange={(e) => onFiltersChange({ ...filters, status: e.target.value as QuoteStatus || undefined, page: 1 })}
-          className="bg-white dark:bg-gray-800"
         >
           <option value="">Alla statusar</option>
           {statuses.map((status) => (
@@ -68,7 +67,6 @@ export function QuoteFilters({ filters, onFiltersChange }: QuoteFiltersProps) {
           label="Kund"
           value={filters.customer_id || ''}
           onChange={(e) => onFiltersChange({ ...filters, customer_id: e.target.value || undefined, page: 1 })}
-          className="bg-white dark:bg-gray-800"
         >
           <option value="">Alla kunder</option>
           {clients?.map((client) => (
@@ -84,7 +82,6 @@ export function QuoteFilters({ filters, onFiltersChange }: QuoteFiltersProps) {
           placeholder="Sök efter titel, nummer..."
           value={filters.search || ''}
           onChange={(e) => onFiltersChange({ ...filters, search: e.target.value || undefined, page: 1 })}
-          className="bg-white dark:bg-gray-800"
         />
 
         <div className="flex items-end">
