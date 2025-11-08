@@ -51,15 +51,15 @@ export default function EditQuotePage() {
   }
 
   return (
-    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="flex min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 dark:from-gray-900 dark:via-gray-900 dark:to-gray-900">
       <Sidebar />
       <main className="flex-1 lg:ml-0">
         <div className="container mx-auto px-4 py-8">
-          <div className="mb-6">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+          <div className="mb-8">
+            <h1 className="text-4xl font-bold bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 bg-clip-text text-transparent">
               Redigera Offert
             </h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">{quote.quote_number}</p>
+            <p className="text-gray-600 dark:text-gray-400 mt-2 text-lg">{quote.quote_number}</p>
           </div>
 
           <QuoteForm 

@@ -5304,3 +5304,823 @@ https://react.dev/link/hydration-mismatch
 [13:09:56.283] Browser LOG     ✅ Sync completed successfully
 [13:09:56.283] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
 [13:09:56.283] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:10:25.631] Server  LOG     🔍 GET /api/employees/list - Starting request
+[13:10:25.652] Browser LOG     👁️ Page visible - triggering sync
+[13:10:25.652] Browser LOG     ⏳ Sync already running, skipping...
+[13:10:25.652] Browser LOG     ✅ Synced 0 updates from server
+[13:10:25.652] Browser LOG     ✅ Sync completed successfully
+[13:10:25.713] Server  LOG     ✅ User authenticated: "2941e8db-d533-412e-a292-7ff713e76567" "vilmer.frost@gmail.com"
+[13:10:25.715] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:10:25.781] Server  LOG     ✅ Tenant ID: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:10:25.781] Server  LOG     ✅ Creating admin client
+[13:10:25.782] Server  LOG     🔍 Querying employees for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:10:25.862] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:10:25.867] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:10:25.873] Server  LOG     ✅ Found 2 "employees"
+[13:10:25.929] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[13:10:25.931] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[13:10:25.972] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:10:25.972] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:10:25.972] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:10:26.024] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[13:10:26.024] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[13:10:26.024] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[13:10:26.026] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[13:10:31.099] Server  LOG     🔍 Dashboard: Rendering TimeClock with: {}
+[13:10:45.629] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[13:10:45.894] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <RedirectBoundary>
+      <RedirectErrorBoundary router={{...}}>
+        <InnerLayoutRouter url="/quotes" tree={[...]} params={{}} cacheNode={{lazyData:null, ...}} segmentPath={[...]} ...>
+          <SegmentViewNode type="page" pagePath="/frost-dem...">
+            <SegmentTrieNode>
+            <ClientPageRoot Component={function QuotesPage} serverProvidedParams={{...}}>
+              <QuotesPage params={Promise} searchParams={Promise}>
+                <div className="flex min-h...">
+                  <SidebarClient>
+                    <button>
+                    <aside className={"\n      ..."} aria-label="Huvudnavig...">
+                      <div className="h-full fle...">
+                        <div>
+                        <nav className="flex-1 p-4...">
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📊
+                            <span
+-                             className="truncate"
+                            >
++                             Dashboard
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             👥
+                            <span
+-                             className="truncate"
+                            >
++                             Anställda
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             🏗️
+                            <span
+-                             className="truncate"
+                            >
++                             Projekt
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📦
+                            <span
+-                             className="truncate"
+                            >
++                             Arkiv
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             👔
+                            <span
+-                             className="truncate"
+                            >
++                             Kunder
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📄
+                            <span
+-                             className="truncate"
+                            >
++                             Offerter
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             🧾
+                            <span
+-                             className="truncate"
+                            >
++                             Fakturor
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📈
+                            <span
+-                             className="truncate"
+                            >
++                             Rapporter
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📅
+                            <span
+-                             className="truncate"
+                            >
++                             Kalender
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📋
+                            <span
+-                             className="truncate"
+                            >
++                             Arbetsordrar
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📊
+                            <span
+-                             className="truncate"
+                            >
++                             Analytics
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             🏠
+                            <span
+-                             className="truncate"
+                            >
++                             ROT-avdrag
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             ⚠️
+                            <span
+-                             className="truncate"
+                            >
++                             ÄTA
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             💬
+                            <span
+-                             className="truncate"
+                            >
++                             Feedback
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             ❓
+                            <span
+-                             className="truncate"
+                            >
++                             FAQ
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             🎨
+                            <span
+-                             className="truncate"
+                            >
++                             Utseende
+                        ...
+                  ...
+          ...
+        ...
+
+[13:10:45.894] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:10:45.894] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[13:10:45.894] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:10:45.894] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:10:45.894] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":1}
+[13:10:45.894] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:10:45.894] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:10:45.894] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:10:46.069] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:10:46.111] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:10:46.121] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:10:46.213] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:10:46.319] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[13:10:46.319] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[13:10:46.319] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[13:10:46.319] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[13:10:46.319] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:10:46.319] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:10:46.319] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:10:46.319] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:10:46.319] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:10:46.493] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:10:46.493] Browser LOG     🔗 Timestamp tie - using server version
+[13:10:46.493] Browser LOG     🔗 Timestamp tie - using server version
+[13:10:46.493] Browser LOG     ✅ Synced 2 updates from server
+[13:10:46.493] Browser LOG     ✅ Sync completed successfully
+[13:10:51.145] Server  LOG     [API] ✅ GET /api/quotes/87484d04-adc9-402b-bbdf-b43b851f316f - Request received {}
+[13:10:51.158] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:10:51.158] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:10:51.158] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:10:51.223] Server  LOG     [API] ✅ Tenant validated {}
+[13:10:51.224] Server  LOG     [API] 🔍 Fetching quote from database... {}
+[13:10:51.304] Server  LOG     [API] ✅ Quote fetched successfully {}
+[13:10:51.304] Server  LOG     [API] 🔍 Fetching related data... {}
+[13:10:51.411] Server  LOG     [API] ✅ Items fetched: 0
+[13:10:51.411] Server  LOG     [API] ✅ Customer fetched: Bobs bengtsonn
+[13:10:51.412] Server  LOG     [API] ✅ Project fetched: Takrenovering
+[13:10:51.412] Server  LOG     [API] ✅ GET /api/quotes/87484d04-adc9-402b-bbdf-b43b851f316f completed successfully {}
+[13:10:52.362] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:10:53.676] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:10:55.961] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:10:58.178] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:10:58.178] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:10:58.178] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:11:00.241] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:11:16.497] Browser LOG     ✅ Synced 0 updates from server
+[13:11:16.497] Browser LOG     ✅ Sync completed successfully
+[13:11:46.562] Browser LOG     ✅ Synced 0 updates from server
+[13:11:46.562] Browser LOG     ✅ Sync completed successfully
+[13:12:16.580] Browser LOG     ✅ Synced 0 updates from server
+[13:12:16.580] Browser LOG     ✅ Sync completed successfully
+[13:12:46.544] Browser LOG     ✅ Synced 0 updates from server
+[13:12:46.544] Browser LOG     ✅ Sync completed successfully
+[13:13:16.528] Browser LOG     ✅ Synced 0 updates from server
+[13:13:16.528] Browser LOG     ✅ Sync completed successfully
+[13:13:46.520] Browser LOG     ✅ Synced 0 updates from server
+[13:13:46.520] Browser LOG     ✅ Sync completed successfully
+[13:14:16.605] Browser LOG     ✅ Synced 0 updates from server
+[13:14:16.605] Browser LOG     ✅ Sync completed successfully
+[13:14:46.529] Browser LOG     ✅ Synced 0 updates from server
+[13:14:46.529] Browser LOG     ✅ Sync completed successfully
+[13:15:17.450] Browser LOG     ✅ Synced 0 updates from server
+[13:15:17.450] Browser LOG     ✅ Sync completed successfully
+[13:15:46.677] Browser LOG     ✅ Synced 0 updates from server
+[13:15:46.677] Browser LOG     ✅ Sync completed successfully
+[13:16:16.706] Browser LOG     ✅ Synced 0 updates from server
+[13:16:16.706] Browser LOG     ✅ Sync completed successfully
+[13:16:46.606] Browser LOG     ✅ Synced 0 updates from server
+[13:16:46.606] Browser LOG     ✅ Sync completed successfully
+[13:17:16.585] Browser LOG     ✅ Synced 0 updates from server
+[13:17:16.586] Browser LOG     ✅ Sync completed successfully
+[13:17:46.533] Browser LOG     ✅ Synced 0 updates from server
+[13:17:46.533] Browser LOG     ✅ Sync completed successfully
+[13:17:54.704] Server  LOG      ✓ Compiled in 93ms
+[13:18:03.938] Server  LOG      ✓ Compiled in 90ms
+[13:18:08.900] Server  LOG      ✓ Compiled in 104ms
+[13:18:12.075] Server  LOG      ✓ Compiled in 75ms
+[13:18:16.582] Browser LOG     ✅ Synced 0 updates from server
+[13:18:16.582] Browser LOG     ✅ Sync completed successfully
+[13:18:20.452] Server  LOG      ✓ Compiled in 84ms
+[13:18:24.671] Server  LOG      ✓ Compiled in 81ms
+[13:18:27.988] Server  LOG      ✓ Compiled in 72ms
+[13:18:34.780] Server  LOG      ✓ Compiled in 84ms
+[13:18:37.941] Server  LOG      ✓ Compiled in 71ms
+[13:18:38.170] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:18:39.532] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:18:41.868] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:18:46.238] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:18:46.511] Browser LOG     ✅ Synced 0 updates from server
+[13:18:46.511] Browser LOG     ✅ Sync completed successfully
+[13:18:52.255] Server  LOG      ✓ Compiled in 84ms
+[13:19:16.612] Browser LOG     ✅ Synced 0 updates from server
+[13:19:16.612] Browser LOG     ✅ Sync completed successfully
+[13:19:17.285] Server  LOG      ✓ Compiled in 102ms
+[13:19:21.617] Server  LOG      ✓ Compiled in 70ms
+[13:19:46.530] Browser LOG     ✅ Synced 0 updates from server
+[13:19:46.530] Browser LOG     ✅ Sync completed successfully
+[13:20:16.593] Browser LOG     ✅ Synced 0 updates from server
+[13:20:16.593] Browser LOG     ✅ Sync completed successfully
+[13:20:46.513] Browser LOG     ✅ Synced 0 updates from server
+[13:20:46.513] Browser LOG     ✅ Sync completed successfully
+[13:21:16.541] Browser LOG     ✅ Synced 0 updates from server
+[13:21:16.541] Browser LOG     ✅ Sync completed successfully
+[13:21:24.800] Server  LOG     🔍 Dashboard: Rendering TimeClock with: {}
+[13:21:25.362] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[13:21:25.731] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
+[13:21:25.731] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
+[13:21:25.731] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
+[13:21:25.731] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
+[13:21:25.731] Browser ERROR   uncaughtError: Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <LoadingBoundary name="dashboard/" loading={null}>
+      <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+        <RedirectBoundary>
+          <RedirectErrorBoundary router={{...}}>
+            <InnerLayoutRouter url="/dashboard" tree={[...]} params={{}} cacheNode={{lazyData:null, ...}} ...>
+              <SegmentViewNode type="page" pagePath="/frost-dem...">
+                <SegmentTrieNode>
+                <DashboardPage>
+                  <DashboardClient userEmail="vilmer.fro..." stats={{totalHours:0, ...}} projects={[...]}>
+                    <div className="min-h-scre...">
+                      <SidebarClient>
+                        <button>
+                        <aside className={"\n      ..."} aria-label="Huvudnavig...">
+                          <div className="h-full fle...">
+                            <div>
+                            <nav className="flex-1 p-4...">
+                              <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                                <span
++                                 className="text-xl"
+-                                 className="text-xl flex-shrink-0"
+                                  aria-hidden="true"
+                                >
++                                 📊
+                                <span
+-                                 className="truncate"
+                                >
++                                 Dashboard
+                              <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                                <span
++                                 className="text-xl"
+-                                 className="text-xl flex-shrink-0"
+                                  aria-hidden="true"
+                                >
++                                 👥
+                                <span
+-                                 className="truncate"
+                                >
++                                 Anställda
+                              <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                                <span
++                                 className="text-xl"
+-                                 className="text-xl flex-shrink-0"
+                                  aria-hidden="true"
+                                >
++                                 🏗️
+                                <span
+-                                 className="truncate"
+                                >
++                                 Projekt
+                              <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                                <span
++                                 className="text-xl"
+-                                 className="text-xl flex-shrink-0"
+                                  aria-hidden="true"
+                                >
++                                 📦
+                                <span
+-                                 className="truncate"
+                                >
++                                 Arkiv
+                              <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                                <span
++                                 className="text-xl"
+-                                 className="text-xl flex-shrink-0"
+                                  aria-hidden="true"
+                                >
++                                 👔
+                                <span
+-                                 className="truncate"
+                                >
++                                 Kunder
+                              <button
+                                onClick={function onClick}
+                                onKeyDown={function onKeyDown}
+                                className={"\n                    w-full flex items-center gap-3 px-4 py-3 rounded-xl..."}
+                                aria-current={undefined}
++                               aria-label="Gå till Fakturor"
+-                               aria-label="Gå till Offerter"
+                              >
+                                <span
++                                 className="text-xl"
+-                                 className="text-xl flex-shrink-0"
+                                  aria-hidden="true"
+                                >
++                                 🧾
+-                                 📄
+                                ...
+                              ...
+                            ...
+                      ...
+              ...
+            ...
+
+[13:21:25.731] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:21:25.731] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
+[13:21:25.731] Browser LOG     TimeClock: No tenantId
+[13:21:25.731] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[13:21:25.731] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:21:25.731] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
+[13:21:25.731] Browser LOG     TimeClock: No tenantId
+[13:21:25.731] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[13:21:25.731] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
+[13:21:25.731] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
+[13:21:25.731] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:21:25.731] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
+[13:21:25.731] Browser LOG     TimeClock: No tenantId
+[13:21:25.731] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[13:21:25.731] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[13:21:25.731] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:21:25.731] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
+[13:21:25.731] Browser LOG     TimeClock: No tenantId
+[13:21:25.731] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[13:21:25.731] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[13:21:25.731] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":1}
+[13:21:25.731] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:21:25.731] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:21:25.731] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:21:25.731] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:21:25.960] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:25.979] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.084] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:21:26.084] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:21:26.128] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.274] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:21:26.274] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:26.274] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:26.274] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:21:26.366] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
+[13:21:26.381] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.384] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.549] Server  LOG     🔍 GET /api/employees/list - Starting request
+[13:21:26.555] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:21:26.555] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:21:26.555] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:21:26.599] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.620] Server  LOG     ✅ User authenticated: "2941e8db-d533-412e-a292-7ff713e76567" "vilmer.frost@gmail.com"
+[13:21:26.634] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.701] Server  LOG     ✅ Tenant ID: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.701] Server  LOG     ✅ Creating admin client
+[13:21:26.702] Server  LOG     🔍 Querying employees for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.851] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.853] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:26.855] Server  LOG     ✅ Found 2 "employees"
+[13:21:26.857] Server  LOG     ✅ Selected employee: {}
+[13:21:26.857] Server  LOG     ✅ Returning employee data immediately
+[13:21:26.925] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[13:21:26.925] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[13:21:26.927] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[13:21:26.927] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[13:21:27.002] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[13:21:27.002] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[13:21:27.002] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[13:21:27.003] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[13:21:27.004] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[13:21:27.005] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[13:21:27.005] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[13:21:27.005] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[13:21:27.059] Browser LOG     🔗 Timestamp tie - using server version
+[13:21:27.059] Browser LOG     🔗 Timestamp tie - using server version
+[13:21:27.059] Browser LOG     ✅ Synced 2 updates from server
+[13:21:27.059] Browser LOG     ✅ Sync completed successfully
+[13:21:27.059] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
+[13:21:27.059] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:27.059] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:27.059] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":0}
+[13:21:27.059] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
+[13:21:27.270] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:27.385] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[13:21:27.385] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
+[13:21:27.385] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:27.385] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:27.385] Browser WARN    ⚠️ Active time entry found but missing start_time: ea5e3ff4-4371-49c9-b0b3-361a804add81
+[13:21:27.491] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:27.491] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:27.593] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:27.812] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
+[13:21:27.812] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:27.812] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:27.812] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":3}
+[13:21:27.812] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:27.812] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:28.033] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:28.033] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[13:21:33.124] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[13:21:33.355] Browser ERROR   A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+%s%s https://react.dev/link/hydration-mismatch 
+
+  ...
+    <RedirectBoundary>
+      <RedirectErrorBoundary router={{...}}>
+        <InnerLayoutRouter url="/quotes" tree={[...]} params={{}} cacheNode={{lazyData:null, ...}} segmentPath={[...]} ...>
+          <SegmentViewNode type="page" pagePath="/frost-dem...">
+            <SegmentTrieNode>
+            <ClientPageRoot Component={function QuotesPage} serverProvidedParams={{...}}>
+              <QuotesPage params={Promise} searchParams={Promise}>
+                <div className="flex min-h...">
+                  <SidebarClient>
+                    <button>
+                    <aside className={"\n      ..."} aria-label="Huvudnavig...">
+                      <div className="h-full fle...">
+                        <div>
+                        <nav className="flex-1 p-4...">
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📊
+                            <span
+-                             className="truncate"
+                            >
++                             Dashboard
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             👥
+                            <span
+-                             className="truncate"
+                            >
++                             Anställda
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             🏗️
+                            <span
+-                             className="truncate"
+                            >
++                             Projekt
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📦
+                            <span
+-                             className="truncate"
+                            >
++                             Arkiv
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             👔
+                            <span
+-                             className="truncate"
+                            >
++                             Kunder
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📄
+                            <span
+-                             className="truncate"
+                            >
++                             Offerter
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             🧾
+                            <span
+-                             className="truncate"
+                            >
++                             Fakturor
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📈
+                            <span
+-                             className="truncate"
+                            >
++                             Rapporter
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📅
+                            <span
+-                             className="truncate"
+                            >
++                             Kalender
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📋
+                            <span
+-                             className="truncate"
+                            >
++                             Arbetsordrar
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             📊
+                            <span
+-                             className="truncate"
+                            >
++                             Analytics
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             🏠
+                            <span
+-                             className="truncate"
+                            >
++                             ROT-avdrag
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             ⚠️
+                            <span
+-                             className="truncate"
+                            >
++                             ÄTA
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             💬
+                            <span
+-                             className="truncate"
+                            >
++                             Feedback
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             ❓
+                            <span
+-                             className="truncate"
+                            >
++                             FAQ
+                          <button onClick={function onClick} onKeyDown={function onKeyDown} className={"\n      ..."} ...>
+                            <span
++                             className="text-xl"
+-                             className="text-xl flex-shrink-0"
+                              aria-hidden="true"
+                            >
++                             🎨
+                            <span
+-                             className="truncate"
+                            >
++                             Utseende
+                        ...
+                  <main className="flex-1 lg:...">
+                    <div className="container ...">
+                      <div>
+                      <QuoteFilters filters={{page:1,limit:20}} onFiltersChange={function bound dispatchSetState}>
+                        <div className="bg-white d...">
+                          <div className="grid grid-...">
+                            <Select label="Status" value="" onChange={function onChange} className="bg-white d...">
+                              <div className="w-full">
+                                <label
++                                 className="block text-sm font-medium text-gray-700 mb-1"
+-                                 className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                                >
++                                 Status
+                                <select
++                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outlin..."
+-                                 className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-..."
+                                  value=""
+                                  onChange={function onChange}
+                                >
+                            <Select label="Kund" value="" onChange={function onChange} className="bg-white d...">
+                              <div className="w-full">
+                                <label
++                                 className="block text-sm font-medium text-gray-700 mb-1"
+-                                 className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                                >
++                                 Kund
+                                <select
++                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outlin..."
+-                                 className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-..."
+                                  value=""
+                                  onChange={function onChange}
+                                >
+                            <Input label="Sök" type="search" placeholder="Sök efter ..." value="" ...>
+                              <div className="w-full">
+                                <label
++                                 className="block text-sm font-medium text-gray-700 mb-1"
+-                                 className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2"
+                                >
++                                 Sök
+                                <input
++                                 className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outlin..."
+-                                 className="w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-..."
+                                  type="search"
+                                  placeholder="Sök efter titel, nummer..."
+                                  value=""
+                                  onChange={function onChange}
+                                >
+                            ...
+                      ...
+          ...
+        ...
+
+[13:21:33.355] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:21:33.355] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[13:21:33.355] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:21:33.355] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:21:33.355] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":1}
+[13:21:33.355] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:21:33.355] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:21:33.355] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
+[13:21:33.503] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:33.535] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:33.562] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:33.596] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[13:21:33.700] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[13:21:33.700] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[13:21:33.700] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[13:21:33.700] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[13:21:33.700] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:21:33.700] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:21:33.700] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:21:33.700] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:21:33.700] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[13:21:33.894] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:21:33.894] Browser LOG     🔗 Timestamp tie - using server version
+[13:21:33.894] Browser LOG     🔗 Timestamp tie - using server version
+[13:21:33.894] Browser LOG     ✅ Synced 2 updates from server
+[13:21:33.894] Browser LOG     ✅ Sync completed successfully

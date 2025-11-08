@@ -105,8 +105,8 @@ export function QuoteForm({ quote, onSubmit, isLoading }: QuoteFormProps) {
       </Button>
 
       {/* Basic Info */}
-      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 backdrop-blur-sm bg-opacity-95">
-        <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent">
+      <div className="bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-800/50 dark:to-gray-800 rounded-xl shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 backdrop-blur-sm">
+        <h2 className="text-xl font-semibold mb-6 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 bg-clip-text text-transparent">
           Grundläggande Information
         </h2>
         
@@ -169,17 +169,18 @@ export function QuoteForm({ quote, onSubmit, isLoading }: QuoteFormProps) {
             <option value="USD">USD</option>
           </Select>
 
-          <div className="flex items-center">
+          <div className="flex items-center gap-2 p-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
             <input
               type="checkbox"
               id="kma_enabled"
               name="kma_enabled"
               checked={formData.kma_enabled}
               onChange={handleChange}
-              className="mr-2"
+              className="w-4 h-4 text-emerald-600 bg-gray-100 border-gray-300 rounded focus:ring-emerald-500 dark:focus:ring-emerald-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
             />
-            <label htmlFor="kma_enabled" className="text-sm font-medium text-gray-700">
-              KMA aktiverad
+            <label htmlFor="kma_enabled" className="text-sm font-medium text-gray-700 dark:text-gray-300 cursor-pointer flex items-center gap-2">
+              <span className="text-emerald-600 dark:text-emerald-400 font-semibold">KMA</span>
+              <span className="text-xs text-gray-500 dark:text-gray-400">(Kostnads- & Miljöanalys)</span>
             </label>
           </div>
         </div>
@@ -202,20 +203,20 @@ export function QuoteForm({ quote, onSubmit, isLoading }: QuoteFormProps) {
       )}
 
       {/* Submit Button */}
-      <div className="flex items-center justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="flex items-center justify-end gap-3 pt-6 border-t-2 border-gray-200 dark:border-gray-700 mt-8">
         <Button
           type="button"
           variant="outline"
           onClick={() => router.back()}
           disabled={isLoading}
-          className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-2"
         >
           Avbryt
         </Button>
         <Button 
           type="submit" 
           disabled={isLoading}
-          className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50"
+          className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 text-white font-semibold px-6 py-2.5"
         >
           {isLoading ? 'Sparar...' : quote ? 'Uppdatera Offert' : 'Skapa Offert'}
         </Button>

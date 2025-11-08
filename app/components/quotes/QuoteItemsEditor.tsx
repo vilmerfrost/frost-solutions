@@ -152,8 +152,11 @@ export function QuoteItemsEditor({ quoteId }: QuoteItemsEditorProps) {
 
       {/* Material Picker */}
       {showMaterialPicker && (
-        <div className="mb-4 p-4 border-2 border-blue-300 dark:border-blue-600 bg-blue-50 dark:bg-blue-900/20 rounded-lg shadow-sm">
-          <MaterialPicker onSelect={handleMaterialSelect} />
+        <div className="mb-6">
+          <MaterialPicker 
+            onSelect={handleMaterialSelect}
+            onClose={() => setShowMaterialPicker(false)}
+          />
         </div>
       )}
 

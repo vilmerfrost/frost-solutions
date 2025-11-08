@@ -9,6 +9,7 @@
   "/api/projects/for-timeclock/route": "app/api/projects/for-timeclock/route.js",
   "/api/projects/hours/route": "app/api/projects/hours/route.js",
   "/api/projects/list/route": "app/api/projects/list/route.js",
+  "/api/quotes/[id]/items/route": "app/api/quotes/[id]/items/route.js",
   "/api/quotes/[id]/route": "app/api/quotes/[id]/route.js",
   "/api/quotes/route": "app/api/quotes/route.js",
   "/api/rbac/permissions/route": "app/api/rbac/permissions/route.js",
