@@ -6236,3 +6236,21 @@ It can also happen if the client has a browser extension installed which messes 
 [13:30:09.665] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
 [13:30:09.665] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
 [13:30:11.053] Server  LOG      ✓ Compiled in 91ms
+[13:30:31.896] Server  LOG      ✓ Compiled in 124ms
+[13:30:34.016] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:30:34.017] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[13:30:34.017] Browser LOG     ✅ Synced 0 updates from server
+[13:30:34.017] Browser LOG     ✅ Sync completed successfully
+[13:30:34.056] Server  LOG     [API] ✅ GET /api/quotes/95b27e3b-7427-4aa1-9fe6-831e566c9a96 - Request received {}
+[13:30:34.136] Server  LOG     [API] ✅ Tenant validated {}
+[13:30:34.137] Server  LOG     [API] 🔍 Fetching quote from database... {}
+[13:30:34.204] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[13:30:34.210] Server  LOG     [API] ✅ Quote fetched successfully {}
+[13:30:34.211] Server  LOG     [API] 🔍 Fetching related data... {}
+[13:30:34.317] Server  LOG     [API] ✅ Items fetched: 0
+[13:30:34.317] Server  LOG     [API] ✅ Customer fetched: Stefan Frost
+[13:30:34.317] Server  LOG     [API] ✅ Project fetched: Snöskottning
+[13:30:34.318] Server  LOG     [API] ✅ GET /api/quotes/95b27e3b-7427-4aa1-9fe6-831e566c9a96 completed successfully {}
+[13:30:34.599] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:30:35.952] Server  WARN    Error: Route "/api/quotes/[id]/items" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
+[13:30:36.018] Server  LOG      ✓ Compiled in 141ms

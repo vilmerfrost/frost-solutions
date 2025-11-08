@@ -148,8 +148,8 @@ export default function SidebarClient() {
                   aria-current={isActive ? 'page' : undefined}
                   aria-label={`Gå till ${item.name}`}
                 >
-                  <span className="text-xl flex-shrink-0" aria-hidden="true">{item.icon}</span>
-                  <span className="truncate">{item.name}</span>
+                  <span className="text-xl flex-shrink-0" aria-hidden="true" suppressHydrationWarning>{item.icon}</span>
+                  <span className="truncate" suppressHydrationWarning>{item.name}</span>
                 </button>
               )
             })}
@@ -190,8 +190,8 @@ export default function SidebarClient() {
                       aria-current={isActive ? 'page' : undefined}
                       aria-label={`Gå till ${item.name}`}
                     >
-                      <span className="text-xl flex-shrink-0" aria-hidden="true">{item.icon}</span>
-                      <span className="truncate">{item.name}</span>
+                      <span className="text-xl flex-shrink-0" aria-hidden="true" suppressHydrationWarning>{item.icon}</span>
+                      <span className="truncate" suppressHydrationWarning>{item.name}</span>
                     </button>
                   )
                 })}
