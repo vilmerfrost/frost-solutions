@@ -5,6 +5,7 @@ import supabase from '@/utils/supabase/supabaseClient'
 
 type TenantContextType = {
   tenantId: string | null
+  isLoading: boolean
   setTenantId: (id: string | null) => void
 }
 
@@ -12,9 +13,11 @@ const TenantContext = createContext<TenantContextType | undefined>(undefined)
 
 export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
   const [tenantId, setTenantId] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
     async function fetchTenantId() {
+      setIsLoading(true)
       try {
         // PRIORITY 1: Use centralized tenant API (single source of truth)
         const tenantRes = await fetch('/api/tenant/get-tenant', { cache: 'no-store' })
@@ -23,6 +26,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
           if (tenantData.tenantId) {
             console.log('✅ TenantContext: Found tenant via centralized API:', tenantData.tenantId, 'source:', tenantData.source)
             setTenantId(tenantData.tenantId)
+            setIsLoading(false)
             return
           }
         }
@@ -34,6 +38,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
           if (employeeData.tenantId) {
             console.log('✅ TenantContext: Found tenant via employee API:', employeeData.tenantId)
             setTenantId(employeeData.tenantId)
+            setIsLoading(false)
             return
           }
         }
@@ -49,6 +54,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
             if (claimTenant) {
               console.log('✅ TenantContext: Found tenant via JWT:', claimTenant)
               setTenantId(claimTenant)
+              setIsLoading(false)
               return
             }
           }
@@ -102,6 +108,8 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
         }
       } catch (err) {
         console.error('Error fetching tenant ID:', err)
+      } finally {
+        setIsLoading(false)
       }
     }
 
@@ -118,7 +126,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
   }, [])
 
   return (
-    <TenantContext.Provider value={{ tenantId, setTenantId }}>
+    <TenantContext.Provider value={{ tenantId, isLoading, setTenantId }}>
       {children}
     </TenantContext.Provider>
   )

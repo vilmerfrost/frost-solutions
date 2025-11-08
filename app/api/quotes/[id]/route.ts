@@ -29,28 +29,73 @@ function createErrorResponse(message: string, status: number, details?: any) {
   )
 }
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
-  const quoteId = params.id
-  const startTime = Date.now()
+// Validate UUID format
+function isValidUUID(uuid: string): boolean {
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  return uuidRegex.test(uuid)
+}
 
+export async function GET(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> | { id: string } }
+) {
+  const startTime = Date.now()
+  
   try {
-    // Step 1: Tenant validation
-    const tenantId = await getTenantId()
-    if (!tenantId) {
-      logError('GET /api/quotes/[id]', 'No tenant ID found', { quoteId })
-      return createErrorResponse('Unauthorized: No tenant found', 401)
+    // VIKTIGT: Next.js 16 kan ha async params
+    const params = await Promise.resolve(context.params)
+    const quoteId = params.id
+
+    // Step 0: Validate params
+    if (!quoteId) {
+      logError('GET /api/quotes/[id]', 'Missing quote ID in params', { 
+        rawParams: params,
+        url: req.url 
+      })
+      return createErrorResponse('Missing quote ID', 400, { params })
     }
 
-    console.log(`[API] GET /api/quotes/${quoteId}`, {
-      tenantId,
+    if (!isValidUUID(quoteId)) {
+      logError('GET /api/quotes/[id]', 'Invalid UUID format', { quoteId })
+      return createErrorResponse('Invalid quote ID format', 400, { quoteId })
+    }
+
+    console.log(`[API] ✅ GET /api/quotes/${quoteId} - Request received`, {
+      url: req.url,
       timestamp: new Date().toISOString(),
+    })
+
+    // Step 1: Tenant validation med detaljerad logging
+    const tenantId = await getTenantId()
+    
+    if (!tenantId) {
+      logError('GET /api/quotes/[id]', 'No tenant ID found - User may not be authenticated', { 
+        quoteId,
+        headers: {
+          cookie: req.headers.get('cookie') ? 'present' : 'missing',
+          authorization: req.headers.get('authorization') ? 'present' : 'missing',
+        }
+      })
+      return createErrorResponse(
+        'Unauthorized: No tenant found. Please log in again.',
+        401,
+        { hint: 'Tenant ID could not be resolved from JWT, cookie, or user_roles' }
+      )
+    }
+
+    console.log(`[API] ✅ Tenant validated`, {
+      quoteId,
+      tenantId,
+      tenantIdLength: tenantId.length,
     })
 
     const admin = createAdminClient()
 
-    // Step 2: Fetch quote with error handling
+    // Step 2: Fetch quote with detailed error handling
     let quote
     try {
+      console.log(`[API] 🔍 Fetching quote from database...`, { quoteId, tenantId })
+
       const { data: quoteData, error: quoteError } = await admin
         .from('quotes')
         .select('*')
@@ -59,18 +104,62 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
         .maybeSingle()
 
       if (quoteError) {
-        throw new Error(`Failed to fetch quote: ${quoteError.message}`)
+        logError('GET /api/quotes/[id] - Database query error', quoteError, { 
+          quoteId, 
+          tenantId,
+          errorCode: quoteError.code,
+          errorDetails: quoteError.details,
+        })
+        throw new Error(`Database error: ${quoteError.message}`)
       }
 
       if (!quoteData) {
-        logError('GET /api/quotes/[id]', 'Quote not found', { quoteId, tenantId })
-        return createErrorResponse('Quote not found', 404, { quoteId })
+        // Log detailed info för debugging
+        console.warn(`[API] ⚠️ Quote not found`, { 
+          quoteId, 
+          tenantId,
+          hint: 'Quote may not exist, or belongs to different tenant'
+        })
+
+        // Försök hitta quote utan tenant filter för debugging (endast i dev)
+        if (process.env.NODE_ENV === 'development') {
+          const { data: anyQuote } = await admin
+            .from('quotes')
+            .select('id, tenant_id')
+            .eq('id', quoteId)
+            .maybeSingle()
+
+          if (anyQuote) {
+            console.warn(`[API] 🔍 Quote exists but tenant mismatch!`, {
+              quoteId,
+              quoteTenantId: anyQuote.tenant_id,
+              userTenantId: tenantId,
+            })
+          } else {
+            console.warn(`[API] 🔍 Quote does not exist in database at all`, { quoteId })
+          }
+        }
+
+        logError('GET /api/quotes/[id]', 'Quote not found or unauthorized', { 
+          quoteId, 
+          tenantId 
+        })
+        return createErrorResponse(
+          'Quote not found or you do not have access to it',
+          404,
+          { quoteId, tenantId: process.env.NODE_ENV === 'development' ? tenantId : undefined }
+        )
       }
 
       quote = quoteData
-      console.log(`[API] Quote fetched successfully`, { quoteId, status: quote.status })
+      console.log(`[API] ✅ Quote fetched successfully`, { 
+        quoteId, 
+        status: quote.status,
+        customerIdPresent: !!quote.customer_id,
+        projectIdPresent: !!quote.project_id,
+      })
     } catch (error: any) {
-      logError('GET /api/quotes/[id] - Quote fetch', error, { quoteId, tenantId })
+      logError('GET /api/quotes/[id] - Quote fetch exception', error, { quoteId, tenantId })
       return createErrorResponse(
         'Failed to fetch quote',
         500,
@@ -79,6 +168,13 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
     }
 
     // Step 3: Fetch related data in parallel with individual error handling
+    console.log(`[API] 🔍 Fetching related data...`, { 
+      quoteId,
+      willFetchItems: true,
+      willFetchCustomer: !!quote.customer_id,
+      willFetchProject: !!quote.project_id,
+    })
+
     const [itemsResult, customerResult, projectResult] = await Promise.allSettled([
       // Items
       admin
@@ -120,10 +216,10 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
           quoteId,
           tenantId,
         })
-        // Don't fail the entire request, just log and continue with empty items
-        console.warn(`[API] Failed to fetch items for quote ${quoteId}, continuing with empty array`)
+        console.warn(`[API] ⚠️ Failed to fetch items, continuing with empty array`)
       } else {
         items = itemsResult.value.data || []
+        console.log(`[API] ✅ Items fetched: ${items.length}`)
       }
     } else {
       logError('GET /api/quotes/[id] - Items fetch rejected', itemsResult.reason, {
@@ -140,9 +236,10 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
           quoteId,
           customerId: quote.customer_id,
         })
-        // Non-critical, continue without customer data
+        console.warn(`[API] ⚠️ Failed to fetch customer data`)
       } else {
         customer = customerResult.value.data
+        console.log(`[API] ✅ Customer fetched: ${customer?.name || 'N/A'}`)
       }
     } else {
       logError('GET /api/quotes/[id] - Customer fetch rejected', customerResult.reason, {
@@ -159,9 +256,10 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
           quoteId,
           projectId: quote.project_id,
         })
-        // Non-critical, continue without project data
+        console.warn(`[API] ⚠️ Failed to fetch project data`)
       } else {
         project = projectResult.value.data
+        console.log(`[API] ✅ Project fetched: ${project?.name || 'N/A'}`)
       }
     } else {
       logError('GET /api/quotes/[id] - Project fetch rejected', projectResult.reason, {
@@ -179,24 +277,24 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
     }
 
     const duration = Date.now() - startTime
-    console.log(`[API] GET /api/quotes/${quoteId} completed`, {
+    console.log(`[API] ✅ GET /api/quotes/${quoteId} completed successfully`, {
       duration: `${duration}ms`,
       itemsCount: items.length,
       hasCustomer: !!customer,
       hasProject: !!project,
+      responseSize: JSON.stringify(response).length,
     })
 
     return NextResponse.json({ data: response })
   } catch (error: any) {
-    // Catch-all for unexpected errors
     const duration = Date.now() - startTime
     logError('GET /api/quotes/[id] - Unexpected error', error, {
-      quoteId: params.id,
       duration: `${duration}ms`,
+      errorType: error?.constructor?.name,
     })
 
     return createErrorResponse(
-      'An unexpected error occurred',
+      'An unexpected error occurred while fetching the quote',
       500,
       {
         message: error?.message,

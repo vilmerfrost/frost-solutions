@@ -36,63 +36,181 @@ export class QuotesAPI {
 
   // Get single quote
   static async get(id: string): Promise<Quote> {
-    const res = await fetch(`/api/quotes/${id}`)
-    if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}))
-      throw new Error(extractErrorMessage(errorData.error || 'Failed to fetch quote'))
+    console.log('[QuotesAPI.get] Starting request', { quoteId: id })
+
+    if (!id) {
+      const error = new Error('Quote ID is required')
+      console.error('[QuotesAPI.get] ❌ Invalid params', { id })
+      throw error
     }
 
-    const result: ApiResponse<Quote> = await res.json()
-    if (!result.data) throw new Error('No quote data returned')
-    return result.data
+    try {
+      const url = `/api/quotes/${id}`
+      console.log('[QuotesAPI.get] Fetching:', url)
+
+      const res = await fetch(url, {
+        // Säkerställ att cookies skickas med
+        credentials: 'include',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+
+      console.log('[QuotesAPI.get] Response received', { 
+        status: res.status,
+        statusText: res.statusText,
+        ok: res.ok,
+      })
+
+      if (!res.ok) {
+        let errorData: any = { error: `HTTP ${res.status}: ${res.statusText}` }
+        
+        try {
+          errorData = await res.json()
+        } catch (parseError) {
+          console.error('[QuotesAPI.get] Failed to parse error response', parseError)
+        }
+
+        console.error('[QuotesAPI.get] ❌ Request failed', {
+          quoteId: id,
+          status: res.status,
+          statusText: res.statusText,
+          error: errorData.error,
+          details: errorData.details,
+          timestamp: errorData.timestamp,
+        })
+
+        // Ge användarvänliga felmeddelanden baserat på status
+        if (res.status === 401) {
+          throw new Error('Du är inte inloggad eller din session har gått ut. Vänligen logga in igen.')
+        } else if (res.status === 404) {
+          throw new Error('Offerten hittades inte eller du har inte tillgång till den.')
+        } else if (res.status === 403) {
+          throw new Error('Du har inte behörighet att visa denna offert.')
+        } else {
+          throw new Error(extractErrorMessage(errorData.error || `Kunde inte hämta offert (${res.status})`))
+        }
+      }
+
+      const result: ApiResponse<Quote> = await res.json()
+
+      if (!result.data) {
+        const error = new Error('No quote data returned from API')
+        console.error('[QuotesAPI.get] ❌ Invalid response', { 
+          quoteId: id,
+          result 
+        })
+        throw error
+      }
+
+      console.log('[QuotesAPI.get] ✅ Success', {
+        quoteId: id,
+        quoteNumber: result.data.quote_number,
+        status: result.data.status,
+        itemsCount: result.data.items?.length || 0,
+      })
+
+      return result.data
+    } catch (error: any) {
+      console.error('[QuotesAPI.get] ❌ Exception', {
+        quoteId: id,
+        error: error.message,
+        errorType: error.constructor?.name,
+        stack: error.stack?.split('\n')[0], // Första raden av stack trace
+      })
+      throw error
+    }
   }
 
   // Create quote
   static async create(data: Partial<Quote>): Promise<Quote> {
+    console.log('[QuotesAPI.create] Starting request', { data })
+
     const res = await fetch('/api/quotes', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      credentials: 'include',
+      body: JSON.stringify(data),
     })
 
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}))
+      const errorData = await res.json().catch(() => ({ 
+        error: `HTTP ${res.status}: ${res.statusText}` 
+      }))
+      console.error('[QuotesAPI.create] ❌ Failed', {
+        status: res.status,
+        error: errorData.error,
+      })
       throw new Error(extractErrorMessage(errorData.error || 'Failed to create quote'))
     }
 
     const result: ApiResponse<Quote> = await res.json()
     if (!result.data) throw new Error('No quote data returned')
+    
+    console.log('[QuotesAPI.create] ✅ Success', { 
+      quoteId: result.data.id,
+      quoteNumber: result.data.quote_number,
+    })
+    
     return result.data
   }
 
   // Update quote
   static async update(id: string, data: Partial<Quote>): Promise<Quote> {
+    console.log('[QuotesAPI.update] Starting request', { quoteId: id, data })
+
     const res = await fetch(`/api/quotes/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
+      credentials: 'include',
+      body: JSON.stringify(data),
     })
 
     if (!res.ok) {
-      const errorData = await res.json().catch(() => ({}))
+      const errorData = await res.json().catch(() => ({ 
+        error: `HTTP ${res.status}: ${res.statusText}` 
+      }))
+      console.error('[QuotesAPI.update] ❌ Failed', {
+        quoteId: id,
+        status: res.status,
+        error: errorData.error,
+      })
       throw new Error(extractErrorMessage(errorData.error || 'Failed to update quote'))
     }
 
     const result: ApiResponse<Quote> = await res.json()
     if (!result.data) throw new Error('No quote data returned')
+    
+    console.log('[QuotesAPI.update] ✅ Success', { 
+      quoteId: id,
+      quoteNumber: result.data.quote_number,
+    })
+    
     return result.data
   }
 
   // Delete quote
   static async delete(id: string): Promise<void> {
+    console.log('[QuotesAPI.delete] Starting request', { quoteId: id })
+
     const res = await fetch(`/api/quotes/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      credentials: 'include',
     })
 
     if (!res.ok && res.status !== 204) {
-      const errorData = await res.json().catch(() => ({}))
+      const errorData = await res.json().catch(() => ({ 
+        error: `HTTP ${res.status}: ${res.statusText}` 
+      }))
+      console.error('[QuotesAPI.delete] ❌ Failed', {
+        quoteId: id,
+        status: res.status,
+        error: errorData.error,
+      })
       throw new Error(extractErrorMessage(errorData.error || 'Failed to delete quote'))
     }
+
+    console.log('[QuotesAPI.delete] ✅ Success', { quoteId: id })
   }
 
   // Get quote items
