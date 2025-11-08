@@ -22,6 +22,8 @@ const navItems: NavItem[] = [
   { name: 'Arkiv', href: '/projects/archive', icon: '📦', gradient: 'from-gray-500 to-gray-600' },
   { name: 'Kunder', href: '/clients', icon: '👔', gradient: 'from-cyan-500 to-teal-600' },
   { name: 'Offerter', href: '/quotes', icon: '📄', gradient: 'from-emerald-500 to-teal-600' },
+  { name: 'Materialdatabas', href: '/materials', icon: '📦', gradient: 'from-teal-500 to-green-600' },
+  { name: 'KMA', href: '/kma', icon: '🌱', gradient: 'from-lime-500 to-green-600' },
   { name: 'Fakturor', href: '/invoices', icon: '🧾', gradient: 'from-teal-500 to-green-600' },
   { name: 'Rapporter', href: '/reports', icon: '📈', gradient: 'from-green-500 to-emerald-600' },
   { name: 'Kalender', href: '/calendar', icon: '📅', gradient: 'from-purple-500 to-pink-600' },
