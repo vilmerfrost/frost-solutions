@@ -124,32 +124,30 @@ export function QuoteItemsEditor({ quoteId }: QuoteItemsEditorProps) {
         <h2 className="text-xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent">
           Artiklar
         </h2>
-        {hasItems && (
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setShowMaterialPicker(!showMaterialPicker)}
-              className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-            >
-              <Package size={16} className="mr-2" />
-              Materialdatabas
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => {
-                setShowAddForm(!showAddForm)
-                resetForm()
-              }}
-              className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-200"
-            >
-              <Plus size={16} className="mr-2" />
-              Lägg till artikel
-            </Button>
-          </div>
-        )}
+        <div className="flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setShowMaterialPicker(!showMaterialPicker)}
+            className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          >
+            <Package size={16} className="mr-2" />
+            Materialdatabas
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            onClick={() => {
+              setShowAddForm(!showAddForm)
+              resetForm()
+            }}
+            className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-lg hover:shadow-xl transition-all duration-200"
+          >
+            <Plus size={16} className="mr-2" />
+            Lägg till artikel
+          </Button>
+        </div>
       </div>
 
       {/* Material Picker */}

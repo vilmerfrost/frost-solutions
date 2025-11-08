@@ -21,7 +21,7 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-xl border-2 border-emerald-200 dark:border-emerald-800 p-6 backdrop-blur-sm">
+      <div className="flex items-center justify-between bg-gradient-to-br from-emerald-50 via-white to-teal-50 dark:from-emerald-900/30 dark:via-gray-800 dark:to-teal-900/30 rounded-xl shadow-xl border-2 border-emerald-300 dark:border-emerald-700 p-6 backdrop-blur-sm">
         <div className="flex items-center gap-4">
           <Button variant="ghost" onClick={() => router.back()} className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
             <ArrowLeft size={16} className="mr-2" />
@@ -49,7 +49,7 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
       <QuoteActions quote={quote} />
 
       {/* Basic Info */}
-      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-blue-50 via-white to-indigo-50 dark:from-blue-900/30 dark:via-gray-800 dark:to-indigo-900/30 rounded-xl shadow-xl border-2 border-blue-200 dark:border-blue-700 p-6 backdrop-blur-sm">
         <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent">
           Information
         </h2>
@@ -96,7 +96,7 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
       <QuoteItemsList quoteId={quote.id} />
 
       {/* Totals */}
-      <div className="bg-gradient-to-br from-white to-gray-50 dark:from-gray-800 dark:to-gray-900 rounded-xl shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 backdrop-blur-sm">
+      <div className="bg-gradient-to-br from-purple-50 via-white to-pink-50 dark:from-purple-900/30 dark:via-gray-800 dark:to-pink-900/30 rounded-xl shadow-xl border-2 border-purple-200 dark:border-purple-700 p-6 backdrop-blur-sm">
         <h2 className="text-xl font-semibold mb-4 bg-gradient-to-r from-gray-800 to-gray-600 dark:from-gray-200 dark:to-gray-400 bg-clip-text text-transparent">
           Summering
         </h2>
