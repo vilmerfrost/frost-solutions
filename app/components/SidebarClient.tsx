@@ -21,6 +21,7 @@ const navItems: NavItem[] = [
   { name: 'Projekt', href: '/projects', icon: '🏗️', gradient: 'from-blue-500 to-cyan-600' },
   { name: 'Arkiv', href: '/projects/archive', icon: '📦', gradient: 'from-gray-500 to-gray-600' },
   { name: 'Kunder', href: '/clients', icon: '👔', gradient: 'from-cyan-500 to-teal-600' },
+  { name: 'Offerter', href: '/quotes', icon: '📄', gradient: 'from-emerald-500 to-teal-600' },
   { name: 'Fakturor', href: '/invoices', icon: '🧾', gradient: 'from-teal-500 to-green-600' },
   { name: 'Rapporter', href: '/reports', icon: '📈', gradient: 'from-green-500 to-emerald-600' },
   { name: 'Kalender', href: '/calendar', icon: '📅', gradient: 'from-purple-500 to-pink-600' },
@@ -147,8 +148,8 @@ export default function SidebarClient() {
                   aria-current={isActive ? 'page' : undefined}
                   aria-label={`Gå till ${item.name}`}
                 >
-                  <span className="text-xl" aria-hidden="true">{item.icon}</span>
-                  <span>{item.name}</span>
+                  <span className="text-xl flex-shrink-0" aria-hidden="true" suppressHydrationWarning>{item.icon}</span>
+                  <span className="truncate" suppressHydrationWarning>{item.name}</span>
                 </button>
               )
             })}

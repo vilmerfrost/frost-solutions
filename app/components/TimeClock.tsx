@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { useQueryClient } from '@tanstack/react-query'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
+import { invalidateDashboardData } from '@/lib/queryInvalidation'
 import { calculateOBHours, calculateTotalAmount, OBTimeSplit } from '@/lib/obCalculation'
 import { roundOBTimeSplit } from '@/lib/timeRounding'
 import { checkTimeOverlap, formatDuplicateMessage } from '@/lib/duplicateCheck'
@@ -26,6 +28,7 @@ interface TimeClockProps {
 
 export default function TimeClock({ employeeId, projects, tenantId: propTenantId }: TimeClockProps) {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const { tenantId: contextTenantId } = useTenant()
   // Use prop tenantId if provided, otherwise fall back to context
   const tenantId = propTenantId || contextTenantId
@@ -45,6 +48,23 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
   const [nearestSite, setNearestSite] = useState<{ site: WorkSite; distance: number } | null>(null)
   const [gpsAutoCheckinEnabled, setGpsAutoCheckinEnabled] = useState<boolean>(false)
   const [eightHourReminderShown, setEightHourReminderShown] = useState<boolean>(false)
+  const [isOnline, setIsOnline] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      setIsOnline(true)
+      return
+    }
+    setIsOnline(navigator.onLine)
+    const handleOnline = () => setIsOnline(true)
+    const handleOffline = () => setIsOnline(false)
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [])
 
   // Load GPS auto-checkin setting from localStorage on mount
   useEffect(() => {
@@ -126,16 +146,20 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
 
       // Then verify with database
       try {
-        const { data } = await supabase
-          .from('time_entries')
-          .select('id, date, start_time, project_id')
-          .eq('tenant_id', tenantId)
-          .eq('employee_id', employeeId)
-          .is('end_time', null)
-          .order('date', { ascending: false })
-          .order('start_time', { ascending: false })
-          .limit(1)
-          .maybeSingle()
+        if (isOnline === false) {
+          console.warn('📴 Offline - skipping active time entry server check')
+        }
+
+        let data: any = null
+        if (isOnline !== false) {
+          const response = await fetch(`/api/time-entries/active?employeeId=${employeeId}`, { cache: 'no-store' })
+          if (response.ok) {
+            const result = await response.json()
+            data = result?.data ?? null
+          } else {
+            console.error('Error fetching active time entry via API:', await response.text())
+          }
+        }
 
         if (data) {
           // Validate that start_time exists - if not, skip this entry
@@ -230,7 +254,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
         clearInterval(elapsedInterval)
       }
     }
-  }, [tenantId, employeeId])
+  }, [tenantId, employeeId, isOnline])
   
   // Update elapsed time when pause state changes (separate effect to avoid race conditions)
   useEffect(() => {
@@ -296,7 +320,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
   // Fetch work sites
   useEffect(() => {
     async function fetchWorkSites() {
-      if (!tenantId) return
+      if (!tenantId || isOnline === false) return
 
       try {
         const { data, error } = await supabase
@@ -327,7 +351,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
     }
 
     fetchWorkSites()
-  }, [tenantId])
+  }, [tenantId, isOnline])
 
   // GPS tracking and auto-checkin - ONLY if manually enabled
   useEffect(() => {
@@ -341,7 +365,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
       return
     }
 
-    if (!employeeId || !tenantId || isCheckedIn || workSites.length === 0) {
+    if (isOnline === false || isOnline === null || !employeeId || !tenantId || isCheckedIn || workSites.length === 0) {
       // Stop tracking if checked in or no work sites
       if (gpsTrackingInterval !== null) {
         stopGPSTracking(gpsTrackingInterval)
@@ -409,7 +433,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
         setGpsTrackingInterval(null)
       }
     }
-  }, [employeeId, tenantId, isCheckedIn, workSites, projects.length, gpsAutoCheckinEnabled])
+  }, [employeeId, tenantId, isCheckedIn, workSites, projects.length, gpsAutoCheckinEnabled, isOnline])
 
   // Cleanup GPS tracking when component unmounts or when checked in
   useEffect(() => {
@@ -421,7 +445,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
 
   // 8-hour reminder notification
   useEffect(() => {
-    if (!isCheckedIn || !activeTimeEntry || eightHourReminderShown || isPaused) return
+    if (isOnline === false || !isCheckedIn || !activeTimeEntry || eightHourReminderShown || isPaused) return
 
     const checkEightHours = () => {
       if (!activeTimeEntry.start_time || !activeTimeEntry.date) return
@@ -448,7 +472,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
     checkEightHours() // Check immediately
 
     return () => clearInterval(interval)
-  }, [isCheckedIn, activeTimeEntry, eightHourReminderShown, isPaused, totalPauseTime])
+  }, [isOnline, isCheckedIn, activeTimeEntry, eightHourReminderShown, isPaused, totalPauseTime])
 
   // Reset 8-hour reminder when checking out
   useEffect(() => {
@@ -465,6 +489,11 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
 
     if (!selectedProject) {
       toast.error('Välj ett projekt först!')
+      return
+    }
+
+    if (isOnline === false) {
+      toast.error('Ingen internetanslutning. Försök igen när du är online.')
       return
     }
 
@@ -542,45 +571,50 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
       payload.break_minutes = 0
 
       // 🔍 DUBBLETT-KONTROLL: Kontrollera om det redan finns en aktiv stämpling eller överlappning
-      const { data: existingEntries, error: checkError } = await supabase
-        .from('time_entries')
-        .select('id, employee_id, project_id, date, start_time, end_time')
-        .eq('tenant_id', tenantId)
-        .eq('employee_id', employeeId)
-        .eq('date', date)
-        .is('end_time', null) // Kontrollera om det finns en aktiv stämpling (ingen end_time)
-
-      if (!checkError && existingEntries && existingEntries.length > 0) {
-        // Det finns redan en aktiv stämpling
-        const activeEntry = existingEntries.find((e: any) => !e.end_time)
-        if (activeEntry) {
-          toast.error('Du har redan en aktiv stämpling för detta datum. Stämpla ut först innan du stämplar in igen.')
-          setLoading(false)
-          return
+      let existingEntries: any[] = []
+      try {
+        const duplicateResponse = await fetch(`/api/time-entries/list?date=${date}`, {
+          cache: 'no-store',
+        })
+        if (duplicateResponse.ok) {
+          const duplicatePayload = await duplicateResponse.json()
+          existingEntries = (duplicatePayload.entries || []).filter(
+            (entry: any) => entry.employee_id === employeeId,
+          )
+        } else {
+          console.warn('❌ Failed to fetch existing entries for duplication check:', await duplicateResponse.text())
         }
+      } catch (duplicateErr) {
+        console.warn('⚠️ Duplication check failed:', duplicateErr)
+      }
 
-        // Kontrollera om det finns överlappande tider
-        const isDuplicate = checkTimeOverlap(
-          {
-            employee_id: employeeId,
-            project_id: selectedProject,
-            date,
-            start_time: time,
-            end_time: null, // Vi stämplar bara in, så inget end_time än
-            tenant_id: tenantId,
-          },
-          existingEntries
+      const activeEntry = existingEntries.find((entry) => !entry.end_time)
+      if (activeEntry) {
+        toast.error('Du har redan en aktiv stämpling för detta datum. Stämpla ut först innan du stämplar in igen.')
+        setLoading(false)
+        return
+      }
+
+      const isDuplicate = checkTimeOverlap(
+        {
+          employee_id: employeeId,
+          project_id: selectedProject,
+          date,
+          start_time: time,
+          end_time: null,
+          tenant_id: tenantId,
+        },
+        existingEntries,
+      )
+
+      if (isDuplicate) {
+        const confirmed = window.confirm(
+          `⚠️ Det finns redan en tidsrapport som överlappar med denna tid.\n\nVill du ändå stämpla in?`,
         )
 
-        if (isDuplicate) {
-          const confirmed = window.confirm(
-            `⚠️ Det finns redan en tidsrapport som överlappar med denna tid.\n\nVill du ändå stämpla in?`
-          )
-          
-          if (!confirmed) {
-            setLoading(false)
-            return
-          }
+        if (!confirmed) {
+          setLoading(false)
+          return
         }
       }
 
@@ -619,6 +653,16 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
         setSelectedProject(result.data.project_id || '')
         setEightHourReminderShown(false) // Reset 8-hour reminder on new check-in
         toast.success('Stämplat in! Kom ihåg att stämpla ut när du är klar.')
+        
+        // Invalidera dashboard queries för att synka data
+        await invalidateDashboardData('clock-in')
+        
+        // Dispatch event för andra komponenter
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('timeEntryUpdated', {
+            detail: { action: 'clock-in', entryId: result.data?.id }
+          }))
+        }
       }
     } catch (err: any) {
       console.error('Unexpected error:', err)
@@ -636,6 +680,11 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
 
     setLoading(true)
     try {
+      if (isOnline === false) {
+        toast.error('Ingen internetanslutning. Försök igen när du är online.')
+        setLoading(false)
+        return
+      }
       const now = new Date()
       const endTime = now.toTimeString().slice(0, 5) // HH:MM
       let startTime = activeTimeEntry.start_time
@@ -645,35 +694,42 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
       
       // If start_time is missing, try to fetch it from database
       if (!startTime && activeTimeEntry.id) {
-        console.warn('⚠️ start_time missing in state, fetching from database...')
-        const { data: freshEntry, error: fetchError } = await supabase
-          .from('time_entries')
-          .select('id, date, start_time, project_id')
-          .eq('id', activeTimeEntry.id)
-          .eq('tenant_id', tenantId)
-          .maybeSingle()
-        
-        if (fetchError || !freshEntry) {
-          toast.error('Kunde inte hämta stämplingsdata från databasen.')
+        console.warn('⚠️ start_time missing in state, fetching from API...')
+        try {
+          const detailResponse = await fetch(`/api/time-entries/get?id=${activeTimeEntry.id}`, {
+            cache: 'no-store',
+          })
+          if (!detailResponse.ok) {
+            const errorText = await detailResponse.text()
+            console.error('Failed to fetch entry details:', errorText)
+            toast.error('Kunde inte hämta stämplingsdata från servern.')
+            setLoading(false)
+            return
+          }
+
+          const detailPayload = await detailResponse.json()
+          const freshEntry = detailPayload.entry
+
+          if (!freshEntry?.start_time) {
+            toast.error('Starttid saknas i databasen. Kan inte stämpla ut. Kontakta administratören.')
+            setLoading(false)
+            return
+          }
+
+          startTime = freshEntry.start_time
+          date = freshEntry.date ? new Date(freshEntry.date) : date
+
+          setActiveTimeEntry((prev: any) => ({
+            ...prev,
+            start_time: startTime,
+            date,
+          }))
+        } catch (detailErr) {
+          console.error('Error fetching entry details:', detailErr)
+          toast.error('Kunde inte hämta stämplingsdata från servern.')
           setLoading(false)
           return
         }
-        
-        if (!freshEntry.start_time) {
-          toast.error('Starttid saknas i databasen. Kan inte stämpla ut. Kontakta administratören.')
-          setLoading(false)
-          return
-        }
-        
-        startTime = freshEntry.start_time
-        date = freshEntry.date instanceof Date ? freshEntry.date : new Date(freshEntry.date)
-        
-        // Update state with fresh data
-        setActiveTimeEntry((prev: any) => ({
-          ...prev,
-          start_time: startTime,
-          date: date
-        }))
       }
       
       // Validate that start_time exists
@@ -929,10 +985,16 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
           }
 
           // Delete the original entry and create separate ones
-          await supabase
-            .from('time_entries')
-            .delete()
-            .eq('id', activeTimeEntry.id)
+          const deleteResponse = await fetch(`/api/time-entries/delete?id=${activeTimeEntry.id}`, {
+            method: 'DELETE',
+          })
+
+          if (!deleteResponse.ok) {
+            console.error('Error deleting original entry:', await deleteResponse.text())
+            toast.error('Kunde inte uppdatera stämpling. Försök igen eller kontakta administratören.')
+            setLoading(false)
+            return
+          }
 
           // Create multiple entries via API route
           const createPromises = entriesToCreate.map(entry => 
@@ -961,6 +1023,16 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
           }
         } else {
           toast.success(`Stämplat ut! ${obSplit.total.toFixed(1)}h registrerat.`)
+        }
+
+        // Invalidera dashboard queries för att synka data
+        await invalidateDashboardData('clock-out')
+        
+        // Dispatch event för andra komponenter
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('timeEntryUpdated', {
+            detail: { action: 'clock-out', entryId: activeTimeEntry.id }
+          }))
         }
 
         setIsCheckedIn(false)
@@ -1117,6 +1189,12 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
           )}
         </div>
       </div>
+
+      {isOnline === false && (
+        <div className="mb-4 rounded-xl border border-yellow-300 bg-yellow-50 px-4 py-3 text-sm text-yellow-800 dark:border-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300">
+          Du är offline. Visar senast sparade tidsdata – stämpla in/ut när du är online igen.
+        </div>
+      )}
 
       {/* Show appropriate message based on state */}
       {!employeeId ? (

@@ -1,26 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { getTenantId } from '@/lib/serverTenant';
-import { createClient } from '@/utils/supabase/server';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+  _req: NextRequest,
+  { params }: { params: { id: string } }
 ) {
   try {
-    const { id: projectId } = await params;
-    const supabase = createClient();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, error: 'Unauthorized' },
-        { status: 401 }
-      );
-    }
+    const { id: projectId } = params;
 
     const tenantId = await getTenantId();
     if (!tenantId) {
@@ -30,7 +20,7 @@ export async function GET(
       );
     }
 
-    const admin = createAdminClient(8000, 'public');
+    const admin = createAdminClient();
 
     // Fetch project
     const { data: project, error: projectError } = await admin
@@ -58,16 +48,6 @@ export async function GET(
       console.error('❌ Time entries error:', timeEntriesError);
     }
 
-    console.log('📊 Project Analytics:', {
-      projectId,
-      timeEntriesCount: timeEntries?.length || 0,
-      sample: timeEntries?.slice(0, 3).map(te => ({
-        hours: te.hours_total,
-        date: te.date,
-        is_billed: te.is_billed,
-      })),
-    });
-
     const actualHours = (timeEntries || []).reduce(
       (sum, te) => {
         const hours = Number(te.hours_total ?? 0);
@@ -75,16 +55,19 @@ export async function GET(
       },
       0
     );
-    
-    console.log('📊 Project calculated hours:', {
-      projectId,
-      actualHours,
-      plannedHours,
-    });
     const rate = Number(project.base_rate_sek || 0);
-    const actualCost = actualHours * rate;
     const plannedHours = Number(project.budgeted_hours || 0);
+    const actualCost = actualHours * rate;
     const plannedValue = plannedHours * rate;
+
+    if (process.env.NODE_ENV !== 'production') {
+      console.info('📊 Project analytics', {
+        projectId,
+        plannedHours,
+        actualHours,
+        timeEntriesCount: timeEntries?.length ?? 0,
+      })
+    }
 
     // Calculate KPIs
     const spi = plannedHours > 0 ? actualHours / plannedHours : 0; // Schedule Performance Index

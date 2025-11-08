@@ -29,11 +29,12 @@ function makeTimeoutFetch(timeoutMs: number) {
  * Features:
  * - Hard timeout on all requests (default: 8 seconds)
  * - No auth refresh (server-side only)
- * - Schema support (app or public)
+ * - Schema support (app or public) - NOTE: Only 'public' is supported by Supabase
  * - Optimized for Next.js server routes
  * 
  * @param timeoutMs - Request timeout in milliseconds (default: 8000)
  * @param schema - Database schema to use ('public' or 'app', default: 'public')
+ *   NOTE: Supabase only supports 'public' schema. 'app' will be treated as 'public'
  * @returns Supabase client configured with service role
  * @throws Error if service role key or URL is missing
  */
@@ -48,8 +49,13 @@ export function createAdminClient(timeoutMs = 8000, schema: 'public' | 'app' = '
     )
   }
 
+  // Supabase only supports 'public' schema via REST API
+  // If 'app' is requested, we'll use 'public' but note that tables in 'app' schema
+  // need to be accessed via RPC functions or with explicit schema qualification
+  const effectiveSchema = 'public'
+
   return createClient(supabaseUrl, serviceKey, {
-    db: { schema }, // 👈 Schema support for app/public
+    db: { schema: effectiveSchema },
     global: {
       fetch: makeTimeoutFetch(timeoutMs),
     },

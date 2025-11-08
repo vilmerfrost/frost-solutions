@@ -1,6 +1,6 @@
 {
   "node": {
-    "40db401f59c81290451245587df3548fd72d7b5c90": {
+    "403bf0b0904c8c6eb75f93a4fb98336d23c46ea1ac": {
       "workers": {
         "app/projects/page": {
           "moduleId": "[project]/frost-demo/.next-internal/server/app/projects/page/actions.js { ACTIONS_MODULE0 => \"[project]/frost-demo/app/projects/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
@@ -14,23 +14,8 @@
       },
       "filename": "frost-demo/app/projects/actions.ts",
       "exportedName": "createProject"
-    },
-    "40a57379e6bcc39c76e395d7c32d0a8fc2d41a6a19": {
-      "workers": {
-        "app/invoices/[id]/page": {
-          "moduleId": "[project]/frost-demo/.next-internal/server/app/invoices/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/frost-demo/app/invoices/[id]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false,
-          "exportedName": "sendInvoiceEmail",
-          "filename": "frost-demo/app/invoices/[id]/actions.ts"
-        }
-      },
-      "layer": {
-        "app/invoices/[id]/page": "action-browser"
-      },
-      "filename": "frost-demo/app/invoices/[id]/actions.ts",
-      "exportedName": "sendInvoiceEmail"
     }
   },
   "edge": {},
-  "encryptionKey": "8GlmbxUD9bR3tBQlsxTGcP8TJO8Nnxb7Gq3D23wxFGY="
+  "encryptionKey": "AsAM/KEsDY+g2DyQPeELn+OsRp8ka8qEFNKV8y2ElXg="
 }

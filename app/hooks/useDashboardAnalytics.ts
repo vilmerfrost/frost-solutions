@@ -1,7 +1,8 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTenant } from '@/context/TenantContext';
+import { useEffect } from 'react';
 
 interface DashboardAnalytics {
   summary: {
@@ -28,6 +29,21 @@ interface DashboardAnalytics {
 
 export function useDashboardAnalytics(period: 'week' | 'month' | 'year' = 'month') {
   const { tenantId } = useTenant();
+  const queryClient = useQueryClient();
+
+  // Listen for time entry updates
+  useEffect(() => {
+    const handleUpdate = () => {
+      console.log('🔔 [Analytics Hook] Time entry updated, invalidating queries...');
+      queryClient.invalidateQueries({ queryKey: ['dashboard-analytics'] });
+    };
+
+    window.addEventListener('timeEntryUpdated', handleUpdate);
+
+    return () => {
+      window.removeEventListener('timeEntryUpdated', handleUpdate);
+    };
+  }, [queryClient]);
 
   return useQuery({
     queryKey: ['dashboard-analytics', tenantId, period],

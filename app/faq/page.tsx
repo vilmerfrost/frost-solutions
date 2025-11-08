@@ -108,6 +108,56 @@ const faqs: FAQItem[] = [
     answer: 'Systemet skapar automatiskt fakturarader från alla ofakturerade tidsrapporter för projektet. Varje tidsrapport blir en fakturarad med datum, timmar och belopp. Tidsrapporterna markeras också automatiskt som fakturerade.'
   },
   {
+    category: 'Offerter',
+    question: 'Hur skapar jag en offert?',
+    answer: 'Gå till "Offerter" → "Ny Offert". Fyll i titel, välj kund, ange giltig till-datum och valuta. Du kan också aktivera KMA (Kostnads- & Miljöanalys) om det behövs. Efter att offerten är skapad kan du lägga till artiklar.'
+  },
+  {
+    category: 'Offerter',
+    question: 'Hur lägger jag till artiklar i en offert?',
+    answer: 'När du redigerar en offert, scrolla ner till "Artiklar"-sektionen. Klicka på "Lägg till artikel" och fyll i namn, antal, enhet, pris/enhet, rabatt % och moms %. Du kan också välja typ (Material, Arbete eller Övrigt). Totals beräknas automatiskt.'
+  },
+  {
+    category: 'Offerter',
+    question: 'Hur beräknas totals i en offert?',
+    answer: 'Systemet beräknar automatiskt: Subtotal (summa av alla artiklar), Rabatt (summa av alla rabatter), Moms (beräknas på netto-belopp efter rabatt), och Total (subtotal - rabatt + moms). Allt uppdateras automatiskt när du ändrar artiklar.'
+  },
+  {
+    category: 'Offerter',
+    question: 'Hur skickar jag en offert till kunden?',
+    answer: 'Öppna offerten och klicka på "Skicka via Email". Ange kundens email-adress. Systemet genererar automatiskt en PDF och skickar den som bilaga. Offertens status ändras till "Skickad" och antal skickade emails spåras.'
+  },
+  {
+    category: 'Offerter',
+    question: 'Kan jag ladda ner offerten som PDF?',
+    answer: 'Ja! Öppna offerten och klicka på "Ladda ner PDF". PDF:en öppnas i en ny flik och kan sparas eller skickas manuellt.'
+  },
+  {
+    category: 'Offerter',
+    question: 'Hur godkänner jag en offert?',
+    answer: 'Om offerten har status "Väntar godkännande", klicka på "Godkänn"-knappen. Du kan lägga till en kommentar. Offertens status ändras till "Godkänd" och händelsen loggas i historiken.'
+  },
+  {
+    category: 'Offerter',
+    question: 'Hur konverterar jag en offert till ett projekt?',
+    answer: 'När en offert har status "Accepterad" eller "Godkänd", klicka på "Konvertera till Projekt". Systemet skapar automatiskt ett nytt projekt med samma namn och kund som offerten. Offerten arkiveras och du omdirigeras till det nya projektet.'
+  },
+  {
+    category: 'Offerter',
+    question: 'Kan jag duplicera en offert?',
+    answer: 'Ja! Öppna offerten och klicka på "Duplicera". Systemet skapar en ny offert med samma artiklar men nytt offertnummer. Den nya offerten har status "Utkast" och kan redigeras fritt.'
+  },
+  {
+    category: 'Offerter',
+    question: 'Vad är KMA (Kostnads- & Miljöanalys)?',
+    answer: 'KMA är en funktion för att spåra kostnads- och miljöanalys i offerter. Du kan aktivera KMA när du skapar eller redigerar en offert. Detta gör att du kan lägga till KMA-referens, typ och omfattning.'
+  },
+  {
+    category: 'Offerter',
+    question: 'Hur filtrerar jag offerter?',
+    answer: 'På offerter-sidan kan du filtrera på status (Utkast, Skickad, Accepterad, etc.), kund eller söka efter titel eller offertnummer. Du kan också kombinera flera filter.'
+  },
+  {
     category: 'Stämpelklocka',
     question: 'Kan jag pausa min stämpling?',
     answer: 'Ja! Klicka på "Pausa" när du tar en paus. Tiden räknas inte under pausen. Klicka på "Återuppta" när du fortsätter arbeta. Total paus-tid visas i stämpelklockan.'

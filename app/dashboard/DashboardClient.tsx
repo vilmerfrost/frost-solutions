@@ -8,7 +8,7 @@ import Sidebar from '@/components/Sidebar'
 import TimeClock from '@/components/TimeClock'
 import NotificationCenter from '@/components/NotificationCenter'
 import DidYouKnow from '@/components/DidYouKnow'
-import { WeeklySchedules } from '@/components/dashboard/WeeklySchedules'
+import { WeeklySchedules } from '@/components/dashboard/WeeklySchedulesComponent'
 
 interface ProjectType {
   id: string
@@ -227,71 +227,52 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
 
   // Separate function to fetch and update stats (can be called independently)
   const fetchDashboardStats = async (tenantIdParam: string) => {
+    const cacheKey = `dashboard-stats:${tenantIdParam}`
     try {
-      const oneWeekAgo = new Date()
-      oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
-      const oneWeekAgoStr = oneWeekAgo.toISOString().split('T')[0]
-      
-      // Get current user's employee ID and role
-      const { data: { user } } = await supabase.auth.getUser()
-      let employeeIdForHours: string | null = null
-      let isAdminForHours = false
-      
-      if (user) {
-        const { data: empData } = await supabase
-          .from('employees')
-          .select('id, role')
-          .eq('auth_user_id', user.id)
-          .eq('tenant_id', tenantIdParam)
-          .maybeSingle()
-        
-        if (empData) {
-          isAdminForHours = empData.role === 'admin' || empData.role === 'Admin' || empData.role === 'ADMIN'
-          if (!isAdminForHours) {
-            employeeIdForHours = empData.id
+      if (typeof window !== 'undefined' && !navigator.onLine) {
+        const cached = window.localStorage.getItem(cacheKey)
+        if (cached) {
+          try {
+            const parsed = JSON.parse(cached)
+            setDashboardStats(parsed)
+            setStatsLoaded(true)
+            return
+          } catch (parseErr) {
+            console.warn('⚠️ Failed to parse cached dashboard stats', parseErr)
           }
         }
       }
-      
-      // Fetch time entries for last 7 days (same logic as server-side)
-      let weekRowsQuery = supabase
-        .from('time_entries')
-        .select('hours_total')
-        .gte('date', oneWeekAgoStr)
-        .eq('tenant_id', tenantIdParam)
-        .eq('is_billed', false)
-      
-      // If not admin, only get this employee's hours
-      if (!isAdminForHours && employeeIdForHours) {
-        weekRowsQuery = weekRowsQuery.eq('employee_id', employeeIdForHours)
+
+      const response = await fetch('/api/dashboard/stats', { cache: 'no-store' })
+      if (!response.ok) {
+        const text = await response.text()
+        console.error('Error fetching dashboard stats API:', response.status, text)
+        throw new Error(text || 'Failed to fetch dashboard stats')
       }
-      
-      const { data: weekRows } = await weekRowsQuery
-      const totalHours = (weekRows ?? []).reduce((sum: number, row: any) => sum + Number(row.hours_total ?? 0), 0)
-      
-      // Get active projects count - fetch fresh to ensure accuracy
-      const { data: projectRows } = await supabase
-        .from('projects')
-        .select('id, status')
-        .eq('tenant_id', tenantIdParam)
-      
-      const activeProjectsCount = (projectRows ?? []).filter((p: any) => {
-        const status = p.status || null
-        return status !== 'completed' && status !== 'archived'
-      }).length
-      
-      // Get draft invoices
-      const { data: invoiceRows } = await supabase
-        .from('invoices')
-        .select('id')
-        .eq('status', 'draft')
-        .eq('tenant_id', tenantIdParam)
-      
+
+      const result = await response.json()
+      if (!result.success || !result.data) {
+        throw new Error(result.error || 'Invalid dashboard stats response')
+      }
+
       setDashboardStats({
-        totalHours,
-        activeProjects: activeProjectsCount,
-        invoicesToSend: invoiceRows?.length ?? 0
+        totalHours: Number(result.data.totalHours ?? 0),
+        activeProjects: Number(result.data.activeProjects ?? 0),
+        invoicesToSend: Number(result.data.invoicesToSend ?? 0),
       })
+
+      if (typeof window !== 'undefined') {
+        try {
+          window.localStorage.setItem(cacheKey, JSON.stringify({
+            totalHours: Number(result.data.totalHours ?? 0),
+            activeProjects: Number(result.data.activeProjects ?? 0),
+            invoicesToSend: Number(result.data.invoicesToSend ?? 0),
+          }))
+        } catch (cacheErr) {
+          console.warn('⚠️ Failed to cache dashboard stats', cacheErr)
+        }
+      }
+
       setStatsLoaded(true)
     } catch (err) {
       console.error('Error fetching dashboard stats:', err)
@@ -313,7 +294,7 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
         const projectsRes = await fetch(`/api/projects/list?tenantId=${tenantId}`, { cache: 'no-store' })
         if (cancelled) return
         
-        if (projectsRes.ok) {
+          if (projectsRes.ok) {
           const projectsData = await projectsRes.json()
           if (cancelled) return
           
@@ -321,22 +302,44 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
             // Fetch hours for each project
             const projectIds = projectsData.projects.map((p: any) => p.id)
             if (projectIds.length > 0) {
-              const { data: hoursData } = await supabase
-                .from('time_entries')
-                .select('project_id, hours_total')
-                .in('project_id', projectIds)
-                .eq('tenant_id', tenantId)
-                .eq('is_billed', false)
-              
-              if (cancelled) return
-              
-              const projectHoursMap = new Map<string, number>()
-              ;(hoursData ?? []).forEach((entry: any) => {
-                const projId = entry.project_id
-                const hours = Number(entry.hours_total ?? 0)
-                const current = projectHoursMap.get(projId) ?? 0
-                projectHoursMap.set(projId, current + hours)
-              })
+                let projectHoursMap = new Map<string, number>()
+
+                if (typeof window !== 'undefined' && !navigator.onLine) {
+                  const cacheKey = `project-hours:${tenantId}`
+                  const cached = window.localStorage.getItem(cacheKey)
+                  if (cached) {
+                    try {
+                      const parsed = JSON.parse(cached) as Record<string, number>
+                      projectHoursMap = new Map(Object.entries(parsed))
+                    } catch (parseErr) {
+                      console.warn('⚠️ Failed to parse cached project hours', parseErr)
+                    }
+                  }
+                } else {
+                  const hoursRes = await fetch('/api/projects/hours', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ projectIds }),
+                    cache: 'no-store',
+                  })
+
+                  if (!cancelled && hoursRes.ok) {
+                    const hoursData = await hoursRes.json()
+                    const totals = hoursData?.totals || {}
+                    projectHoursMap = new Map(Object.entries(totals).map(([id, value]) => [id, Number(value ?? 0)]))
+
+                    if (typeof window !== 'undefined') {
+                      try {
+                        const cacheKey = `project-hours:${tenantId}`
+                        window.localStorage.setItem(cacheKey, JSON.stringify(totals))
+                      } catch (cacheErr) {
+                        console.warn('⚠️ Failed to cache project hours', cacheErr)
+                      }
+                    }
+                  } else if (!cancelled && !hoursRes.ok) {
+                    console.error('Error fetching project hours API:', await hoursRes.text())
+                  }
+                }
 
               // Map projects with hours
               const projectsWithHours: ProjectType[] = projectsData.projects

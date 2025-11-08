@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { createAdminClient } from '@/utils/supabase/admin'
 import { getTenantId } from '@/lib/serverTenant'
 
 /**
@@ -42,17 +42,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'No tenant ID found' }, { status: 400 })
     }
 
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (!supabaseUrl || !serviceKey) {
-      return NextResponse.json(
-        { error: 'Service role key not configured' },
-        { status: 500 }
-      )
-    }
-
-    const adminSupabase = createAdminClient(supabaseUrl, serviceKey)
+    const adminSupabase = createAdminClient()
 
     // Get employee to check tenant
     const { data: employeeData } = await adminSupabase

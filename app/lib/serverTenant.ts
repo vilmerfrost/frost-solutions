@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
+import { createAdminClient } from '@/utils/supabase/admin'
 
 /**
  * Unified tenant resolution for server-side code.
@@ -30,6 +31,23 @@ export async function getTenantId(): Promise<string | null> {
     const cookieTenant = c.get('tenant_id')?.value
     if (cookieTenant) {
       return cookieTenant
+    }
+
+    // Priority 3: fall back to user_roles via service-role client
+    try {
+      const admin = createAdminClient()
+      const { data: roleData } = await admin
+        .from('user_roles')
+        .select('tenant_id')
+        .eq('user_id', user.id)
+        .limit(1)
+        .maybeSingle()
+
+      if (roleData?.tenant_id) {
+        return roleData.tenant_id
+      }
+    } catch (roleError) {
+      console.error('getTenantId: failed to resolve tenant via user_roles', roleError)
     }
 
     return null

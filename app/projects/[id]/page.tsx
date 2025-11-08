@@ -176,53 +176,8 @@ export default function ProjectDetailPage() {
           } else {
             const errorText = await hoursResponse.text()
             console.warn('❌ Failed to fetch project hours from API:', errorText)
-            // Fallback to direct query - filter by employee if not admin
-            const { data: { user } } = await supabase.auth.getUser()
-            let employeeIdForFilter: string | null = null
-            let isAdminForFilter = false
-            
-            if (user) {
-              const { data: empData } = await supabase
-                .from('employees')
-                .select('id, role')
-                .eq('auth_user_id', user.id)
-                .eq('tenant_id', tenantId)
-                .maybeSingle()
-              
-              if (empData) {
-                isAdminForFilter = empData.role === 'admin' || empData.role === 'Admin' || empData.role === 'ADMIN'
-                if (!isAdminForFilter) {
-                  employeeIdForFilter = empData.id
-                }
-              }
-            }
-            
-            let entryQuery = supabase
-              .from('time_entries')
-              .select('hours_total, date, ob_type')
-              .eq('project_id', projectId)
-              .eq('is_billed', false)
-              .eq('tenant_id', tenantId)
-            
-            if (!isAdminForFilter && employeeIdForFilter) {
-              entryQuery = entryQuery.eq('employee_id', employeeIdForFilter)
-            }
-            
-            const { data: entryRows, error: entriesErr } = await entryQuery
-              .order('date', { ascending: false })
-              .limit(50)
-
-            if (entriesErr) {
-              console.warn('Failed to fetch time entries', entriesErr)
-              setHours(0)
-              setTimeEntries([])
-            } else {
-              const totalHours = (entryRows ?? []).reduce((sum: number, row: any) => {
-                return sum + Number(row?.hours_total ?? 0)
-              }, 0)
-              setHours(totalHours)
-              setTimeEntries(entryRows || [])
-            }
+            setHours(0)
+            setTimeEntries([])
           }
         } catch (hoursErr) {
           console.warn('Error fetching project hours:', hoursErr)

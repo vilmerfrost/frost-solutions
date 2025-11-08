@@ -15,10 +15,11 @@ import { QueryClient } from '@tanstack/react-query'
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: Infinity, // Offline-first: data never becomes stale
-      gcTime: 1000 * 60 * 60 * 24, // 24 hours
-      refetchOnWindowFocus: false,
-      networkMode: 'offline-first', // Read from cache first
+      staleTime: Infinity,
+      gcTime: 1000 * 60 * 60 * 24,
+      refetchOnWindowFocus: true,
+      refetchOnReconnect: true,
+      networkMode: 'always',
       retry: (failureCount, error: any) => {
         // Don't retry if offline
         if (typeof navigator !== 'undefined' && !navigator.onLine) {
@@ -33,7 +34,7 @@ export const queryClient = new QueryClient({
       }
     },
     mutations: {
-      networkMode: 'offline-first',
+      networkMode: 'always',
       retry: 1,
       retryDelay: (attemptIndex) => {
         return Math.min(1000 * 2 ** attemptIndex, 30000);

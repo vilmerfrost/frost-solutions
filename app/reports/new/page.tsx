@@ -1,7 +1,6 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
-import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
@@ -14,10 +13,53 @@ import CommentBox from '@/components/CommentBox'
 import TimeClock from '@/components/TimeClock'
 import { checkTimeOverlap, formatDuplicateMessage } from '@/lib/duplicateCheck'
 import { useAdmin } from '@/hooks/useAdmin'
+import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { addToOfflineQueue, getPendingTimeEntries, syncPendingTimeEntries } from '@/lib/offline/timeEntriesQueue'
+import supabase from '@/utils/supabase/supabaseClient'
 
 export default function NewReportPage() {
   const router = useRouter()
   const { tenantId } = useTenant()
+  
+  // Catch any unhandled errors to prevent JSON display
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      // Prevent 503 errors from being displayed
+      if (
+        event.message?.includes('503') ||
+        event.message?.includes('Service Unavailable') ||
+        event.message?.includes('Offline och ingen cache') ||
+        event.error?.message?.includes('Offline och ingen cache') ||
+        event.filename?.includes('reports/new')
+      ) {
+        event.preventDefault()
+        console.warn('Caught offline/503 error, preventing display:', event.message)
+        setFetchError('offline')
+      }
+    }
+    
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      // Prevent unhandled promise rejections from crashing the page
+      if (
+        event.reason?.message?.includes('503') ||
+        event.reason?.message?.includes('Service Unavailable') ||
+        event.reason?.message?.includes('Failed to fetch') ||
+        event.reason?.message?.includes('network')
+      ) {
+        event.preventDefault()
+        console.warn('Caught unhandled rejection (likely offline):', event.reason)
+        setFetchError('offline')
+      }
+    }
+    
+    window.addEventListener('error', handleError)
+    window.addEventListener('unhandledrejection', handleUnhandledRejection)
+    
+    return () => {
+      window.removeEventListener('error', handleError)
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection)
+    }
+  }, [])
   const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10))
   const [start, setStart] = useState('07:00')
   const [end, setEnd] = useState('16:00')
@@ -33,38 +75,299 @@ export default function NewReportPage() {
   const [multiProjectMode, setMultiProjectMode] = useState(false)
   const [projectEntries, setProjectEntries] = useState<Array<{ projectId: string, hours: number }>>([{ projectId: '', hours: 0 }])
   const [breakMinutes, setBreakMinutes] = useState(0)
+  const [isOnline, setIsOnline] = useState<boolean | null>(null)
+  const [fetchError, setFetchError] = useState<string | null>(null)
+  const [isMounted, setIsMounted] = useState(false)
   const { isAdmin } = useAdmin()
+  
+  // Track pending offline entries
+  const [pendingCount, setPendingCount] = useState(0)
   
   // Kontrollera om typen kräver tidsfält
   const requiresTimeFields = !['vabb', 'sick', 'vacation', 'absence'].includes(type)
   
+  // Mark component as mounted to prevent hydration issues
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Update pending count
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const updatePendingCount = () => {
+      setPendingCount(getPendingTimeEntries().length)
+    }
+    updatePendingCount()
+    // Update every 2 seconds to catch changes
+    const interval = setInterval(updatePendingCount, 2000)
+    return () => clearInterval(interval)
+  }, [])
+
+  // Auto-sync pending time entries when coming online
+  useEffect(() => {
+    if (typeof window === 'undefined' || isOnline !== true || !tenantId) return
+
+    const handleOnline = async () => {
+      if (!tenantId) {
+        console.warn('⚠️ Cannot sync: tenantId is missing')
+        return
+      }
+
+      const pending = getPendingTimeEntries()
+      if (pending.length === 0) {
+        console.log('✅ No pending entries to sync')
+        setPendingCount(0)
+        return
+      }
+
+      console.log(`🔄 Syncing ${pending.length} pending time entries...`)
+      const result = await syncPendingTimeEntries(tenantId)
+      
+      console.log('📊 Sync result:', result)
+      
+      if (result.synced > 0) {
+        toast.success(`${result.synced} tidsrapporter synkade!`)
+      }
+      if (result.failed > 0) {
+        toast.error(`${result.failed} tidsrapporter kunde inte synkas. Försök igen senare.`)
+      }
+      
+      // Update pending count after sync
+      setPendingCount(getPendingTimeEntries().length)
+    }
+
+    // Sync immediately if online and we have pending entries
+    if (isOnline === true && tenantId) {
+      const pending = getPendingTimeEntries()
+      if (pending.length > 0) {
+        handleOnline()
+      }
+    }
+
+    // Listen for online events
+    window.addEventListener('online', handleOnline)
+    return () => window.removeEventListener('online', handleOnline)
+  }, [isOnline, tenantId])
+  
+  // Offline/online detection - initialize immediately to prevent hydration issues
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      setIsOnline(true) // Assume online on server
+      return
+    }
+    
+    // Set initial state immediately
+    const initialOnline = navigator.onLine
+    setIsOnline(initialOnline)
+    
+    // If offline initially, set error state
+    if (!initialOnline) {
+      // Check if we have any cached data
+      const hasCache = 
+        localStorage.getItem('currentEmployeeId') ||
+        localStorage.getItem(`projects:${tenantId}`) ||
+        localStorage.getItem(`employees:${tenantId}`)
+      
+      if (!hasCache) {
+        setFetchError('offline')
+      }
+    }
+    
+    const handleOnline = () => {
+      setIsOnline(true)
+      setFetchError(null) // Clear error when coming back online
+    }
+    const handleOffline = () => {
+      setIsOnline(false)
+      // Only set error if no cache available
+      const hasCache = 
+        localStorage.getItem('currentEmployeeId') ||
+        localStorage.getItem(`projects:${tenantId}`) ||
+        localStorage.getItem(`employees:${tenantId}`)
+      
+      if (!hasCache) {
+        setFetchError('offline')
+      }
+    }
+    
+    window.addEventListener('online', handleOnline)
+    window.addEventListener('offline', handleOffline)
+    
+    return () => {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
+    }
+  }, [tenantId])
+  
   // Hämta current employee ID för TimeClock
   useEffect(() => {
     async function fetchCurrentEmployee() {
+      // Wait for isOnline to be determined
+      if (isOnline === null) return
+      
+      // Also fetch and cache userId when online (or try Supabase client which works offline)
+      // Try Supabase client first (works offline if session exists)
       try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) return
-        
-        const res = await fetch('/api/employee/get-current')
+        const { data: { user }, error: userError } = await supabase.auth.getUser()
+        if (!userError && user?.id) {
+          try {
+            localStorage.setItem('cachedUserId', user.id)
+            console.log('✅ Cached userId on page load (Supabase):', user.id)
+          } catch (err) {
+            console.warn('Could not cache userId:', err)
+          }
+        }
+      } catch (err) {
+        console.warn('Supabase getUser failed on page load:', err)
+      }
+      
+      // Also try API route if online (as backup)
+      if (isOnline !== false) {
+        try {
+          const userRes = await fetch('/api/auth/user', { cache: 'no-store' })
+          if (userRes.ok) {
+            const userData = await userRes.json()
+            const userId = userData.userId || userData.id
+            if (userId) {
+              try {
+                localStorage.setItem('cachedUserId', userId)
+                console.log('✅ Cached userId on page load (API):', userId)
+              } catch (err) {
+                console.warn('Could not cache userId:', err)
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Could not fetch userId on page load:', err)
+        }
+      }
+      
+      if (isOnline === false) {
+        // Offline - försök läsa från cache
+        try {
+          const cached = localStorage.getItem('currentEmployeeId')
+          if (cached) {
+            const data = JSON.parse(cached)
+            if (data.employeeId) {
+              setCurrentEmployeeId(data.employeeId)
+              if (!employeeId) {
+                setEmployeeId(data.employeeId)
+              }
+            }
+          }
+        } catch (err) {
+          console.warn('Could not read cached employee ID:', err)
+        }
+        return
+      }
+      
+      try {
+        const res = await fetch('/api/employee/get-current', { cache: 'no-store' })
         if (res.ok) {
           const data = await res.json()
           if (data.employeeId) {
             setCurrentEmployeeId(data.employeeId)
+            // Cache för offline-användning
+            try {
+              localStorage.setItem('currentEmployeeId', JSON.stringify(data))
+            } catch (err) {
+              console.warn('Could not cache employee ID:', err)
+            }
             // Auto-fyll employeeId om den är tom
             if (!employeeId) {
               setEmployeeId(data.employeeId)
             }
           }
+        } else {
+          // API returnerade fel - försök cache
+          let errorText = ''
+          try {
+            errorText = await res.text()
+            console.warn('API returned error, trying cache:', errorText)
+          } catch (textErr) {
+            console.warn('Could not read error text:', textErr)
+          }
+          
+          // Ignorera felmeddelandet och försök cache
+          try {
+            const cached = localStorage.getItem('currentEmployeeId')
+            if (cached) {
+              const data = JSON.parse(cached)
+              if (data.employeeId) {
+                setCurrentEmployeeId(data.employeeId)
+                if (!employeeId) {
+                  setEmployeeId(data.employeeId)
+                }
+              }
+            }
+          } catch (cacheErr) {
+            console.warn('Could not read cached employee ID:', cacheErr)
+          }
         }
-      } catch (err) {
-        console.error('Error fetching current employee:', err)
+      } catch (err: any) {
+        // Fetch misslyckades (t.ex. offline) - försök cache
+        console.warn('Fetch failed (likely offline), trying cache:', err.message)
+        // Don't set fetchError here - we'll try cache first
+        try {
+          const cached = localStorage.getItem('currentEmployeeId')
+          if (cached) {
+            const data = JSON.parse(cached)
+            if (data.employeeId) {
+              setCurrentEmployeeId(data.employeeId)
+              if (!employeeId) {
+                setEmployeeId(data.employeeId)
+              }
+              // Successfully loaded from cache - clear error
+              setFetchError(null)
+            } else {
+              // No cache available
+              if (isOnline === false) {
+                setFetchError('offline')
+              }
+            }
+          } else {
+            // No cache available
+            if (isOnline === false) {
+              setFetchError('offline')
+            }
+          }
+        } catch (cacheErr) {
+          console.warn('Could not read cached employee ID:', cacheErr)
+          if (isOnline === false) {
+            setFetchError('offline')
+          }
+        }
       }
     }
     fetchCurrentEmployee()
-  }, [])
+  }, [isOnline])
   
   async function fetchData() {
     if (!tenantId) return
+    
+    // Wait for isOnline to be determined
+    if (isOnline === null) return
+    
+    // Offline handling - läs från cache
+    if (isOnline === false) {
+      try {
+        const cachedProjects = localStorage.getItem(`projects:${tenantId}`)
+        const cachedEmployees = localStorage.getItem(`employees:${tenantId}`)
+        
+        if (cachedProjects) {
+          const projectsData = JSON.parse(cachedProjects)
+          setProjects(projectsData.projects || [])
+        }
+        
+        if (cachedEmployees) {
+          const employeesData = JSON.parse(cachedEmployees)
+          setEmployees(employeesData.employees || [])
+        }
+      } catch (err) {
+        console.warn('Could not read cached data:', err)
+      }
+      return
+    }
     
     // Fetch projects via API route (same as TimeClock) for consistency
     try {
@@ -73,42 +376,141 @@ export default function NewReportPage() {
         const projectsData = await projectsRes.json()
         if (projectsData.projects) {
           setProjects(projectsData.projects)
+          // Cache för offline-användning
+          try {
+            localStorage.setItem(`projects:${tenantId}`, JSON.stringify({ projects: projectsData.projects }))
+          } catch (err) {
+            console.warn('Could not cache projects:', err)
+          }
         } else {
           setProjects([])
         }
       } else {
-        // Fallback: direct query with status filter
-        const { data: pData } = await supabase
-          .from('projects')
-          .select('id, name, status')
-          .eq('tenant_id', tenantId)
+        // API returnerade fel - försök cache (ignorera felmeddelandet)
+        let errorText = ''
+        try {
+          errorText = await projectsRes.text()
+          console.warn('Projects API returned error, trying cache:', errorText.substring(0, 100))
+        } catch (textErr) {
+          console.warn('Could not read error text:', textErr)
+        }
         
-        // Filter out completed/archived projects
-        const activeProjects = (pData ?? []).filter((p: any) => {
-          const status = p.status || null
-          return status !== 'completed' && status !== 'archived'
-        }).map((p: any) => ({ id: p.id, name: p.name }))
-        
-        setProjects(activeProjects)
+        // Ignorera felmeddelandet och försök cache
+        try {
+          const cached = localStorage.getItem(`projects:${tenantId}`)
+          if (cached) {
+            const projectsData = JSON.parse(cached)
+            setProjects(projectsData.projects || [])
+          } else {
+            setProjects([])
+          }
+        } catch (err) {
+          console.warn('Could not read cached projects:', err)
+          setProjects([])
+        }
       }
-    } catch (err) {
-      console.error('Error fetching projects:', err)
-      setProjects([])
+    } catch (err: any) {
+      // Fetch misslyckades (t.ex. offline) - försök cache
+      console.warn('Projects fetch failed (likely offline), trying cache:', err.message)
+      try {
+        const cached = localStorage.getItem(`projects:${tenantId}`)
+        if (cached) {
+          const projectsData = JSON.parse(cached)
+          setProjects(projectsData.projects || [])
+          // Successfully loaded from cache - don't set error
+        } else {
+          setProjects([])
+          // No cache available
+          if (isOnline === false && projects.length === 0) {
+            setFetchError('offline')
+          }
+        }
+      } catch (cacheErr) {
+        console.warn('Could not read cached projects:', cacheErr)
+        setProjects([])
+        if (isOnline === false) {
+          setFetchError('offline')
+        }
+      }
     }
     
-    const { data: eData } = await supabase
-      .from('employees')
-      .select('id, name, full_name')
-      .eq('tenant_id', tenantId)
-    setEmployees((eData ?? []).map(e => ({
-      id: e.id,
-      name: (e as any).full_name || e.name || 'Okänd'
-    })))
+    // Fetch employees via API route
+    try {
+      const employeesRes = await fetch(`/api/employees/list?tenantId=${tenantId}`, { cache: 'no-store' })
+      if (employeesRes.ok) {
+        const employeesData = await employeesRes.json()
+        const employeesList = employeesData.employees || []
+        setEmployees(employeesList.map((e: any) => ({
+          id: e.id,
+          name: e.full_name || e.name || 'Okänd'
+        })))
+        // Cache för offline-användning
+        try {
+          localStorage.setItem(`employees:${tenantId}`, JSON.stringify({ employees: employeesList }))
+        } catch (err) {
+          console.warn('Could not cache employees:', err)
+        }
+      } else {
+        // API returnerade fel - försök cache (ignorera felmeddelandet)
+        let errorText = ''
+        try {
+          errorText = await employeesRes.text()
+          console.warn('Employees API returned error, trying cache:', errorText.substring(0, 100))
+        } catch (textErr) {
+          console.warn('Could not read error text:', textErr)
+        }
+        
+        // Ignorera felmeddelandet och försök cache
+        try {
+          const cached = localStorage.getItem(`employees:${tenantId}`)
+          if (cached) {
+            const employeesData = JSON.parse(cached)
+            const employeesList = employeesData.employees || []
+            setEmployees(employeesList.map((e: any) => ({
+              id: e.id,
+              name: e.full_name || e.name || 'Okänd'
+            })))
+          } else {
+            setEmployees([])
+          }
+        } catch (err) {
+          console.warn('Could not read cached employees:', err)
+          setEmployees([])
+        }
+      }
+    } catch (err: any) {
+      // Fetch misslyckades (t.ex. offline) - försök cache
+      console.warn('Employees fetch failed (likely offline), trying cache:', err.message)
+      try {
+        const cached = localStorage.getItem(`employees:${tenantId}`)
+        if (cached) {
+          const employeesData = JSON.parse(cached)
+          const employeesList = employeesData.employees || []
+          setEmployees(employeesList.map((e: any) => ({
+            id: e.id,
+            name: e.full_name || e.name || 'Okänd'
+          })))
+          // Successfully loaded from cache - don't set error
+        } else {
+          setEmployees([])
+          // No cache available
+          if (isOnline === false && employees.length === 0) {
+            setFetchError('offline')
+          }
+        }
+      } catch (cacheErr) {
+        console.warn('Could not read cached employees:', cacheErr)
+        setEmployees([])
+        if (isOnline === false) {
+          setFetchError('offline')
+        }
+      }
+    }
   }
   
   useEffect(() => { 
     fetchData() 
-  }, [tenantId])
+  }, [tenantId, isOnline])
 
   // Auto-fyll tider när typ ändras
   useEffect(() => {
@@ -146,13 +548,86 @@ export default function NewReportPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
+    
+    // Don't block if online status is unknown (null) - assume online
+    // Only block if explicitly offline
+    if (isOnline === false) {
+      // This should not happen anymore since we save offline, but keep as safety
+      console.log('Offline detected, saving to queue...')
+    }
+    
     setSaving(true)
 
-    const { data: userData, error: authError } = await supabase.auth.getUser()
-    const userId = (userData as any)?.user?.id
+    // Get user ID - prioritize offline methods first, then online API
+    let userId: string | null = null
+    
+    // Strategy 1: Try Supabase client directly (works offline if session exists)
+    try {
+      const { data: { user }, error: userError } = await supabase.auth.getUser()
+      if (!userError && user?.id) {
+        userId = user.id
+        console.log('✅ Got userId from Supabase client:', userId)
+        // Cache for future offline use
+        try {
+          localStorage.setItem('cachedUserId', userId)
+        } catch (err) {
+          console.warn('Could not cache userId:', err)
+        }
+      }
+    } catch (err) {
+      console.warn('Supabase client getUser failed:', err)
+    }
+    
+    // Strategy 2: Try cache (for offline scenarios)
+    if (!userId) {
+      try {
+        const cachedUserId = localStorage.getItem('cachedUserId')
+        if (cachedUserId) {
+          userId = cachedUserId
+          console.log('✅ Using cached userId:', userId)
+        }
+      } catch (err) {
+        console.warn('Could not read cached userId:', err)
+      }
+    }
+    
+    // Strategy 3: Try API route (only if online and still no userId)
+    if (!userId && isOnline !== false) {
+      try {
+        const userRes = await fetch('/api/auth/user', { cache: 'no-store' })
+        if (userRes.ok) {
+          const userData = await userRes.json()
+          userId = userData.userId || userData.id
+          if (userId) {
+            // Cache for offline use
+            try {
+              localStorage.setItem('cachedUserId', userId)
+              console.log('✅ Cached userId from API:', userId)
+            } catch (err) {
+              console.warn('Could not cache userId:', err)
+            }
+          }
+        }
+      } catch (err) {
+        console.warn('API fetch failed (will use cache if available):', err)
+      }
+    }
+    
+    // Strategy 4: Final fallback - try cache one more time
+    if (!userId) {
+      try {
+        const cachedUserId = localStorage.getItem('cachedUserId')
+        if (cachedUserId) {
+          userId = cachedUserId
+          console.log('✅ Using cached userId as final fallback:', userId)
+        }
+      } catch (err) {
+        console.warn('Could not read cached userId:', err)
+      }
+    }
 
-    if (authError || !userId) {
-      toast.error('Du är inte inloggad.')
+    if (!userId) {
+      toast.error('Du är inte inloggad. Logga in igen.')
       setSaving(false)
       return
     }
@@ -214,39 +689,20 @@ export default function NewReportPage() {
     // Beräkna amount_total baserat på employee's base_rate och OB-tillägg (byggkollektivavtalet)
     let amount_total = 0
     if (requiresTimeFields && employeeId && tenantId) {
-      // Hämta employee's base_rate - try with both columns first
-      let { data: empData, error: empError } = await supabase
-        .from('employees')
-        .select('base_rate_sek, default_rate_sek')
-        .eq('id', employeeId)
-        .eq('tenant_id', tenantId)
-        .maybeSingle()
-
-      // If error due to missing default_rate_sek, try with only base_rate_sek
-      if (empError && (empError.code === '42703' || empError.message?.includes('default_rate_sek'))) {
-        const fallback = await supabase
-          .from('employees')
-          .select('base_rate_sek')
-          .eq('id', employeeId)
-          .eq('tenant_id', tenantId)
-          .maybeSingle()
-        
-        if (!fallback.error && fallback.data) {
-          empData = fallback.data
-          empError = null
+      // Hämta employee's base_rate via API route
+      let baseRate = 360 // Default fallback
+      try {
+        const rateRes = await fetch(`/api/employee/rate?employeeId=${employeeId}`, { cache: 'no-store' })
+        if (rateRes.ok) {
+          const rateData = await rateRes.json()
+          baseRate = Number(rateData.baseRate || rateData.defaultRate || 360)
+        } else {
+          console.warn('Could not fetch employee rate via API, using default.')
         }
+      } catch (err) {
+        console.warn('Error fetching employee rate:', err)
+        // Use default rate
       }
-
-      // If still error, try minimal select (just id)
-      if (empError && empError.code !== 'PGRST116') {
-        // PGRST116 = no rows found, which is a real error
-        console.error('Error fetching employee rate:', empError)
-        toast.error('Kunde inte hämta anställds lön: ' + empError.message)
-        setSaving(false)
-        return
-      }
-
-      const baseRate = Number(empData?.base_rate_sek || empData?.default_rate_sek || 360)
       
       // Byggkollektivavtalet:
       // - Vanlig tid (work): 100% = 1.0x
@@ -289,53 +745,95 @@ export default function NewReportPage() {
       return
     }
 
-    // 🔍 DUBBLETT-KONTROLL: Kontrollera om det redan finns en liknande tidsrapport
-    try {
-      const { data: existingEntries, error: checkError } = await supabase
-        .from('time_entries')
-        .select('id, employee_id, project_id, date, start_time, end_time')
-        .eq('tenant_id', tenantId)
-        .eq('employee_id', employeeId)
-        .eq('date', date)
-      
-      if (checkError) {
-        console.warn('Could not check for duplicates:', checkError)
-        // Fortsätt ändå - bättre att försöka spara än att blockera
-      } else if (existingEntries && existingEntries.length > 0) {
-        // Kontrollera överlappning
-        const isDuplicate = checkTimeOverlap(
-          {
-            employee_id: employeeId,
-            project_id: basePayload.project_id,
-            date,
-            start_time: basePayload.start_time,
-            end_time: basePayload.end_time,
-            tenant_id: tenantId,
-          },
-          existingEntries
-        )
-
-        if (isDuplicate) {
-          const duplicateMsg = formatDuplicateMessage(existingEntries[0])
-          const confirmed = window.confirm(
-            `⚠️ ${duplicateMsg}\n\nVill du ändå spara denna tidsrapport?`
+    // 🔍 DUBBLETT-KONTROLL: Kontrollera om det redan finns en liknande tidsrapport via API (endast om online)
+    if (isOnline !== false) {
+      try {
+        const checkRes = await fetch(`/api/time-entries/list?tenantId=${tenantId}&employeeId=${employeeId}&date=${date}`, {
+          cache: 'no-store',
+        })
+        
+        if (checkRes.ok) {
+          const checkData = await checkRes.json()
+          const existingEntries = checkData.timeEntries || []
+        
+        if (existingEntries.length > 0) {
+          // Kontrollera överlappning
+          const isDuplicate = checkTimeOverlap(
+            {
+              employee_id: employeeId,
+              project_id: basePayload.project_id,
+              date,
+              start_time: basePayload.start_time,
+              end_time: basePayload.end_time,
+              tenant_id: tenantId,
+            },
+            existingEntries
           )
-          
-          if (!confirmed) {
-            setSaving(false)
-            return
+
+          if (isDuplicate) {
+            const duplicateMsg = formatDuplicateMessage(existingEntries[0])
+            const confirmed = window.confirm(
+              `⚠️ ${duplicateMsg}\n\nVill du ändå spara denna tidsrapport?`
+            )
+            
+            if (!confirmed) {
+              setSaving(false)
+              return
+            }
           }
         }
+      } else {
+        console.warn('Could not check for duplicates:', await checkRes.text())
+        // Fortsätt ändå - bättre att försöka spara än att blockera
       }
-    } catch (dupCheckErr) {
-      console.error('Error in duplicate check:', dupCheckErr)
-      // Fortsätt ändå - låt användaren spara
+      } catch (dupCheckErr) {
+        console.error('Error in duplicate check:', dupCheckErr)
+        // Fortsätt ändå - låt användaren spara
+      }
+    } else {
+      // Offline: hoppa över duplicate check
+      console.log('Offline: Skipping duplicate check')
     }
+
+    // Helper function to save offline
+    const saveOffline = (payload: any) => {
+      try {
+        console.log('💾 Saving to offline queue:', payload)
+        const offlineEntry = {
+          tenant_id: payload.tenant_id,
+          employee_id: payload.employee_id,
+          project_id: payload.project_id,
+          date: payload.date,
+          start_time: payload.start_time,
+          end_time: payload.end_time,
+          hours_total: payload.hours_total,
+          ob_type: payload.ob_type,
+          amount_total: payload.amount_total,
+          is_billed: payload.is_billed,
+          break_minutes: payload.break_minutes,
+          comment: payload.description || null,
+          work_type: payload.ob_type || null,
+        }
+        
+        addToOfflineQueue(offlineEntry)
+        console.log('✅ Saved to offline queue successfully')
+        return true
+      } catch (error) {
+        console.error('❌ Error saving offline:', error)
+        return false
+      }
+    }
+
+    // Determine if we should try online first (if online status is true or null)
+    const shouldTryOnline = isOnline !== false // true or null = try online first
+    
+    console.log('📊 Submit state:', { isOnline, shouldTryOnline, multiProjectMode })
 
     // Om multi-projekt läge, skapa flera time entries
     if (multiProjectMode && requiresTimeFields) {
       let successCount = 0
       let errorCount = 0
+      let offlineCount = 0
       
       for (const entry of projectEntries) {
         if (!entry.projectId || entry.hours <= 0) continue
@@ -351,23 +849,63 @@ export default function NewReportPage() {
           amount_total: Math.round((entry.hours / (hours || 1)) * amount_total * 100) / 100,
         }
         
-        const response = await fetch('/api/time-entries/create', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(entryPayload),
-        })
+        // Om offline, spara direkt till queue
+        if (isOnline === false) {
+          console.log('📴 Offline: Saving to queue')
+          if (saveOffline(entryPayload)) {
+            offlineCount++
+          } else {
+            errorCount++
+          }
+          continue
+        }
         
-        const result = await response.json()
-        
-        if (!response.ok || result.error) {
-          console.error('Error saving time entry for project:', entry.projectId, result.error)
-          errorCount++
+        // Om online eller unknown, försök spara direkt först
+        if (shouldTryOnline) {
+          try {
+            console.log('🌐 Online: Attempting direct save')
+            const response = await fetch('/api/time-entries/create', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(entryPayload),
+            })
+            
+            const result = await response.json()
+            
+            if (!response.ok || result.error) {
+              // Om det misslyckas, spara offline istället
+              console.log('⚠️ Direct save failed, saving offline:', result.error)
+              if (saveOffline(entryPayload)) {
+                offlineCount++
+              } else {
+                errorCount++
+              }
+            } else {
+              console.log('✅ Direct save successful')
+              successCount++
+            }
+          } catch (err) {
+            // Nätverksfel - spara offline
+            console.log('❌ Network error, saving offline:', err)
+            if (saveOffline(entryPayload)) {
+              offlineCount++
+            } else {
+              errorCount++
+            }
+          }
         } else {
-          successCount++
+          // Fallback: spara offline om shouldTryOnline är false
+          if (saveOffline(entryPayload)) {
+            offlineCount++
+          } else {
+            errorCount++
+          }
         }
       }
       
-      if (errorCount > 0) {
+      if (offlineCount > 0) {
+        toast.success(`${offlineCount} tidsrapporter sparade offline och synkas när du är online igen!`)
+      } else if (errorCount > 0) {
         toast.error(`${successCount} av ${projectEntries.length} tidsrapporter sparades. ${errorCount} misslyckades.`)
       } else {
         toast.success(`${successCount} tidsrapporter sparade!`)
@@ -379,39 +917,171 @@ export default function NewReportPage() {
     }
     
     // Single project mode - original logic
-    const response = await fetch('/api/time-entries/create', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(basePayload),
-    })
-
-    const result = await response.json()
-
-    if (!response.ok || result.error) {
-      console.error('Error saving time entry:', result.error)
-      toast.error('Kunde inte spara: ' + (result.error || result.message || 'Okänt fel'))
-      setSaving(false)
-      return
+    // Om offline, spara direkt till queue
+    if (isOnline === false) {
+      console.log('📴 Offline: Saving single entry to queue')
+      if (saveOffline(basePayload)) {
+        toast.success('Tidsrapport sparad offline och synkas när du är online igen!')
+        setSaving(false)
+        router.push('/reports')
+        return
+      } else {
+        toast.error('Kunde inte spara offline. Försök igen.')
+        setSaving(false)
+        return
+      }
     }
     
-    toast.success('Tidsrapport sparad!')
-    router.push('/reports')
+    // Om online eller unknown, försök spara direkt först
+    if (shouldTryOnline) {
+      try {
+        console.log('🌐 Online: Attempting direct save for single entry')
+        const response = await fetch('/api/time-entries/create', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(basePayload),
+        })
+
+        const result = await response.json()
+
+        if (!response.ok || result.error) {
+          // Om det misslyckas, spara offline istället
+          console.log('⚠️ Direct save failed, saving offline:', result.error)
+          if (saveOffline(basePayload)) {
+            toast.success('Tidsrapport sparad offline och synkas när du är online igen!')
+            setSaving(false)
+            router.push('/reports')
+            return
+          } else {
+            toast.error('Kunde inte spara: ' + (result.error || result.message || 'Okänt fel'))
+            setSaving(false)
+            return
+          }
+        }
+        
+        console.log('✅ Direct save successful')
+        toast.success('Tidsrapport sparad!')
+        router.push('/reports')
+      } catch (err) {
+        // Nätverksfel - spara offline
+        console.log('❌ Network error, saving offline:', err)
+        if (saveOffline(basePayload)) {
+          toast.success('Tidsrapport sparad offline och synkas när du är online igen!')
+          setSaving(false)
+          router.push('/reports')
+        } else {
+          toast.error('Kunde inte spara. Kontrollera din internetanslutning.')
+          setSaving(false)
+        }
+      }
+    } else {
+      // Fallback: spara offline om shouldTryOnline är false
+      console.log('📴 Fallback: Saving to queue')
+      if (saveOffline(basePayload)) {
+        toast.success('Tidsrapport sparad offline och synkas när du är online igen!')
+        setSaving(false)
+        router.push('/reports')
+      } else {
+        toast.error('Kunde inte spara offline. Försök igen.')
+        setSaving(false)
+      }
+    }
+  }
+
+  // Don't render until mounted (prevents hydration issues)
+  if (!isMounted) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col lg:flex-row">
+        <Sidebar />
+        <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
+          <div className="p-4 sm:p-6 lg:p-10 max-w-3xl mx-auto w-full">
+            <div className="mb-6 sm:mb-8">
+              <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-1 sm:mb-2">Ny tidsrapport</h1>
+              <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Laddar...</p>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
+  }
+
+  // Don't render if we have a critical error (prevent JSON error display)
+  if (fetchError === 'offline' || (fetchError && fetchError.includes('Offline och ingen cache'))) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col lg:flex-row">
+        <Sidebar />
+        <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
+          <div className="p-4 sm:p-6 lg:p-10 max-w-3xl mx-auto w-full">
+            <div className="mb-6 rounded-md border border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span>📴</span>
+                <span>Du är offline och ingen cachad data finns tillgänglig. Vänligen vänta tills du är online igen.</span>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col lg:flex-row">
-      <Sidebar />
-      <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
-        <div className="p-4 sm:p-6 lg:p-10 max-w-3xl mx-auto w-full">
-          <div className="mb-6 sm:mb-8">
-            <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-1 sm:mb-2">Ny tidsrapport</h1>
-            <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Rapportera arbetstid eller frånvaro</p>
+    <ErrorBoundary fallback={
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col lg:flex-row">
+        <Sidebar />
+        <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
+          <div className="p-4 sm:p-6 lg:p-10 max-w-3xl mx-auto w-full">
+            <div className="mb-6 rounded-md border border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 px-4 py-3">
+              <div className="flex items-center gap-2">
+                <span>📴</span>
+                <span>Du är offline. Vänligen vänta tills du är online igen.</span>
+              </div>
+            </div>
           </div>
+        </main>
+      </div>
+    }>
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col lg:flex-row">
+        <Sidebar />
+        <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
+          <div className="p-4 sm:p-6 lg:p-10 max-w-3xl mx-auto w-full">
+            <div className="mb-6 sm:mb-8">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h1 className="text-3xl sm:text-4xl font-black text-gray-900 dark:text-white mb-1 sm:mb-2">Ny tidsrapport</h1>
+                  <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Rapportera arbetstid eller frånvaro</p>
+                </div>
+                {pendingCount > 0 && (
+                  <div className="rounded-full bg-amber-500 text-white px-3 py-1 text-sm font-semibold">
+                    {pendingCount} väntar på synkning
+                  </div>
+                )}
+              </div>
+            </div>
 
           {/* Time Clock - Snabb stämpling */}
           {currentEmployeeId && (
             <div className="mb-6 sm:mb-8">
               <TimeClock employeeId={currentEmployeeId} projects={projects} />
+            </div>
+          )}
+
+          {/* Offline banner */}
+          {isOnline === false && (
+            <div className="mb-6 rounded-md border border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 px-4 py-3 text-sm">
+              <div className="flex items-center gap-2">
+                <span>📴</span>
+                <span>Offline – Du kan spara tidsrapporter offline. De synkas automatiskt när du är online igen.</span>
+              </div>
+            </div>
+          )}
+          
+          {/* Error display if API fails */}
+          {projects.length === 0 && employees.length === 0 && isOnline !== false && (
+            <div className="mb-6 rounded-md border border-yellow-500 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-800 dark:text-yellow-300 px-4 py-3 text-sm">
+              <div className="flex items-center gap-2">
+                <span>⚠️</span>
+                <span>Kunde inte ladda projekt eller anställda. Kontrollera din internetanslutning och försök igen.</span>
+              </div>
             </div>
           )}
 
@@ -660,5 +1330,6 @@ export default function NewReportPage() {
         </div>
       </main>
     </div>
+    </ErrorBoundary>
   )
 }
