@@ -18,6 +18,13 @@ export async function GET(
 
     console.log('[OAuth Callback] Provider:', provider);
 
+    // Get base URL from request headers (fallback to env var)
+    const host = request.headers.get('host');
+    const protocol = request.headers.get('x-forwarded-proto') || 'http';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
+    
+    console.log('[OAuth Callback] Base URL:', baseUrl);
+
     // Extract query parameters
     const { searchParams } = new URL(request.url);
     const code = searchParams.get('code');
@@ -38,7 +45,7 @@ export async function GET(
         description: errorDescription,
       });
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=${error}&message=${errorDescription}`
+        `${baseUrl}/integrations?error=${error}&message=${errorDescription}`
       );
     }
 
@@ -46,12 +53,12 @@ export async function GET(
     if (!code || !state) {
       console.error('[OAuth Callback] ❌ Missing required parameters');
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=invalid_request`
+        `${baseUrl}/integrations?error=invalid_request`
       );
     }
 
     // Decode and validate state parameter
-    let stateData: { tenantId: string; provider: string; timestamp: number };
+    let stateData: { tenantId: string; provider: string; redirectUri?: string; timestamp: number };
 
     try {
       const stateJson = Buffer.from(state, 'base64url').toString('utf-8');
@@ -75,23 +82,26 @@ export async function GET(
     } catch (stateError: any) {
       console.error('[OAuth Callback] ❌ Invalid state:', stateError);
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=invalid_state`
+        `${baseUrl}/integrations?error=invalid_state`
       );
     }
 
     const tenantId = stateData.tenantId;
+    const redirectUri = stateData.redirectUri || `${baseUrl}/api/integrations/callback/${provider}`;
+    
     console.log('[OAuth Callback] ✅ State validated for tenant:', tenantId);
+    console.log('[OAuth Callback] Using redirect URI:', redirectUri);
 
     // Exchange code for tokens
     const oauthManager = new OAuthManager();
     let tokens;
 
     try {
-      tokens = await oauthManager.exchangeCodeForTokens(provider, code);
+      tokens = await oauthManager.exchangeCodeForTokens(provider, code, redirectUri);
     } catch (tokenError: any) {
       console.error('[OAuth Callback] ❌ Token exchange failed:', tokenError);
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=token_exchange_failed`
+        `${baseUrl}/integrations?error=token_exchange_failed`
       );
     }
 
@@ -103,7 +113,7 @@ export async function GET(
     } catch (vaultError: any) {
       console.error('[OAuth Callback] ❌ Failed to store tokens:', vaultError);
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=token_storage_failed`
+        `${baseUrl}/integrations?error=token_storage_failed`
       );
     }
 
@@ -146,7 +156,7 @@ export async function GET(
     if (dbError) {
       console.error('[OAuth Callback] ❌ Database error:', dbError);
       return NextResponse.redirect(
-        `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=database_error`
+        `${baseUrl}/integrations?error=database_error`
       );
     }
 
@@ -156,7 +166,7 @@ export async function GET(
 
     // Redirect to success page
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/integrations?success=true&provider=${provider}`
+      `${baseUrl}/integrations?success=true&provider=${provider}`
     );
   } catch (error: any) {
     console.error('[OAuth Callback] ❌ FATAL ERROR:', error);

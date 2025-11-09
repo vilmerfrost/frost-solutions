@@ -36,6 +36,13 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid provider' }, { status: 400 });
     }
 
+    // Get base URL from request headers (fallback to env var)
+    const host = request.headers.get('host');
+    const protocol = request.headers.get('x-forwarded-proto') || 'http';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
+    
+    console.log('[Authorize] Base URL:', baseUrl);
+
     // Validate provider configuration
     try {
       validateProviderConfig(provider);
@@ -47,9 +54,9 @@ export async function GET(
       );
     }
 
-    // Generate authorization URL
+    // Generate authorization URL with dynamic base URL
     const oauthManager = new OAuthManager();
-    const authUrl = oauthManager.generateAuthorizationUrl(provider, tenantId);
+    const authUrl = oauthManager.generateAuthorizationUrl(provider, tenantId, baseUrl);
 
     console.log('[Authorize] ✅ Redirecting to:', authUrl);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

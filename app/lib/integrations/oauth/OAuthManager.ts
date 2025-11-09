@@ -25,28 +25,42 @@ export class OAuthManager {
    *
    * @param provider - 'fortnox' or 'visma'
    * @param tenantId - Tenant ID for state parameter
+   * @param baseUrl - Optional base URL (defaults to config redirectUri)
    * @returns Authorization URL
    */
-  generateAuthorizationUrl(provider: AccountingProvider, tenantId: string): string {
+  generateAuthorizationUrl(
+    provider: AccountingProvider, 
+    tenantId: string,
+    baseUrl?: string
+  ): string {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('[OAuthManager] 🔐 GENERATING AUTH URL');
     console.log('[OAuthManager] Provider:', provider);
     console.log('[OAuthManager] Tenant:', tenantId);
+    console.log('[OAuthManager] Base URL:', baseUrl || 'using config');
 
     const config = getProviderConfig(provider);
 
-    // State parameter: encode tenantId for callback validation
+    // Use provided baseUrl or fallback to config redirectUri
+    const redirectUri = baseUrl 
+      ? `${baseUrl}/api/integrations/callback/${provider}`
+      : config.redirectUri;
+
+    console.log('[OAuthManager] Redirect URI:', redirectUri);
+
+    // State parameter: encode tenantId and redirectUri for callback validation
     const state = Buffer.from(
       JSON.stringify({
         tenantId,
         provider,
+        redirectUri, // Store redirect URI in state so callback can use it
         timestamp: Date.now(),
       })
     ).toString('base64url');
 
     const params = new URLSearchParams({
       client_id: config.clientId,
-      redirect_uri: config.redirectUri,
+      redirect_uri: redirectUri,
       response_type: 'code',
       scope: config.scope,
       state,
@@ -66,11 +80,13 @@ export class OAuthManager {
    *
    * @param provider - 'fortnox' or 'visma'
    * @param code - Authorization code from callback
+   * @param redirectUri - Redirect URI used in authorization request (must match exactly)
    * @returns OAuth tokens
    */
   async exchangeCodeForTokens(
     provider: AccountingProvider,
-    code: string
+    code: string,
+    redirectUri?: string
   ): Promise<OAuthTokens> {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('[OAuthManager] 🔄 EXCHANGING CODE FOR TOKENS');
@@ -79,11 +95,16 @@ export class OAuthManager {
 
     const config = getProviderConfig(provider);
 
+    // Use provided redirectUri or fallback to config
+    const finalRedirectUri = redirectUri || config.redirectUri;
+    
+    console.log('[OAuthManager] Using redirect URI:', finalRedirectUri);
+
     try {
       const params = new URLSearchParams({
         grant_type: 'authorization_code',
         code,
-        redirect_uri: config.redirectUri,
+        redirect_uri: finalRedirectUri,
         client_id: config.clientId,
         client_secret: config.clientSecret,
       });
