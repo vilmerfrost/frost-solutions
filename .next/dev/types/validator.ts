@@ -983,6 +983,15 @@ type RouteHandlerConfig<Route extends AppRouteHandlerRoutes = AppRouteHandlerRou
   type __Unused = __Check
 }
 
+// Validate ../../../app/api/debug/oauth-config/route.ts
+{
+  type __IsExpected<Specific extends RouteHandlerConfig<"/api/debug/oauth-config">> = Specific
+  const handler = {} as typeof import("../../../app/api/debug/oauth-config/route.js")
+  type __Check = __IsExpected<typeof handler>
+  // @ts-ignore
+  type __Unused = __Check
+}
+
 // Validate ../../../app/api/emails/track/route.ts
 {
   type __IsExpected<Specific extends RouteHandlerConfig<"/api/emails/track">> = Specific

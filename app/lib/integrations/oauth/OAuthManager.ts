@@ -25,42 +25,34 @@ export class OAuthManager {
    *
    * @param provider - 'fortnox' or 'visma'
    * @param tenantId - Tenant ID for state parameter
-   * @param baseUrl - Optional base URL (defaults to config redirectUri)
    * @returns Authorization URL
    */
-  generateAuthorizationUrl(
-    provider: AccountingProvider, 
-    tenantId: string,
-    baseUrl?: string
-  ): string {
+  generateAuthorizationUrl(provider: AccountingProvider, tenantId: string): string {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('[OAuthManager] 🔐 GENERATING AUTH URL');
     console.log('[OAuthManager] Provider:', provider);
     console.log('[OAuthManager] Tenant:', tenantId);
-    console.log('[OAuthManager] Base URL:', baseUrl || 'using config');
 
     const config = getProviderConfig(provider);
 
-    // Use provided baseUrl or fallback to config redirectUri
-    const redirectUri = baseUrl 
-      ? `${baseUrl}/api/integrations/callback/${provider}`
-      : config.redirectUri;
+    // Use static redirect URI from config (built from NEXT_PUBLIC_APP_URL)
+    const redirectUri = config.redirectUri;
 
     console.log('[OAuthManager] Redirect URI:', redirectUri);
 
-    // State parameter: encode tenantId and redirectUri for callback validation
+    // State parameter: encode tenantId for callback validation
     const state = Buffer.from(
       JSON.stringify({
         tenantId,
         provider,
-        redirectUri, // Store redirect URI in state so callback can use it
+        redirectUri, // Store redirect URI in state for verification
         timestamp: Date.now(),
       })
     ).toString('base64url');
 
     const params = new URLSearchParams({
       client_id: config.clientId,
-      redirect_uri: redirectUri,
+      redirect_uri: redirectUri, // ✅ Use static redirect URI from config
       response_type: 'code',
       scope: config.scope,
       state,
@@ -70,6 +62,7 @@ export class OAuthManager {
 
     console.log('[OAuthManager] ✅ Auth URL generated');
     console.log('[OAuthManager] State:', state);
+    console.log('[OAuthManager] Full URL:', authUrl);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
 
     return authUrl;
@@ -95,21 +88,23 @@ export class OAuthManager {
 
     const config = getProviderConfig(provider);
 
-    // Use provided redirectUri or fallback to config
+    // Use provided redirectUri or fallback to config (must match authorization redirect_uri EXACTLY)
     const finalRedirectUri = redirectUri || config.redirectUri;
     
-    console.log('[OAuthManager] Using redirect URI:', finalRedirectUri);
+    console.log('[OAuthManager] 📤 Request details:');
+    console.log('  - Token URL:', config.tokenUrl);
+    console.log('  - Grant type:', 'authorization_code');
+    console.log('  - Redirect URI:', finalRedirectUri);
+    console.log('  - Client ID:', config.clientId.slice(0, 8) + '...');
 
     try {
       const params = new URLSearchParams({
         grant_type: 'authorization_code',
         code,
-        redirect_uri: finalRedirectUri,
+        redirect_uri: finalRedirectUri, // ✅ Must match authorization redirect_uri EXACTLY
         client_id: config.clientId,
         client_secret: config.clientSecret,
       });
-
-      console.log('[OAuthManager] 📤 Requesting tokens from:', config.tokenUrl);
 
       const response = await fetch(config.tokenUrl, {
         method: 'POST',
@@ -126,9 +121,20 @@ export class OAuthManager {
       if (!response.ok) {
         console.error('[OAuthManager] ❌ Token exchange failed:', {
           status: response.status,
+          statusText: response.statusText,
           body: responseText,
         });
-        throw new Error(`Token exchange failed: ${response.status} ${responseText}`);
+        
+        // Parse error if JSON
+        let errorDetail = responseText;
+        try {
+          const errorJson = JSON.parse(responseText);
+          errorDetail = errorJson.error_description || errorJson.error || responseText;
+        } catch (e) {
+          // Not JSON, use raw text
+        }
+        
+        throw new Error(`Token exchange failed (${response.status}): ${errorDetail}`);
       }
 
       const tokens: OAuthTokens = JSON.parse(responseText);
@@ -137,6 +143,7 @@ export class OAuthManager {
         hasAccessToken: !!tokens.access_token,
         hasRefreshToken: !!tokens.refresh_token,
         expiresIn: tokens.expires_in,
+        tokenType: tokens.token_type,
         scope: tokens.scope,
       });
 

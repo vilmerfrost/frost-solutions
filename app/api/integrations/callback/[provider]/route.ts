@@ -3,6 +3,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { OAuthManager } from '@/lib/integrations/oauth/OAuthManager';
+import { getProviderConfig, buildRedirectUri } from '@/lib/integrations/oauth/providers';
 import type { AccountingProvider } from '@/types/integrations';
 
 export async function GET(
@@ -18,10 +19,12 @@ export async function GET(
 
     console.log('[OAuth Callback] Provider:', provider);
 
-    // Get base URL from request headers (fallback to env var)
-    const host = request.headers.get('host');
-    const protocol = request.headers.get('x-forwarded-proto') || 'http';
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
+    // Get base URL for redirects (use env var, fallback to headers for error redirects only)
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (() => {
+      const host = request.headers.get('host');
+      const protocol = request.headers.get('x-forwarded-proto') || 'http';
+      return `${protocol}://${host}`;
+    })();
     
     console.log('[OAuth Callback] Base URL:', baseUrl);
 
@@ -87,16 +90,29 @@ export async function GET(
     }
 
     const tenantId = stateData.tenantId;
-    const redirectUri = stateData.redirectUri || `${baseUrl}/api/integrations/callback/${provider}`;
+    
+    // Get config redirect URI (source of truth - must match what was sent in authorization)
+    const config = getProviderConfig(provider);
+    const redirectUri = config.redirectUri;
     
     console.log('[OAuth Callback] ✅ State validated for tenant:', tenantId);
-    console.log('[OAuth Callback] Using redirect URI:', redirectUri);
+    console.log('[OAuth Callback] Redirect URI from config:', redirectUri);
+    
+    // Verify redirect URI from state matches config (for security)
+    if (stateData.redirectUri && stateData.redirectUri !== redirectUri) {
+      console.warn('[OAuth Callback] ⚠️ Redirect URI mismatch:', {
+        fromState: stateData.redirectUri,
+        fromConfig: redirectUri,
+      });
+      // Use config redirect URI as it's the source of truth
+    }
 
-    // Exchange code for tokens
+    // Exchange code for tokens using the redirect URI from config (source of truth)
     const oauthManager = new OAuthManager();
     let tokens;
 
     try {
+      // Use config redirect URI (must match exactly what was sent in authorization)
       tokens = await oauthManager.exchangeCodeForTokens(provider, code, redirectUri);
     } catch (tokenError: any) {
       console.error('[OAuth Callback] ❌ Token exchange failed:', tokenError);

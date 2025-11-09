@@ -1,5 +1,36 @@
 {
-  "node": {},
+  "node": {
+    "40b16eea0186280607b040c271930cd5706ed973f0": {
+      "workers": {
+        "app/invoices/[id]/page": {
+          "moduleId": "[project]/frost-demo/.next-internal/server/app/invoices/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/frost-demo/app/invoices/[id]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "sendInvoiceEmail",
+          "filename": "frost-demo/app/invoices/[id]/actions.ts"
+        }
+      },
+      "layer": {
+        "app/invoices/[id]/page": "action-browser"
+      },
+      "filename": "frost-demo/app/invoices/[id]/actions.ts",
+      "exportedName": "sendInvoiceEmail"
+    },
+    "4075dc29b77e30e4002a667a06306202d1b1593149": {
+      "workers": {
+        "app/projects/page": {
+          "moduleId": "[project]/frost-demo/.next-internal/server/app/projects/page/actions.js { ACTIONS_MODULE0 => \"[project]/frost-demo/app/projects/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "createProject",
+          "filename": "frost-demo/app/projects/actions.ts"
+        }
+      },
+      "layer": {
+        "app/projects/page": "action-browser"
+      },
+      "filename": "frost-demo/app/projects/actions.ts",
+      "exportedName": "createProject"
+    }
+  },
   "edge": {},
   "encryptionKey": "120WMcLJAn3WB3HgMUkQPwtuFvCB5wAqMnWaDbFmEVU="
 }
