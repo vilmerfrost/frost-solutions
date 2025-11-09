@@ -129,24 +129,38 @@ export async function syncPendingTimeEntries(tenantId: string | null | undefined
 
   for (const entry of pending) {
     try {
-      // Convert offline entry to API format
+      // CRITICAL FIX: Strippa approval-fält från payload när syncing offline entries
+      // Detta förhindrar att gamla snapshots skriver över godkänd status på servern
+      const {
+        approval_status, // eslint-disable-line @typescript-eslint/no-unused-vars
+        approved_at,     // eslint-disable-line @typescript-eslint/no-unused-vars
+        approved_by,     // eslint-disable-line @typescript-eslint/no-unused-vars
+        ...safeEntry
+      } = entry
+
+      // Convert offline entry to API format (WITHOUT approval fields)
       const payload = {
-        tenant_id: entry.tenant_id || tenantId, // Use entry tenant_id or fallback to parameter
-        employee_id: entry.employee_id,
-        project_id: entry.project_id,
-        date: entry.date,
-        start_time: entry.start_time,
-        end_time: entry.end_time,
-        hours_total: entry.hours_total,
-        ob_type: entry.ob_type,
-        amount_total: entry.amount_total,
-        is_billed: entry.is_billed,
-        break_minutes: entry.break_minutes,
-        comment: entry.comment,
-        work_type: entry.work_type,
+        tenant_id: safeEntry.tenant_id || tenantId, // Use entry tenant_id or fallback to parameter
+        employee_id: safeEntry.employee_id,
+        project_id: safeEntry.project_id,
+        date: safeEntry.date,
+        start_time: safeEntry.start_time,
+        end_time: safeEntry.end_time,
+        hours_total: safeEntry.hours_total,
+        ob_type: safeEntry.ob_type,
+        amount_total: safeEntry.amount_total,
+        is_billed: safeEntry.is_billed,
+        break_minutes: safeEntry.break_minutes,
+        comment: safeEntry.comment,
+        work_type: safeEntry.work_type,
       }
 
-      console.log('📤 Syncing entry:', { id: entry.id, date: entry.date, hours: entry.hours_total })
+      console.log('[TimeEntriesQueue] Syncing entry (approval fields stripped):', {
+        id: entry.id,
+        date: entry.date,
+        hours: entry.hours_total,
+        hadApprovalStatus: !!approval_status,
+      })
 
       const response = await fetch('/api/time-entries/create', {
         method: 'POST',

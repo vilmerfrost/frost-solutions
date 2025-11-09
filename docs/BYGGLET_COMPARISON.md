@@ -186,6 +186,11 @@
    - Kan vara extern tjänst
    - **Estimerad tid:** 1 dag (integration)
 
+8. Rot Avdrags REVAMP förbättring
+mer exakt intregration och undersökning på hur
+
+9.  Impemterra ais på alla hjälpsamma/relevanta sidor
+
 ---
 
 ## 💡 Slutsats

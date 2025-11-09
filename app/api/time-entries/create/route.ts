@@ -339,29 +339,45 @@ export async function POST(req: Request) {
       }
     }
 
+    // CRITICAL FIX: Strippa approval-fält från payload för att förhindra att offline sync
+    // skriver över godkänd status. Approval-fält ska ENDAST sättas via approve-endpoints.
+    const {
+      approval_status, // eslint-disable-line @typescript-eslint/no-unused-vars
+      approved_at,     // eslint-disable-line @typescript-eslint/no-unused-vars
+      approved_by,     // eslint-disable-line @typescript-eslint/no-unused-vars
+      ...safePayload
+    } = payload
+
+    console.log('[Create Time Entry] Stripped approval fields from payload', {
+      hadApprovalStatus: !!approval_status,
+      hadApprovedAt: !!approved_at,
+      hadApprovedBy: !!approved_by,
+    })
+
     // Build insert payload progressively - ALWAYS use verified tenantId
+    // Approval-fält ska INTE inkluderas - låt DB sätta default 'pending' endast vid ny rad
     const insertPayload: any = {
       tenant_id: tenantId, // ALWAYS use the verified tenantId, never from payload
-      employee_id: payload.employee_id,
-      project_id: payload.project_id,
-      date: payload.date,
-      start_time: payload.start_time,
-      end_time: payload.end_time || null,
-      break_minutes: payload.break_minutes || 0,
-      ob_type: payload.ob_type || 'work',
-      hours_total: payload.hours_total || 0,
-      amount_total: payload.amount_total || 0,
-      is_billed: payload.is_billed || false,
+      employee_id: safePayload.employee_id,
+      project_id: safePayload.project_id,
+      date: safePayload.date,
+      start_time: safePayload.start_time,
+      end_time: safePayload.end_time || null,
+      break_minutes: safePayload.break_minutes || 0,
+      ob_type: safePayload.ob_type || 'work',
+      hours_total: safePayload.hours_total || 0,
+      amount_total: safePayload.amount_total || 0,
+      is_billed: safePayload.is_billed || false,
     }
 
-    // Add optional fields
-    if (payload.user_id) insertPayload.user_id = payload.user_id
-    if (payload.description) insertPayload.description = payload.description
-    if (payload.start_location_lat) insertPayload.start_location_lat = payload.start_location_lat
-    if (payload.start_location_lng) insertPayload.start_location_lng = payload.start_location_lng
-    if (payload.end_location_lat) insertPayload.end_location_lat = payload.end_location_lat
-    if (payload.end_location_lng) insertPayload.end_location_lng = payload.end_location_lng
-    if (payload.work_site_id) insertPayload.work_site_id = payload.work_site_id
+    // Add optional fields (but NOT approval fields)
+    if (safePayload.user_id) insertPayload.user_id = safePayload.user_id
+    if (safePayload.description) insertPayload.description = safePayload.description
+    if (safePayload.start_location_lat) insertPayload.start_location_lat = safePayload.start_location_lat
+    if (safePayload.start_location_lng) insertPayload.start_location_lng = safePayload.start_location_lng
+    if (safePayload.end_location_lat) insertPayload.end_location_lat = safePayload.end_location_lat
+    if (safePayload.end_location_lng) insertPayload.end_location_lng = safePayload.end_location_lng
+    if (safePayload.work_site_id) insertPayload.work_site_id = safePayload.work_site_id
 
     // Double-check tenant_id before insert
     console.log('Final insert payload:', {

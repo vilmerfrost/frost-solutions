@@ -3,9 +3,10 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useIntegrations, useExportToFortnox } from '@/hooks/useIntegrations';
+import { useIntegrationStatus, useSyncInvoice, useSyncCustomer } from '@/hooks/useIntegrations';
 import { Sparkles, Upload, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from '@/lib/toast';
+import type { AccountingProvider } from '@/types/integrations';
 
 interface ExportToIntegrationButtonProps {
   /** Typ av data som ska exporteras */
@@ -35,18 +36,20 @@ export function ExportToIntegrationButton({
   className = '',
 }: ExportToIntegrationButtonProps) {
   const router = useRouter();
-  const { data: integrations, isLoading: isLoadingIntegrations } = useIntegrations();
-  const exportMutation = useExportToFortnox();
+  const { data: integrationStatus, isLoading: isLoadingIntegrations } = useIntegrationStatus();
+  const syncInvoiceMutation = useSyncInvoice();
+  const syncCustomerMutation = useSyncCustomer();
   const [isChecking, setIsChecking] = useState(false);
 
   // Hitta Fortnox integration
-  const fortnoxIntegration = integrations?.find(int => int.provider === 'fortnox' && int.status === 'connected');
-  const vismaIntegration = integrations?.find(int => 
-    (int.provider === 'visma_eaccounting' || int.provider === 'visma_payroll') && int.status === 'connected'
+  const fortnoxIntegration = integrationStatus?.integrations?.find(int => int.provider === 'fortnox' && int.status === 'active');
+  const vismaIntegration = integrationStatus?.integrations?.find(int => 
+    int.provider === 'visma' && int.status === 'active'
   );
 
   const hasConnectedIntegration = !!fortnoxIntegration || !!vismaIntegration;
-  const isExporting = exportMutation.isPending || isChecking;
+  const provider: AccountingProvider | null = fortnoxIntegration ? 'fortnox' : vismaIntegration ? 'visma' : null;
+  const isExporting = syncInvoiceMutation.isPending || syncCustomerMutation.isPending || isChecking;
 
   // Get resource type name in Swedish
   const getResourceTypeName = () => {
@@ -65,38 +68,37 @@ export function ExportToIntegrationButton({
   // Get integration name
   const getIntegrationName = () => {
     if (fortnoxIntegration) return 'Fortnox';
-    if (vismaIntegration) {
-      if (vismaIntegration.provider === 'visma_eaccounting') return 'Visma eAccounting';
-      if (vismaIntegration.provider === 'visma_payroll') return 'Visma Payroll';
-      return 'Visma';
-    }
+    if (vismaIntegration) return 'Visma';
     return 'Fortnox/Visma';
   };
 
   const handleExport = async () => {
-    if (!hasConnectedIntegration) {
+    if (!hasConnectedIntegration || !provider) {
       toast.error('Ingen integration ansluten. Anslut till Fortnox eller Visma först i Inställningar → Integrationer');
-      router.push('/settings/integrations');
+      router.push('/integrations');
       return;
     }
 
     setIsChecking(true);
 
     try {
-      const integrationId = fortnoxIntegration?.id || vismaIntegration?.id;
-      if (!integrationId) {
-        toast.error('Integration ID saknas');
-        return;
-      }
-
       // Single export
       if (!resourceIds) {
-        await exportMutation.mutateAsync({
-          integrationId,
-          type: type === 'customer' ? 'customer' : 'invoice',
-          id: resourceId,
-        });
-        toast.success(`${getResourceTypeName().charAt(0).toUpperCase() + getResourceTypeName().slice(1)} köad för export`);
+        if (type === 'customer') {
+          await syncCustomerMutation.mutateAsync({
+            clientId: resourceId,
+            provider,
+          });
+        } else if (type === 'invoice') {
+          await syncInvoiceMutation.mutateAsync({
+            invoiceId: resourceId,
+            provider,
+          });
+        } else {
+          toast.error('Projekt kan inte exporteras ännu');
+          return;
+        }
+        toast.success(`${getResourceTypeName().charAt(0).toUpperCase() + getResourceTypeName().slice(1)} synkad till ${getIntegrationName()}`);
       } else {
         // Bulk export - export each one
         let successCount = 0;
@@ -104,11 +106,17 @@ export function ExportToIntegrationButton({
 
         for (const id of resourceIds) {
           try {
-            await exportMutation.mutateAsync({
-              integrationId,
-              type: type === 'customer' ? 'customer' : 'invoice',
-              id,
-            });
+            if (type === 'customer') {
+              await syncCustomerMutation.mutateAsync({
+                clientId: id,
+                provider,
+              });
+            } else if (type === 'invoice') {
+              await syncInvoiceMutation.mutateAsync({
+                invoiceId: id,
+                provider,
+              });
+            }
             successCount++;
           } catch (error) {
             errorCount++;
@@ -117,15 +125,15 @@ export function ExportToIntegrationButton({
         }
 
         if (successCount > 0) {
-          toast.success(`${successCount} ${getResourceTypeName()} köade för export`);
+          toast.success(`${successCount} ${getResourceTypeName()} synkade till ${getIntegrationName()}`);
         }
         if (errorCount > 0) {
-          toast.error(`${errorCount} ${getResourceTypeName()} kunde inte exporteras`);
+          toast.error(`${errorCount} ${getResourceTypeName()} kunde inte synkas`);
         }
       }
     } catch (error: any) {
       console.error('Export error:', error);
-      toast.error(`Export misslyckades: ${error?.message || 'Ett oväntat fel uppstod'}`);
+      toast.error(`Synkronisering misslyckades: ${error?.message || 'Ett oväntat fel uppstod'}`);
     } finally {
       setIsChecking(false);
     }

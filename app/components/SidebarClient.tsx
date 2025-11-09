@@ -25,6 +25,9 @@ const navItems: NavItem[] = [
   { name: 'Materialdatabas', href: '/materials', icon: '📦', gradient: 'from-teal-500 to-green-600' },
   { name: 'KMA', href: '/kma', icon: '🌱', gradient: 'from-lime-500 to-green-600' },
   { name: 'Fakturor', href: '/invoices', icon: '🧾', gradient: 'from-teal-500 to-green-600' },
+  { name: 'Leverantörsfakturor', href: '/supplier-invoices', icon: '📥', gradient: 'from-emerald-500 to-teal-600' },
+  { name: 'Löneexport', href: '/payroll/periods', icon: '💰', gradient: 'from-purple-500 to-pink-600' },
+  { name: 'Lönespec', href: '/payroll', icon: '💵', gradient: 'from-green-500 to-teal-600' },
   { name: 'Rapporter', href: '/reports', icon: '📈', gradient: 'from-green-500 to-emerald-600' },
   { name: 'Kalender', href: '/calendar', icon: '📅', gradient: 'from-purple-500 to-pink-600' },
   { name: 'Arbetsordrar', href: '/work-orders', icon: '📋', gradient: 'from-orange-500 to-red-600' },
@@ -34,10 +37,11 @@ const navItems: NavItem[] = [
   { name: 'Feedback', href: '/feedback', icon: '💬', gradient: 'from-green-500 to-emerald-600' },
   { name: 'FAQ', href: '/faq', icon: '❓', gradient: 'from-blue-500 to-indigo-600' },
   { name: 'Utseende', href: '/settings/utseende', icon: '🎨', gradient: 'from-indigo-500 to-purple-600' },
+  { name: 'Integrationer', href: '/integrations', icon: '🔗', gradient: 'from-fuchsia-500 to-purple-600' },
 ]
 
 const adminNavItems: NavItem[] = [
-  { name: 'Integrationer', href: '/settings/integrations', icon: '🔌', gradient: 'from-violet-500 to-fuchsia-600' },
+  // Integrationer finns redan i navItems, inga extra admin-items behövs
 ]
 
 export default function SidebarClient() {
@@ -47,6 +51,12 @@ export default function SidebarClient() {
   const { isAdmin, loading: adminLoading } = useAdmin()
   const [isOpen, setIsOpen] = useState(false) // Start closed on mobile
   const [showSearchBar, setShowSearchBar] = useState(false)
+  const [isMounted, setIsMounted] = useState(false)
+
+  // Fix hydration mismatch - only render client-side content after mount
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   // Debug: Log admin status (bara i development, client-side only)
   useEffect(() => {
@@ -157,7 +167,8 @@ export default function SidebarClient() {
             })}
             
             {/* Admin-only items - Visa alltid om användaren är admin */}
-            {adminNavItems.length > 0 && isAdmin && (
+            {/* Only render admin items after mount to prevent hydration mismatch */}
+            {isMounted && adminNavItems.length > 0 && isAdmin && (
               <>
                 <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
                   <p className="px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
@@ -217,7 +228,7 @@ export default function SidebarClient() {
               <span>{theme === 'light' ? 'Mörkt läge' : 'Ljust läge'}</span>
             </button>
             
-            {!adminLoading && isAdmin && (
+            {isMounted && !adminLoading && isAdmin && (
               <>
                 <button
                   onClick={() => router.push('/admin')}

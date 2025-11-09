@@ -1,9 +1,9 @@
 // app/settings/integrations/page.tsx
 "use client";
 
-import { Suspense, useMemo } from 'react';
+import { Suspense } from 'react';
 import { useAdmin } from '@/hooks/useAdmin';
-import { useIntegrations } from '@/hooks/useIntegrations';
+import { useIntegrationStatus, useConnectIntegration, useDisconnectIntegration } from '@/hooks/useIntegrations';
 import { Loader2, Lock, AlertTriangle, Info } from 'lucide-react';
 import Sidebar from '@/components/SidebarClient';
 
@@ -11,6 +11,7 @@ import Sidebar from '@/components/SidebarClient';
 import { IntegrationCard } from '@/components/integrations/IntegrationCard';
 import { IntegrationWarning } from '@/components/integrations/IntegrationWarning';
 import { OAuthCallbackHandler } from '@/components/integrations/OAuthCallbackHandler';
+import type { AccountingProvider } from '@/types/integrations';
 
 /**
  * Huvudsida för hantering av integrationer (t.ex. Fortnox).
@@ -18,38 +19,14 @@ import { OAuthCallbackHandler } from '@/components/integrations/OAuthCallbackHan
  */
 export default function IntegrationsPage() {
   const { isAdmin, isLoading: isAdminLoading } = useAdmin();
-  const { data: integrations, isLoading: isLoadingIntegrations, isError } = useIntegrations();
+  const { data: integrationStatus, isLoading: isLoadingIntegrations, isError } = useIntegrationStatus();
+  const connectMutation = useConnectIntegration();
+  const disconnectMutation = useDisconnectIntegration();
+  const integrations = integrationStatus?.integrations || [];
   
-  // Filtrera bort dubbletter - säkerhetsåtgärd även om API:et redan filtrerar
-  // Prioritera: 1) Anslutna integrationer, 2) Senaste skapade
-  // VIKTIGT: useMemo måste vara FÖRE alla villkorliga returns (Rules of Hooks)
-  const uniqueIntegrations = useMemo(() => {
-    if (!integrations || integrations.length === 0) return [];
-    
-    // Om API:et redan filtrerat korrekt, bara returnera integrations
-    // Men gör en extra kontroll för säkerhets skull
-    const providerMap = new Map<string, typeof integrations[0]>();
-    
-    // Sortera integrationer: anslutna först, sedan efter created_at (nyaste först)
-    const sorted = [...integrations].sort((a, b) => {
-      // Anslutna integrationer först
-      if (a.status === 'connected' && b.status !== 'connected') return -1;
-      if (a.status !== 'connected' && b.status === 'connected') return 1;
-      // Sedan sortera efter created_at (nyaste först)
-      const aTime = new Date(a.created_at).getTime();
-      const bTime = new Date(b.created_at).getTime();
-      return bTime - aTime;
-    });
-    
-    // Ta första integrationen per provider
-    for (const integration of sorted) {
-      if (!providerMap.has(integration.provider)) {
-        providerMap.set(integration.provider, integration);
-      }
-    }
-    
-    return Array.from(providerMap.values());
-  }, [integrations]);
+  // Hitta integrationer per provider
+  const fortnoxIntegration = integrations.find(int => int.provider === 'fortnox');
+  const vismaIntegration = integrations.find(int => int.provider === 'visma');
   
   // Hantera laddning av data
   if (isAdminLoading || isLoadingIntegrations) {
@@ -157,16 +134,37 @@ export default function IntegrationsPage() {
               - 3 kolumner på desktop (xl:grid-cols-3)
               Detta löser hela ditt layout-problem.
             */}
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-              {uniqueIntegrations.map((integration) => (
-                <IntegrationCard
-                  key={integration.id}
-                  integration={integration}
-                />
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Fortnox Card */}
+              <IntegrationCard
+                provider="fortnox"
+                integration={fortnoxIntegration}
+                onConnect={() => connectMutation.mutate('fortnox')}
+                onDisconnect={() => {
+                  if (confirm('Är du säker på att du vill koppla från Fortnox?')) {
+                    disconnectMutation.mutate('fortnox');
+                  }
+                }}
+                isConnecting={connectMutation.isPending}
+                isDisconnecting={disconnectMutation.isPending}
+              />
+
+              {/* Visma Card */}
+              <IntegrationCard
+                provider="visma"
+                integration={vismaIntegration}
+                onConnect={() => connectMutation.mutate('visma')}
+                onDisconnect={() => {
+                  if (confirm('Är du säker på att du vill koppla från Visma?')) {
+                    disconnectMutation.mutate('visma');
+                  }
+                }}
+                isConnecting={connectMutation.isPending}
+                isDisconnecting={disconnectMutation.isPending}
+              />
 
               {/* Om inga integrationer finns, visa meddelande */}
-              {uniqueIntegrations.length === 0 && (
+              {!fortnoxIntegration && !vismaIntegration && (
                 <div className="col-span-full">
                   <IntegrationWarning variant="info" title="Inga integrationer hittades">
                     Det finns inga integrationer konfigurerade ännu. Integrationer skapas automatiskt när du försöker ansluta till en tjänst.

@@ -1,21 +1,5 @@
 {
-  "node": {
-    "403bf0b0904c8c6eb75f93a4fb98336d23c46ea1ac": {
-      "workers": {
-        "app/projects/page": {
-          "moduleId": "[project]/frost-demo/.next-internal/server/app/projects/page/actions.js { ACTIONS_MODULE0 => \"[project]/frost-demo/app/projects/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false,
-          "exportedName": "createProject",
-          "filename": "frost-demo/app/projects/actions.ts"
-        }
-      },
-      "layer": {
-        "app/projects/page": "action-browser"
-      },
-      "filename": "frost-demo/app/projects/actions.ts",
-      "exportedName": "createProject"
-    }
-  },
+  "node": {},
   "edge": {},
-  "encryptionKey": "AsAM/KEsDY+g2DyQPeELn+OsRp8ka8qEFNKV8y2ElXg="
+  "encryptionKey": "120WMcLJAn3WB3HgMUkQPwtuFvCB5wAqMnWaDbFmEVU="
 }

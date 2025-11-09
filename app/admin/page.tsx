@@ -7,6 +7,7 @@ import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { DashboardAnalytics } from '@/components/analytics/DashboardAnalytics'
 import AISummary from '@/components/AISummary'
+import { toast } from '@/lib/toast'
 
 interface Employee {
   id: string
@@ -37,6 +38,32 @@ export default function AdminPage() {
   const [projects, setProjects] = useState<Project[]>([])
   const [invoices, setInvoices] = useState<Invoice[]>([])
   const [loading, setLoading] = useState(true)
+  const [approvingAll, setApprovingAll] = useState(false)
+
+  async function handleApproveAll() {
+    setApprovingAll(true)
+    try {
+      const res = await fetch('/api/time-entries/approve-all', {
+        method: 'POST'
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        throw new Error(data.error || 'Kunde inte godkänna tidsrapporter')
+      }
+
+      toast.success(
+        data.updated
+          ? `Godkände ${data.updated} tidsrapporter`
+          : 'Alla tidsrapporter godkändes'
+      )
+    } catch (err: any) {
+      toast.error('Fel vid massgodkännande: ' + err.message)
+    } finally {
+      setApprovingAll(false)
+    }
+  }
 
   useEffect(() => {
     if (!tenantId) {
@@ -182,6 +209,15 @@ export default function AdminPage() {
           <div className="mb-6 sm:mb-8">
             <h1 className="text-3xl sm:text-4xl font-black text-gray-900 mb-1 sm:mb-2">Admin Dashboard</h1>
             <p className="text-sm sm:text-base text-gray-500">Översikt över företaget</p>
+            <div className="mt-4">
+              <button
+                onClick={handleApproveAll}
+                disabled={approvingAll}
+                className="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-lg font-semibold shadow hover:shadow-lg transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {approvingAll ? 'Godkänner alla tidsrapporter...' : 'Godkänn alla tidsrapporter'}
+              </button>
+            </div>
           </div>
 
           {/* Stats */}

@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { getTenantId } from '@/lib/serverTenant'
+import { resolveTimeEntryContext, getTimeEntryColumnSet, TimeEntryContextError } from '../_utils'
 
 /**
  * API route för att hämta time_entries med service role
@@ -9,110 +7,28 @@ import { getTenantId } from '@/lib/serverTenant'
  */
 export async function GET(req: Request) {
   try {
-    const supabase = createClient()
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    const { tenantId, adminSupabase, isAdmin, employeeId } = await resolveTimeEntryContext()
 
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
-    }
-
-    let tenantId = await getTenantId()
+    // CRITICAL FIX: Always explicitly include approval columns
+    // Don't rely on columnSet detection - always try to include them
+    // Use '*' to get all columns, then explicitly add approval columns
+    const selectString = `
+      *,
+      approval_status,
+      approved_at,
+      approved_by
+    `.trim().replace(/\s+/g, ' ');
     
-    if (!tenantId) {
-      // Try to get tenant from employee record
-      const { data: employeeData } = await supabase
-        .from('employees')
-        .select('tenant_id')
-        .eq('auth_user_id', user.id)
-        .maybeSingle()
-      
-      if (employeeData?.tenant_id) {
-        tenantId = employeeData.tenant_id
-      }
-    }
-    
-    if (!tenantId) {
-      console.error('❌ No tenant ID found for user:', user.id)
-      return NextResponse.json({ error: 'No tenant ID found' }, { status: 400 })
-    }
-
-    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (!supabaseUrl || !serviceKey) {
-      return NextResponse.json(
-        { error: 'Service role key not configured' },
-        { status: 500 }
-      )
-    }
-
-    const adminSupabase = createAdminClient(supabaseUrl, serviceKey)
-
-    // Check if user is admin - WITHOUT tenant filter first to find employee
-    const { data: employeeData } = await adminSupabase
-      .from('employees')
-      .select('id, role, tenant_id')
-      .eq('auth_user_id', user.id)
-      .maybeSingle()
-
-    // If employee has a tenant_id, use that (it's the correct one from database)
-    if (employeeData?.tenant_id) {
-      // Verify the employee's tenant exists
-      const { data: empTenantExists } = await adminSupabase
-        .from('tenants')
-        .select('id')
-        .eq('id', employeeData.tenant_id)
-        .maybeSingle()
-      
-      if (empTenantExists) {
-        tenantId = employeeData.tenant_id
-        console.log('✅ Using tenant from employee record:', tenantId)
-      } else {
-        console.log('⚠️ Employee tenant does not exist, keeping original tenant')
-      }
-    }
-
-    // Verify tenant exists (final check)
-    const { data: tenantExists } = await adminSupabase
-      .from('tenants')
-      .select('id')
-      .eq('id', tenantId)
-      .maybeSingle()
-
-    if (!tenantExists) {
-      console.error('❌ Final tenant does not exist:', tenantId)
-      // Try to find ANY tenant from time entries
-      const { data: anyTimeEntry } = await adminSupabase
-        .from('time_entries')
-        .select('tenant_id')
-        .limit(1)
-        .maybeSingle()
-      
-      if (anyTimeEntry?.tenant_id) {
-        tenantId = anyTimeEntry.tenant_id
-        console.log('🔄 Using tenant from any time entry:', tenantId)
-      }
-    }
-
-    const isAdmin = employeeData?.role === 'admin' || employeeData?.role === 'Admin'
-    const employeeId = employeeData?.id || null
-
-    console.log('🔍 API: Fetching time entries', {
-      tenantId,
-      isAdmin,
-      employeeId,
-      tenantExists: !!tenantExists,
-      employeeTenantId: employeeData?.tenant_id
-    })
+    console.log('[List API] Using explicit SELECT with approval columns');
 
     // Handle date filter if provided
     const { searchParams } = new URL(req.url);
     const dateFilter = searchParams.get('date'); // YYYY-MM-DD format
     
-    // Build query - try to get ALL entries first to see what exists
+    // Build query - CRITICAL: Använd selectString som inkluderar approval-kolumnerna
     let query = adminSupabase
       .from('time_entries')
-      .select('id, date, hours_total, ob_type, project_id, employee_id, start_time, end_time, tenant_id')
+      .select(selectString)
       .eq('tenant_id', tenantId)
       .order('date', { ascending: false })
       .order('start_time', { ascending: false })
@@ -131,17 +47,86 @@ export async function GET(req: Request) {
     const { data: entries, error } = await query
 
     if (error) {
-      console.error('❌ Error fetching time entries:', error)
+      console.error('[List API] ❌ Error fetching time entries:', error)
+      
+      // Om felet är relaterat till kolumner som inte finns, försök med explicit lista
+      if (error.message?.includes('column') || error.code === '42703') {
+        console.log('[List API] ⚠️ Column error detected, retrying with explicit column list')
+        
+        // Explicit lista utan approval-kolumner först
+        const fallbackColumns = [
+          'id', 'date', 'hours_total', 'ob_type', 'project_id', 
+          'employee_id', 'start_time', 'end_time', 'tenant_id'
+        ]
+        
+        let fallbackQuery = adminSupabase
+          .from('time_entries')
+          .select(fallbackColumns.join(', '))
+          .eq('tenant_id', tenantId)
+          .order('date', { ascending: false })
+          .order('start_time', { ascending: false })
+          .limit(100)
+        
+        if (dateFilter) {
+          fallbackQuery = fallbackQuery.eq('date', dateFilter)
+        }
+        if (!isAdmin && employeeId) {
+          fallbackQuery = fallbackQuery.eq('employee_id', employeeId)
+        }
+        
+        const { data: fallbackEntries, error: fallbackError } = await fallbackQuery
+        
+        if (fallbackError) {
+          return NextResponse.json(
+            { error: fallbackError.message || 'Failed to fetch time entries', details: fallbackError },
+            { 
+              status: 500,
+              headers: { 'Cache-Control': 'no-store' }
+            }
+          )
+        }
+        
+        console.log('[List API] ✅ Found entries (fallback, no approval columns)', {
+          count: fallbackEntries?.length || 0,
+          tenantId,
+        })
+        
+        return NextResponse.json({
+          timeEntries: fallbackEntries || [],
+          entries: fallbackEntries || [],
+          isAdmin,
+          employeeId,
+          tenantId,
+          count: fallbackEntries?.length || 0
+        }, {
+          headers: { 'Cache-Control': 'no-store' }
+        })
+      }
+      
       return NextResponse.json(
         { error: error.message || 'Failed to fetch time entries', details: error },
-        { status: 500 }
+        { 
+          status: 500,
+          headers: { 'Cache-Control': 'no-store' }
+        }
       )
     }
+
+    // Logga approval-status för första raderna för debugging
+    const sampleWithApproval = entries?.slice(0, 5).map(e => ({
+      id: e.id,
+      hours: e.hours_total,
+      date: e.date,
+      approval_status: e.approval_status,
+      approved_at: e.approved_at,
+      status: e.status,
+    }))
 
     console.log('✅ API: Found entries', {
       count: entries?.length || 0,
       tenantId,
-      sample: entries?.slice(0, 3).map(e => ({ id: e.id, hours: e.hours_total, date: e.date, tenant_id: e.tenant_id }))
+      sample: sampleWithApproval,
+      approvalStatusCount: entries?.filter((e: any) => e.approval_status === 'approved').length || 0,
     })
 
     // If no entries found, try to find any entries for this employee regardless of tenant
@@ -158,15 +143,25 @@ export async function GET(req: Request) {
       }
     }
 
+    // CRITICAL: Add cache headers to prevent stale data
     return NextResponse.json({
       timeEntries: entries || [],
-      entries: entries || [], // Both formats for compatibility
+      entries: entries || [],
       isAdmin,
       employeeId,
       tenantId,
       count: entries?.length || 0
+    }, {
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      }
     })
   } catch (err: any) {
+    if (err instanceof TimeEntryContextError) {
+      return NextResponse.json({ error: err.message }, { status: err.status })
+    }
     console.error('❌ Unexpected error in time-entries/list:', err)
     return NextResponse.json(
       { error: 'Internal server error', details: err.message },

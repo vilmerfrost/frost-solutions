@@ -101,7 +101,7 @@ forward-logs-shared.ts:95 ✅ Sync completed successfully
 :3000/api/integrations:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
 :3000/api/integrations:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
 :3000/api/integrations:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
-
+npm
 ```
 
 ### 3. Starta Dev Server
