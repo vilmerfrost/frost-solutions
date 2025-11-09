@@ -171,8 +171,14 @@ export async function GET(
   } catch (error: any) {
     console.error('[OAuth Callback] ❌ FATAL ERROR:', error);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
+    
+    // Get base URL for error redirect
+    const host = request.headers.get('host');
+    const protocol = request.headers.get('x-forwarded-proto') || 'http';
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
+    
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_APP_URL}/integrations?error=unknown&message=${encodeURIComponent(error.message)}`
+      `${baseUrl}/integrations?error=unknown&message=${encodeURIComponent(error.message)}`
     );
   }
 }
