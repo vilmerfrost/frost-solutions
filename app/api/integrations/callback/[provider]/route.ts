@@ -48,7 +48,7 @@ export async function GET(
         description: errorDescription,
       });
       return NextResponse.redirect(
-        `${baseUrl}/integrations?error=${error}&message=${errorDescription}`
+        `${baseUrl}/settings/integrations?error=${error}&message=${errorDescription}`
       );
     }
 
@@ -56,7 +56,7 @@ export async function GET(
     if (!code || !state) {
       console.error('[OAuth Callback] ❌ Missing required parameters');
       return NextResponse.redirect(
-        `${baseUrl}/integrations?error=invalid_request`
+        `${baseUrl}/settings/integrations?error=invalid_request`
       );
     }
 
@@ -85,7 +85,7 @@ export async function GET(
     } catch (stateError: any) {
       console.error('[OAuth Callback] ❌ Invalid state:', stateError);
       return NextResponse.redirect(
-        `${baseUrl}/integrations?error=invalid_state`
+        `${baseUrl}/settings/integrations?error=invalid_state`
       );
     }
 
@@ -117,7 +117,7 @@ export async function GET(
     } catch (tokenError: any) {
       console.error('[OAuth Callback] ❌ Token exchange failed:', tokenError);
       return NextResponse.redirect(
-        `${baseUrl}/integrations?error=token_exchange_failed`
+        `${baseUrl}/settings/integrations?error=token_exchange_failed`
       );
     }
 
@@ -129,7 +129,7 @@ export async function GET(
     } catch (vaultError: any) {
       console.error('[OAuth Callback] ❌ Failed to store tokens:', vaultError);
       return NextResponse.redirect(
-        `${baseUrl}/integrations?error=token_storage_failed`
+        `${baseUrl}/settings/integrations?error=token_storage_failed`
       );
     }
 
@@ -172,7 +172,7 @@ export async function GET(
     if (dbError) {
       console.error('[OAuth Callback] ❌ Database error:', dbError);
       return NextResponse.redirect(
-        `${baseUrl}/integrations?error=database_error`
+        `${baseUrl}/settings/integrations?error=database_error`
       );
     }
 
@@ -182,7 +182,7 @@ export async function GET(
 
     // Redirect to success page
     return NextResponse.redirect(
-      `${baseUrl}/integrations?success=true&provider=${provider}`
+      `${baseUrl}/settings/integrations?success=true&provider=${provider}`
     );
   } catch (error: any) {
     console.error('[OAuth Callback] ❌ FATAL ERROR:', error);
@@ -194,7 +194,7 @@ export async function GET(
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
     
     return NextResponse.redirect(
-      `${baseUrl}/integrations?error=unknown&message=${encodeURIComponent(error.message)}`
+      `${baseUrl}/settings/integrations?error=unknown&message=${encodeURIComponent(error.message)}`
     );
   }
 }

@@ -40,7 +40,6 @@ Du kommer behöva dessa exakta värden när du registrerar i portalerna.
 ### 2.1 Logga in på Fortnox Developer Portal
 
 **URL:** https://developer.fortnox.se/
-
 1. Logga in med ditt Fortnox-konto
 2. Gå till **"Mina Appar"** (My Applications)
 3. Välj din applikation (eller skapa ny om du inte har en)
@@ -101,6 +100,12 @@ Klicka på **"Spara"** eller **"Update"** efter att du lagt till URIs.
 
 ### 3.3 Lägg till Redirect URIs
 
+**⚠️ VIKTIGT: Rätt path!**
+Den korrekta path är `/api/integrations/callback/visma` (callback FÖRE visma).
+
+**❌ FEL:** `/api/integrations/visma/callback`  
+**✅ RÄTT:** `/api/integrations/callback/visma`
+
 **För Development (localhost):**
 ```
 http://localhost:3000/api/integrations/callback/visma
@@ -116,16 +121,42 @@ https://din-domän.se/api/integrations/callback/visma
 https://staging.din-domän.se/api/integrations/callback/visma
 ```
 
-### 3.4 Visma-specifika krav
+### 3.4 Visma Spiris Support (Om du behöver ändra Redirect URI)
+
+Om du redan har registrerat en felaktig redirect URI (t.ex. `/api/integrations/visma/callback` istället för `/api/integrations/callback/visma`), behöver du kontakta Spiris support för att ändra den.
+
+**Support Email:** support@spiris.se eller api@spiris.se
+
+**Vad du behöver skicka:**
+1. Ditt Client ID (t.ex. `frostsoultionssandbox`)
+2. Den korrekta redirect URI: `http://localhost:3000/api/integrations/callback/visma`
+
+**Exempel på email:**
+```
+Hej!
+
+Jag behöver ändra min redirect URI för Visma eAccounting integration.
+
+Client ID: [ditt_client_id]
+Ny Redirect URI: http://localhost:3000/api/integrations/callback/visma
+
+Tack!
+```
+
+**Notera:** HTTP är endast tillåtet i Sandbox-miljön. För production krävs HTTPS.
+
+### 3.5 Visma-specifika krav
 
 - ✅ **HTTPS krävs i production** (Visma tillåter endast HTTP för localhost)
 - ✅ **Ingen trailing slash**
 - ✅ **Exakt matchning** - varje tecken måste stämma
+- ✅ **Rätt path-ordning** - `/callback/visma` inte `/visma/callback`
 - ❌ **Inga wildcards**
 
-### 3.5 Spara inställningar
+### 3.6 Spara inställningar
 
-Klicka på **"Save"** eller **"Update"** efter att du lagt till URIs.
+Om du kan redigera själv: Klicka på **"Save"** eller **"Update"** efter att du lagt till URIs.  
+Om du behöver support: Vänta på bekräftelse från Spiris att redirect URI är uppdaterad.
 
 ---
 
