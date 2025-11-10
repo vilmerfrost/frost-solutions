@@ -4,7 +4,6 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import { useAdmin } from '@/hooks/useAdmin'
-import NotificationCenter from '@/components/NotificationCenter'
 import { SafeOnlineStatusIndicator } from '@/components/SafeSyncComponents'
 import { SearchBar } from '@/components/search/SearchBar'
 
@@ -37,7 +36,9 @@ const navItems: NavItem[] = [
   { name: 'Feedback', href: '/feedback', icon: '💬', gradient: 'from-green-500 to-emerald-600' },
   { name: 'FAQ', href: '/faq', icon: '❓', gradient: 'from-blue-500 to-indigo-600' },
   { name: 'Utseende', href: '/settings/utseende', icon: '🎨', gradient: 'from-indigo-500 to-purple-600' },
-  { name: 'Integrationer', href: '/integrations', icon: '🔗', gradient: 'from-fuchsia-500 to-purple-600' },
+  { name: 'Integrationer', href: '/settings/integrations', icon: '🔗', gradient: 'from-fuchsia-500 to-purple-600' },
+  { name: 'Följesedlar', href: '/delivery-notes', icon: '📋', gradient: 'from-blue-500 to-indigo-600' },
+  { name: 'Arbetsflöden', href: '/workflows', icon: '⚙️', gradient: 'from-indigo-500 to-purple-600' },
 ]
 
 const adminNavItems: NavItem[] = [
@@ -49,13 +50,11 @@ export default function SidebarClient() {
   const router = useRouter()
   const { theme, toggleTheme } = useTheme()
   const { isAdmin, loading: adminLoading } = useAdmin()
-  const [isOpen, setIsOpen] = useState(false) // Start closed on mobile
-  const [showSearchBar, setShowSearchBar] = useState(false)
-  const [isMounted, setIsMounted] = useState(false)
+  const [isOpen, setIsOpen] = useState(false)
+  const [hydrated, setHydrated] = useState(false)
 
-  // Fix hydration mismatch - only render client-side content after mount
   useEffect(() => {
-    setIsMounted(true)
+    setHydrated(true)
   }, [])
 
   // Debug: Log admin status (bara i development, client-side only)
@@ -65,9 +64,9 @@ export default function SidebarClient() {
     }
   }, [isAdmin, adminLoading])
 
-  useEffect(() => {
-    setShowSearchBar(true)
-  }, [])
+  if (!hydrated) {
+    return null
+  }
 
   return (
     <>
@@ -115,18 +114,7 @@ export default function SidebarClient() {
             </div>
             {/* Global Search Bar */}
             <div className="mt-4">
-              {showSearchBar ? (
-                <SearchBar />
-              ) : (
-                <div className="relative w-full max-w-2xl mx-auto">
-                  <div className="relative animate-pulse">
-                    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-                      <div className="w-5 h-5 rounded-full bg-gray-200 dark:bg-gray-700" />
-                    </div>
-                    <div className="w-full pl-12 pr-24 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-800" />
-                  </div>
-                </div>
-              )}
+              <SearchBar />
             </div>
           </div>
 
@@ -167,8 +155,7 @@ export default function SidebarClient() {
             })}
             
             {/* Admin-only items - Visa alltid om användaren är admin */}
-            {/* Only render admin items after mount to prevent hydration mismatch */}
-            {isMounted && adminNavItems.length > 0 && isAdmin && (
+            {adminNavItems.length > 0 && isAdmin && (
               <>
                 <div className="pt-4 mt-4 border-t border-gray-200 dark:border-gray-700">
                   <p className="px-4 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2">
@@ -228,7 +215,7 @@ export default function SidebarClient() {
               <span>{theme === 'light' ? 'Mörkt läge' : 'Ljust läge'}</span>
             </button>
             
-            {isMounted && !adminLoading && isAdmin && (
+            {!adminLoading && isAdmin && (
               <>
                 <button
                   onClick={() => router.push('/admin')}

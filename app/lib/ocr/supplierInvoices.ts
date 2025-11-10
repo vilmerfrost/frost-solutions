@@ -1,8 +1,46 @@
 // app/lib/ocr/supplierInvoices.ts
+import fs from 'node:fs'
+import path from 'node:path'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { createClient } from '@supabase/supabase-js'
-import Tesseract from 'tesseract.js'
 import type { OCRResult } from '@/types/supplierInvoices'
+
+type TesseractModule = typeof import('tesseract.js')
+
+let tesseractPromise: Promise<TesseractModule | null> | null = null
+
+async function loadTesseract(): Promise<TesseractModule | null> {
+  if (!tesseractPromise) {
+    tesseractPromise = import('tesseract.js')
+      .then((mod) => (mod.default ? (mod.default as unknown as TesseractModule) : (mod as unknown as TesseractModule)))
+      .catch((err) => {
+        console.error('Failed to load tesseract.js', err)
+        return null
+      })
+  }
+  return tesseractPromise
+}
+
+function resolveTesseractPaths() {
+  try {
+    const root = process.cwd()
+    const workerPath = path.resolve(root, 'node_modules/tesseract.js/src/worker-script/node/index.js')
+    const corePath = path.resolve(root, 'node_modules/tesseract.js-core/tesseract-core.wasm.js')
+
+    if (!fs.existsSync(workerPath) || !fs.existsSync(corePath)) {
+      throw new Error('Resolved tesseract assets not found on disk')
+    }
+
+    return {
+      workerPath,
+      corePath,
+      langPath: 'https://tessdata.projectnaptha.com/4.0.0_fast/', // Remote tessdata
+    }
+  } catch (err) {
+    console.warn('Unable to resolve tesseract.js paths, falling back to defaults', err)
+    return undefined
+  }
+}
 
 async function uploadToStorage(tenantId: string, fileName: string, buf: Buffer): Promise<string> {
   const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -33,8 +71,15 @@ async function uploadToStorage(tenantId: string, fileName: string, buf: Buffer):
 
 export async function scanInvoiceWithTesseract(buffer: Buffer): Promise<OCRResult> {
   try {
-    const { data } = await Tesseract.recognize(buffer, 'eng+swe', {
-      logger: () => {} // Suppress logs
+    const tesseract = await loadTesseract()
+    if (!tesseract) {
+      throw new Error('tesseract.js could not be loaded')
+    }
+
+    const customPaths = resolveTesseractPaths()
+    const { data } = await tesseract.recognize(buffer, 'eng+swe', {
+      logger: () => {},
+      ...(customPaths ?? {}),
     })
 
     const text = data?.text ?? ''
@@ -150,21 +195,34 @@ export async function processScannedInvoice(
   supplierId: string,
   projectId: string | null,
   tenantId: string,
-  options?: { useVision?: boolean }
+  options?: { useVision?: boolean; createdBy?: string | null; mimeType?: string }
 ): Promise<{ invoiceId: string; ocrResult: OCRResult }> {
-  const admin = createAdminClient()
+  const admin = createAdminClient() // Use default 'public' schema for RPC calls
 
   // 1) OCR
-  let ocr: OCRResult
+  const mimeType = options?.mimeType ?? ''
+  const isImage = mimeType.startsWith('image/')
+  const hasVisionKey = Boolean(process.env.GOOGLE_VISION_API_KEY)
+  const preferVision = options?.useVision || (!isImage && hasVisionKey)
+
+  let ocr: OCRResult | null = null
+
   try {
-    if (options?.useVision && process.env.GOOGLE_VISION_API_KEY) {
+    if (!preferVision && isImage) {
+      ocr = await scanInvoiceWithTesseract(fileBuffer)
+    } else if (hasVisionKey) {
       ocr = await scanInvoiceWithGoogleVision(fileBuffer, process.env.GOOGLE_VISION_API_KEY)
     } else {
-      ocr = await scanInvoiceWithTesseract(fileBuffer)
+      console.warn('[OCR] Skipping OCR providers for mime type:', mimeType || 'okänt')
     }
 
     // If confidence too low, try Google Vision as fallback
-    if ((ocr.confidence ?? 0) < 75 && process.env.GOOGLE_VISION_API_KEY && !options?.useVision) {
+    if (
+      ocr &&
+      (ocr.confidence ?? 0) < 75 &&
+      hasVisionKey &&
+      !preferVision
+    ) {
       try {
         ocr = await scanInvoiceWithGoogleVision(fileBuffer, process.env.GOOGLE_VISION_API_KEY)
       } catch (visionError) {
@@ -173,6 +231,16 @@ export async function processScannedInvoice(
     }
   } catch (e) {
     console.error('OCR failed:', e)
+    if (hasVisionKey && !preferVision) {
+      try {
+        ocr = await scanInvoiceWithGoogleVision(fileBuffer, process.env.GOOGLE_VISION_API_KEY)
+      } catch (visionError) {
+        console.warn('Google Vision fallback after failure also failed:', visionError)
+      }
+    }
+  }
+
+  if (!ocr) {
     // Continue anyway, mark for manual review
     ocr = {
       text: '',
@@ -190,36 +258,86 @@ export async function processScannedInvoice(
   const conf = Math.max(0, Math.min(100, Number(ocr.confidence ?? 0)))
 
   // 4) Get user ID
-  const { data: { user } } = await admin.auth.getUser()
+  const createdBy = options?.createdBy ?? null
 
-  // 5) Create invoice (status depends on confidence)
-  const { data: created, error } = await admin
-    .from('supplier_invoices')
-    .insert({
-      tenant_id: tenantId,
-      supplier_id: supplierId,
-      project_id: projectId,
-      invoice_number: invoiceNumber,
-      invoice_date: ocr.fields?.invoiceDate || today,
-      status: conf >= 70 ? 'pending_approval' : 'draft',
-      ocr_confidence: conf,
-      file_path: storagePath,
-      created_by: user?.id || null
+  // 5) Create invoice using RPC function (handles both invoice and history in transaction)
+  // Use JSONB wrapper (v2) for better schema cache compatibility
+  console.log('[OCR] Calling RPC insert_supplier_invoice_v2 (JSONB wrapper)...')
+  
+  // Build payload object (order doesn't matter with JSONB!)
+  const payload = {
+    p_tenant_id: tenantId,
+    p_supplier_id: supplierId,
+    p_project_id: projectId || undefined, // Omit if null to use DEFAULT
+    p_file_path: storagePath,
+    p_file_size: fileBuffer.length,
+    p_mime_type: mimeType || 'application/pdf',
+    p_original_filename: fileName,
+    p_invoice_number: invoiceNumber || undefined,
+    p_invoice_date: ocr.fields?.invoiceDate || today,
+    p_status: conf >= 70 ? 'pending_approval' : 'draft',
+    p_ocr_confidence: conf > 0 ? conf : undefined,
+    p_ocr_data: ocr.text ? { text: ocr.text, confidence: conf } : undefined,
+    p_extracted_data: ocr.fields && Object.keys(ocr.fields).length > 0 ? ocr.fields : undefined,
+    p_created_by: createdBy || undefined
+  }
+  
+  // Remove undefined values (let PostgreSQL use DEFAULTs)
+  const cleanPayload = Object.fromEntries(
+    Object.entries(payload).filter(([_, value]) => value !== undefined)
+  )
+  
+  console.log('[OCR] RPC payload:', JSON.stringify(cleanPayload, null, 2))
+  
+  // Try v2 (JSONB wrapper) first, fallback to v1 if needed
+  let invoiceData: any = null
+  let rpcError: any = null
+  
+  try {
+    const { data, error } = await admin.rpc('insert_supplier_invoice_v2', {
+      p_payload: cleanPayload
     })
-    .select('id')
-    .single()
+    invoiceData = data
+    rpcError = error
+  } catch (err: any) {
+    // If v2 doesn't exist or fails, try v1 (backwards compatibility)
+    console.warn('[OCR] v2 failed, trying v1...', err.message)
+    try {
+      const { data, error } = await admin.rpc('insert_supplier_invoice', cleanPayload)
+      invoiceData = data
+      rpcError = error
+    } catch (v1Err: any) {
+      rpcError = v1Err
+    }
+  }
 
-  if (error) throw error
+  if (rpcError) {
+    console.error('[OCR] ❌ RPC call failed:', rpcError)
+    console.error('[OCR] Error code:', rpcError.code)
+    console.error('[OCR] Error message:', rpcError.message)
+    console.error('[OCR] Error details:', rpcError.details)
+    console.error('[OCR] Error hint:', rpcError.hint)
+    
+    // Provide helpful error message
+    let errorMsg = `Failed to create invoice: ${rpcError.message}`
+    if (rpcError.message?.includes('does not exist') || rpcError.message?.includes('schema cache')) {
+      errorMsg += '. Schema cache may be stale. Run: NOTIFY pgrst, "reload schema"; in Supabase SQL Editor.'
+    } else if (rpcError.message?.includes('function')) {
+      errorMsg += '. Make sure RPC functions are created. Run supabase/rpc/supplier_invoices_v2.sql'
+    }
+    
+    throw new Error(errorMsg)
+  }
 
-  // 6) Log to history
-  await admin.from('supplier_invoice_history').insert({
-    tenant_id: tenantId,
-    supplier_invoice_id: created.id,
-    action: 'ocr_scanned',
-    data: { fileName, storagePath, confidence: conf, fields: ocr.fields },
-    changed_by: user?.id || null
-  })
+  console.log('[OCR] ✅ RPC call successful, response:', invoiceData)
 
-  return { invoiceId: created.id, ocrResult: ocr }
+  const invoiceId = invoiceData?.id
+  if (!invoiceId) {
+    console.error('[OCR] ❌ No invoice ID in response:', invoiceData)
+    throw new Error('Invoice created but no ID returned from RPC function')
+  }
+
+  console.log('[OCR] ✅ Invoice created successfully, ID:', invoiceId)
+  return { invoiceId, ocrResult: ocr }
 }
 

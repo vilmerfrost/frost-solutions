@@ -1,60 +1,90 @@
-import { NextResponse } from 'next/server'
-import { createClient } from '@/utils/supabase/server'
-import { createClient as createAdminClient } from '@supabase/supabase-js'
-import { getTenantId } from '@/lib/serverTenant'
+// app/api/rot/route.ts
+import { NextRequest, NextResponse } from 'next/server';
+import { z } from 'zod';
+import { createAdminClient } from '@/utils/supabase/admin';
+import { getTenantId } from '@/lib/serverTenant';
+import { extractErrorMessage } from '@/lib/errorUtils';
+import { resolveRotPercent, calcRot } from '@/lib/rot/calc';
+import { buildSkatteverketXml } from '@/lib/rot/xml';
+import { decryptPnr } from '@/lib/crypto/pnr';
 
-/**
- * GET /api/rot
- * Hämtar ROT-applikationer (ÄTAs) för en tenant eller projekt
- */
-export async function GET(req: Request) {
+const RotInput = z.object({
+  invoiceId: z.string().uuid(),
+  laborAmountSEK: z.number().positive(),
+  materialAmountSEK: z.number().nonnegative().default(0),
+  travelAmountSEK: z.number().nonnegative().default(0),
+  customerPnrEnc: z.string(), // krypterat i DB eller inkommande
+  projectAddress: z.string().optional(),
+});
+
+export async function POST(req: NextRequest) {
   try {
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const tenantId = await getTenantId()
+    const tenantId = await getTenantId();
     if (!tenantId) {
-      return NextResponse.json({ error: 'No tenant found' }, { status: 400 })
+      return NextResponse.json({ error: 'Ingen tenant' }, { status: 401 });
     }
 
-    const { searchParams } = new URL(req.url)
-    const projectId = searchParams.get('project_id')
+    const input = RotInput.parse(await req.json());
+    const admin = createAdminClient();
 
-    const adminSupabase = createAdminClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!
-    )
-
-    let query = adminSupabase
-      .from('rot_applications')
-      .select('*')
+    const { data: inv } = await admin
+      .from('invoices')
+      .select('id, number, issue_date, tenant_id, customer_id')
+      .eq('id', input.invoiceId)
       .eq('tenant_id', tenantId)
+      .maybeSingle();
 
-    if (projectId) {
-      query = query.eq('project_id', projectId)
+    if (!inv) {
+      return NextResponse.json({ error: 'Faktura saknas' }, { status: 404 });
     }
 
-    const { data: rotApplications, error } = await query.order('created_at', { ascending: false })
+    const percent = resolveRotPercent(inv.issue_date);
+    const deduction = calcRot(input.laborAmountSEK, percent);
+    const pnr = await decryptPnr(input.customerPnrEnc);
+
+    const xml = buildSkatteverketXml({
+      orgNumber: process.env.COMPANY_ORG_NUMBER || '',
+      personalIdentityNoDecrypted: pnr,
+      invoiceNumber: inv.number,
+      invoiceDate: inv.issue_date,
+      laborAmountSEK: input.laborAmountSEK,
+      deductionAmountSEK: deduction,
+      projectAddress: input.projectAddress,
+    });
+
+    const { data: rot, error } = await admin
+      .schema('app')
+      .from('rot_deductions')
+      .insert({
+        tenant_id: tenantId,
+        invoice_id: inv.id,
+        rot_percentage: percent,
+        labor_amount_sek: input.laborAmountSEK,
+        material_amount_sek: input.materialAmountSEK,
+        travel_amount_sek: input.travelAmountSEK,
+        deduction_amount_sek: deduction,
+        xml_payload: xml,
+        status: 'queued',
+      })
+      .select()
+      .single();
 
     if (error) {
-      console.error('Error fetching rot applications:', error)
-      return NextResponse.json(
-        { error: 'Failed to fetch ÄTAs', details: error.message },
-        { status: 500 }
-      )
+      throw error;
     }
 
-    return NextResponse.json(rotApplications || [])
-  } catch (error: any) {
-    console.error('Error in GET /api/rot:', error)
+    await admin.schema('app').from('rot_deduction_history').insert({
+      tenant_id: tenantId,
+      rot_id: rot.id,
+      action: 'created',
+      meta: { percent, deduction },
+    });
+
+    return NextResponse.json({ success: true, data: rot });
+  } catch (e: any) {
     return NextResponse.json(
-      { error: 'Internal server error', details: error.message },
+      { success: false, error: extractErrorMessage(e) },
       { status: 500 }
-    )
+    );
   }
 }
-

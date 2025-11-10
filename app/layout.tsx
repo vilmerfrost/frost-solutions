@@ -9,6 +9,7 @@ import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 import { SafeSyncComponents } from "@/components/SafeSyncComponents";
 import { SyncInitializer } from "@/components/SyncInitializer";
 import AIChatbotClient from "@/components/ai/AIChatbotClient";
+import { AiAssistant } from "@/components/ai/AiAssistant";
 
 // INTE "use client"! Ingen useEffect här!
 
@@ -41,6 +42,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                 <div style={{ position: 'relative', zIndex: 1 }}>
                   <AIChatbotClient />
                 </div>
+                <AiAssistant />
               </TenantProvider>
             </ThemeProvider>
           </QueryProvider>

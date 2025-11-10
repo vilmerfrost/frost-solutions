@@ -1,48 +1,32 @@
 // app/types/ai.ts
+export type AIMessageRole = 'system' | 'user' | 'assistant' | 'tool';
 
-export type RiskLevel = 'low' | 'medium' | 'high';
-export type Confidence = 'low' | 'medium' | 'high';
-
-export interface BudgetPrediction {
-  currentSpend: number;
-  budgetRemaining: number;
-  currentProgress: number;  // 0..100
-  predictedFinal: number;
-  riskLevel: RiskLevel;
-  suggestions: string[];
-  confidence: Confidence;
+export interface AIMessage {
+  id: string;
+  tenant_id: string;
+  conversation_id: string;
+  role: AIMessageRole;
+  content: { text?: string; parts?: unknown[]; tool_calls?: unknown[] };
+  token_count: number;
+  created_at: string;
 }
 
-export interface MaterialResult {
-  name: string;
-  confidence: number; // 0..100
-  category: string;
-  supplierItems: Array<{ id: string; name: string; price: number; supplier: string }>;
-  alternatives: Array<{ name: string; confidence: number }>;
+export interface AIConversation {
+  id: string;
+  tenant_id: string;
+  title?: string;
+  created_by: string;
+  token_used: number;
+  created_at: string;
+  updated_at: string;
 }
 
-export interface KmaItem {
-  title: string;
-  category: string;
-  requiresPhoto: boolean;
-  description: string;
-  order: number;
+export interface AIResponseCache {
+  id: string;
+  tenant_id: string;
+  cache_key: string;
+  response: unknown;
+  token_saved: number;
+  expires_at: string;
+  created_at: string;
 }
-
-export interface InvoiceSuggestion {
-  totalAmount: number;
-  suggestedDiscount: number;
-  invoiceRows: Array<{ description: string; quantity: number; unitPrice: number; vat: number; amount: number }>;
-  notes: string;
-  confidence: Confidence;
-}
-
-export interface ProjectPlan {
-  phases: Array<{ name: string; duration: number; resources: number; description: string; order: number }>;
-  totalDays: number;
-  bufferDays: number;
-  riskFactors: string[];
-  recommendedTeamSize: number;
-  confidenceLevel: Confidence;
-}
-

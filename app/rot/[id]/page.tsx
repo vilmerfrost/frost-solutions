@@ -6,6 +6,7 @@ import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
+import { RotCalculator } from '@/components/rot/RotCalculator'
 
 interface RotApplication {
   id: string
@@ -462,6 +463,15 @@ export default function RotApplicationDetailPage() {
                   </p>
                 </div>
               </div>
+            </div>
+
+            {/* ROT Calculator Widget */}
+            <div className="mt-6">
+              <RotCalculator
+                invoiceDateISO={application.submission_date || new Date().toISOString()}
+                laborCost={application.work_cost_sek}
+                materialCost={application.material_cost_sek}
+              />
             </div>
           </div>
 

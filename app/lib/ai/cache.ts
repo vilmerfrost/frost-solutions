@@ -1,109 +1,41 @@
 // app/lib/ai/cache.ts
 import crypto from 'crypto';
 import { createAdminClient } from '@/utils/supabase/admin';
-import { extractErrorMessage } from '@/lib/errorUtils';
 
-export function makeCacheKey(obj: unknown): string {
-  const raw = JSON.stringify(obj ?? {});
-  return crypto.createHash('sha256').update(raw).digest('hex');
+export function makeCacheKey(tenantId: string, messages: unknown): string {
+  const hash = crypto.createHash('sha256').update(JSON.stringify(messages)).digest('hex');
+  return `${tenantId}:${hash}`;
 }
 
-export async function getFromCache<T>(
-  tenantId: string,
-  cacheType: string,
-  cacheKey: string
-): Promise<{ hit: boolean; data?: T }> {
+export async function getCached(tenantId: string, key: string): Promise<unknown | null> {
   const admin = createAdminClient();
   
-  // Try app.ai_cache first
-  let { data, error } = await admin
+  const { data } = await admin
     .schema('app')
-    .from('ai_cache')
-    .select('response_data, expires_at')
+    .from('ai_response_cache')
+    .select('response, expires_at')
     .eq('tenant_id', tenantId)
-    .eq('cache_type', cacheType)
-    .eq('cache_key', cacheKey)
+    .eq('cache_key', key)
     .gt('expires_at', new Date().toISOString())
     .maybeSingle();
-
-  // Fallback to public.ai_cache if app schema fails
-  if (error) {
-    const { data: publicData, error: publicError } = await admin
-      .from('ai_cache')
-      .select('response_data, expires_at')
-      .eq('tenant_id', tenantId)
-      .eq('cache_type', cacheType)
-      .eq('cache_key', cacheKey)
-      .gt('expires_at', new Date().toISOString())
-      .maybeSingle();
-    
-    if (publicError) {
-      // Table doesn't exist - return cache miss
-      return { hit: false };
-    }
-    data = publicData;
-    error = publicError;
-  }
-
-  if (error) {
-    // Log but don't throw - graceful degradation
-    console.warn('Cache lookup error:', extractErrorMessage(error));
-    return { hit: false };
-  }
-  if (!data) {
-    return { hit: false };
-  }
-  return { hit: true, data: data.response_data as T };
+  
+  return data?.response ?? null;
 }
 
-export async function setCache<T>(
+export async function setCached(
   tenantId: string,
-  cacheType: string,
-  cacheKey: string,
-  data: T,
-  ttlDays: number,
-  model?: string
+  key: string,
+  response: unknown,
+  ttlSec = 3600
 ): Promise<void> {
   const admin = createAdminClient();
-  const expiresAt = new Date(Date.now() + ttlDays * 24 * 60 * 60 * 1000).toISOString();
+  const exp = new Date(Date.now() + ttlSec * 1000).toISOString();
   
-  // Try app.ai_cache first
-  let { error } = await admin
+  await admin
     .schema('app')
-    .from('ai_cache')
+    .from('ai_response_cache')
     .upsert(
-      {
-        tenant_id: tenantId,
-        cache_type: cacheType,
-        cache_key: cacheKey,
-        response_data: data as any,
-        model_used: model ?? null,
-        ttl_days: ttlDays,
-        expires_at: expiresAt,
-      },
-      { onConflict: 'tenant_id,cache_key,cache_type' }
+      { tenant_id: tenantId, cache_key: key, response, expires_at: exp },
+      { onConflict: 'tenant_id,cache_key' }
     );
-
-  // Fallback to public.ai_cache if app schema fails
-  if (error) {
-    const { error: publicError } = await admin.from('ai_cache').upsert(
-      {
-        tenant_id: tenantId,
-        cache_type: cacheType,
-        cache_key: cacheKey,
-        response_data: data as any,
-        model_used: model ?? null,
-        ttl_days: ttlDays,
-        expires_at: expiresAt,
-      },
-      { onConflict: 'tenant_id,cache_key,cache_type' }
-    );
-
-    if (publicError) {
-      // Table doesn't exist - log but don't throw (graceful degradation)
-      console.warn('ai_cache table not found, skipping cache write:', extractErrorMessage(publicError));
-      return;
-    }
-  }
 }
-

@@ -1,7 +1,12 @@
+// app/hooks/useDebounce.ts
 'use client';
 
 import { useState, useEffect } from 'react';
 
+/**
+ * Debounce hook - delays value updates until after delay ms
+ * Useful for search inputs, API calls, etc.
+ */
 export function useDebounce<T>(value: T, delay: number): T {
   const [debouncedValue, setDebouncedValue] = useState<T>(value);
 
@@ -17,4 +22,3 @@ export function useDebounce<T>(value: T, delay: number): T {
 
   return debouncedValue;
 }
-

@@ -1,903 +1,549 @@
-[00:00:01.647] Server  WARN     ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-[00:00:01.865] Server  LOG      ✓ Ready in 1520ms
-[00:00:05.910] Server  LOG     [OAuth] Building redirect URI for fortnox: "http://localhost:3000/api/integrations/callback/fortnox"
-[00:00:05.913] Server  LOG     [OAuth] Building redirect URI for visma: "http://localhost:3000/api/integrations/callback/visma"
-[00:00:05.925] Server  LOG     [OAuth] Getting config for provider: fortnox
-[00:00:05.925] Server  LOG     [OAuth] Getting config for provider: visma
-[00:00:13.150] Server  LOG     [OAuth] Getting config for provider: fortnox
-[00:00:13.151] Server  LOG     [OAuth] Getting config for provider: visma
-[00:00:13.956] Server  LOG     [OAuth] Getting config for provider: fortnox
-[00:00:13.957] Server  LOG     [OAuth] Getting config for provider: visma
-[00:04:43.347] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:04:43.588] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:04:43.588] Browser LOG     [IntegrationAPI] 📊 Fetching status...
-[00:04:43.588] Browser LOG     [IntegrationAPI] 📊 Fetching analytics...
-[00:04:43.588] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:04:43.588] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:04:43.588] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:04:43.588] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":1}
-[00:04:43.588] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
-[00:04:43.588] Browser LOG     [IntegrationAPI] ✅ Analytics fetched: {"operations":0,"timeline":0}
-[00:04:43.588] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:04:43.588] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:04:43.588] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:04:43.829] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:04:43.829] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:04:43.829] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:04:43.829] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:04:44.232] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:44.236] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:44.253] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:44.259] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:44.364] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:04:44.364] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:04:44.364] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:04:44.364] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:04:44.364] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:04:44.698] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[00:04:44.698] Browser LOG     [useConnectIntegration] 🔐 Starting OAuth for: fortnox
-[00:04:44.698] Browser LOG     [IntegrationAPI] 🔐 Starting OAuth flow: fortnox
-[00:04:44.888] Browser LOG     🔗 Timestamp tie - using server version
-[00:04:44.888] Browser LOG     🔗 Timestamp tie - using server version
-[00:04:44.888] Browser LOG     ✅ Synced 2 updates from server
-[00:04:44.888] Browser LOG     ✅ Sync completed successfully
-[00:04:45.497] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:04:45.498] Server  LOG     [Authorize] 🚀 STARTING OAUTH FLOW
-[00:04:45.573] Server  LOG     [Authorize] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:45.574] Server  LOG     [Authorize] Provider: "fortnox"
-[00:04:45.574] Server  LOG     [OAuth] Validating config for: fortnox
-[00:04:45.574] Server  LOG     [OAuth] Getting config for provider: fortnox
-[00:04:45.575] Server  LOG     [OAuth] ✅ fortnox configuration valid
-[00:04:45.575] Server  LOG     [OAuth] Redirect URI: http://localhost:3000/api/integrations/callback/fortnox
-[00:04:45.575] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:04:45.575] Server  LOG     [OAuthManager] 🔐 GENERATING AUTH URL
-[00:04:45.576] Server  LOG     [OAuthManager] Provider: "fortnox"
-[00:04:45.576] Server  LOG     [OAuthManager] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:45.576] Server  LOG     [OAuth] Getting config for provider: fortnox
-[00:04:45.576] Server  LOG     [OAuthManager] Redirect URI: "http://localhost:3000/api/integrations/callback/fortnox"
-[00:04:45.577] Server  LOG     [OAuthManager] ✅ Auth URL generated
-[00:04:45.577] Server  LOG     [OAuthManager] State: "eyJ0ZW5hbnRJZCI6IjhlZTI4ZjU1LWI3ODAtNDI4Ni04MTM3LTllNzBlYTU4YWU1NiIsInByb3ZpZGVyIjoiZm9ydG5veCIsInJlZGlyZWN0VXJpIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwL2FwaS9pbnRlZ3JhdGlvbnMvY2FsbGJhY2svZm9ydG5veCIsInRpbWVzdGFtcCI6MTc2MjcwMDAyMjc3OH0"
-[00:04:45.577] Server  LOG     [OAuthManager] Full URL: "https://apps.fortnox.se/oauth-v1/auth?client_id=UFg21BcGXfMs&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fintegrations%2Fcallback%2Ffortnox&response_type=code&scope=customer+invoice+article&state=eyJ0ZW5hbnRJZCI6IjhlZTI4ZjU1LWI3ODAtNDI4Ni04MTM3LTllNzBlYTU4YWU1NiIsInByb3ZpZGVyIjoiZm9ydG5veCIsInJlZGlyZWN0VXJpIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwL2FwaS9pbnRlZ3JhdGlvbnMvY2FsbGJhY2svZm9ydG5veCIsInRpbWVzdGFtcCI6MTc2MjcwMDAyMjc3OH0"
-[00:04:45.577] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:04:45.577] Server  LOG     [Authorize] ✅ Redirecting to: "https://apps.fortnox.se/oauth-v1/auth?client_id=UFg21BcGXfMs&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fintegrations%2Fcallback%2Ffortnox&response_type=code&scope=customer+invoice+article&state=eyJ0ZW5hbnRJZCI6IjhlZTI4ZjU1LWI3ODAtNDI4Ni04MTM3LTllNzBlYTU4YWU1NiIsInByb3ZpZGVyIjoiZm9ydG5veCIsInJlZGlyZWN0VXJpIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwL2FwaS9pbnRlZ3JhdGlvbnMvY2FsbGJhY2svZm9ydG5veCIsInRpbWVzdGFtcCI6MTc2MjcwMDAyMjc3OH0"
-[00:04:45.577] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:04:50.552] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:04:50.552] Server  LOG     [OAuth Callback] 🎯 RECEIVED CALLBACK
-[00:04:50.553] Server  LOG     [OAuth Callback] Provider: "fortnox"
-[00:04:50.553] Server  LOG     [OAuth Callback] Base URL: "http://localhost:3000"
-[00:04:50.554] Server  LOG     [OAuth Callback] Query params: {}
-[00:04:50.555] Server  ERROR   [OAuth Callback] ❌ OAuth error: {}
-[00:04:51.260] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:04:51.468] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:04:51.468] Browser LOG     [IntegrationAPI] 📊 Fetching status...
-[00:04:51.468] Browser LOG     [IntegrationAPI] 📊 Fetching analytics...
-[00:04:51.468] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:04:51.468] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:04:51.468] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:04:51.468] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":1}
-[00:04:51.468] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:04:51.468] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:04:51.468] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:04:51.511] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:04:51.512] Server  LOG     [Integration Analytics API] 📊 FETCHING ANALYTICS
-[00:04:51.536] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:04:51.536] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
-[00:04:51.596] Server  LOG     [Integration Analytics API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:51.597] Server  LOG     [Integration Analytics API] Days: 30
-[00:04:51.623] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:51.690] Server  LOG     [Integration Analytics API] Logs found: 0
-[00:04:51.702] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:51.706] Server  LOG     [Integration Status API] Integrations found: 0
-[00:04:51.715] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:51.718] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:51.773] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:04:51.781] Server  LOG     [Integration Status API] Recent logs: 0
-[00:04:51.781] Server  LOG     [Integration Status API] Stats: {}
-[00:04:51.782] Server  LOG     [Integration Status API] ✅ SUCCESS
-[00:04:51.782] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:04:51.809] Server  LOG     [Integration Analytics API] ✅ SUCCESS
-[00:04:51.810] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:04:51.919] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:04:51.919] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:04:51.919] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:04:51.920] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:04:51.920] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:04:51.920] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:04:51.920] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:04:51.920] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:04:51.920] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:04:51.920] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
-[00:04:51.920] Browser LOG     [IntegrationAPI] ✅ Analytics fetched: {"operations":0,"timeline":0}
-[00:04:52.134] Browser LOG     🔗 Timestamp tie - using server version
-[00:04:52.134] Browser LOG     🔗 Timestamp tie - using server version
-[00:04:52.134] Browser LOG     ✅ Synced 2 updates from server
-[00:04:52.134] Browser LOG     ✅ Sync completed successfully
-[00:04:52.134] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[00:05:21.894] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:21.894] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
-[00:05:21.901] Browser LOG     [IntegrationAPI] 📊 Fetching status...
-[00:05:21.969] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:22.062] Server  LOG     [Integration Status API] Integrations found: 0
-[00:05:22.136] Browser LOG     ✅ Synced 0 updates from server
-[00:05:22.136] Browser LOG     ✅ Sync completed successfully
-[00:05:22.177] Server  LOG     [Integration Status API] Recent logs: 0
-[00:05:22.177] Server  LOG     [Integration Status API] Stats: {}
-[00:05:22.178] Server  LOG     [Integration Status API] ✅ SUCCESS
-[00:05:22.178] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:22.281] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
-[00:05:42.253] Browser LOG     [useConnectIntegration] 🔐 Starting OAuth for: fortnox
-[00:05:42.253] Browser LOG     [IntegrationAPI] 🔐 Starting OAuth flow: fortnox
-[00:05:42.371] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:42.372] Server  LOG     [Authorize] 🚀 STARTING OAUTH FLOW
-[00:05:42.453] Server  LOG     [Authorize] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:42.453] Server  LOG     [Authorize] Provider: "fortnox"
-[00:05:42.453] Server  LOG     [OAuth] Validating config for: fortnox
-[00:05:42.454] Server  LOG     [OAuth] Getting config for provider: fortnox
-[00:05:42.454] Server  LOG     [OAuth] ✅ fortnox configuration valid
-[00:05:42.454] Server  LOG     [OAuth] Redirect URI: http://localhost:3000/api/integrations/callback/fortnox
-[00:05:42.455] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:42.455] Server  LOG     [OAuthManager] 🔐 GENERATING AUTH URL
-[00:05:42.455] Server  LOG     [OAuthManager] Provider: "fortnox"
-[00:05:42.455] Server  LOG     [OAuthManager] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:42.455] Server  LOG     [OAuth] Getting config for provider: fortnox
-[00:05:42.456] Server  LOG     [OAuthManager] Redirect URI: "http://localhost:3000/api/integrations/callback/fortnox"
-[00:05:42.456] Server  LOG     [OAuthManager] ✅ Auth URL generated
-[00:05:42.456] Server  LOG     [OAuthManager] State: "eyJ0ZW5hbnRJZCI6IjhlZTI4ZjU1LWI3ODAtNDI4Ni04MTM3LTllNzBlYTU4YWU1NiIsInByb3ZpZGVyIjoiZm9ydG5veCIsInJlZGlyZWN0VXJpIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwL2FwaS9pbnRlZ3JhdGlvbnMvY2FsbGJhY2svZm9ydG5veCIsInRpbWVzdGFtcCI6MTc2MjcwMDA3OTY1Nn0"
-[00:05:42.456] Server  LOG     [OAuthManager] Full URL: "https://apps.fortnox.se/oauth-v1/auth?client_id=UFg21BcGXfMs&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fintegrations%2Fcallback%2Ffortnox&response_type=code&scope=customer+invoice+article&state=eyJ0ZW5hbnRJZCI6IjhlZTI4ZjU1LWI3ODAtNDI4Ni04MTM3LTllNzBlYTU4YWU1NiIsInByb3ZpZGVyIjoiZm9ydG5veCIsInJlZGlyZWN0VXJpIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwL2FwaS9pbnRlZ3JhdGlvbnMvY2FsbGJhY2svZm9ydG5veCIsInRpbWVzdGFtcCI6MTc2MjcwMDA3OTY1Nn0"
-[00:05:42.457] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:42.457] Server  LOG     [Authorize] ✅ Redirecting to: "https://apps.fortnox.se/oauth-v1/auth?client_id=UFg21BcGXfMs&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fintegrations%2Fcallback%2Ffortnox&response_type=code&scope=customer+invoice+article&state=eyJ0ZW5hbnRJZCI6IjhlZTI4ZjU1LWI3ODAtNDI4Ni04MTM3LTllNzBlYTU4YWU1NiIsInByb3ZpZGVyIjoiZm9ydG5veCIsInJlZGlyZWN0VXJpIjoiaHR0cDovL2xvY2FsaG9zdDozMDAwL2FwaS9pbnRlZ3JhdGlvbnMvY2FsbGJhY2svZm9ydG5veCIsInRpbWVzdGFtcCI6MTc2MjcwMDA3OTY1Nn0"
-[00:05:42.457] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:47.037] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:47.037] Server  LOG     [OAuth Callback] 🎯 RECEIVED CALLBACK
-[00:05:47.037] Server  LOG     [OAuth Callback] Provider: "fortnox"
-[00:05:47.038] Server  LOG     [OAuth Callback] Base URL: "http://localhost:3000"
-[00:05:47.038] Server  LOG     [OAuth Callback] Query params: {}
-[00:05:47.038] Server  ERROR   [OAuth Callback] ❌ OAuth error: {}
-[00:05:48.020] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:05:48.222] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:48.222] Server  LOG     [Integration Analytics API] 📊 FETCHING ANALYTICS
-[00:05:48.251] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:48.253] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
-[00:05:48.298] Server  LOG     [Integration Analytics API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:48.299] Server  LOG     [Integration Analytics API] Days: 30
-[00:05:48.321] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:05:48.321] Browser LOG     [IntegrationAPI] 📊 Fetching status...
-[00:05:48.321] Browser LOG     [IntegrationAPI] 📊 Fetching analytics...
-[00:05:48.321] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:05:48.321] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:05:48.321] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:05:48.321] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":1}
-[00:05:48.321] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:05:48.321] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:05:48.321] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:05:48.332] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:48.416] Server  LOG     [Integration Analytics API] Logs found: 0
-[00:05:48.429] Server  LOG     [Integration Status API] Integrations found: 0
-[00:05:48.505] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:48.507] Server  LOG     [Integration Status API] Recent logs: 0
-[00:05:48.508] Server  LOG     [Integration Status API] Stats: {}
-[00:05:48.508] Server  LOG     [Integration Status API] ✅ SUCCESS
-[00:05:48.508] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:48.512] Server  LOG     [Integration Analytics API] ✅ SUCCESS
-[00:05:48.512] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:05:48.519] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:48.523] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:48.608] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:48.721] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:05:48.721] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:05:48.721] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:05:48.721] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:05:48.721] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:05:48.721] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
-[00:05:48.721] Browser LOG     [IntegrationAPI] ✅ Analytics fetched: {"operations":0,"timeline":0}
-[00:05:48.721] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:05:48.721] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:05:48.721] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:05:48.721] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:05:48.951] Browser LOG     🔗 Timestamp tie - using server version
-[00:05:48.951] Browser LOG     🔗 Timestamp tie - using server version
-[00:05:48.951] Browser LOG     ✅ Synced 2 updates from server
-[00:05:48.951] Browser LOG     ✅ Sync completed successfully
-[00:05:48.951] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[00:06:18.620] Browser LOG     [IntegrationAPI] 📊 Fetching status...
-[00:06:18.626] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:06:18.626] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
-[00:06:18.742] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:06:18.842] Server  LOG     [Integration Status API] Integrations found: 0
-[00:06:18.937] Server  LOG     [Integration Status API] Recent logs: 0
-[00:06:18.938] Server  LOG     [Integration Status API] Stats: {}
-[00:06:18.938] Server  LOG     [Integration Status API] ✅ SUCCESS
-[00:06:18.938] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:06:18.940] Browser LOG     ✅ Synced 0 updates from server
-[00:06:18.940] Browser LOG     ✅ Sync completed successfully
-[00:06:19.044] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
-[00:06:25.732] Browser LOG     [IntegrationAPI] 📊 Fetching status...
-[00:06:25.828] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:06:25.828] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
-[00:06:25.908] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:06:25.994] Server  LOG     [Integration Status API] Integrations found: 0
-[00:06:26.101] Server  LOG     [Integration Status API] Recent logs: 0
-[00:06:26.102] Server  LOG     [Integration Status API] Stats: {}
-[00:06:26.102] Server  LOG     [Integration Status API] ✅ SUCCESS
-[00:06:26.102] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:06:26.206] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
-[00:06:28.001] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:06:28.001] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
-[00:06:28.017] Browser LOG     [IntegrationAPI] 📊 Fetching status...
-[00:06:28.082] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:06:28.155] Server  LOG     [Integration Status API] Integrations found: 0
-[00:06:28.227] Server  LOG     [Integration Status API] Recent logs: 0
-[00:06:28.228] Server  LOG     [Integration Status API] Stats: {}
-[00:06:28.228] Server  LOG     [Integration Status API] ✅ SUCCESS
-[00:06:28.228] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:06:28.336] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
-[00:06:44.754] Browser LOG     [useConnectIntegration] 🔐 Starting OAuth for: visma
-[00:06:44.754] Browser LOG     [IntegrationAPI] 🔐 Starting OAuth flow: visma
-[00:06:44.883] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:06:44.884] Server  LOG     [Authorize] 🚀 STARTING OAUTH FLOW
-[00:06:44.960] Server  LOG     [Authorize] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:06:44.961] Server  LOG     [Authorize] Provider: "visma"
-[00:06:44.961] Server  LOG     [OAuth] Validating config for: visma
-[00:06:44.962] Server  LOG     [OAuth] Getting config for provider: visma
-[00:06:44.962] Server  LOG     [OAuth] ✅ visma configuration valid
-[00:06:44.962] Server  LOG     [OAuth] Redirect URI: http://localhost:3000/api/integrations/callback/visma
-[00:06:44.963] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:06:44.963] Server  LOG     [OAuthManager] 🔐 GENERATING AUTH URL
-[00:06:44.963] Server  LOG     [OAuthManager] Provider: "visma"
-[00:06:44.963] Server  LOG     [OAuthManager] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:06:44.964] Server  LOG     [OAuth] Getting config for provider: visma
-[00:06:44.964] Server  LOG     [OAuthManager] Redirect URI: "http://localhost:3000/api/integrations/callback/visma"
-[00:06:44.964] Server  LOG     [OAuthManager] ✅ Auth URL generated
-[00:06:44.964] Server  LOG     [OAuthManager] State: "eyJ0ZW5hbnRJZCI6IjhlZTI4ZjU1LWI3ODAtNDI4Ni04MTM3LTllNzBlYTU4YWU1NiIsInByb3ZpZGVyIjoidmlzbWEiLCJyZWRpcmVjdFVyaSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hcGkvaW50ZWdyYXRpb25zL2NhbGxiYWNrL3Zpc21hIiwidGltZXN0YW1wIjoxNzYyNzAwMTQyMTYyfQ"
-[00:06:44.965] Server  LOG     [OAuthManager] Full URL: "https://identity.vismaonline.com/connect/authorize?client_id=frostsoultionssandbox&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fintegrations%2Fcallback%2Fvisma&response_type=code&scope=ea%3Aapi+ea%3Asales&state=eyJ0ZW5hbnRJZCI6IjhlZTI4ZjU1LWI3ODAtNDI4Ni04MTM3LTllNzBlYTU4YWU1NiIsInByb3ZpZGVyIjoidmlzbWEiLCJyZWRpcmVjdFVyaSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hcGkvaW50ZWdyYXRpb25zL2NhbGxiYWNrL3Zpc21hIiwidGltZXN0YW1wIjoxNzYyNzAwMTQyMTYyfQ"
-[00:06:44.965] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:06:44.965] Server  LOG     [Authorize] ✅ Redirecting to: "https://identity.vismaonline.com/connect/authorize?client_id=frostsoultionssandbox&redirect_uri=http%3A%2F%2Flocalhost%3A3000%2Fapi%2Fintegrations%2Fcallback%2Fvisma&response_type=code&scope=ea%3Aapi+ea%3Asales&state=eyJ0ZW5hbnRJZCI6IjhlZTI4ZjU1LWI3ODAtNDI4Ni04MTM3LTllNzBlYTU4YWU1NiIsInByb3ZpZGVyIjoidmlzbWEiLCJyZWRpcmVjdFVyaSI6Imh0dHA6Ly9sb2NhbGhvc3Q6MzAwMC9hcGkvaW50ZWdyYXRpb25zL2NhbGxiYWNrL3Zpc21hIiwidGltZXN0YW1wIjoxNzYyNzAwMTQyMTYyfQ"
-[00:06:44.965] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:15:59.716] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:16:00.020] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:00.020] Browser LOG     [IntegrationAPI] 📊 Fetching status...
-[00:16:00.020] Browser LOG     [IntegrationAPI] 📊 Fetching analytics...
-[00:16:00.020] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:16:00.020] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:00.020] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:00.020] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
-[00:16:00.020] Browser LOG     [IntegrationAPI] ✅ Analytics fetched: {"operations":0,"timeline":0}
-[00:16:00.020] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":1}
-[00:16:00.020] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:16:00.020] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:16:00.020] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:16:00.224] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:16:00.224] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:16:00.224] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:16:00.224] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:16:00.448] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:00.453] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:00.455] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:00.463] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:00.581] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:16:00.581] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:16:00.581] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:16:00.581] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:16:00.581] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:00.918] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[00:16:00.918] Browser LOG     🔗 Timestamp tie - using server version
-[00:16:00.918] Browser LOG     🔗 Timestamp tie - using server version
-[00:16:00.918] Browser LOG     ✅ Synced 2 updates from server
-[00:16:00.918] Browser LOG     ✅ Sync completed successfully
-[00:16:07.072] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:07.072] Browser LOG     [usePayrollPeriods] Fetching periods... {"filters":{}}
-[00:16:07.072] Browser LOG     [PayrollAPI.list] Starting request {"filters":{}}
-[00:16:07.072] Browser LOG     [PayrollAPI.list] Fetching: /api/payroll/periods?
-[00:16:07.072] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:07.072] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[00:16:07.189] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:16:07.189] Server  LOG     [GET /api/payroll/periods] 🚀 STARTING
-[00:16:07.189] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:16:07.190] Server  LOG     [GET /api/payroll/periods] 📋 Filters: {}
-[00:16:07.403] Server  LOG     [GET /api/payroll/periods] ✅ Success: {}
-[00:16:07.403] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:16:07.508] Browser LOG     [PayrollAPI.list] Response status: 200
-[00:16:07.508] Browser LOG     [PayrollAPI.list] ✅ Success {"count":3}
-[00:16:07.508] Browser LOG     [usePayrollPeriods] ✅ Periods fetched {"count":3}
-[00:16:13.627] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:13.628] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:13.628] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:13.628] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
-[00:16:13.628] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:13.628] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
-[00:16:13.628] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[00:16:13.763] Server  LOG     🔍 GET /api/employees/list - Starting request
-[00:16:13.795] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:13.800] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:13.820] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:13.828] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
-[00:16:13.829] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
-[00:16:13.833] Server  LOG     ✅ User authenticated: "2941e8db-d533-412e-a292-7ff713e76567" "vilmer.frost@gmail.com"
-[00:16:13.901] Server  LOG     ✅ Tenant ID: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:13.901] Server  LOG     ✅ Creating admin client
-[00:16:13.902] Server  LOG     🔍 Querying employees for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:13.942] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:13.945] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:13.973] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:13.982] Server  LOG     ✅ Found 2 "employees"
-[00:16:14.037] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
-[00:16:14.038] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
-[00:16:14.039] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
-[00:16:14.039] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
-[00:16:14.043] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
-[00:16:14.043] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
-[00:16:14.112] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
-[00:16:14.113] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
-[00:16:14.113] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
-[00:16:14.114] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
-[00:16:14.136] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
-[00:16:14.137] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
-[00:16:14.137] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
-[00:16:14.137] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
-[00:16:14.161] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
-[00:16:14.162] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
-[00:16:14.162] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
-[00:16:14.162] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
-[00:16:14.403] Server  LOG     ✅ Selected employee: {}
-[00:16:14.403] Server  LOG     ✅ Returning employee data immediately
-[00:16:14.655] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
-[00:16:14.655] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.655] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.655] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":0}
-[00:16:14.655] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
-[00:16:14.655] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.655] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.705] Server  LOG     ✅ Selected employee: {}
-[00:16:14.706] Server  LOG     ✅ Returning employee data immediately
-[00:16:14.841] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:14.981] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
-[00:16:14.981] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.981] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.981] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.981] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.981] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
-[00:16:14.981] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:16:14.981] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
-[00:16:14.981] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.981] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:14.981] Browser WARN    ⚠️ Active time entry found but missing start_time: ea5e3ff4-4371-49c9-b0b3-361a804add81
-[00:16:15.105] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:15.220] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:15.395] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:15.409] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:16:15.409] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.409] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":3}
-[00:16:15.566] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:16:15.566] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:15.566] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:23.902] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:23.902] Browser LOG     🔄 Project page: load() called {"projectId":"27f56576-0a89-4327-9245-6fb389da5215","refreshTrigger":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:23.902] Browser LOG     🔍 Loading project: {"projectId":"27f56576-0a89-4327-9245-6fb389da5215","tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:23.902] Browser LOG     ✅ Project page: Event listeners registered for timeEntryUpdated on window, document, and body
-[00:16:23.902] Browser LOG     🔌 Project page: Event listeners removed
-[00:16:23.902] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:16:23.902] Browser LOG     🔄 Project page: load() called {"projectId":"27f56576-0a89-4327-9245-6fb389da5215","refreshTrigger":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:23.902] Browser LOG     🔍 Loading project: {"projectId":"27f56576-0a89-4327-9245-6fb389da5215","tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:16:23.902] Browser LOG     ✅ Project page: Event listeners registered for timeEntryUpdated on window, document, and body
-[00:16:23.902] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[00:16:24.102] Browser LOG     ✅ Project loaded: Villa ekbacken
-[00:16:24.102] Browser LOG     📋 Project client info: {"client_id":"d14e2148-bd63-44fd-85db-c069e5fac9c1","clients":{"id":"d14e2148-bd63-44fd-85db-c069e5fac9c1","name":"Bobs bengtsonn","org_number":null},"customer_name":"Bobs bengtsonn"}
-[00:16:24.102] Browser LOG     📊 Project page: Fetching project hours from API...
-[00:16:25.079] Server  LOG     ✅ Using tenant from employee record: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:25.080] Server  LOG     🔍 API: Fetching project hours {}
-[00:16:25.170] Server  LOG     ✅ API: Project hours calculated {}
-[00:16:25.275] Browser LOG     ✅ Project page: Hours fetched: {"count":1,"entries":[{"date":"2025-11-02","hours_total":9,"ob_type":"work"}],"hours":9}
-[00:16:25.636] Browser ERROR   Error loading files: {"message":"select * from storage.search($1,$2,$3,$4,$5,$6,$7,$8) - infinite recursion detected in policy for relation \"user_roles\"","name":"StorageApiError","status":500,"statusCode":"500"}
-[00:16:25.636] Browser ERROR   Error loading files: {"message":"select * from storage.search($1,$2,$3,$4,$5,$6,$7,$8) - infinite recursion detected in policy for relation \"user_roles\"","name":"StorageApiError","status":500,"statusCode":"500"}
-[00:16:26.204] Server  WARN    Error: Route "/api/projects/[id]/analytics" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:16:27.483] Server  WARN    Error: Route "/api/projects/[id]/analytics" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:16:29.760] Server  WARN    Error: Route "/api/projects/[id]/analytics" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:16:30.816] Browser LOG     ✅ Synced 0 updates from server
-[00:16:30.816] Browser LOG     ✅ Sync completed successfully
-[00:16:34.032] Server  WARN    Error: Route "/api/projects/[id]/analytics" used `params.id`. `params` is a Promise and must be unwrapped with `await` or `React.use()` before accessing its properties. Learn more: https://nextjs.org/docs/messages/sync-dynamic-apis
-[00:16:55.303] Browser LOG     [IntegrationAPI] 📊 Fetching status...
-[00:16:55.330] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:16:55.330] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
-[00:16:55.403] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:16:55.474] Server  LOG     [Integration Status API] Integrations found: 0
-[00:16:55.555] Server  LOG     [Integration Status API] Recent logs: 0
-[00:16:55.556] Server  LOG     [Integration Status API] Stats: {}
-[00:16:55.556] Server  LOG     [Integration Status API] ✅ SUCCESS
-[00:16:55.556] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-[00:16:55.665] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
-[00:17:00.808] Browser LOG     ✅ Synced 0 updates from server
-[00:17:00.808] Browser LOG     ✅ Sync completed successfully
-[00:17:06.624] Server  WARN    ai_rate_limits table not found, skipping rate limit check
-[00:17:07.072] Server  ERROR   Claude API error: Error: Claude API fel 400: {"type":"error","error":{"type":"invalid_request_error","message":"Your credit balance is too low to access the Anthropic API. Please go to Plans & Billing to upgrade or purchase credits."},"request_i…
-[00:17:07.230] Server  WARN    ai_cache table not found, skipping cache write: "Could not find the table 'public.ai_cache' in the schema cache"
-[00:17:21.857] Browser LOG     🔌 Project page: Event listeners removed
-[00:17:21.857] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:17:21.857] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:17:22.105] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[00:17:24.287] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:17:24.571] Browser ERROR   uncaughtError: Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+[00:00:02.206] Server  WARN     ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[00:00:02.443] Server  LOG      ✓ Ready in 1953ms
+[00:00:19.744] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:19.927] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:19.927] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[00:00:19.927] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:19.927] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:19.927] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":0}
+[00:00:20.257] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:00:20.257] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:00:20.257] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:00:20.257] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:00:20.652] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:00:20.655] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:00:20.656] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:00:20.660] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:00:20.662] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:00:20.785] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:00:20.785] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:00:20.785] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:00:20.785] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:00:20.785] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:00:20.785] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:21.239] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:00:21.239] Browser LOG     🔗 Timestamp tie - using server version
+[00:00:21.239] Browser LOG     🔗 Timestamp tie - using server version
+[00:00:21.239] Browser LOG     ✅ Synced 2 updates from server
+[00:00:21.239] Browser LOG     ✅ Sync completed successfully
+[00:00:31.797] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[00:00:31.798] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
+[00:00:31.799] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:31.799] Browser LOG     [IntegrationAPI] 📊 Fetching status...
+[00:00:31.799] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:31.799] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:00:31.865] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:00:31.948] Server  LOG     [Integration Status API] Integrations found: 0
+[00:00:32.046] Server  LOG     [Integration Status API] Recent logs: 0
+[00:00:32.053] Server  LOG     [Integration Status API] Stats: {}
+[00:00:32.054] Server  LOG     [Integration Status API] ✅ SUCCESS
+[00:00:32.054] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[00:00:32.181] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
+[00:00:32.184] Server  ERROR   Error fetching user role from app.user_roles: {}
+[00:00:32.270] Server  ERROR   Error fetching employee role: {}
+[00:00:32.339] Server  ERROR   Error fetching user role from app.user_roles: {}
+[00:00:32.404] Server  ERROR   Error fetching employee role: {}
+[00:00:32.473] Server  ERROR   Error fetching permissions: {}
+[00:00:32.474] Server  LOG     🔍 Permissions API: {}
+[00:00:35.166] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:35.167] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:35.167] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:00:35.294] Browser ERROR   A query that was dehydrated as pending ended up rejecting. [["invoices","8ee28f55-b780-4286-8137-9e70ea58ae56"]]: Error: unrecognized configuration parameter "app.current_tenant_id"; The error will be redacted in production builds
+[00:00:35.294] Browser ERROR   A query that was dehydrated as pending ended up rejecting. [["invoices","8ee28f55-b780-4286-8137-9e70ea58ae56"]]: Error: unrecognized configuration parameter "app.current_tenant_id"; The error will be redacted in production builds
+[00:00:35.294] Browser ERROR   A query that was dehydrated as pending ended up rejecting. [["invoices","8ee28f55-b780-4286-8137-9e70ea58ae56"]]: Error: unrecognized configuration parameter "app.current_tenant_id"; The error will be redacted in production builds
+[00:00:35.294] Browser ERROR   A query that was dehydrated as pending ended up rejecting. [["invoices","8ee28f55-b780-4286-8137-9e70ea58ae56"]]: Error: unrecognized configuration parameter "app.current_tenant_id"; The error will be redacted in production builds
+[00:00:35.563] Browser ERROR   Error fetching invoice: {"code":"42704","details":null,"hint":null,"message":"unrecognized configuration parameter \"app.current_tenant_id\""}
+[00:00:35.563] Browser ERROR   Error details: {"code":"42704","details":null,"hint":null,"message":"unrecognized configuration parameter \"app.current_tenant_id\""}
+[00:00:35.563] Browser ERROR   Error fetching invoice: {"code":"42704","details":null,"hint":null,"message":"unrecognized configuration parameter \"app.current_tenant_id\""}
+[00:00:35.563] Browser ERROR   Error details: {"code":"42704","details":null,"hint":null,"message":"unrecognized configuration parameter \"app.current_tenant_id\""}
+[00:00:43.283] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:43.283] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:43.283] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:00:51.048] Browser LOG     ✅ Synced 0 updates from server
+[00:00:51.048] Browser LOG     ✅ Sync completed successfully
+[00:00:51.523] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:51.523] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:51.767] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:00:53.893] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:53.893] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:53.894] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:00:57.345] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:57.345] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:57.345] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:00:58.794] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:58.794] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:00:58.794] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:01:00.833] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:01:00.834] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:01:00.834] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:01:03.234] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:01:03.234] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:01:03.234] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:01:03.557] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[00:01:03.557] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
+[00:01:03.576] Browser LOG     [IntegrationAPI] 📊 Fetching status...
+[00:01:03.644] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:01:03.712] Server  LOG     [Integration Status API] Integrations found: 0
+[00:01:03.794] Server  LOG     [Integration Status API] Recent logs: 0
+[00:01:03.795] Server  LOG     [Integration Status API] Stats: {}
+[00:01:03.795] Server  LOG     [Integration Status API] ✅ SUCCESS
+[00:01:03.795] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[00:01:03.907] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
+[00:01:04.748] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:01:04.748] Browser ERROR   Error fetching invoices: {}
+[00:01:04.748] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:01:04.748] Browser ERROR   Error fetching invoices: {}
+[00:01:04.748] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:01:06.147] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:01:06.147] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
+[00:01:06.147] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
+[00:01:06.515] Browser ERROR   Error fetching invoice: {"code":"42704","details":null,"hint":null,"message":"unrecognized configuration parameter \"app.current_tenant_id\""}
+[00:01:06.515] Browser ERROR   Error details: {"code":"42704","details":null,"hint":null,"message":"unrecognized configuration parameter \"app.current_tenant_id\""}
+[00:01:06.515] Browser ERROR   Error fetching invoice: {"code":"42704","details":null,"hint":null,"message":"unrecognized configuration parameter \"app.current_tenant_id\""}
+[00:01:06.515] Browser ERROR   Error details: {"code":"42704","details":null,"hint":null,"message":"unrecognized configuration parameter \"app.current_tenant_id\""}
+[00:01:21.054] Browser LOG     ✅ Synced 0 updates from server
+[00:01:21.054] Browser LOG     ✅ Sync completed successfully
+[00:01:51.061] Browser LOG     ✅ Synced 0 updates from server
+[00:01:51.061] Browser LOG     ✅ Sync completed successfully
+[00:02:21.115] Browser LOG     ✅ Synced 0 updates from server
+[00:02:21.115] Browser LOG     ✅ Sync completed successfully
+[00:02:51.772] Browser LOG     ✅ Synced 0 updates from server
+[00:02:51.772] Browser LOG     ✅ Sync completed successfully
+[00:03:21.436] Browser LOG     ✅ Synced 0 updates from server
+[00:03:21.436] Browser LOG     ✅ Sync completed successfully
+[00:03:51.172] Browser LOG     ✅ Synced 0 updates from server
+[00:03:51.172] Browser LOG     ✅ Sync completed successfully
+[00:04:21.180] Browser LOG     ✅ Synced 0 updates from server
+[00:04:21.180] Browser LOG     ✅ Sync completed successfully
+[00:04:51.078] Browser LOG     ✅ Synced 0 updates from server
+[00:04:51.078] Browser LOG     ✅ Sync completed successfully
+[00:05:21.713] Browser LOG     ✅ Synced 0 updates from server
+[00:05:21.713] Browser LOG     ✅ Sync completed successfully
+[00:05:51.046] Browser LOG     ✅ Synced 0 updates from server
+[00:05:51.046] Browser LOG     ✅ Sync completed successfully
+[00:06:18.861] Server  LOG      ✓ Compiled in 116ms
+[00:06:21.162] Browser LOG     ✅ Synced 0 updates from server
+[00:06:21.162] Browser LOG     ✅ Sync completed successfully
+[00:06:25.984] Server  LOG      ✓ Compiled in 156ms
+[00:06:26.091] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
 
-- A server/client branch `if (typeof window !== 'undefined')`.
-- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
-- Date formatting in a user's locale which doesn't match the server.
-- External changing data without sending a snapshot of it along with the HTML.
-- Invalid HTML tag nesting.
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-client] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
 
-It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
 
-https://react.dev/link/hydration-mismatch
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:26.091] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
 
-  ...
-    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
-      <RedirectBoundary>
-        <RedirectErrorBoundary router={{...}}>
-          <InnerLayoutRouter url="/faq#integ..." tree={[...]} params={{}} cacheNode={{lazyData:null, ...}} ...>
-            <SegmentViewNode type="page" pagePath="/frost-dem...">
-              <SegmentTrieNode>
-              <ClientPageRoot Component={function FAQPage} serverProvidedParams={{...}}>
-                <FAQPage params={Promise} searchParams={Promise}>
-                  <div className="min-h-scre...">
-                    <SidebarClient>
-                      <button>
-                      <aside className={"\n      ..."} aria-label="Huvudnavig...">
-                        <div className="h-full fle...">
-                          <div>
-                          <nav className="flex-1 p-4...">
-                            <button>
-                            <button>
-                            <button>
-                            <button>
-                            <button>
-                            <button>
-                            <button
-                              onClick={function onClick}
-                              onKeyDown={function onKeyDown}
-                              className={"\n                    w-full flex items-center gap-3 px-4 py-3 rounded-xl\n..."}
-                              aria-current={undefined}
-+                             aria-label="Gå till Fakturor"
--                             aria-label="Gå till Materialdatabas"
-                            >
-                              <span className="text-xl flex-shrink-0" aria-hidden="true">
-+                               🧾
--                               📦
-                              ...
-                            ...
-                          ...
-                    ...
-            ...
-          ...
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-ssr] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
 
-[00:17:24.571] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:17:24.571] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:17:24.571] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:17:24.571] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:17:24.571] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:17:24.571] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:17:24.571] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:17:24.571] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:17:24.571] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:17:24.571] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:17:24.571] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":1}
-[00:17:24.571] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:17:24.571] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:17:24.571] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:17:24.571] Browser LOG     [SW] Registrering lyckades, scope: http://localhost:3000/
-[00:17:24.699] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:17:24.736] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:17:24.739] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:17:24.799] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:17:24.801] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:17:24.904] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:17:24.904] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:17:24.904] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:17:24.904] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[00:17:24.904] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:17:24.904] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:17:25.099] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[00:17:25.099] Browser LOG     🔗 Timestamp tie - using server version
-[00:17:25.099] Browser LOG     🔗 Timestamp tie - using server version
-[00:17:25.099] Browser LOG     ✅ Synced 2 updates from server
-[00:17:25.099] Browser LOG     ✅ Sync completed successfully
-[00:17:55.237] Browser LOG     ✅ Synced 0 updates from server
-[00:17:55.237] Browser LOG     ✅ Sync completed successfully
-[00:18:25.141] Browser LOG     ✅ Synced 0 updates from server
-[00:18:25.141] Browser LOG     ✅ Sync completed successfully
-[00:18:55.138] Browser LOG     ✅ Synced 0 updates from server
-[00:18:55.138] Browser LOG     ✅ Sync completed successfully
-[00:19:25.172] Browser LOG     ✅ Synced 0 updates from server
-[00:19:25.172] Browser LOG     ✅ Sync completed successfully
-[00:19:55.217] Browser LOG     ✅ Synced 0 updates from server
-[00:19:55.217] Browser LOG     ✅ Sync completed successfully
-[00:20:25.154] Browser LOG     ✅ Synced 0 updates from server
-[00:20:25.154] Browser LOG     ✅ Sync completed successfully
-[00:20:54.925] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:20:55.030] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:20:55.132] Browser LOG     ✅ Synced 0 updates from server
-[00:20:55.132] Browser LOG     ✅ Sync completed successfully
-[00:21:25.161] Browser LOG     ✅ Synced 0 updates from server
-[00:21:25.161] Browser LOG     ✅ Sync completed successfully
-[00:21:55.224] Browser LOG     ✅ Synced 0 updates from server
-[00:21:55.224] Browser LOG     ✅ Sync completed successfully
-[00:22:25.149] Browser LOG     ✅ Synced 0 updates from server
-[00:22:25.150] Browser LOG     ✅ Sync completed successfully
-[00:22:55.171] Browser LOG     ✅ Synced 0 updates from server
-[00:22:55.171] Browser LOG     ✅ Sync completed successfully
-[00:23:25.172] Browser LOG     ✅ Synced 0 updates from server
-[00:23:25.172] Browser LOG     ✅ Sync completed successfully
-[00:23:55.210] Browser LOG     ✅ Synced 0 updates from server
-[00:23:55.210] Browser LOG     ✅ Sync completed successfully
-[00:24:25.157] Browser LOG     ✅ Synced 0 updates from server
-[00:24:25.157] Browser LOG     ✅ Sync completed successfully
-[00:24:55.154] Browser LOG     ✅ Synced 0 updates from server
-[00:24:55.154] Browser LOG     ✅ Sync completed successfully
-[00:25:25.829] Browser LOG     ✅ Synced 0 updates from server
-[00:25:25.829] Browser LOG     ✅ Sync completed successfully
-[00:25:55.641] Browser LOG     ✅ Synced 0 updates from server
-[00:25:55.641] Browser LOG     ✅ Sync completed successfully
-[00:26:25.298] Browser LOG     ✅ Synced 0 updates from server
-[00:26:25.298] Browser LOG     ✅ Sync completed successfully
-[00:26:55.246] Browser LOG     ✅ Synced 0 updates from server
-[00:26:55.246] Browser LOG     ✅ Sync completed successfully
-[00:27:25.319] Browser LOG     ✅ Synced 0 updates from server
-[00:27:25.319] Browser LOG     ✅ Sync completed successfully
-[00:27:55.407] Browser LOG     ✅ Synced 0 updates from server
-[00:27:55.407] Browser LOG     ✅ Sync completed successfully
-[00:28:25.206] Browser LOG     ✅ Synced 0 updates from server
-[00:28:25.206] Browser LOG     ✅ Sync completed successfully
-[00:28:55.215] Browser LOG     ✅ Synced 0 updates from server
-[00:28:55.215] Browser LOG     ✅ Sync completed successfully
-[00:29:25.214] Browser LOG     ✅ Synced 0 updates from server
-[00:29:25.215] Browser LOG     ✅ Sync completed successfully
-[00:29:55.338] Browser LOG     ✅ Synced 0 updates from server
-[00:29:55.338] Browser LOG     ✅ Sync completed successfully
-[00:30:25.219] Browser LOG     ✅ Synced 0 updates from server
-[00:30:25.219] Browser LOG     ✅ Sync completed successfully
-[00:30:55.172] Browser LOG     ✅ Synced 0 updates from server
-[00:30:55.172] Browser LOG     ✅ Sync completed successfully
-[00:31:25.176] Browser LOG     ✅ Synced 0 updates from server
-[00:31:25.176] Browser LOG     ✅ Sync completed successfully
-[00:31:55.307] Browser LOG     ✅ Synced 0 updates from server
-[00:31:55.308] Browser LOG     ✅ Sync completed successfully
-[00:32:25.205] Browser LOG     ✅ Synced 0 updates from server
-[00:32:25.205] Browser LOG     ✅ Sync completed successfully
-[00:32:55.478] Browser LOG     ✅ Synced 0 updates from server
-[00:32:55.478] Browser LOG     ✅ Sync completed successfully
-[00:33:25.258] Browser LOG     ✅ Synced 0 updates from server
-[00:33:25.258] Browser LOG     ✅ Sync completed successfully
-[00:33:55.197] Browser LOG     ✅ Synced 0 updates from server
-[00:33:55.197] Browser LOG     ✅ Sync completed successfully
-[00:34:25.166] Browser LOG     ✅ Synced 0 updates from server
-[00:34:25.166] Browser LOG     ✅ Sync completed successfully
-[00:34:55.171] Browser LOG     ✅ Synced 0 updates from server
-[00:34:55.171] Browser LOG     ✅ Sync completed successfully
-[00:35:25.797] Browser LOG     ✅ Synced 0 updates from server
-[00:35:25.797] Browser LOG     ✅ Sync completed successfully
-[00:35:55.245] Browser LOG     ✅ Synced 0 updates from server
-[00:35:55.245] Browser LOG     ✅ Sync completed successfully
-[00:36:25.170] Browser LOG     ✅ Synced 0 updates from server
-[00:36:25.170] Browser LOG     ✅ Sync completed successfully
-[00:36:55.213] Browser LOG     ✅ Synced 0 updates from server
-[00:36:55.213] Browser LOG     ✅ Sync completed successfully
-[00:37:25.147] Browser LOG     ✅ Synced 0 updates from server
-[00:37:25.147] Browser LOG     ✅ Sync completed successfully
-[00:37:55.201] Browser LOG     ✅ Synced 0 updates from server
-[00:37:55.201] Browser LOG     ✅ Sync completed successfully
-[00:38:25.207] Browser LOG     ✅ Synced 0 updates from server
-[00:38:25.207] Browser LOG     ✅ Sync completed successfully
-[00:38:55.173] Browser LOG     ✅ Synced 0 updates from server
-[00:38:55.173] Browser LOG     ✅ Sync completed successfully
-[00:39:25.149] Browser LOG     ✅ Synced 0 updates from server
-[00:39:25.149] Browser LOG     ✅ Sync completed successfully
-[00:39:55.245] Browser LOG     ✅ Synced 0 updates from server
-[00:39:55.245] Browser LOG     ✅ Sync completed successfully
-[00:40:25.148] Browser LOG     ✅ Synced 0 updates from server
-[00:40:25.148] Browser LOG     ✅ Sync completed successfully
-[00:40:55.132] Browser LOG     ✅ Synced 0 updates from server
-[00:40:55.132] Browser LOG     ✅ Sync completed successfully
-[00:41:25.159] Browser LOG     ✅ Synced 0 updates from server
-[00:41:25.159] Browser LOG     ✅ Sync completed successfully
-[00:41:55.200] Browser LOG     ✅ Synced 0 updates from server
-[00:41:55.200] Browser LOG     ✅ Sync completed successfully
-[00:42:25.218] Browser LOG     ✅ Synced 0 updates from server
-[00:42:25.218] Browser LOG     ✅ Sync completed successfully
-[00:42:55.153] Browser LOG     ✅ Synced 0 updates from server
-[00:42:55.153] Browser LOG     ✅ Sync completed successfully
-[00:43:25.143] Browser LOG     ✅ Synced 0 updates from server
-[00:43:25.143] Browser LOG     ✅ Sync completed successfully
-[00:43:55.610] Browser LOG     ✅ Synced 0 updates from server
-[00:43:55.610] Browser LOG     ✅ Sync completed successfully
-[00:44:25.279] Browser LOG     ✅ Synced 0 updates from server
-[00:44:25.279] Browser LOG     ✅ Sync completed successfully
-[00:44:55.382] Browser LOG     ✅ Synced 0 updates from server
-[00:44:55.382] Browser LOG     ✅ Sync completed successfully
-[00:45:25.179] Browser LOG     ✅ Synced 0 updates from server
-[00:45:25.179] Browser LOG     ✅ Sync completed successfully
-[00:45:55.256] Browser LOG     ✅ Synced 0 updates from server
-[00:45:55.256] Browser LOG     ✅ Sync completed successfully
-[00:46:25.198] Browser LOG     ✅ Synced 0 updates from server
-[00:46:25.198] Browser LOG     ✅ Sync completed successfully
-[00:46:55.188] Browser LOG     ✅ Synced 0 updates from server
-[00:46:55.189] Browser LOG     ✅ Sync completed successfully
-[00:47:25.168] Browser LOG     ✅ Synced 0 updates from server
-[00:47:25.168] Browser LOG     ✅ Sync completed successfully
-[00:47:55.225] Browser LOG     ✅ Synced 0 updates from server
-[00:47:55.226] Browser LOG     ✅ Sync completed successfully
-[00:48:25.164] Browser LOG     ✅ Synced 0 updates from server
-[00:48:25.164] Browser LOG     ✅ Sync completed successfully
-[00:48:55.149] Browser LOG     ✅ Synced 0 updates from server
-[00:48:55.149] Browser LOG     ✅ Sync completed successfully
-[00:49:25.160] Browser LOG     ✅ Synced 0 updates from server
-[00:49:25.160] Browser LOG     ✅ Sync completed successfully
-[00:49:55.253] Browser LOG     ✅ Synced 0 updates from server
-[00:49:55.253] Browser LOG     ✅ Sync completed successfully
-[00:50:25.194] Browser LOG     ✅ Synced 0 updates from server
-[00:50:25.194] Browser LOG     ✅ Sync completed successfully
-[00:50:55.167] Browser LOG     ✅ Synced 0 updates from server
-[00:50:55.167] Browser LOG     ✅ Sync completed successfully
-[00:51:25.712] Browser LOG     ✅ Synced 0 updates from server
-[00:51:25.712] Browser LOG     ✅ Sync completed successfully
-[00:51:55.263] Browser LOG     ✅ Synced 0 updates from server
-[00:51:55.263] Browser LOG     ✅ Sync completed successfully
-[00:52:25.194] Browser LOG     ✅ Synced 0 updates from server
-[00:52:25.194] Browser LOG     ✅ Sync completed successfully
-[00:52:55.194] Browser LOG     ✅ Synced 0 updates from server
-[00:52:55.194] Browser LOG     ✅ Sync completed successfully
-[00:53:25.228] Browser LOG     ✅ Synced 0 updates from server
-[00:53:25.228] Browser LOG     ✅ Sync completed successfully
-[00:53:55.200] Browser LOG     ✅ Synced 0 updates from server
-[00:53:55.200] Browser LOG     ✅ Sync completed successfully
-[00:54:25.174] Browser LOG     ✅ Synced 0 updates from server
-[00:54:25.174] Browser LOG     ✅ Sync completed successfully
-[00:54:55.197] Browser LOG     ✅ Synced 0 updates from server
-[00:54:55.198] Browser LOG     ✅ Sync completed successfully
-[00:55:25.178] Browser LOG     ✅ Synced 0 updates from server
-[00:55:25.178] Browser LOG     ✅ Sync completed successfully
-[00:55:55.230] Browser LOG     ✅ Synced 0 updates from server
-[00:55:55.230] Browser LOG     ✅ Sync completed successfully
-[00:56:25.175] Browser LOG     ✅ Synced 0 updates from server
-[00:56:25.175] Browser LOG     ✅ Sync completed successfully
-[00:56:55.165] Browser LOG     ✅ Synced 0 updates from server
-[00:56:55.165] Browser LOG     ✅ Sync completed successfully
-[00:57:25.167] Browser LOG     ✅ Synced 0 updates from server
-[00:57:25.167] Browser LOG     ✅ Sync completed successfully
-[00:57:55.222] Browser LOG     ✅ Synced 0 updates from server
-[00:57:55.222] Browser LOG     ✅ Sync completed successfully
-[00:58:25.149] Browser LOG     ✅ Synced 0 updates from server
-[00:58:25.149] Browser LOG     ✅ Sync completed successfully
-[00:58:55.149] Browser LOG     ✅ Synced 0 updates from server
-[00:58:55.149] Browser LOG     ✅ Sync completed successfully
-[00:59:25.138] Browser LOG     ✅ Synced 0 updates from server
-[00:59:25.138] Browser LOG     ✅ Sync completed successfully
-[00:59:55.222] Browser LOG     ✅ Synced 0 updates from server
-[00:59:55.222] Browser LOG     ✅ Sync completed successfully
-[01:00:25.133] Browser LOG     ✅ Synced 0 updates from server
-[01:00:25.133] Browser LOG     ✅ Sync completed successfully
-[01:00:55.167] Browser LOG     ✅ Synced 0 updates from server
-[01:00:55.167] Browser LOG     ✅ Sync completed successfully
-[01:01:25.214] Browser LOG     ✅ Synced 0 updates from server
-[01:01:25.214] Browser LOG     ✅ Sync completed successfully
-[01:01:55.238] Browser LOG     ✅ Synced 0 updates from server
-[01:01:55.238] Browser LOG     ✅ Sync completed successfully
-[01:02:25.287] Browser LOG     ✅ Synced 0 updates from server
-[01:02:25.287] Browser LOG     ✅ Sync completed successfully
-[01:02:55.198] Browser LOG     ✅ Synced 0 updates from server
-[01:02:55.198] Browser LOG     ✅ Sync completed successfully
-[01:03:25.230] Browser LOG     ✅ Synced 0 updates from server
-[01:03:25.230] Browser LOG     ✅ Sync completed successfully
-[01:03:55.297] Browser LOG     ✅ Synced 0 updates from server
-[01:03:55.297] Browser LOG     ✅ Sync completed successfully
-[01:04:25.190] Browser LOG     ✅ Synced 0 updates from server
-[01:04:25.190] Browser LOG     ✅ Sync completed successfully
-[01:04:55.197] Browser LOG     ✅ Synced 0 updates from server
-[01:04:55.197] Browser LOG     ✅ Sync completed successfully
-[01:05:25.197] Browser LOG     ✅ Synced 0 updates from server
-[01:05:25.197] Browser LOG     ✅ Sync completed successfully
-[01:05:55.256] Browser LOG     ✅ Synced 0 updates from server
-[01:05:55.256] Browser LOG     ✅ Sync completed successfully
-[01:06:25.154] Browser LOG     ✅ Synced 0 updates from server
-[01:06:25.154] Browser LOG     ✅ Sync completed successfully
-[01:06:55.199] Browser LOG     ✅ Synced 0 updates from server
-[01:06:55.199] Browser LOG     ✅ Sync completed successfully
-[01:07:25.151] Browser LOG     ✅ Synced 0 updates from server
-[01:07:25.151] Browser LOG     ✅ Sync completed successfully
-[01:07:55.202] Browser LOG     ✅ Synced 0 updates from server
-[01:07:55.202] Browser LOG     ✅ Sync completed successfully
-[01:08:25.146] Browser LOG     ✅ Synced 0 updates from server
-[01:08:25.146] Browser LOG     ✅ Sync completed successfully
-[01:08:55.193] Browser LOG     ✅ Synced 0 updates from server
-[01:08:55.193] Browser LOG     ✅ Sync completed successfully
-[01:09:25.154] Browser LOG     ✅ Synced 0 updates from server
-[01:09:25.154] Browser LOG     ✅ Sync completed successfully
-[01:09:55.215] Browser LOG     ✅ Synced 0 updates from server
-[01:09:55.215] Browser LOG     ✅ Sync completed successfully
-[01:10:25.122] Browser LOG     ✅ Synced 0 updates from server
-[01:10:25.122] Browser LOG     ✅ Sync completed successfully
-[01:10:55.133] Browser LOG     ✅ Synced 0 updates from server
-[01:10:55.133] Browser LOG     ✅ Sync completed successfully
-[01:11:25.189] Browser LOG     ✅ Synced 0 updates from server
-[01:11:25.189] Browser LOG     ✅ Sync completed successfully
-[01:11:55.254] Browser LOG     ✅ Synced 0 updates from server
-[01:11:55.254] Browser LOG     ✅ Sync completed successfully
-[01:12:25.125] Browser LOG     ✅ Synced 0 updates from server
-[01:12:25.125] Browser LOG     ✅ Sync completed successfully
-[01:12:55.159] Browser LOG     ✅ Synced 0 updates from server
-[01:12:55.159] Browser LOG     ✅ Sync completed successfully
-[01:13:25.184] Browser LOG     ✅ Synced 0 updates from server
-[01:13:25.184] Browser LOG     ✅ Sync completed successfully
-[01:13:55.202] Browser LOG     ✅ Synced 0 updates from server
-[01:13:55.202] Browser LOG     ✅ Sync completed successfully
-[01:14:25.140] Browser LOG     ✅ Synced 0 updates from server
-[01:14:25.140] Browser LOG     ✅ Sync completed successfully
-[01:14:55.133] Browser LOG     ✅ Synced 0 updates from server
-[01:14:55.133] Browser LOG     ✅ Sync completed successfully
-[01:15:25.163] Browser LOG     ✅ Synced 0 updates from server
-[01:15:25.163] Browser LOG     ✅ Sync completed successfully
-[01:15:55.374] Browser LOG     ✅ Synced 0 updates from server
-[01:15:55.374] Browser LOG     ✅ Sync completed successfully
-[01:16:25.214] Browser LOG     ✅ Synced 0 updates from server
-[01:16:25.214] Browser LOG     ✅ Sync completed successfully
-[01:16:55.234] Browser LOG     ✅ Synced 0 updates from server
-[01:16:55.234] Browser LOG     ✅ Sync completed successfully
-[01:17:25.189] Browser LOG     ✅ Synced 0 updates from server
-[01:17:25.189] Browser LOG     ✅ Sync completed successfully
-[01:17:55.220] Browser LOG     ✅ Synced 0 updates from server
-[01:17:55.220] Browser LOG     ✅ Sync completed successfully
-[01:18:25.145] Browser LOG     ✅ Synced 0 updates from server
-[01:18:25.145] Browser LOG     ✅ Sync completed successfully
-[01:18:55.054] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:18:55.208] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[01:18:55.208] Browser LOG     ✅ Synced 0 updates from server
-[01:18:55.208] Browser LOG     ✅ Sync completed successfully
-[01:19:18.383] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:18.383] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:18.383] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[01:19:18.383] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
-[01:19:18.383] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
-[01:19:18.383] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
-[01:19:18.511] Server  LOG     🔍 GET /api/employees/list - Starting request
-[01:19:18.585] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
-[01:19:18.597] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:18.601] Server  LOG     ✅ User authenticated: "2941e8db-d533-412e-a292-7ff713e76567" "vilmer.frost@gmail.com"
-[01:19:18.683] Server  LOG     ✅ Tenant ID: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:18.684] Server  LOG     ✅ Creating admin client
-[01:19:18.684] Server  LOG     🔍 Querying employees for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:18.713] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
-[01:19:18.713] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
-[01:19:18.770] Server  LOG     ✅ Found 2 "employees"
-[01:19:18.800] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:18.863] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:18.938] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
-[01:19:18.938] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
-[01:19:18.976] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:18.979] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:19.046] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
-[01:19:19.047] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
-[01:19:19.047] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
-[01:19:19.047] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
-[01:19:19.068] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
-[01:19:19.068] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
-[01:19:19.102] Server  LOG     ✅ Selected employee: {}
-[01:19:19.102] Server  LOG     ✅ Returning employee data immediately
-[01:19:19.144] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
-[01:19:19.145] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
-[01:19:19.145] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
-[01:19:19.145] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
-[01:19:19.158] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:19.235] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
-[01:19:19.235] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
-[01:19:19.237] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
-[01:19:19.237] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:19.237] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:19.237] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":0}
-[01:19:19.308] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
-[01:19:19.308] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
-[01:19:19.309] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
-[01:19:19.309] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
-[01:19:19.344] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
-[01:19:19.482] Server  LOG     ✅ Selected employee: {}
-[01:19:19.482] Server  LOG     ✅ Returning employee data immediately
-[01:19:19.569] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:19.821] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
-[01:19:19.821] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:19.821] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:19.821] Browser WARN    ⚠️ Active time entry found but missing start_time: ea5e3ff4-4371-49c9-b0b3-361a804add81
-[01:19:19.821] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
-[01:19:19.821] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
-[01:19:19.821] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:19.821] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:19.821] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
-[01:19:19.821] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:19.821] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:20.645] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:20.645] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:20.645] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:20.645] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:20.662] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:20.681] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:20.847] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
-[01:19:20.847] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
-[01:19:20.847] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:20.847] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:20.847] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
-[01:19:20.847] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:20.847] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:20.847] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":3}
-[01:19:21.356] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[01:19:21.544] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:21.544] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:21.544] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
-[01:19:21.544] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:21.544] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:25.123] Browser LOG     ✅ Synced 0 updates from server
-[01:19:25.123] Browser LOG     ✅ Sync completed successfully
-[01:19:48.960] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:48.960] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:19:55.143] Browser LOG     ✅ Synced 0 updates from server
-[01:19:55.143] Browser LOG     ✅ Sync completed successfully
-[01:20:19.038] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:20:19.038] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:20:25.122] Browser LOG     ✅ Synced 0 updates from server
-[01:20:25.122] Browser LOG     ✅ Sync completed successfully
-[01:20:48.996] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:20:48.996] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:20:55.114] Browser LOG     ✅ Synced 0 updates from server
-[01:20:55.114] Browser LOG     ✅ Sync completed successfully
-[01:21:18.954] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:21:18.954] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:21:25.135] Browser LOG     ✅ Synced 0 updates from server
-[01:21:25.135] Browser LOG     ✅ Sync completed successfully
-[01:21:49.923] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:21:49.923] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:21:55.937] Browser LOG     ✅ Synced 0 updates from server
-[01:21:55.937] Browser LOG     ✅ Sync completed successfully
-[01:22:19.925] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:22:19.925] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:22:25.938] Browser LOG     ✅ Synced 0 updates from server
-[01:22:25.938] Browser LOG     ✅ Sync completed successfully
-[01:23:15.928] Browser LOG     ✅ Synced 0 updates from server
-[01:23:15.928] Browser LOG     ✅ Sync completed successfully
-[01:23:15.928] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:23:15.928] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:24:15.937] Browser LOG     ✅ Synced 0 updates from server
-[01:24:15.937] Browser LOG     ✅ Sync completed successfully
-[01:24:15.937] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:24:15.937] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:25:15.926] Browser LOG     ✅ Synced 0 updates from server
-[01:25:15.926] Browser LOG     ✅ Sync completed successfully
-[01:25:16.934] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:25:16.934] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:26:15.929] Browser LOG     ✅ Synced 0 updates from server
-[01:26:15.929] Browser LOG     ✅ Sync completed successfully
-[01:26:15.929] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:26:15.929] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:27:15.936] Browser LOG     ✅ Synced 0 updates from server
-[01:27:15.936] Browser LOG     ✅ Sync completed successfully
-[01:27:15.936] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:27:15.936] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:28:15.926] Browser LOG     ✅ Synced 0 updates from server
-[01:28:15.926] Browser LOG     ✅ Sync completed successfully
-[01:28:15.926] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:28:15.926] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:29:15.938] Browser LOG     ✅ Synced 0 updates from server
-[01:29:15.938] Browser LOG     ✅ Sync completed successfully
-[01:29:15.938] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:29:15.938] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:30:15.936] Browser LOG     ✅ Synced 0 updates from server
-[01:30:15.936] Browser LOG     ✅ Sync completed successfully
-[01:30:15.936] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:30:15.936] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:31:15.934] Browser LOG     ✅ Synced 0 updates from server
-[01:31:15.934] Browser LOG     ✅ Sync completed successfully
-[01:31:15.934] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[01:31:15.934] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:36.039] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-client] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:36.039] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-ssr] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:44.331] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-client] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:44.331] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-ssr] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:50.475] Server  LOG      ✓ Compiled in 139ms
+[00:06:50.579] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-client] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:50.579] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-ssr] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:50.934] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-client] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:50.934] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-ssr] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:06:51.075] Browser LOG     ✅ Synced 0 updates from server
+[00:06:51.075] Browser LOG     ✅ Sync completed successfully
+[00:07:02.620] Server  LOG      ✓ Compiled in 482ms
+[00:07:02.728] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-client] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:07:02.728] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-ssr] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:07:17.859] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-client] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:07:17.859] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-ssr] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:07:20.924] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-client] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:07:20.924] Browser ERROR   ./app/components/factoring/FactoringOfferCard.tsx:4:1
+Export CardFooter doesn't exist in target module
+  2 | 'use client';
+  3 |
+> 4 | import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '@/components/ui/card';
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  5 | import { Button } from '@/components/ui/button';
+  6 | import { FactoringStatusBadge } from './FactoringStatusBadge';
+  7 | import { FactoringFeeBreakdown } from './FactoringFeeBreakdown';
+
+The export CardFooter was not found in module [project]/app/components/ui/card.tsx [app-ssr] (ecmascript).
+Did you mean to import Card?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import traces:
+  Client Component Browser:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component Browser]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Client Component Browser]
+    ./app/invoices/[id]/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/components/factoring/FactoringOfferCard.tsx [Client Component SSR]
+    ./app/components/factoring/FactoringWidget.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Client Component SSR]
+    ./app/invoices/[id]/page.tsx [Server Component]
+[00:07:21.098] Browser LOG     ✅ Synced 0 updates from server
+[00:07:21.098] Browser LOG     ✅ Sync completed successfully

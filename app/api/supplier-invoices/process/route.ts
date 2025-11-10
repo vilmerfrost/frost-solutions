@@ -41,6 +41,10 @@ export async function POST(req: NextRequest) {
   const correlationId = newCorrelationId();
   let tenantId: string | null = null;
   let storagePath: string | undefined;
+  const requestUserId =
+    req.headers.get('x-user-id') ??
+    req.headers.get('x-supabase-user-id') ??
+    null;
 
   try {
     // Auth / tenant
@@ -261,9 +265,6 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Create invoice record
-    const { data: { user } } = await admin.auth.getUser();
-
     const requiresManualReview =
       result.ocrConfidence < 75 || !projectMatch || projectMatch.confidence < 60;
 
@@ -302,7 +303,7 @@ export async function POST(req: NextRequest) {
           : null,
         requires_manual_review: requiresManualReview,
         status: requiresManualReview ? 'pending_approval' : 'pending_approval',
-        created_by: user?.id,
+        created_by: requestUserId,
       })
       .select('id')
       .single();

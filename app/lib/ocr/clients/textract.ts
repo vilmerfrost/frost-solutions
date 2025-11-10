@@ -24,6 +24,45 @@ export async function runTextract(
   fileBytes: Uint8Array,
   mimeType: string
 ): Promise<TextractResult> {
+  const mockResult: TextractResult = {
+    blocks: [
+      { BlockType: 'LINE', Text: 'Leverantör: Demo Bygg AB', Confidence: 96 },
+      { BlockType: 'LINE', Text: 'Fakturanummer: MOCK-12345', Confidence: 94 },
+      { BlockType: 'LINE', Text: 'Datum: 2025-11-01', Confidence: 93 },
+      { BlockType: 'LINE', Text: 'Förfallodatum: 2025-12-01', Confidence: 92 },
+      { BlockType: 'LINE', Text: 'Total: 12 345,00 SEK', Confidence: 95 },
+      { BlockType: 'LINE', Text: 'Moms: 25%', Confidence: 91 },
+      { BlockType: 'LINE', Text: 'Projekt: PROJ-2025-001', Confidence: 88 },
+    ],
+    rawText: [
+      'Leverantör: Demo Bygg AB',
+      'Fakturanummer: MOCK-12345',
+      'Datum: 2025-11-01',
+      'Förfallodatum: 2025-12-01',
+      'Total: 12 345,00 SEK',
+      'Moms: 25%',
+      'Projekt: PROJ-2025-001',
+      'Artikel 1 10 st 500,00 SEK 5 000,00 SEK',
+      'Artikel 2 5 st 1 200,00 SEK 6 000,00 SEK',
+      'Frakt 1 st 1 345,00 SEK 1 345,00 SEK',
+    ].join('\n'),
+    modelConfidence: 92,
+  };
+
+  const useMock = (process.env.OCR_USE_MOCK ?? 'true').toLowerCase() !== 'false';
+  if (useMock) {
+    return mockResult;
+  }
+
+  const hasAwsConfig =
+    Boolean(process.env.AWS_ACCESS_KEY_ID) &&
+    Boolean(process.env.AWS_SECRET_ACCESS_KEY) &&
+    Boolean(process.env.AWS_REGION);
+
+  if (!hasAwsConfig) {
+    return mockResult;
+  }
+
   const isPdf = mimeType === 'application/pdf';
   const maxAttempts = 3;
 

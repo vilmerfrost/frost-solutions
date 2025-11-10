@@ -11,6 +11,7 @@ import { toast } from '@/lib/toast'
 import FileUpload from '@/components/FileUpload'
 import FileList from '@/components/FileList'
 import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
+import { FactoringWidget } from '@/components/factoring/FactoringWidget'
 
 interface Invoice {
   id: string
@@ -811,6 +812,16 @@ export default function InvoicePage() {
                   resourceId={invoice.id}
                   resourceName={invoice.number || invoice.id}
                   variant="button"
+                />
+              )}
+              
+              {/* Factoring Widget */}
+              {invoice && tenantId && (
+                <FactoringWidget
+                  tenantId={tenantId}
+                  invoiceId={invoice.id}
+                  amountSEK={total}
+                  idempotencyKey={`invoice-${invoice.id}-${Date.now()}`}
                 />
               )}
               

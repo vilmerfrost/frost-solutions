@@ -1,5 +1,21 @@
 {
-  "node": {},
+  "node": {
+    "40f606e257ef630e401418a3da13b8c0adacfd41a7": {
+      "workers": {
+        "app/invoices/[id]/page": {
+          "moduleId": "[project]/.next-internal/server/app/invoices/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/invoices/[id]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+          "async": false,
+          "exportedName": "sendInvoiceEmail",
+          "filename": "app/invoices/[id]/actions.ts"
+        }
+      },
+      "layer": {
+        "app/invoices/[id]/page": "action-browser"
+      },
+      "filename": "app/invoices/[id]/actions.ts",
+      "exportedName": "sendInvoiceEmail"
+    }
+  },
   "edge": {},
-  "encryptionKey": "120WMcLJAn3WB3HgMUkQPwtuFvCB5wAqMnWaDbFmEVU="
+  "encryptionKey": "6+7EdRJ3BWb6rdzKRW6atNDJahUwXuKJcxPEj8polxg="
 }
