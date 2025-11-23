@@ -1,0 +1,290 @@
+# 🚀 Frost Solutions
+
+> AI-driven automatisering för bygg & blue-collar-industrin
+
+**Next.js 16 • Supabase • AI-agenter • OCR • Time-tracking • Payroll • Multi-tenant SaaS**
+
+---
+
+## 📑 Innehållsförteckning
+
+- [Översikt](#-översikt)
+- [Huvudfunktioner](#-huvudfunktioner)
+- [Tech Stack](#️-tech-stack)
+- [Projektstruktur](#-projektstruktur)
+- [Kom igång](#-kom-igång)
+- [Testning](#-testning)
+- [Deployment](#-deployment)
+- [Säkerhet](#-säkerhet)
+- [Brand & UI](#-brand--ui-philosophy)
+- [Bidra](#-bidra)
+- [Kontakt](#-kontakt)
+
+---
+
+## 🌟 Översikt
+
+Frost Solutions är en modern, modulär SaaS-plattform designad för nordiska byggbolag och andra blue-collar-verksamheter. Systemet kombinerar Next.js, Supabase, och ett AI-drivet automatiseringslager för att hantera:
+
+- ⏱️ **Tidrapportering** – Offline-vänlig, mobil-optimerad
+- 📄 **OCR-baserad fakturahantering** – AI-driven dokumentavläsning
+- 💰 **Payroll & OB-beräkningar** – Automatiserad löneprocessering
+- 📊 **Projekthantering** – Fullständig projektöversikt
+- 📁 **Dokument & rot-hantering** – Centraliserad dokumentation
+- 🏢 **Multi-tenant arkitektur** – Skalbar för alla företagsstorlekar
+- 🤖 **AI-agenter** – Validering, planering och autonoma nattjobb (Night Factory)
+
+Byggd för att vara snabb, pålitlig, mobil-optimerad, och redo för både små firmor och större team.
+
+---
+
+## 🧠 Huvudfunktioner
+
+### ⏱️ 1. Time Tracking
+
+**Next.js + Supabase-baserad tidrapportering**
+
+- ✅ Offline-vänligt UI med lokal caching
+- 📅 Vecko- & månadsöversikt
+- 🧮 Automatisk OB-beräkning
+- ✅ Supervisor approvals
+- 📱 Mobil-optimerad upplevelse
+
+### 📄 2. OCR Invoice Processing
+
+**AI-baserad fakturaavläsning och -hantering**
+
+- 🔍 AI-baserad fakturaavläsning
+- 🧠 RAG-förstärkt leverantörsigenkänning
+- 💡 Automatiska förslag på projekt/kostnadskod
+- ✅ Validering via multi-agent pipeline
+- 📊 Intelligent dataklassificering
+
+### 💰 3. Payroll & Wage Engine
+
+**Komplett lönehantering med svenska regler**
+
+- 📊 Arbetsgivaravgifter & skattetabeller
+- 🌙 OB, jour, traktamente
+- 🇸🇪 Stöd för svenska 2025-regler
+- 🔗 Integreras mot Fortnox / Visma
+- 📈 Automatiserade beräkningar
+
+### ⚙️ 4. Frost Night Factory
+
+**Automated R&D med multi-agent pipeline**
+
+- 🤖 Multi-agent LangGraph pipeline
+- 🔄 Planner → Architect → Coder → Tester → Reporter
+- 🌙 Kör nightly jobb helt automatiskt
+- 💰 Kostnadsoptimerad (local inference + cloud)
+- 🚀 Kontinuerlig förbättring av systemet
+
+### 🧩 5. Modular SaaS Architecture
+
+**Skalbar, säker multi-tenant arkitektur**
+
+- 🏢 Multi-tenant support
+- 🔒 RLS-härdad Supabase
+- ⚡ Server Actions med robust felhantering
+- 📦 Queue-baserade workflows
+- 🔐 Enterprise-grade säkerhet
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+- **Framework:** Next.js 16 (App Router)
+- **UI Library:** React 19
+- **Language:** TypeScript (strict mode)
+- **Styling:** Tailwind CSS + shadcn/ui
+- **State Management:** Zustand
+- **Data Fetching:** React Query
+
+### Backend
+
+- **Database:** Supabase (PostgreSQL)
+- **Authentication:** Supabase Auth
+- **Security:** Row Level Security (RLS)
+- **Storage:** Supabase Storage
+- **Functions:** Edge Functions
+- **API:** Server Actions / Route Handlers
+- **Vector Search:** pgvector för RAG
+- **Job Queue:** Supabase Functions
+
+### AI Layer
+
+- **OCR:** Google Vision API / AWS Textract
+- **Agents:** LangGraph / CrewAI
+- **Local Inference:** Ollama (Mistral, CodeLlama, DeepSeek)
+- **Cloud Models:** Gemini, GPT-4, Claude
+
+---
+
+## 📁 Projektstruktur
+
+```
+frost-solutions/
+├── app/                   # Next.js App Router
+│   ├── dashboard/         # Dashboard routes
+│   ├── auth/             # Authentication pages
+│   ├── api/              # API routes
+│   └── (components)/     # Route groups
+├── lib/                   # Shared libraries
+│   ├── supabase/         # Supabase client & utilities
+│   ├── validation/       # Validation schemas
+│   ├── ai/               # AI agent implementations
+│   └── utils/            # Helper functions
+├── server/                # Server-side code
+│   ├── actions/          # Server Actions
+│   └── queues/           # Job queue handlers
+├── types/                 # TypeScript type definitions
+├── public/                # Static assets
+├── scripts/               # Build & deployment scripts
+└── README.md              # This file
+```
+
+---
+
+## ⚡ Kom igång
+
+### Förutsättningar
+
+- Node.js 18+ och pnpm
+- Supabase-konto
+- (Valfritt) Ollama för lokal AI-inference
+
+### Installation
+
+1. **Installera dependencies**
+
+   ```bash
+   pnpm install
+   ```
+
+2. **Konfigurera miljövariabler**
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Fyll i följande variabler i `.env`:
+
+   ```env
+   # Supabase
+   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+   SERVICE_ROLE_KEY=your_service_role_key
+
+   # AI Providers
+   GEMINI_API_KEY=your_gemini_key
+   OPENAI_API_KEY=your_openai_key
+   PERPLEXITY_API_KEY=your_perplexity_key
+   # ... andra AI-nycklar
+   ```
+
+3. **Starta utvecklingsservern**
+
+   ```bash
+   pnpm dev
+   ```
+
+4. **Starta AI-lokal pipeline (valfritt, för Night Factory)**
+
+   ```bash
+   # Terminal 1: Starta Ollama
+   ollama serve
+
+   # Terminal 2: Starta Python backend
+   python -m uvicorn server:app --reload
+   ```
+
+---
+
+## 🧪 Testning
+
+### Frontend & Backend
+
+```bash
+pnpm test
+```
+
+### Night Factory (Python)
+
+```bash
+pytest tests/
+```
+
+---
+
+## 🌍 Deployment
+
+Frost Solutions kan köras på följande plattformar:
+
+| Komponent | Plattform | Beskrivning |
+|-----------|-----------|-------------|
+| **Frontend** | Vercel | Next.js deployment |
+| **Database & Auth** | Supabase | Managed PostgreSQL & Auth |
+| **Night Factory** | Fly.io / Railway | Python backend |
+| **Storage & OCR** | AWS S3 | Invoice storage & processing |
+
+> 📖 Se `deployment-guide.md` för detaljerade deployment-instruktioner.
+
+---
+
+## 🔐 Säkerhet
+
+Frost Solutions följer enterprise-grade säkerhetsstandarder:
+
+- ✅ **Full RLS policy coverage** – Alla tabeller skyddade
+- ✅ **Strict Server Actions** – Validerad input/output
+- ✅ **Audit logging** – Alla kritiska operationer loggas
+- ✅ **Encrypted storage** – Känslig data krypterad
+- ✅ **JWT-baserad auth** – Säker autentisering
+- ✅ **SOC2-ish logging standard** – Compliance-ready
+
+---
+
+## 🧊 Brand & UI Philosophy
+
+Frost Solutions följer en Apple-inspirerad, ultra-clean design:
+
+- 🎨 **Frosted glass UI** – Modern glasmorphism
+- 🔵 **Nordic blue** (`#007AFF`) & **Frost Gold** (`#FFD700`)
+- 📐 **Bento layout** – Modulär, grid-baserad design
+- ✨ **Smooth micro-interactions** – Polerad användarupplevelse
+- 🏢 **Modern enterprise vibe** – Professionell men tillgänglig
+
+---
+
+## 🤝 Bidra
+
+Projektet är primärt utvecklat av **Vilmer Frost**, men pull requests från teammedlemmar och framtida utvecklare är välkomna!
+
+### Bidragsprocess
+
+1. Forka projektet
+2. Skapa en feature branch (`git checkout -b feature/AmazingFeature`)
+3. Committa dina ändringar (`git commit -m 'Add some AmazingFeature'`)
+4. Pusha till branchen (`git push origin feature/AmazingFeature`)
+5. Öppna en Pull Request
+
+---
+
+## 📬 Kontakt
+
+**Founder:** Vilmer Frost
+
+- 🌐 **GitHub:** [@vilmerfrost](https://github.com/vilmerfrost)
+- 📧 **Email:** _lägg in egen dev-mail här_
+- 🌍 **Website:** [frostsolutions.se](https://frostsolutions.se) _(coming soon)_
+
+---
+
+<div align="center">
+
+**Byggt med ❄️ av Frost Solutions**
+
+</div>
