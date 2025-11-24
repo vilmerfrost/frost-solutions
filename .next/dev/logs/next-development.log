@@ -1,228 +1,328 @@
-[00:00:02.602] Server  WARN     ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-[00:00:02.921] Server  LOG      ✓ Ready in 2.4s
-[00:00:05.988] Server  LOG      ○ Compiling / ...
-[00:00:07.283] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:07.436] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:00:07.856] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:07.990] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:00:08.348] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:08.488] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:00:08.635] Browser WARN    debug/me returned error: Auth session missing!
-[00:00:08.635] Browser WARN    ⚠️ TenantContext: All API routes failed, trying legacy method...
-[00:00:08.635] Browser WARN    Could not get user for tenant lookup: {"__isAuthError":true,"name":"AuthSessionMissingError","status":400}
-[00:00:08.635] Browser WARN    debug/me returned error: Auth session missing!
-[00:00:08.635] Browser WARN    ⚠️ TenantContext: All API routes failed, trying legacy method...
-[00:00:08.635] Browser WARN    Could not get user for tenant lookup: {"__isAuthError":true,"name":"AuthSessionMissingError","status":400}
-[00:00:08.635] Browser WARN    debug/me returned error: Auth session missing!
-[00:00:08.635] Browser WARN    ⚠️ TenantContext: All API routes failed, trying legacy method...
-[00:00:08.635] Browser WARN    Could not get user for tenant lookup: {"__isAuthError":true,"name":"AuthSessionMissingError","status":400}
-[00:00:08.635] Browser WARN    debug/me returned error: Auth session missing!
-[00:00:08.635] Browser WARN    ⚠️ TenantContext: All API routes failed, trying legacy method...
-[00:00:08.635] Browser WARN    Could not get user for tenant lookup: {"__isAuthError":true,"name":"AuthSessionMissingError","status":400}
-[00:00:08.790] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:00:08.790] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:00:08.790] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:00:08.790] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:00:31.139] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:31.722] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:31.729] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:31.739] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:31.856] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:00:31.856] Browser ERROR   No session found after all attempts. Hash: ...
-[00:00:31.856] Browser LOG     Session found, setting cookies...
-[00:00:31.856] Browser WARN    debug/me returned error: Auth session missing!
-[00:00:31.856] Browser WARN    ⚠️ TenantContext: All API routes failed, trying legacy method...
-[00:00:31.856] Browser LOG     🔍 Fetching tenant from employees table for user: 2941e8db-d533-412e-a292-7ff713e76567
-[00:00:31.856] Browser WARN    debug/me returned error: Auth session missing!
-[00:00:31.856] Browser WARN    ⚠️ TenantContext: All API routes failed, trying legacy method...
-[00:00:31.856] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:00:31.856] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:00:31.856] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:00:31.856] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:00:31.856] Browser WARN    debug/me returned error: Auth session missing!
-[00:00:31.856] Browser WARN    ⚠️ TenantContext: All API routes failed, trying legacy method...
-[00:00:31.856] Browser LOG     Cookies set, verifying...
-[00:00:31.856] Browser LOG     ✅ TenantContext: Found tenant from employees table: 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:00:31.856] Browser LOG     🔍 Fetching tenant from employees table for user: 2941e8db-d533-412e-a292-7ff713e76567
-[00:00:31.856] Browser LOG     🔍 Fetching tenant from employees table for user: 2941e8db-d533-412e-a292-7ff713e76567
-[00:00:31.856] Browser LOG     ✅ TenantContext: Found tenant from employees table: 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:00:31.856] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:00:31.856] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:00:31.856] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:00:31.856] Browser LOG     ✅ TenantContext: Found tenant from employees table: 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:00:32.252] Browser LOG     ✅ Synced 2 updates from server
-[00:00:32.252] Browser LOG     ✅ Sync completed successfully
-[00:00:32.252] Browser LOG     User found: 2941e8db-d533-412e-a292-7ff713e76567
-[00:00:32.509] Browser LOG     Employee linking result: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","linked":false,"message":"Employee record already linked or no update needed","tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:32.835] Browser LOG     Found tenant: 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:00:34.377] Server  LOG     🔍 Dashboard: Rendering TimeClock with: {}
-[00:00:34.498] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:00:34.702] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
-[00:00:34.702] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
-[00:00:34.702] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
-[00:00:34.702] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
-[00:00:34.702] Browser LOG     TimeClock: No tenantId
-[00:00:34.702] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:00:34.702] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
-[00:00:34.702] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":null}
-[00:00:34.702] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
-[00:00:34.702] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
-[00:00:34.702] Browser LOG     TimeClock: No tenantId
-[00:00:34.702] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
-[00:00:34.702] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
-[00:00:34.702] Browser LOG     TimeClock: No tenantId
-[00:00:34.702] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":0}
-[00:00:34.839] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:34.844] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:34.845] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:35.037] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:00:35.037] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:35.037] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:35.037] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":0}
-[00:00:35.037] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:00:35.037] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:00:35.037] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:00:35.037] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:00:35.037] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:00:35.037] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:00:35.037] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
-[00:00:35.149] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:35.261] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:35.268] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:00:35.268] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":0}
-[00:00:35.300] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:35.331] Server  LOG     🔍 GET /api/employees/list - Starting request
-[00:00:35.413] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:35.418] Server  LOG     ✅ User authenticated: "2941e8db-d533-412e-a292-7ff713e76567" "vilmer.frost@gmail.com"
-[00:00:35.429] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:35.480] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
-[00:00:35.481] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
-[00:00:35.499] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
-[00:00:35.500] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
-[00:00:35.501] Server  LOG     ✅ Tenant ID: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:35.501] Server  LOG     ✅ Creating admin client
-[00:00:35.501] Server  LOG     🔍 Querying employees for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:35.529] Browser LOG     🔗 Timestamp tie - using server version
-[00:00:35.529] Browser LOG     🔗 Timestamp tie - using server version
-[00:00:35.529] Browser LOG     ✅ Synced 2 updates from server
-[00:00:35.529] Browser LOG     ✅ Sync completed successfully
-[00:00:35.539] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
-[00:00:35.540] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
-[00:00:35.540] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
-[00:00:35.540] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
-[00:00:35.560] Server  LOG     ✅ Selected employee: {}
-[00:00:35.560] Server  LOG     ✅ Returning employee data immediately
-[00:00:35.561] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
-[00:00:35.562] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
-[00:00:35.562] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
-[00:00:35.562] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
-[00:00:35.569] Server  LOG     ✅ Found 2 "employees"
-[00:00:35.766] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
-[00:00:35.766] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:35.766] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:35.766] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":0}
-[00:00:35.766] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
-[00:00:35.955] Server  ERROR   ❌ Projects/hours: error fetching time entries {}
-[00:00:35.969] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:36.139] Browser ERROR   Error fetching project hours API: {"success":false,"error":"Could not find the table 'app.time_entries' in the schema cache"}
-[00:00:36.139] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:36.139] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:36.139] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:00:36.139] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
-[00:00:36.139] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:36.139] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:36.139] Browser WARN    ⚠️ Active time entry found but missing start_time: ea5e3ff4-4371-49c9-b0b3-361a804add81
-[00:00:36.325] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:00:36.541] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
-[00:00:36.541] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:36.541] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:36.541] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":3}
-[00:00:36.541] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:36.541] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:36.541] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:00:36.541] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:01:05.197] Browser LOG     ✅ Synced 0 updates from server
-[00:01:05.197] Browser LOG     ✅ Sync completed successfully
-[00:01:05.465] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:01:05.465] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:01:35.252] Browser LOG     ✅ Synced 0 updates from server
-[00:01:35.252] Browser LOG     ✅ Sync completed successfully
-[00:01:35.563] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:01:35.563] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:02:05.406] Browser LOG     ✅ Synced 0 updates from server
-[00:02:05.406] Browser LOG     ✅ Sync completed successfully
-[00:02:05.724] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:02:05.724] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:02:35.229] Browser LOG     ✅ Synced 0 updates from server
-[00:02:35.229] Browser LOG     ✅ Sync completed successfully
-[00:02:35.530] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:02:35.530] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:03:05.230] Browser LOG     ✅ Synced 0 updates from server
-[00:03:05.230] Browser LOG     ✅ Sync completed successfully
-[00:03:05.524] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:03:05.524] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:03:32.175] Browser ERROR   ❌ Sync failed: {}
-[00:03:32.175] Browser ERROR   Background sync failed: {}
-[00:03:32.175] Browser ERROR   ❌ Sync failed: {}
-[00:03:32.175] Browser ERROR   Background sync failed: {}
-[00:03:32.175] Browser LOG     ✅ Synced 0 updates from server
-[00:03:32.175] Browser LOG     ✅ Sync completed successfully
-[00:03:32.175] Browser LOG     ✅ Synced 0 updates from server
-[00:03:32.175] Browser LOG     ✅ Sync completed successfully
-[00:03:32.175] Browser LOG     ✅ Synced 0 updates from server
-[00:03:32.175] Browser LOG     ✅ Sync completed successfully
-[00:03:32.175] Browser LOG     ✅ Synced 0 updates from server
-[00:03:32.175] Browser LOG     ✅ Sync completed successfully
-[00:03:33.601] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
-[00:03:34.167] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:03:34.183] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
-[00:03:34.227] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:03:34.245] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:03:34.690] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:03:35.177] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:03:35.177] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:03:35.177] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:03:35.177] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
-[00:03:35.177] Browser LOG     🤖 AIChatbot: isOpen changed to: false
-[00:03:35.177] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:03:35.177] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:03:35.177] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:03:35.177] Browser LOG     🔗 Timestamp tie - using server version
-[00:03:35.177] Browser LOG     🔗 Timestamp tie - using server version
-[00:03:35.177] Browser LOG     ✅ Synced 2 updates from server
-[00:03:35.177] Browser LOG     ✅ Sync completed successfully
-[00:03:35.234] Browser LOG     ✅ Synced 0 updates from server
-[00:03:35.234] Browser LOG     ✅ Sync completed successfully
-[00:03:35.485] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:03:35.485] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:04:05.226] Browser LOG     ✅ Synced 0 updates from server
-[00:04:05.226] Browser LOG     ✅ Sync completed successfully
-[00:04:05.587] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:04:05.587] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:04:06.168] Browser LOG     ✅ Synced 0 updates from server
-[00:04:06.168] Browser LOG     ✅ Sync completed successfully
-[00:04:35.200] Browser LOG     ✅ Synced 0 updates from server
-[00:04:35.200] Browser LOG     ✅ Sync completed successfully
-[00:04:35.481] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:04:35.481] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:04:36.169] Browser LOG     ✅ Synced 0 updates from server
-[00:04:36.169] Browser LOG     ✅ Sync completed successfully
-[00:05:06.160] Browser LOG     ✅ Synced 0 updates from server
-[00:05:06.160] Browser LOG     ✅ Sync completed successfully
-[00:05:06.160] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:05:06.160] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:05:06.160] Browser LOG     ✅ Synced 0 updates from server
-[00:05:06.160] Browser LOG     ✅ Sync completed successfully
-[00:05:07.005] Browser LOG     👁️ Page visible - triggering sync
-[00:05:07.197] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
-[00:05:07.300] Browser LOG     ✅ Synced 0 updates from server
-[00:05:07.300] Browser LOG     ✅ Sync completed successfully
-[00:05:07.300] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
-[00:05:36.172] Browser LOG     ✅ Synced 0 updates from server
-[00:05:36.172] Browser LOG     ✅ Sync completed successfully
-[00:05:36.172] Browser LOG     ✅ Synced 0 updates from server
-[00:05:36.172] Browser LOG     ✅ Sync completed successfully
-[00:05:36.172] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:05:36.172] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
-[00:06:06.160] Browser LOG     ✅ Synced 0 updates from server
-[00:06:06.160] Browser LOG     ✅ Sync completed successfully
+[00:00:01.749] Server  WARN     ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+[00:00:01.968] Server  LOG      ✓ Ready in 1620ms
+[00:48:10.094] Server  ERROR    ⨯ Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:10.172] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:10.210] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/pages/_app/build-manifest.json'
+[00:48:13.040] Server  ERROR    ⨯ Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:13.214] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:13.240] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/pages/_app/build-manifest.json'
+[00:48:14.568] Server  ERROR    ⨯ Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:14.674] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:14.699] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/pages/_app/build-manifest.json'
+[00:48:22.241] Server  ERROR    ⨯ Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:22.300] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:22.334] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/pages/_app/build-manifest.json'
+[00:48:24.272] Server  ERROR    ⨯ Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:24.335] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:24.388] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/pages/_app/build-manifest.json'
+[00:48:26.587] Server  ERROR    ⨯ Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:26.655] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:26.710] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/pages/_app/build-manifest.json'
+[00:48:27.252] Server  ERROR    ⨯ Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:27.369] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:27.391] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/pages/_app/build-manifest.json'
+[00:48:28.534] Server  ERROR    ⨯ Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:28.725] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/app/page/build-manifest.json'
+[00:48:28.761] Server  ERROR   Error: ENOENT: no such file or directory, open '/Users/vilmerfrost/Documents/frost-solutions/.next/dev/server/pages/_app/build-manifest.json'
+[00:01:46.325] Server  LOG      ○ Compiling / ...
+[00:01:58.088] Server  LOG      ✓ Compiled in 1130ms
+[00:49:46.962] Server  LOG      ✓ Compiled in 1056ms
+[00:49:49.405] Server  LOG      ✓ Compiled in 1110ms
+[00:02:38.508] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:02:38.632] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[00:02:38.948] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:02:38.948] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:02:38.948] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:02:38.948] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:02:41.004] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:41.015] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:41.055] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:41.078] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:41.184] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:02:41.184] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:02:41.184] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:02:41.184] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:02:41.962] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:41.962] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":null,"projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:41.962] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:02:41.962] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
+[00:02:41.962] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:02:41.962] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":null,"isCheckedIn":false,"projectsCount":0}
+[00:02:42.183] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
+[00:02:42.183] Browser LOG     ✅ Synced 2 updates from server
+[00:02:42.183] Browser LOG     ✅ Sync completed successfully
+[00:02:42.183] Browser LOG     TimeClock: Fetching employee for user 2941e8db-d533-412e-a292-7ff713e76567
+[00:02:43.231] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:43.403] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:43.487] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[00:02:43.487] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[00:02:43.560] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[00:02:43.560] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[00:02:43.560] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[00:02:43.560] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[00:02:43.573] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:43.579] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:02:43.619] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:43.746] Server  LOG     🔍 GET /api/employees/list - Starting request
+[00:02:43.749] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:43.819] Server  LOG     ✅ User authenticated: "2941e8db-d533-412e-a292-7ff713e76567" "vilmer.frost@gmail.com"
+[00:02:43.825] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[00:02:43.826] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[00:02:43.830] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:44.322] Server  LOG     ✅ Tenant ID: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:44.333] Server  LOG     ✅ Creating admin client
+[00:02:44.335] Server  LOG     🔍 Querying employees for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:44.337] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[00:02:44.338] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[00:02:44.338] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[00:02:44.338] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[00:02:44.348] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[00:02:44.349] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[00:02:44.416] Server  LOG     ✅ Found 2 "employees"
+[00:02:44.434] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[00:02:44.435] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[00:02:44.436] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[00:02:44.436] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[00:02:44.561] Server  LOG     ✅ Selected employee: {}
+[00:02:44.562] Server  LOG     ✅ Returning employee data immediately
+[00:02:44.767] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
+[00:02:44.767] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:44.767] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:44.767] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":0}
+[00:02:44.767] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
+[00:02:45.016] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.016] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.092] Server  LOG     ✅ Selected employee: {}
+[00:02:45.092] Server  LOG     ✅ Returning employee data immediately
+[00:02:45.166] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:45.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.278] Browser LOG     TimeClock: Found employee ID via API: 47224e0b-5809-4894-8696-49dd2b5f71f0
+[00:02:45.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.278] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:45.278] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
+[00:02:45.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.278] Browser WARN    ⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API
+[00:02:45.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.278] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.504] Browser WARN    ⚠️ Active time entry found but missing start_time: ea5e3ff4-4371-49c9-b0b3-361a804add81
+[00:02:45.505] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:45.609] Browser LOG     ✅ Dashboard: Got tenantId from centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:45.609] Browser LOG     🔒 Dashboard: Using tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56 for projects and TimeClock
+[00:02:45.609] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.609] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.718] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:45.802] Server  LOG     ✅ Projects/for-timeclock: Using tenantId: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:45.975] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.975] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":0,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.975] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:45.975] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.975] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.975] Browser LOG     🔍 TimeClock: Component mounted/updated {"activeTimeEntry":false,"componentVisible":true,"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","isCheckedIn":false,"projectsCount":3}
+[00:02:45.975] Browser LOG     ✅ TimeClock: Found projects via API 3 for tenant 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:45.975] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:45.975] Browser LOG     🔍 Dashboard: Rendering TimeClock with: {"employeeId":"47224e0b-5809-4894-8696-49dd2b5f71f0","projectsCount":3,"tenantId":"8ee28f55-b780-4286-8137-9e70ea58ae56"}
+[00:02:55.590] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:02:55.590] Browser LOG     🔍 EmployeesPage: Fetching employees for tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:55.590] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:02:55.590] Browser LOG     🔍 EmployeesPage: Fetching employees for tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:55.590] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:02:55.773] Browser LOG     ✅ EmployeesPage: Found 2 employees for tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:55.773] Browser LOG     ✅ EmployeesPage: Found 2 employees for tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:58.418] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:02:58.418] Browser LOG     🔍 ProjectsContent: Fetching projects for tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:58.418] Browser LOG     ✅ Projects list: Event listeners registered for timeEntryUpdated on window, document, and body
+[00:02:58.418] Browser LOG     🔌 Projects list: Event listeners removed
+[00:02:58.418] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:02:58.418] Browser LOG     🔍 ProjectsContent: Fetching projects for tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:58.418] Browser LOG     ✅ Projects list: Event listeners registered for timeEntryUpdated on window, document, and body
+[00:02:58.418] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:02:58.472] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:58.498] Server  LOG     ✅ Projects/list: Fetching projects for valid tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:58.648] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:58.663] Server  LOG     ✅ Projects/list: User access verified for tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:02:58.743] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[00:02:58.744] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[00:02:58.745] Server  LOG     ✅ Projects/list: Query returned 5 "projects"
+[00:02:58.746] Server  LOG     ✅ Projects/list: After verification: 5 "projects"
+[00:02:58.817] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[00:02:58.818] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[00:02:58.818] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[00:02:58.819] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[00:02:58.827] Server  LOG     ✅ Projects/list: After tenant validation: 5 "projects"
+[00:02:58.827] Server  LOG     🔇 Filtering out project: "Dörr installtion" "status:" "completed"
+[00:02:58.827] Server  LOG     🔇 Filtering out project: "d" "status:" "archived"
+[00:02:58.827] Server  LOG     ✅ Projects/list: After status filter: 3 "projects"
+[00:02:58.961] Browser LOG     📊 Projects fetched via API: 3 projects for tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:58.961] Browser LOG     ✅ ProjectsContent: Verified 3 projects after security check
+[00:02:58.962] Browser LOG     📊 Projects list: Fetching hours for 3 projects
+[00:02:58.962] Browser LOG     📊 Projects fetched via API: 3 projects for tenantId: 8ee28f55-b780-4286-8137-9e70ea58ae56
+[00:02:58.962] Browser LOG     ✅ ProjectsContent: Verified 3 projects after security check
+[00:02:58.962] Browser LOG     📊 Projects list: Fetching hours for 3 projects
+[00:03:00.589] Server  LOG     ✅ Using tenant from employee record: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:00.590] Server  LOG     🔍 API: Fetching project hours {}
+[00:03:00.594] Server  LOG     ✅ Using tenant from employee record: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:00.594] Server  LOG     🔍 API: Fetching project hours {}
+[00:03:00.595] Server  LOG     ✅ Using tenant from employee record: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:00.595] Server  LOG     🔍 API: Fetching project hours {}
+[00:03:00.601] Server  LOG     ✅ Using tenant from employee record: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:00.601] Server  LOG     🔍 API: Fetching project hours {}
+[00:03:00.604] Server  LOG     ✅ Using tenant from employee record: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:00.604] Server  LOG     🔍 API: Fetching project hours {}
+[00:03:00.626] Server  LOG     ✅ Using tenant from employee record: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:00.627] Server  LOG     🔍 API: Fetching project hours {}
+[00:03:00.665] Server  LOG     ✅ API: Project hours calculated {}
+[00:03:00.672] Server  LOG     ✅ API: Project hours calculated {}
+[00:03:00.678] Server  LOG     ✅ API: Project hours calculated {}
+[00:03:00.686] Server  LOG     ✅ API: Project hours calculated {}
+[00:03:00.688] Server  LOG     ✅ API: Project hours calculated {}
+[00:03:00.711] Server  LOG     ✅ API: Project hours calculated {}
+[00:03:00.815] Browser LOG     ✅ Project a03ddc24-d8d2-42d4-a58f-9bba896f0638: 9h
+[00:03:00.815] Browser LOG     ✅ Project 27f56576-0a89-4327-9245-6fb389da5215: 9h
+[00:03:00.815] Browser LOG     ✅ Project 27f56576-0a89-4327-9245-6fb389da5215: 9h
+[00:03:00.815] Browser LOG     ✅ Project 3cd7be04-2d7b-4375-9b98-7f6a8c675777: 21.5h
+[00:03:00.815] Browser LOG     ✅ Project a03ddc24-d8d2-42d4-a58f-9bba896f0638: 9h
+[00:03:00.815] Browser LOG     ✅ Projects list: Hours map updated: [["3cd7be04-2d7b-4375-9b98-7f6a8c675777",21.5],["a03ddc24-d8d2-42d4-a58f-9bba896f0638",9],["27f56576-0a89-4327-9245-6fb389da5215",9]]
+[00:03:00.815] Browser LOG     ✅ Project 3cd7be04-2d7b-4375-9b98-7f6a8c675777: 21.5h
+[00:03:00.815] Browser LOG     ✅ Projects list: Hours map updated: [["3cd7be04-2d7b-4375-9b98-7f6a8c675777",21.5],["a03ddc24-d8d2-42d4-a58f-9bba896f0638",9],["27f56576-0a89-4327-9245-6fb389da5215",9]]
+[00:03:01.363] Server  ERROR   Error fetching user role from app.user_roles: {}
+[00:03:01.443] Server  ERROR   Error fetching employee role: {}
+[00:03:01.656] Server  ERROR   Error fetching user role from app.user_roles: {}
+[00:03:01.729] Server  ERROR   Error fetching employee role: {}
+[00:03:01.803] Server  ERROR   Error fetching permissions: {}
+[00:03:01.803] Server  LOG     🔍 Permissions API: {}
+[00:03:01.807] Browser LOG     🔌 Projects list: Event listeners removed
+[00:03:01.807] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:01.807] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:01.807] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:03:04.973] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:04.973] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:04.973] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:03:05.285] Browser LOG     [IntegrationAPI] 📊 Fetching status...
+[00:03:05.624] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[00:03:05.624] Server  LOG     [Integration Status API] 📊 FETCHING STATUS
+[00:03:05.704] Server  LOG     [Integration Status API] Tenant: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:05.782] Server  LOG     [Integration Status API] Integrations found: 0
+[00:03:05.890] Server  LOG     [Integration Status API] Recent logs: 0
+[00:03:05.891] Server  LOG     [Integration Status API] Stats: {}
+[00:03:05.891] Server  LOG     [Integration Status API] ✅ SUCCESS
+[00:03:05.891] Server  LOG     ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+[00:03:05.995] Browser LOG     [IntegrationAPI] ✅ Status fetched: {"integrations":0,"logs":0}
+[00:03:08.895] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:08.895] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:08.895] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:03:11.378] Browser LOG     ✅ Synced 0 updates from server
+[00:03:11.378] Browser LOG     ✅ Sync completed successfully
+[00:03:13.584] Browser ERROR   React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+%s   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ BugFixesPage 1. useContext                 useContext
+2. useContext                 useContext
+3. useState                   useState
+4. useState                   useState
+5. useState                   useState
+6. useRef                     useRef
+7. useEffect                  useEffect
+8. useState                   useState
+9. useState                   useState
+10. useState                  useState
+11. useState                  useState
+12. useState                  useState
+13. useState                  useState
+14. useState                  useState
+15. undefined                 useEffect
+
+[00:03:13.584] Browser ERROR   ErrorBoundary caught an error: {} {"componentStack":"\n    at BugFixesPage (http://localhost:3002/_next/static/chunks/app_d9c00023._.js:1631:171)\n    at ClientPageRoot (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:2157:27)\n    at SegmentViewNode (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3306:28)\n    at InnerLayoutRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:390:34)\n    at RedirectErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9184:9)\n    at RedirectBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9217:29)\n    at HTTPAccessFallbackBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9740:39)\n    at LoadingBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:496:32)\n    at ErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:1048:26)\n    at InnerScrollAndFocusHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:290:9)\n    at ScrollAndFocusHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:373:34)\n    at RenderFromTemplateContext (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:769:44)\n    at SegmentStateProvider (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3322:33)\n    at OuterLayoutRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:532:30)\n    at InnerLayoutRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:390:34)\n    at RedirectErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9184:9)\n    at RedirectBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9217:29)\n    at HTTPAccessFallbackErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9665:9)\n    at HTTPAccessFallbackBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9740:39)\n    at LoadingBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:496:32)\n    at ErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:1048:26)\n    at InnerScrollAndFocusHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:290:9)\n    at ScrollAndFocusHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:373:34)\n    at RenderFromTemplateContext (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:769:44)\n    at SegmentStateProvider (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3322:33)\n    at OuterLayoutRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:532:30)\n    at TenantProvider (http://localhost:3002/_next/static/chunks/app_cb0e42d3._.js:74:27)\n    at ThemeProvider (http://localhost:3002/_next/static/chunks/app_cb0e42d3._.js:224:26)\n    at QueryClientProvider (http://localhost:3002/_next/static/chunks/node_modules_bac56025._.js:7737:30)\n    at PersistQueryClientProvider (http://localhost:3002/_next/static/chunks/node_modules_bac56025._.js:10369:37)\n    at QueryProvider (http://localhost:3002/_next/static/chunks/app_cb0e42d3._.js:561:26)\n    at ErrorBoundary (http://localhost:3002/_next/static/chunks/app_cb0e42d3._.js:312:9)\n    at body (<anonymous>)\n    at html (<anonymous>)\n    at RootLayout [Server] (<anonymous>)\n    at SegmentViewNode (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3306:28)\n    at __next_root_layout_boundary__ (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:1673:64)\n    at RedirectErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9184:9)\n    at RedirectBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9217:29)\n    at HTTPAccessFallbackErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9665:9)\n    at HTTPAccessFallbackBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9740:39)\n    at DevRootHTTPAccessFallbackBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9809:46)\n    at AppDevOverlayErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3417:9)\n    at HotReload (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:10803:22)\n    at Router (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:10983:23)\n    at ErrorBoundaryHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:982:9)\n    at ErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:1048:26)\n    at RootErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9489:30)\n    at AppRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:11300:22)\n    at ServerRoot (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:12780:23)\n    at Root (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:12798:17)"}
+[00:03:15.404] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[00:03:15.404] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[00:03:15.405] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:03:15.405] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:03:15.405] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:03:15.405] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:03:15.655] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:03:15.796] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[00:03:15.991] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:16.001] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:16.005] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:16.018] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:16.120] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:03:16.120] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:03:16.120] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:03:16.120] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:03:16.120] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:03:16.120] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:03:16.120] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:03:16.120] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:03:16.335] Browser ERROR   React has detected a change in the order of Hooks called by %s. This will lead to bugs and errors if not fixed. For more information, read the Rules of Hooks: https://react.dev/link/rules-of-hooks
+
+   Previous render            Next render
+   ------------------------------------------------------
+%s   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+ BugFixesPage 1. useContext                 useContext
+2. useContext                 useContext
+3. useState                   useState
+4. useState                   useState
+5. useState                   useState
+6. useRef                     useRef
+7. useEffect                  useEffect
+8. useState                   useState
+9. useState                   useState
+10. useState                  useState
+11. useState                  useState
+12. useState                  useState
+13. useState                  useState
+14. useState                  useState
+15. undefined                 useEffect
+
+[00:03:16.335] Browser ERROR   ErrorBoundary caught an error: {} {"componentStack":"\n    at BugFixesPage (http://localhost:3002/_next/static/chunks/app_d9c00023._.js:1631:171)\n    at ClientPageRoot (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:2157:27)\n    at SegmentViewNode (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3306:28)\n    at InnerLayoutRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:390:34)\n    at RedirectErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9184:9)\n    at RedirectBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9217:29)\n    at HTTPAccessFallbackBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9740:39)\n    at LoadingBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:496:32)\n    at ErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:1048:26)\n    at InnerScrollAndFocusHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:290:9)\n    at ScrollAndFocusHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:373:34)\n    at RenderFromTemplateContext (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:769:44)\n    at SegmentStateProvider (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3322:33)\n    at OuterLayoutRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:532:30)\n    at InnerLayoutRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:390:34)\n    at RedirectErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9184:9)\n    at RedirectBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9217:29)\n    at HTTPAccessFallbackErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9665:9)\n    at HTTPAccessFallbackBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9740:39)\n    at LoadingBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:496:32)\n    at ErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:1048:26)\n    at InnerScrollAndFocusHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:290:9)\n    at ScrollAndFocusHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:373:34)\n    at RenderFromTemplateContext (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:769:44)\n    at SegmentStateProvider (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3322:33)\n    at OuterLayoutRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_094231d7._.js:532:30)\n    at TenantProvider (http://localhost:3002/_next/static/chunks/app_cb0e42d3._.js:74:27)\n    at ThemeProvider (http://localhost:3002/_next/static/chunks/app_cb0e42d3._.js:224:26)\n    at QueryClientProvider (http://localhost:3002/_next/static/chunks/node_modules_bac56025._.js:7737:30)\n    at PersistQueryClientProvider (http://localhost:3002/_next/static/chunks/node_modules_bac56025._.js:10369:37)\n    at QueryProvider (http://localhost:3002/_next/static/chunks/app_cb0e42d3._.js:561:26)\n    at ErrorBoundary (http://localhost:3002/_next/static/chunks/app_cb0e42d3._.js:312:9)\n    at body (<anonymous>)\n    at html (<anonymous>)\n    at RootLayout [Server] (<anonymous>)\n    at SegmentViewNode (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3306:28)\n    at __next_root_layout_boundary__ (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:1673:64)\n    at RedirectErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9184:9)\n    at RedirectBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9217:29)\n    at HTTPAccessFallbackErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9665:9)\n    at HTTPAccessFallbackBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9740:39)\n    at DevRootHTTPAccessFallbackBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9809:46)\n    at AppDevOverlayErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_4b2403f5._.js:3417:9)\n    at HotReload (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:10803:22)\n    at Router (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:10983:23)\n    at ErrorBoundaryHandler (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:982:9)\n    at ErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:1048:26)\n    at RootErrorBoundary (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:9489:30)\n    at AppRouter (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:11300:22)\n    at ServerRoot (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:12780:23)\n    at Root (http://localhost:3002/_next/static/chunks/node_modules_next_dist_client_a6ce9b62._.js:12798:17)"}
+[00:03:16.335] Browser LOG     🔗 Timestamp tie - using server version
+[00:03:16.335] Browser LOG     🔗 Timestamp tie - using server version
+[00:03:16.335] Browser LOG     ✅ Synced 2 updates from server
+[00:03:16.335] Browser LOG     ✅ Sync completed successfully
+[00:03:22.286] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:03:22.465] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:22.465] Browser LOG     🛡️ [REST-GUARD] Global fetch guard installed
+[00:03:22.465] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:22.465] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:22.465] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":false,"navItemsCount":1}
+[00:03:22.646] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:22.704] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:22.707] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:22.718] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:03:22.821] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:03:22.821] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:03:22.821] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:03:22.821] Browser LOG     🤖 AIChatbot: Component mounted, isOpen: false
+[00:03:22.821] Browser LOG     🤖 AIChatbot: isOpen changed to: false
+[00:03:22.821] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:03:22.821] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:03:22.821] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:22.821] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt
+[00:03:23.043] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:03:23.044] Browser LOG     🔗 Timestamp tie - using server version
+[00:03:23.044] Browser LOG     🔗 Timestamp tie - using server version
+[00:03:23.044] Browser LOG     ✅ Synced 2 updates from server
+[00:03:23.044] Browser LOG     ✅ Sync completed successfully
+[00:03:31.606] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:31.606] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:31.606] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:03:38.967] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:38.967] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:38.967] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:03:52.280] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:52.280] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":true,"isAdmin":false,"navItemsCount":1}
+[00:03:52.280] Browser LOG     🔍 Sidebar - Admin status: {"adminLoading":false,"isAdmin":true,"navItemsCount":1}
+[00:03:53.074] Browser LOG     ✅ Synced 0 updates from server
+[00:03:53.074] Browser LOG     ✅ Sync completed successfully
+[00:03:59.999] Browser ERROR   Error fetching invoices: {}
+[00:04:24.014] Browser LOG     ✅ Synced 0 updates from server
+[00:04:24.014] Browser LOG     ✅ Sync completed successfully
+[00:04:34.714] Browser LOG     👁️ Page visible - triggering sync
+[00:04:35.171] Server  LOG     ✅ Using tenant from JWT: "8ee28f55-b780-4286-8137-9e70ea58ae56"
+[00:04:35.181] Browser LOG     ✅ Synced 0 updates from server
+[00:04:35.181] Browser LOG     ✅ Sync completed successfully
+[00:04:35.298] Browser LOG     ✅ TenantContext: Found tenant via centralized API: 8ee28f55-b780-4286-8137-9e70ea58ae56 source: jwt

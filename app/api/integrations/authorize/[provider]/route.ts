@@ -47,9 +47,15 @@ export async function GET(
       );
     }
 
-    // Generate authorization URL using static redirect URI from config
+    // Generate authorization URL
+    // Use request origin to support ngrok and other dynamic URLs
+    // Note: OAuth providers (Fortnox/Visma) require redirect URIs to be pre-registered
+    const host = request.headers.get('host') || request.headers.get('x-forwarded-host');
+    const proto = request.headers.get('x-forwarded-proto') || 'https';
+    const baseUrl = host ? `${proto}://${host}` : undefined;
+    
     const oauthManager = new OAuthManager();
-    const authUrl = oauthManager.generateAuthorizationUrl(provider, tenantId);
+    const authUrl = oauthManager.generateAuthorizationUrl(provider, tenantId, baseUrl);
 
     console.log('[Authorize] ✅ Redirecting to:', authUrl);
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

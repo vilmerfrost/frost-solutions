@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ok, fail } from '@/lib/ai/common';
 import { getTenantId } from '@/lib/serverTenant';
 import { createAdminClient } from '@/utils/supabase/admin';
-import { makeCacheKey, getFromCache, setCache } from '@/lib/ai/cache';
+import { makeCacheKey, getCached, setCached } from '@/lib/ai/cache';
 import { enforceRateLimit } from '@/lib/ai/ratelimit';
 import { claudeJSON } from '@/lib/ai/claude';
 import { templateProjectPlan } from '@/lib/ai/templates';
@@ -59,14 +59,22 @@ export async function POST(req: NextRequest) {
       (project.budgeted_hours ?? 0);
     const complex = totalHours > 50;
 
-    const cacheKey = makeCacheKey({ projectId, totalHours, complex });
-    const cached = await getFromCache<ProjectPlan>(tenantId, 'project-plan', cacheKey);
-    if (cached.hit && cached.data) {
-      return ok({
-        plan: cached.data,
-        model: complex ? 'claude-sonnet' : 'claude-haiku',
-        cached: true,
-      });
+    const cacheKey = makeCacheKey(tenantId, { projectId, totalHours, complex });
+    try {
+      const cached = await getCached(tenantId, cacheKey);
+      if (cached && typeof cached === 'object') {
+        const cachedData = cached as ProjectPlan;
+        return ok({
+          plan: cachedData,
+          model: complex ? 'claude-sonnet' : 'claude-haiku',
+          cached: true,
+        });
+      }
+    } catch (cacheError) {
+      // Cache errors shouldn't block the request
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Cache read error (non-blocking):', cacheError);
+      }
     }
 
     const model = complex ? 'claude-3-5-sonnet-latest' : 'claude-3-5-haiku-latest';
@@ -110,14 +118,15 @@ export async function POST(req: NextRequest) {
     }
 
     if (plan) {
-      await setCache(
-        tenantId,
-        'project-plan',
-        cacheKey,
-        plan,
-        14,
-        complex ? 'claude-sonnet' : 'claude-haiku'
-      );
+      // Cache the result (TTL: 14 days = 1209600 seconds)
+      try {
+        await setCached(tenantId, cacheKey, plan, 1209600);
+      } catch (cacheError) {
+        // Cache write errors shouldn't block the response
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Cache write error (non-blocking):', cacheError);
+        }
+      }
     }
 
     return ok({

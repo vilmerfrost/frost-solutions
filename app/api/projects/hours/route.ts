@@ -36,9 +36,10 @@ export async function POST(req: NextRequest) {
 
     const includeBilled = Boolean(body?.includeBilled)
 
-    const adminApp = createAdminClient(8000, 'app')
+    // Use public schema - time_entries table is in public schema, not app schema
+    const adminClient = createAdminClient()
 
-    let hoursQuery = adminApp
+    let hoursQuery = adminClient
       .from('time_entries')
       .select('project_id, hours_total, is_billed')
       .eq('tenant_id', tenantId)

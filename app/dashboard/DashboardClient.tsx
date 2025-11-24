@@ -41,8 +41,8 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
   // Get current user's employee ID and projects for time clock
   useEffect(() => {
     async function fetchTimeClockData() {
+      // Don't log warnings during initial mount - wait for TenantContext to hydrate
       if (!tenantId) {
-        console.log('TimeClock: No tenantId')
         return
       }
 
@@ -74,16 +74,22 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
         // Fallback: Try direct query if API didn't find employee
         if (!foundEmployeeId) {
           console.log('TimeClock: Trying direct query as fallback')
-          const { data: employeeData } = await supabase
+          const { data: employeeData, error: employeeError } = await supabase
             .from('employees')
             .select('id')
             .eq('auth_user_id', user.id)
             .eq('tenant_id', tenantId)
             .maybeSingle()
 
-          if (employeeData) {
-            console.log('TimeClock: Found employee ID via direct query:', employeeData.id)
-            foundEmployeeId = employeeData.id
+          if (employeeError) {
+            console.warn('TimeClock: Direct query error:', employeeError)
+          } else if (employeeData) {
+            // Type guard to ensure employeeData has id property
+            const employee = employeeData as { id: string } | null
+            if (employee?.id) {
+              console.log('TimeClock: Found employee ID via direct query:', employee.id)
+              foundEmployeeId = employee.id
+            }
           }
         }
 
@@ -360,25 +366,33 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
               setProjectsLoaded(true)
               
               // Fetch stats separately
-              await fetchDashboardStats(tenantId)
+              if (tenantId) {
+                await fetchDashboardStats(tenantId)
+              }
             } else {
               if (cancelled) return
               setDashboardProjects([])
               setProjectsLoaded(true)
               // Still fetch stats even if no projects
-              await fetchDashboardStats(tenantId)
+              if (tenantId) {
+                await fetchDashboardStats(tenantId)
+              }
             }
           } else {
             if (cancelled) return
             setProjectsLoaded(true)
-            await fetchDashboardStats(tenantId)
+            if (tenantId) {
+              await fetchDashboardStats(tenantId)
+            }
           }
         }
       } catch (err) {
         if (cancelled) return
         console.error('Error fetching dashboard projects:', err)
         setProjectsLoaded(true)
-        await fetchDashboardStats(tenantId)
+        if (tenantId) {
+          await fetchDashboardStats(tenantId)
+        }
       }
     }
 
@@ -393,10 +407,16 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
     }
 
     // Listen for time entry updates specifically
+    // IMPORTANT: Refresh both projects (with hours) AND stats when time entries change
+    // This ensures progress bars update correctly
     const handleTimeEntryUpdate = () => {
-      console.log('🔄 Dashboard: Time entry updated, refreshing stats...')
+      console.log('🔄 Dashboard: Time entry updated, refreshing projects and stats...')
       if (!cancelled && tenantId) {
-        setTimeout(() => fetchDashboardStats(tenantId), 500)
+        // Refresh projects first (includes hours calculation), then stats
+        setTimeout(() => {
+          fetchDashboardProjects()
+          fetchDashboardStats(tenantId)
+        }, 500)
       }
     }
 
@@ -414,16 +434,18 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
     }
     refreshStats()
 
-    // Poll for stats updates every 30 seconds to keep in sync
-    const statsInterval = setInterval(() => {
+    // Poll for stats and projects updates every 30 seconds to keep in sync
+    // This ensures progress bars stay updated even if events are missed
+    const syncInterval = setInterval(() => {
       if (tenantId && !cancelled) {
+        fetchDashboardProjects()
         fetchDashboardStats(tenantId)
       }
     }, 30000) // 30 seconds
 
     return () => {
       cancelled = true
-      clearInterval(statsInterval)
+      clearInterval(syncInterval)
       window.removeEventListener('projectCreated', handleProjectUpdate)
       window.removeEventListener('projectUpdated', handleProjectUpdate)
       window.removeEventListener('timeEntryUpdated', handleTimeEntryUpdate)
@@ -492,16 +514,18 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
 
           {/* Time Clock - Always show, even if no employee/projects (component handles it) */}
           {(() => {
-            console.log('🔍 Dashboard: Rendering TimeClock with:', {
-              employeeId,
-              projectsCount: availableProjects.length,
-              tenantId: timeClockTenantId || tenantId,
-            })
+            if (process.env.NODE_ENV === 'development') {
+              console.log('🔍 Dashboard: Rendering TimeClock with:', {
+                employeeId,
+                projectsCount: availableProjects.length,
+                tenantId: timeClockTenantId || tenantId || undefined,
+              })
+            }
             return (
               <TimeClock 
                 employeeId={employeeId} 
                 projects={availableProjects}
-                tenantId={timeClockTenantId || tenantId}
+                tenantId={timeClockTenantId || tenantId || undefined}
               />
             )
           })()}

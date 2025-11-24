@@ -4,6 +4,7 @@ import { getTenantId } from '@/lib/serverTenant'
 import { sendQuoteEmail } from '@/lib/email/sendQuoteEmail'
 import { generateQuotePDF } from '@/lib/pdf/generateQuotePDF'
 import { logQuoteChange } from '@/lib/quotes/approval'
+import { getBaseUrlFromHeaders } from '@/utils/url'
 
 export const runtime = 'nodejs'
 
@@ -35,7 +36,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       .order('order_index', { ascending: true })
 
     const pdf = await generateQuotePDF(quote, items ?? [])
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+    // Use getBaseUrlFromHeaders to get current origin (works with ngrok, localhost, production)
+    const baseUrl = getBaseUrlFromHeaders(req.headers)
     const trackingUrl = `${baseUrl}/api/emails/track?tenant_id=${tenantId}&quote_id=${params.id}`
 
     await sendQuoteEmail({

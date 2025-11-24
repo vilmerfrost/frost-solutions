@@ -24,10 +24,16 @@ export default function EmployeesPage() {
   const { isAdmin } = useAdmin()
 
   useEffect(() => {
+    // Wait a bit for TenantContext to hydrate before showing warning
     if (!tenantId) {
-      console.log('⚠️ EmployeesPage: No tenantId available')
+      // Only show warning after a delay to avoid false positives during hydration
+      const timeout = setTimeout(() => {
+        if (!tenantId) {
+          console.log('⚠️ EmployeesPage: No tenantId available after hydration delay')
+        }
+      }, 1000)
       setLoading(false)
-      return
+      return () => clearTimeout(timeout)
     }
 
     async function fetchEmployees() {

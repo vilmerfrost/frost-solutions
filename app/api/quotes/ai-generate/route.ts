@@ -107,7 +107,10 @@ export async function POST(req: NextRequest) {
 
     // Försök använda extern AI först (om den finns)
     try {
-      const aiResponse = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/api/ai/generate-quote`, {
+      // Use getBaseUrlFromHeaders to get current origin (works with ngrok, localhost, production)
+      const { getBaseUrlFromHeaders } = await import('@/utils/url')
+      const baseUrl = getBaseUrlFromHeaders(req.headers)
+      const aiResponse = await fetch(`${baseUrl}/api/ai/generate-quote`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt, context }),

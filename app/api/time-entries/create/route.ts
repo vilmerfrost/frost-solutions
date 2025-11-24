@@ -354,6 +354,19 @@ export async function POST(req: Request) {
       hadApprovedBy: !!approved_by,
     })
 
+    // Validate start_time for check-in entries (entries without end_time)
+    // This prevents creating invalid entries that block checkout functionality
+    if (!safePayload.end_time && !safePayload.start_time) {
+      console.error('❌ Invalid time entry: Missing start_time for check-in entry')
+      return NextResponse.json(
+        {
+          error: 'start_time is required for check-in entries (entries without end_time)',
+          suggestion: 'Please ensure start_time is included in the request payload'
+        },
+        { status: 400 }
+      )
+    }
+
     // Build insert payload progressively - ALWAYS use verified tenantId
     // Approval-fält ska INTE inkluderas - låt DB sätta default 'pending' endast vid ny rad
     const insertPayload: any = {
@@ -361,7 +374,7 @@ export async function POST(req: Request) {
       employee_id: safePayload.employee_id,
       project_id: safePayload.project_id,
       date: safePayload.date,
-      start_time: safePayload.start_time,
+      start_time: safePayload.start_time, // Required for check-in entries
       end_time: safePayload.end_time || null,
       break_minutes: safePayload.break_minutes || 0,
       ob_type: safePayload.ob_type || 'work',

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { getBaseUrlFromHeaders } from '@/utils/url'
 
 /**
  * API route för att arkivera/återställa en kund
@@ -29,7 +30,13 @@ export async function PATCH(
       return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
     }
 
-    const adminCheckRes = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/admin/check`)
+    // Use getBaseUrlFromHeaders to get current origin (works with ngrok, localhost, production)
+    const baseUrl = getBaseUrlFromHeaders(req.headers)
+    const adminCheckRes = await fetch(`${baseUrl}/api/admin/check`, {
+      headers: {
+        'Cookie': req.headers.get('Cookie') || '',
+      },
+    })
     let isAdmin = false
     if (adminCheckRes?.ok) {
       const adminData = await adminCheckRes.json()

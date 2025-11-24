@@ -1,8 +1,8 @@
 // app/api/ai/summarize/route.ts
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { ok, fail } from '@/lib/ai/common';
 import { getTenantId } from '@/lib/serverTenant';
-import { makeCacheKey, getFromCache, setCache } from '@/lib/ai/cache';
+import { makeCacheKey, getCached, setCached } from '@/lib/ai/cache';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -13,6 +13,7 @@ export const dynamic = 'force-dynamic';
  * IMPROVED: Added caching and tenant support
  */
 export async function POST(req: NextRequest) {
+  // Wrap entire handler in try-catch to prevent any crashes
   try {
     const tenantId = await getTenantId();
     // Use tenant ID if available, otherwise use a default (for backward compatibility)
@@ -97,10 +98,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Check cache first
-    const cacheKey = makeCacheKey(cacheKeyInput);
-    const cached = await getFromCache<{ summary: string }>(cacheTenantId, 'summary', cacheKey);
-    if (cached.hit && cached.data) {
-      return ok({ summary: cached.data.summary, model: 'huggingface', cached: true });
+    const cacheKey = makeCacheKey(cacheTenantId, cacheKeyInput);
+    try {
+      const cached = await getCached(cacheTenantId, cacheKey);
+      if (cached && typeof cached === 'object' && 'summary' in cached) {
+        const cachedData = cached as { summary: string };
+        return ok({ summary: cachedData.summary, model: 'huggingface', cached: true });
+      }
+    } catch (cacheError) {
+      // Cache errors shouldn't block the request - just log and continue
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Cache read error (non-blocking):', cacheError);
+      }
     }
 
     // Use Hugging Face Inference API (free, no auth needed for many models)
@@ -145,8 +154,16 @@ export async function POST(req: NextRequest) {
       modelUsed = 'template';
     }
 
-    // Cache the result
-    await setCache(cacheTenantId, 'summary', cacheKey, { summary }, 7, modelUsed);
+    // Cache the result (TTL: 7 days = 604800 seconds)
+    // Don't block on cache write errors
+    try {
+      await setCached(cacheTenantId, cacheKey, { summary }, 604800);
+    } catch (cacheError) {
+      // Cache write errors shouldn't block the response
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Cache write error (non-blocking):', cacheError);
+      }
+    }
 
     return ok({
       summary,
@@ -154,8 +171,22 @@ export async function POST(req: NextRequest) {
       cached: false,
     });
   } catch (err: any) {
+    // Catch ALL errors - never let this crash the site
     console.error('AI summarize error:', err);
-    return fail(err, 'Kunde inte generera sammanfattning.');
+    
+    // Always return a safe response, even if everything fails
+    try {
+      return fail(err, 'Kunde inte generera sammanfattning.');
+    } catch (failError) {
+      // Even fail() might throw - return a basic error response
+      return NextResponse.json(
+        {
+          success: false,
+          error: 'Kunde inte generera sammanfattning. Försök igen senare.',
+        },
+        { status: 500 }
+      );
+    }
   }
 }
 

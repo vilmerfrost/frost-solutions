@@ -2,6 +2,7 @@
 
 import { headers } from 'next/headers'
 import { createClient } from '@supabase/supabase-js'
+import { getBaseUrlFromHeaders } from '@/utils/url'
 
 // Typ för att hantera både FormData och JS-objekt (TypeScript-friendly)
 type EmailInput = FormData | { email: string }
@@ -19,20 +20,9 @@ export async function sendMagicLink(formData: EmailInput) {
   }
   if (!email) throw new Error('Saknar e-post');
 
+  // Use getBaseUrlFromHeaders to get the current origin (works with ngrok, localhost, production)
   const h = await headers();
-  const forwardedHost = h.get('x-forwarded-host') ?? undefined;
-  const host =
-    forwardedHost ??
-    h.get('host') ??
-    process.env.NEXT_PUBLIC_SITE_URL?.replace(/^https?:\/\//, '') ??
-    'localhost:3000';
-
-  const proto =
-    h.get('x-forwarded-proto') ??
-    (process.env.NEXT_PUBLIC_SITE_URL?.startsWith('https') ? 'https' : 'http');
-
-  const origin =
-    process.env.NEXT_PUBLIC_SITE_URL ?? `${proto}://${host}`;
+  const origin = getBaseUrlFromHeaders(h);
 
   const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -42,8 +32,8 @@ export async function sendMagicLink(formData: EmailInput) {
   const { error } = await supabase.auth.signInWithOtp({
     email,
     options: {
+      // Use current origin so it works with ngrok and production
       emailRedirectTo: `${origin}/auth/callback`,
-
     },
   });
   if (error) throw error;

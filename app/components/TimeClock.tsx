@@ -84,7 +84,10 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
   // Check for active time entry on mount and restore from localStorage
   useEffect(() => {
     async function checkActiveEntry() {
-      if (!tenantId || !employeeId) return
+      // Don't log warnings during initial mount - wait for TenantContext to hydrate
+      if (!tenantId || !employeeId) {
+        return
+      }
 
       // First check localStorage for cached state
       const storageKey = `timeClock_${employeeId}_${tenantId}`

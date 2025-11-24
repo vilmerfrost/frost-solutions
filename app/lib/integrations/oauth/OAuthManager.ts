@@ -25,17 +25,18 @@ export class OAuthManager {
    *
    * @param provider - 'fortnox' or 'visma'
    * @param tenantId - Tenant ID for state parameter
+   * @param overrideBaseUrl - Optional base URL override (e.g., from request headers for ngrok support)
    * @returns Authorization URL
    */
-  generateAuthorizationUrl(provider: AccountingProvider, tenantId: string): string {
+  generateAuthorizationUrl(provider: AccountingProvider, tenantId: string, overrideBaseUrl?: string): string {
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
     console.log('[OAuthManager] 🔐 GENERATING AUTH URL');
     console.log('[OAuthManager] Provider:', provider);
     console.log('[OAuthManager] Tenant:', tenantId);
 
-    const config = getProviderConfig(provider);
+    const config = getProviderConfig(provider, overrideBaseUrl);
 
-    // Use static redirect URI from config (built from NEXT_PUBLIC_APP_URL)
+    // Use redirect URI from config (may be overridden for ngrok support)
     const redirectUri = config.redirectUri;
 
     console.log('[OAuthManager] Redirect URI:', redirectUri);

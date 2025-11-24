@@ -42,7 +42,7 @@ const navItems: NavItem[] = [
 ]
 
 const adminNavItems: NavItem[] = [
-  // Integrationer finns redan i navItems, inga extra admin-items behövs
+  { name: 'Bug Fixes', href: '/bug-fixes', icon: '🐛', gradient: 'from-red-500 to-orange-600' },
 ]
 
 export default function SidebarClient() {

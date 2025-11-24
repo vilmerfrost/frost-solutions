@@ -6,8 +6,16 @@ import type { AccountingProvider, ProviderConfig } from '@/types/integrations';
  * Get base URL for redirect URIs
  * Uses NEXT_PUBLIC_APP_URL from environment
  * CRITICAL: Must match exactly what's registered in OAuth provider portal
+ * 
+ * Note: For OAuth integrations (Fortnox/Visma), the redirect URI must be pre-registered
+ * in their developer portals. If using ngrok, you'll need to register the ngrok URL there too.
  */
-function getBaseUrl(): string {
+function getBaseUrl(overrideBaseUrl?: string): string {
+  // Allow override for dynamic base URLs (e.g., from request headers)
+  if (overrideBaseUrl) {
+    return overrideBaseUrl.replace(/\/$/, '');
+  }
+  
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
   
   if (!baseUrl) {
@@ -23,10 +31,11 @@ function getBaseUrl(): string {
  * CRITICAL: Must match exactly what's registered in OAuth provider portal
  * 
  * @param provider - 'fortnox' or 'visma'
+ * @param overrideBaseUrl - Optional base URL override (e.g., from request headers for ngrok support)
  * @returns Full redirect URI (e.g., http://localhost:3000/api/integrations/callback/fortnox)
  */
-export function buildRedirectUri(provider: AccountingProvider): string {
-  const baseUrl = getBaseUrl();
+export function buildRedirectUri(provider: AccountingProvider, overrideBaseUrl?: string): string {
+  const baseUrl = getBaseUrl(overrideBaseUrl);
   
   // NO trailing slash
   const redirectUri = `${baseUrl}/api/integrations/callback/${provider}`;
@@ -64,17 +73,28 @@ const VISMA_CONFIG: ProviderConfig = {
   },
 };
 
-export function getProviderConfig(provider: AccountingProvider): ProviderConfig {
+/**
+ * Get provider configuration
+ * 
+ * @param provider - 'fortnox' or 'visma'
+ * @param overrideBaseUrl - Optional base URL override (e.g., from request headers for ngrok support)
+ * @returns Provider configuration with redirect URI
+ */
+export function getProviderConfig(provider: AccountingProvider, overrideBaseUrl?: string): ProviderConfig {
   console.log(`[OAuth] Getting config for provider: ${provider}`);
   
-  switch (provider) {
-    case 'fortnox':
-      return FORTNOX_CONFIG;
-    case 'visma':
-      return VISMA_CONFIG;
-    default:
-      throw new Error(`Unknown provider: ${provider}`);
+  // Build config with potentially overridden redirect URI
+  const baseConfig = provider === 'fortnox' ? FORTNOX_CONFIG : VISMA_CONFIG;
+  
+  // If override is provided, rebuild redirect URI
+  if (overrideBaseUrl) {
+    return {
+      ...baseConfig,
+      redirectUri: buildRedirectUri(provider, overrideBaseUrl),
+    };
   }
+  
+  return baseConfig;
 }
 
 export function validateProviderConfig(provider: AccountingProvider): void {

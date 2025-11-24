@@ -1,8 +1,10 @@
 'use server'
 
+import { headers } from 'next/headers'
 import { createClient } from '@/utils/supabase/server'
 import { getResend, fromAddress } from '@/utils/supabase/resend'
 import { redirect } from 'next/navigation'
+import { getBaseUrlFromHeaders } from '@/utils/url'
 
 function sek(n: number) {
   try { return Number(n ?? 0).toLocaleString('sv-SE',{style:'currency',currency:'SEK'}) } catch { return `${Math.round(Number(n??0))} kr` }
@@ -65,7 +67,9 @@ export async function sendInvoiceEmail(invoiceId: string) {
   if (!to) throw new Error('Fakturan saknar kundens e-post. Kontrollera att kunden har en e-postadress.')
 
   // Länk till vy (kunden kan klicka)
-  const origin = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  // Use getBaseUrlFromHeaders to get current origin (works with ngrok, localhost, production)
+  const h = await headers()
+  const origin = getBaseUrlFromHeaders(h)
   const viewUrl = `${origin}/invoices/${invoice.id}`
 
   // Mail HTML (enkel men tydlig)

@@ -42,15 +42,19 @@ export function AIChatbot() {
 
   // Initialize messages on client mount only
   useEffect(() => {
-    console.log('🤖 AIChatbot: Component mounted, isOpen:', isOpen)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🤖 AIChatbot: Component mounted, isOpen:', isOpen)
+    }
     if (messages.length === 0) {
       setMessages([getInitialMessage()])
     }
   }, []) // Empty deps - only run once on mount
 
-  // Debug: Log when isOpen changes
+  // Debug: Log when isOpen changes (development only)
   useEffect(() => {
-    console.log('🤖 AIChatbot: isOpen changed to:', isOpen)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🤖 AIChatbot: isOpen changed to:', isOpen)
+    }
   }, [isOpen])
 
   // Scroll to bottom when messages change
@@ -381,9 +385,10 @@ export function AIChatbot() {
             onClick={(e) => {
               e.preventDefault()
               e.stopPropagation()
-              console.log('🤖 AIChatbot: Button clicked, opening chat, current isOpen:', isOpen)
+              if (process.env.NODE_ENV === 'development') {
+                console.log('🤖 AIChatbot: Button clicked, opening chat, current isOpen:', isOpen)
+              }
               setIsOpen(true)
-              console.log('🤖 AIChatbot: setIsOpen(true) called')
             }}
             className="bg-gradient-to-r from-purple-500 to-blue-500 text-white p-3 sm:p-4 rounded-full shadow-lg hover:shadow-xl transition-all transform hover:scale-110 flex items-center justify-center gap-2 group"
             style={{

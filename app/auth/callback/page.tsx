@@ -13,8 +13,64 @@ function CallbackContent() {
 
     async function handleCallback() {
       try {
-        // Step 1: Check if there's a hash in the URL (OAuth redirect)
+        // Step 1: Check for errors in query parameters first (Supabase sometimes returns errors in query params)
+        const error = searchParams?.get('error');
+        const errorCode = searchParams?.get('error_code');
+        const errorDescription = searchParams?.get('error_description');
+        
+        if (error || errorCode) {
+          console.error('OAuth error in query params:', { error, errorCode, errorDescription });
+          
+          // Build error message for redirect
+          let errorMessage = 'auth_failed';
+          if (errorCode === 'flow_state_not_found') {
+            errorMessage = 'session_expired';
+          } else if (error === 'server_error') {
+            errorMessage = 'server_error';
+          } else if (error) {
+            errorMessage = error;
+          }
+          
+          if (mounted) {
+            router.replace(`/login?error=${errorMessage}${errorDescription ? `&message=${encodeURIComponent(errorDescription)}` : ''}`);
+          }
+          return;
+        }
+        
+        // Step 1.5: Check if there's a hash in the URL (OAuth redirect)
         const hash = window.location.hash;
+        
+        // Step 1.6: Check for errors in the hash as well (some OAuth flows use hash)
+        if (hash && mounted) {
+          try {
+            const hashParams = new URLSearchParams(hash.substring(1)); // Remove #
+            const hashError = hashParams.get('error');
+            const hashErrorCode = hashParams.get('error_code');
+            const hashErrorDescription = hashParams.get('error_description');
+            
+            if (hashError || hashErrorCode) {
+              console.error('OAuth error in hash:', { error: hashError, errorCode: hashErrorCode, errorDescription: hashErrorDescription });
+              
+              // Build error message for redirect
+              let errorMessage = 'auth_failed';
+              if (hashErrorCode === 'flow_state_not_found') {
+                errorMessage = 'session_expired';
+              } else if (hashError === 'server_error') {
+                errorMessage = 'server_error';
+              } else if (hashError) {
+                errorMessage = hashError;
+              }
+              
+              if (mounted) {
+                router.replace(`/login?error=${errorMessage}${hashErrorDescription ? `&message=${encodeURIComponent(hashErrorDescription)}` : ''}`);
+              }
+              return;
+            }
+          } catch (parseError) {
+            console.error('Error parsing hash for errors:', parseError);
+            // Continue to try getting session anyway
+          }
+        }
         
         // Step 2: Try to get session - createBrowserClient should handle hash automatically
         // But we need to wait for it to process
@@ -69,7 +125,7 @@ function CallbackContent() {
         }
 
         if (!session || !mounted) {
-          console.error('No session found after all attempts. Hash:', hash.substring(0, 50) + '...');
+          console.error('No session found after all attempts. Hash:', hash ? hash.substring(0, 50) + '...' : 'none');
           if (mounted) {
             router.replace('/login?error=no_session');
           }

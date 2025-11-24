@@ -3,16 +3,23 @@
 
 'use client'
 
+import { useEffect } from 'react'
 import { ErrorBoundary } from './ErrorBoundary'
 import { SyncProgress } from './SyncProgress'
 import { OfflineBanner } from './OfflineBanner'
 import { OnlineStatusIndicator } from './OnlineStatusIndicator'
+import { initializeGlobalErrorHandlers } from '@/lib/error-handling/global-error-handler'
 
 /**
  * Safe wrapper för sync-komponenter
  * Om IndexedDB har problem, renderas komponenterna inte
  */
 export function SafeSyncComponents() {
+  // Initialize global error handlers on mount
+  useEffect(() => {
+    initializeGlobalErrorHandlers()
+  }, [])
+
   return (
     <>
       <ErrorBoundary fallback={null}>

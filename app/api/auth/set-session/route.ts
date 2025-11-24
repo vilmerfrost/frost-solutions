@@ -5,9 +5,18 @@ const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL; // sätt i .env
 
 export async function POST(req: Request) {
   // Enkel Origin/Referer-kontroll (grundläggande CSRF-skydd)
+  // I development, tillåt localhost på alla portar för att hantera olika enheter
   const origin = req.headers.get('origin') || req.headers.get('referer') || '';
+  
   if (ORIGIN && !origin.startsWith(ORIGIN)) {
-    return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+    // I development, tillåt localhost på alla portar
+    const isDevelopment = process.env.NODE_ENV !== 'production';
+    const isLocalhost = origin.includes('localhost') || origin.includes('127.0.0.1') || origin.includes('192.168.');
+    
+    if (!isDevelopment || !isLocalhost) {
+      console.error('Invalid origin:', { origin, ORIGIN, isDevelopment, isLocalhost });
+      return NextResponse.json({ error: 'Invalid origin' }, { status: 403 });
+    }
   }
 
   const { access_token, refresh_token } = await req.json();

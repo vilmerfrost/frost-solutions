@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { ok, fail } from '@/lib/ai/common';
 import { getTenantId } from '@/lib/serverTenant';
 import { createAdminClient } from '@/utils/supabase/admin';
-import { makeCacheKey, getFromCache, setCache } from '@/lib/ai/cache';
+import { makeCacheKey, getCached, setCached } from '@/lib/ai/cache';
 import { enforceRateLimit } from '@/lib/ai/ratelimit';
 import { claudeJSON } from '@/lib/ai/claude';
 import { templateInvoiceSuggestion } from '@/lib/ai/templates';
@@ -59,10 +59,18 @@ export async function POST(req: NextRequest) {
     const baseRate = project.base_rate_sek ?? 600;
     const roughTotal = Math.round(hours * baseRate);
 
-    const cacheKey = makeCacheKey({ projectId, hrs: hours, baseRate });
-    const cached = await getFromCache<InvoiceSuggestion>(tenantId, 'invoice', cacheKey);
-    if (cached.hit && cached.data) {
-      return ok({ suggestion: cached.data, model: 'claude-haiku', cached: true });
+    const cacheKey = makeCacheKey(tenantId, { projectId, hrs: hours, baseRate });
+    try {
+      const cached = await getCached(tenantId, cacheKey);
+      if (cached && typeof cached === 'object') {
+        const cachedData = cached as InvoiceSuggestion;
+        return ok({ suggestion: cachedData, model: 'claude-haiku', cached: true });
+      }
+    } catch (cacheError) {
+      // Cache errors shouldn't block the request
+      if (process.env.NODE_ENV === 'development') {
+        console.warn('Cache read error (non-blocking):', cacheError);
+      }
     }
 
     // Prompt (liten för kostnadsoptimering)
@@ -122,7 +130,15 @@ export async function POST(req: NextRequest) {
     }
 
     if (suggestion) {
-      await setCache(tenantId, 'invoice', cacheKey, suggestion, 7, 'claude-haiku');
+      // Cache the result (TTL: 7 days = 604800 seconds)
+      try {
+        await setCached(tenantId, cacheKey, suggestion, 604800);
+      } catch (cacheError) {
+        // Cache write errors shouldn't block the response
+        if (process.env.NODE_ENV === 'development') {
+          console.warn('Cache write error (non-blocking):', cacheError);
+        }
+      }
     }
 
     return ok({

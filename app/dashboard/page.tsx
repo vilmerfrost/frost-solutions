@@ -54,7 +54,8 @@ export default async function DashboardPage() {
   // If no tenant found, try to link employee by email and retry
   if (!tenantId && finalUser.email) {
     try {
-      const linkResponse = await fetch(`${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'}/api/auth/link-employee`, {
+      // Use relative path - works with any origin (localhost, ngrok, production)
+      const linkResponse = await fetch('/api/auth/link-employee', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

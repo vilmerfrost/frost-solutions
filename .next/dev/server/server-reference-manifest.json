@@ -1,21 +1,21 @@
 {
   "node": {
-    "40fcc90e13b7bf13e7fdcf0197109ef3749ad6ae1b": {
+    "40ff1ad63b4a4cc1485aec8e1733d0729672a577c2": {
       "workers": {
-        "app/login/page": {
-          "moduleId": "[project]/.next-internal/server/app/login/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/auth/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
+        "app/projects/page": {
+          "moduleId": "[project]/.next-internal/server/app/projects/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/projects/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
           "async": false,
-          "exportedName": "sendMagicLink",
-          "filename": "app/auth/actions.ts"
+          "exportedName": "createProject",
+          "filename": "app/projects/actions.ts"
         }
       },
       "layer": {
-        "app/login/page": "action-browser"
+        "app/projects/page": "action-browser"
       },
-      "filename": "app/auth/actions.ts",
-      "exportedName": "sendMagicLink"
+      "filename": "app/projects/actions.ts",
+      "exportedName": "createProject"
     }
   },
   "edge": {},
-  "encryptionKey": "6+7EdRJ3BWb6rdzKRW6atNDJahUwXuKJcxPEj8polxg="
+  "encryptionKey": "BeBn4Ni3hkv8Q/+xxUOADojZoJxI8oj6mwbzXMGB7uw="
 }
