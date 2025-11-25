@@ -1,7 +1,6 @@
 // app/components/integrations/ExportPayrollButton.tsx
 "use client";
 
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useIntegrations, useExportToFortnox } from '@/hooks/useIntegrations';
 import { Sparkles, Upload, Loader2 } from 'lucide-react';
@@ -27,7 +26,7 @@ export function ExportPayrollButton({
   const router = useRouter();
   const { data: integrations, isLoading: isLoadingIntegrations } = useIntegrations();
   const exportMutation = useExportToFortnox();
-  const [isExporting, setIsExporting] = useState(false);
+  const isExportingState = exportMutation.isPending || isLoadingIntegrations;
 
   // Hitta Fortnox eller Visma Payroll integration
   const fortnoxIntegration = integrations?.find(int => int.provider === 'fortnox' && int.status === 'connected');
@@ -39,7 +38,6 @@ export function ExportPayrollButton({
   );
 
   const hasConnectedIntegration = !!fortnoxIntegration || !!vismaPayrollIntegration || !!vismaEAccountingIntegration;
-  const isExportingState = exportMutation.isPending || isExporting || isLoadingIntegrations;
 
   // Get integration name
   const getIntegrationName = () => {
@@ -56,8 +54,6 @@ export function ExportPayrollButton({
       return;
     }
 
-    setIsExporting(true);
-
     try {
       const integrationId = fortnoxIntegration?.id || vismaPayrollIntegration?.id || vismaEAccountingIntegration?.id;
       if (!integrationId) {
@@ -65,24 +61,17 @@ export function ExportPayrollButton({
         return;
       }
 
-      // Export payroll data via API
-      const response = await fetch(`/api/integrations/${integrationId}/export-payroll`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ month }),
+      await exportMutation.mutateAsync({
+        integrationId,
+        type: 'payroll',
+        month,
       });
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Export misslyckades');
-      }
-
+      // Hook already shows a toast, but add more context for payroll export
       toast.success(`Lönespec för ${month} har köats för export till ${getIntegrationName()}`);
     } catch (error: any) {
       console.error('Export error:', error);
       toast.error(`Export misslyckades: ${error?.message || 'Ett oväntat fel uppstod'}`);
-    } finally {
-      setIsExporting(false);
     }
   };
 

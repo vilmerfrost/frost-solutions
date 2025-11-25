@@ -24,6 +24,17 @@ export function useIntegrationStatus() {
 }
 
 /**
+ * Convenience hook that only returns the integrations array
+ */
+export function useIntegrations() {
+  const statusQuery = useIntegrationStatus();
+  return {
+    ...statusQuery,
+    data: statusQuery.data?.integrations ?? [],
+  };
+}
+
+/**
  * Start OAuth connection flow
  * This triggers a browser redirect
  */
@@ -38,6 +49,66 @@ export function useConnectIntegration() {
     onError: (error: Error) => {
       console.error('[useConnectIntegration] ❌ Failed:', error);
       toast.error(`Kunde inte ansluta: ${error.message}`);
+    },
+  });
+}
+
+type ExportPayload =
+  | {
+      integrationId: string;
+      type: 'invoice' | 'customer';
+      id: string;
+    }
+  | {
+      integrationId: string;
+      type: 'payroll';
+      month: string;
+    };
+
+/**
+ * Export data/jobs to Fortnox/Visma via integration jobs
+ */
+export function useExportToFortnox() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (payload: ExportPayload) => {
+      const { integrationId, type } = payload;
+      const url =
+        type === 'payroll'
+          ? `/api/integrations/${integrationId}/export-payroll`
+          : `/api/integrations/${integrationId}/export`;
+
+      const body =
+        type === 'payroll'
+          ? { month: payload.month }
+          : { type, id: payload.id };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(result.error || 'Export misslyckades');
+      }
+
+      return result;
+    },
+    onSuccess: (_, variables) => {
+      toast.success('Export köad!', {
+        description:
+          variables.type === 'payroll'
+            ? `Lönespec ${variables.month} skickas till Fortnox/Visma`
+            : `Typ: ${variables.type}`,
+      });
+      queryClient.invalidateQueries({ queryKey: ['integration_jobs'] });
+    },
+    onError: (error: Error) => {
+      toast.error('Export misslyckades', {
+        description: error.message,
+      });
     },
   });
 }
