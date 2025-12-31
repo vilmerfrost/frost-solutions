@@ -87,40 +87,7 @@ export default function BugFixesPage() {
   const [filter, setFilter] = useState<'all' | 'open' | 'fixed'>('all')
   const [severityFilter, setSeverityFilter] = useState<'all' | Bug['severity']>('all')
 
-  // Check admin access
-  if (adminLoading) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600 dark:text-gray-400">Kontrollerar åtkomst...</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (!isAdmin) {
-    return (
-      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center max-w-md p-8">
-          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-            🔒 Åtkomst nekad
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Denna sida är endast tillgänglig för utvecklare och administratörer.
-          </p>
-          <button
-            onClick={() => router.push('/dashboard')}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-          >
-            Tillbaka till Dashboard
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  // Load from localStorage on mount
+  // Load from localStorage on mount - MUST be before any conditional returns
   useEffect(() => {
     const savedPages = localStorage.getItem('bug-fixes-pages')
     const savedBugs = localStorage.getItem('bug-fixes-bugs')
@@ -133,7 +100,7 @@ export default function BugFixesPage() {
     }
   }, [])
 
-  // Save to localStorage whenever data changes
+  // Save to localStorage whenever data changes - MUST be before any conditional returns
   useEffect(() => {
     localStorage.setItem('bug-fixes-pages', JSON.stringify(pages))
   }, [pages])
@@ -232,6 +199,39 @@ export default function BugFixesPage() {
     'in-progress': 'bg-yellow-50 text-yellow-700 border-yellow-200',
     fixed: 'bg-green-50 text-green-700 border-green-200',
     closed: 'bg-gray-50 text-gray-700 border-gray-200',
+  }
+
+  // Check admin access AFTER all hooks
+  if (adminLoading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600 dark:text-gray-400">Kontrollerar åtkomst...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center max-w-md p-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            🔒 Åtkomst nekad
+          </h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Denna sida är endast tillgänglig för utvecklare och administratörer.
+          </p>
+          <button
+            onClick={() => router.push('/dashboard')}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+          >
+            Tillbaka till Dashboard
+          </button>
+        </div>
+      </div>
+    )
   }
 
   return (

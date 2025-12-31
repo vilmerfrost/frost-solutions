@@ -117,26 +117,29 @@ export default function NewInvoiceContent() {
             setCustomerName(projectData.customer_name || '')
           }
 
-          // Fetch unbilled time entries for this project
-          const { data: entriesData, error: entriesError } = await supabase
-            .from('time_entries')
-            .select('hours_total')
-            .eq('project_id', projectId)
-            .eq('is_billed', false)
-            .eq('tenant_id', tenantId)
+          // Fetch unbilled time entries via API route (avoids RLS issues)
+          try {
+            const response = await fetch(`/api/projects/${projectId}/unbilled-hours`)
+            const result = await response.json()
 
-          if (entriesError) {
-            console.warn('Error fetching time entries:', entriesError)
-            // Continue with 0 hours
+            if (result.success && result.data) {
+              const { unbilledHours, totalAmount, timeEntries } = result.data
+              const rate = Number(projectData.base_rate_sek) || 360
+              setAmount(totalAmount || (unbilledHours * rate))
+              setDesc(`${unbilledHours.toFixed(1)} timmar @ ${rate} kr/tim = ${(totalAmount || unbilledHours * rate).toLocaleString('sv-SE')} kr`)
+            } else {
+              // Fallback to project rate only
+              const rate = Number(projectData.base_rate_sek) || 360
+              setAmount(0)
+              setDesc(`Inga ofakturerade timmar`)
+            }
+          } catch (apiError: any) {
+            console.warn('Error fetching unbilled hours via API:', apiError)
+            // Fallback: use project rate only
+            const rate = Number(projectData.base_rate_sek) || 360
+            setAmount(0)
+            setDesc(`Kunde inte ladda timmar`)
           }
-
-          const totalHours = (entriesData ?? []).reduce((sum: number, row: any) => {
-            return sum + Number(row?.hours_total ?? 0)
-          }, 0)
-
-          const rate = Number(projectData.base_rate_sek) || 360
-          setAmount(totalHours * rate)
-          setDesc(`${totalHours.toFixed(1)} timmar @ ${rate} kr/tim = ${(totalHours * rate).toLocaleString('sv-SE')} kr`)
         }
       } catch (err) {
         console.error('Error loading project:', err)

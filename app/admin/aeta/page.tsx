@@ -180,13 +180,13 @@ export default function AdminAetaPage() {
               .insert([{
                 ...timeEntryPayload,
                 description: `ÄTA: ${request.description}`,
-              }])
+              }] as any)
 
             // If description column doesn't exist, try without it
             if (result.error && (result.error.code === '42703' || result.error.message?.includes('description'))) {
               result = await supabase
                 .from('time_entries')
-                .insert([timeEntryPayload])
+                .insert([timeEntryPayload] as any)
             }
 
             if (result.error) {

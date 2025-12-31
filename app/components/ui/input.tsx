@@ -15,7 +15,7 @@ export function Input({ label, error, className = '', ...props }: InputProps) {
         </label>
       )}
       <input
-        className={`w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:cursor-not-allowed ${
+        className={`w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:cursor-not-allowed ${
           error ? 'border-red-500 dark:border-red-600 focus:ring-red-500 focus:border-red-500' : ''
         } ${className}`}
         {...props}
@@ -41,7 +41,7 @@ export function Textarea({ label, error, className = '', ...props }: TextareaPro
         </label>
       )}
       <textarea
-        className={`w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-700 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:cursor-not-allowed resize-none ${
+        className={`w-full px-4 py-2.5 border-2 border-gray-200 dark:border-gray-600 rounded-lg shadow-sm bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:focus:ring-emerald-600 dark:focus:border-emerald-600 transition-all duration-200 disabled:bg-gray-100 dark:disabled:bg-gray-900 disabled:cursor-not-allowed resize-none ${
           error ? 'border-red-500 dark:border-red-600 focus:ring-red-500 focus:border-red-500' : ''
         } ${className}`}
         {...props}

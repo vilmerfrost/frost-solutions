@@ -304,8 +304,8 @@ export async function GET(
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const quoteId = params.id
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: quoteId } = await params
   const startTime = Date.now()
 
   try {
@@ -364,7 +364,7 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
       .update({
         ...body,
         updated_at: new Date().toISOString(),
-      })
+      } as any)
       .eq('id', quoteId)
       .eq('tenant_id', tenantId)
       .select()
@@ -408,8 +408,8 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
-  const quoteId = params.id
+export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id: quoteId } = await params
   const startTime = Date.now()
 
   try {

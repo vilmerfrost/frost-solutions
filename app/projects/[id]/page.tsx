@@ -13,7 +13,7 @@ import DidYouKnow from '@/components/DidYouKnow'
 import ATA2Card from '@/components/ATA2Card'
 import BudgetCard from '@/components/BudgetCard'
 import { ScheduleCalendar } from '@/components/scheduling/ScheduleCalendar'
-import { useProject, useProjectHours } from '@/hooks/useProjects'
+// Removed: useProject and useProjectHours don't exist - using direct queries instead
 import { useAdmin } from '@/hooks/useAdmin'
 import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
 import { Sparkles } from 'lucide-react'
@@ -21,6 +21,7 @@ import { BudgetAIPrediction } from '@/components/ai/BudgetAIPrediction'
 import { MaterialAIIdentifier } from '@/components/ai/MaterialAIIdentifier'
 import { ProjectAIPlanning } from '@/components/ai/ProjectAIPlanning'
 import { ProjectAnalytics } from '@/components/analytics/ProjectAnalytics'
+import { ProjectEmployeeManager } from '@/components/projects/ProjectEmployeeManager'
 
 type ProjectRecord = {
   id: string
@@ -82,6 +83,12 @@ export default function ProjectDetailPage() {
       try {
         if (cancelled) return
         
+        if (!projectId || !tenantId) {
+          setError('Saknar projekt ID eller tenant ID')
+          setLoading(false)
+          return
+        }
+
         console.log('🔍 Loading project:', { projectId, tenantId })
         
         // Fetch project - try multiple approaches
@@ -121,8 +128,9 @@ export default function ProjectDetailPage() {
             .maybeSingle()
           
           if (!retryNoTenant.error && retryNoTenant.data) {
+            const retryData = retryNoTenant.data as any
             // Verify tenant matches manually
-            if (retryNoTenant.data.tenant_id === tenantId) {
+            if (retryData.tenant_id === tenantId) {
               projectData = retryNoTenant.data
               projectError = null
             } else {
@@ -144,7 +152,8 @@ export default function ProjectDetailPage() {
           return
         }
         
-        console.log('✅ Project loaded:', projectData.name)
+        const project = projectData as any
+        console.log('✅ Project loaded:', project.name)
         console.log('📋 Project client info:', {
           client_id: (projectData as any).client_id,
           clients: (projectData as any).clients,
@@ -339,8 +348,9 @@ export default function ProjectDetailPage() {
             .single()
           
           if (projectData) {
-            clientId = projectData.client_id || (projectData as any)?.clients?.id || null
-            clientName = (projectData as any)?.clients?.name || projectData.customer_name || 'Okänd kund'
+            const proj = projectData as any
+            clientId = proj.client_id || proj?.clients?.id || null
+            clientName = proj?.clients?.name || proj.customer_name || 'Okänd kund'
           }
         } catch (err) {
           console.warn('Could not fetch client info from project:', err)
@@ -468,8 +478,9 @@ export default function ProjectDetailPage() {
             .single()
           
           if (projectData) {
-            clientId = projectData.client_id || (projectData as any)?.clients?.id || null
-            clientName = (projectData as any)?.clients?.name || projectData.customer_name || 'Okänd kund'
+            const proj = projectData as any
+            clientId = proj.client_id || proj?.clients?.id || null
+            clientName = proj?.clients?.name || proj.customer_name || 'Okänd kund'
           }
         } catch (err) {
           console.warn('Could not fetch client info from project:', err)
@@ -810,14 +821,14 @@ export default function ProjectDetailPage() {
             <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Bilagor</h2>
             <FileUpload 
               entityType="project" 
-              entityId={projectId}
+              entityId={projectId || ''}
               onUploadComplete={() => {
                 // Trigger refresh
                 window.location.reload()
               }}
             />
             <div className="mt-4">
-              <FileList entityType="project" entityId={projectId} />
+              <FileList entityType="project" entityId={projectId || ''} />
             </div>
           </div>
 
@@ -907,10 +918,15 @@ export default function ProjectDetailPage() {
                       return
                     }
                     
+                    if (!projectId || !tenantId) {
+                      toast.error('Saknar projekt ID eller tenant ID')
+                      return
+                    }
+
                     try {
                       const { error } = await supabase
                         .from('projects')
-                        .update({ status: 'active' })
+                        .update({ status: 'active' } as any)
                         .eq('id', projectId)
                         .eq('tenant_id', tenantId)
                       
@@ -942,11 +958,16 @@ export default function ProjectDetailPage() {
                     return
                   }
                   
+                  if (!projectId || !tenantId) {
+                    toast.error('Saknar projekt ID eller tenant ID')
+                    return
+                  }
+
                   try {
                     // First try with status column
                     let { error } = await supabase
                       .from('projects')
-                      .update({ status: 'archived' })
+                      .update({ status: 'archived' } as any)
                       .eq('id', projectId)
                       .eq('tenant_id', tenantId)
                     
@@ -954,7 +975,7 @@ export default function ProjectDetailPage() {
                     if (error && (error.code === '42703' || error.message?.includes('status'))) {
                       const fallback = await supabase
                         .from('projects')
-                        .update({ status: 'completed' })
+                        .update({ status: 'completed' } as any)
                         .eq('id', projectId)
                         .eq('tenant_id', tenantId)
                       

@@ -9,6 +9,8 @@ import { Upload, FileText, CheckCircle, AlertCircle, Loader } from 'lucide-react
 import { useUploadSupplierInvoice } from '@/hooks/useSupplierInvoices'
 import { useSuppliers } from '@/hooks/useSuppliers'
 import { useProjects } from '@/hooks/useProjects'
+import { InvoiceOCRUpload } from '@/components/invoices/InvoiceOCRUpload'
+import type { InvoiceOCRResult } from '@/lib/ai/frost-bygg-ai-integration'
 
 interface InvoiceUploadProps {
   onComplete: (data: { invoiceId: string }) => void

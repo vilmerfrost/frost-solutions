@@ -98,39 +98,39 @@ export default function NewProjectPage() {
     router.replace('/projects')
   }
   return (
-    <div className="min-h-screen bg-white flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-white dark:bg-gray-900 flex flex-col lg:flex-row">
       <div className="hidden lg:block">
         <Sidebar />
       </div>
       <main className="flex-1 w-full flex items-center justify-center p-4 sm:p-6 lg:p-10">
-        <div className="w-full max-w-md bg-white rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 p-6 sm:p-8 lg:p-10">
+        <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 p-6 sm:p-8 lg:p-10">
           <div className="flex items-center gap-3 mb-6">
             <FrostLogo size={32}/>
-            <div className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">Nytt projekt</div>
+            <div className="font-bold text-xl bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent dark:text-white">Nytt projekt</div>
           </div>
 
-          {/* AI KMA Suggestion */}
-          {name && (
+          {/* AI KMA Suggestion - DISABLED FOR V1.0 */}
+          {/* {name && (
             <div className="mb-6">
               <KMAIISuggestion projectType={name.toLowerCase().includes('elektriker') ? 'elektriker' : name.toLowerCase().includes('rörmokare') ? 'rörmokare' : name.toLowerCase().includes('målare') ? 'målare' : 'bygg'} />
             </div>
-          )}
+          )} */}
 
           {/* Note: AI Projektplanering visas på projekt-detaljsidan efter att projektet är skapat */}
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
+          <form onSubmit={handleSubmit} className="flex flex-col gap-6">
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Projektnamn *</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Projektnamn *</label>
               <input 
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all hover:border-gray-300 text-base"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all hover:border-gray-300 dark:hover:border-gray-500 text-base"
                 value={name} onChange={e=>setName(e.target.value)} required placeholder="T.ex. Villa Ekbacken"/>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">Kund *</label>
+              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Kund *</label>
               <select
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all hover:border-gray-300 text-base"
+                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all hover:border-gray-300 dark:hover:border-gray-500 text-base"
                 required
               >
                 <option value="">Välj kund...</option>
@@ -141,22 +141,22 @@ export default function NewProjectPage() {
                 ))}
               </select>
               {clients.length === 0 && (
-                <p className="mt-2 text-sm text-gray-500">
-                  Inga kunder hittades. <a href="/clients/new" className="text-purple-600 hover:underline">Lägg till kund</a>
+                <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+                  Inga kunder hittades. <a href="/clients/new" className="text-purple-600 dark:text-purple-400 hover:underline">Lägg till kund</a>
                 </p>
               )}
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Timpris (SEK) *</label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Timpris (SEK) *</label>
                 <input 
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all hover:border-gray-300 text-base"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all hover:border-gray-300 dark:hover:border-gray-500 text-base"
                   type="number" value={baseRate} onChange={e=>setBaseRate(e.target.value)} required min={1} placeholder="360"/>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">Budget (timmar) <span className="text-xs text-gray-400 font-normal">(valfritt)</span></label>
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Budget (timmar) <span className="text-xs text-gray-400 dark:text-gray-500 font-normal">(valfritt)</span></label>
                 <input 
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all hover:border-gray-300 text-base"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all hover:border-gray-300 dark:hover:border-gray-500 text-base"
                   type="number" value={budget} onChange={e=>setBudget(Number(e.target.value))} min={0} placeholder="T.ex. 60"/>
               </div>
             </div>
@@ -178,7 +178,7 @@ export default function NewProjectPage() {
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-3 rounded-xl border-2 border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 hover:border-gray-400 transition-all"
+                className="px-6 py-3 rounded-xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 hover:border-gray-400 dark:hover:border-gray-500 transition-all"
               >
                 Avbryt
               </button>

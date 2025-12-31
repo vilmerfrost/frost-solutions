@@ -22,6 +22,8 @@ export default function ProjectsArchivePage() {
     async function fetchArchivedProjects() {
       try {
         // Try with status first - only show completed/archived projects
+        if (!tenantId) return
+        
         let { data, error } = await supabase
           .from('projects')
           .select('id, name, customer_name, created_at, base_rate_sek, budgeted_hours, status')

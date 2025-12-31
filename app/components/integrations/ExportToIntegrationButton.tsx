@@ -118,9 +118,12 @@ export function ExportToIntegrationButton({
               });
             }
             successCount++;
-          } catch (error) {
+          } catch (error: any) {
             errorCount++;
-            console.error(`Failed to export ${id}:`, error);
+            // Only log if error has meaningful content
+            if (error && (error.message || error.code || typeof error === 'string')) {
+              console.error(`Failed to export ${id}:`, error.message || error.code || error);
+            }
           }
         }
 

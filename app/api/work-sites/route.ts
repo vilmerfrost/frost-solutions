@@ -191,7 +191,7 @@ export async function POST(req: Request) {
 
     const { data, error } = await adminSupabase
       .from('work_sites')
-      .insert([insertPayload])
+      .insert([insertPayload] as any)
       .select()
       .single()
 

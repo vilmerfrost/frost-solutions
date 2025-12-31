@@ -21,10 +21,10 @@ export async function applyMarkupToInvoice(
   if (error) throw error
 
   // Get user ID if not provided
-  let userId = changedBy
+  let userId: string | undefined = changedBy
   if (!userId) {
     const { data: { user } } = await admin.auth.getUser()
-    userId = user?.id || null
+    userId = user?.id || undefined
   }
 
   await admin.from('supplier_invoice_history').insert({

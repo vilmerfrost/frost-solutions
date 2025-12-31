@@ -84,7 +84,7 @@ export async function PUT(
 
     const { data, error } = await adminSupabase
       .from('work_sites')
-      .update(payload)
+      .update(payload as any)
       .eq('id', id)
       .select()
       .single()

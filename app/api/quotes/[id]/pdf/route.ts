@@ -7,8 +7,9 @@ import { logQuoteChange } from '@/lib/quotes/approval'
 
 export const runtime = 'nodejs'
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: quoteId } = await params
     const tenantId = await getTenantId()
     if (!tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -19,7 +20,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
       .from('quotes')
       .select('*, customer:clients(name)')
       .eq('tenant_id', tenantId)
-      .eq('id', params.id)
+      .eq('id', quoteId)
       .maybeSingle()
     
     if (qErr || !quote) {
@@ -30,7 +31,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
       .from('quote_items')
       .select('*')
       .eq('tenant_id', tenantId)
-      .eq('quote_id', params.id)
+      .eq('quote_id', quoteId)
       .order('order_index', { ascending: true })
     
     if (iErr) throw iErr

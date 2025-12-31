@@ -80,7 +80,9 @@ export default function AetaPage() {
         .select('id')
         .eq('auth_user_id', userId)
         .eq('tenant_id', tenantId)
-        .single()
+        .maybeSingle()
+      
+      const emp = employeeData as any
 
       // Upload attachment if provided
       let attachmentUrl: string | null = null
@@ -124,7 +126,7 @@ export default function AetaPage() {
         description,
         hours: Number(hours),
         tenant_id: tenantId,
-        employee_id: employeeData?.id || null,
+        employee_id: emp?.id || null,
         status: 'pending',
         requested_by: userId,
       }
@@ -139,7 +141,7 @@ export default function AetaPage() {
 
       const { error } = await supabase
         .from('aeta_requests')
-        .insert([insertPayload])
+        .insert([insertPayload] as any)
 
       if (error) {
         console.error('Error saving AETA request:', error)

@@ -47,6 +47,8 @@ export default function NewRotApplicationPage() {
 
     async function loadData() {
       try {
+        if (!tenantId) return
+        
         // Load projects - filter out completed and archived projects
         const { data: projectsData } = await supabase
           .from('projects')

@@ -464,7 +464,7 @@ export default function FAQPage() {
             <h1 className="text-4xl sm:text-5xl font-black mt-4 mb-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
               FAQ - Vanliga Frågor
             </h1>
-            <p className="text-gray-600 text-center">
+            <p className="text-gray-600 dark:text-gray-400 text-center">
               Hitta svar på dina frågor om Frost Solutions
             </p>
           </div>
@@ -476,7 +476,7 @@ export default function FAQPage() {
               placeholder="Sök efter frågor..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full px-6 py-4 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
+              className="w-full px-6 py-4 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-lg"
             />
           </div>
 

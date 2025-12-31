@@ -56,6 +56,8 @@ export default function PayslipPage() {
         }
 
         // Get current user's employee record - try with different column names
+        if (!tenantId) return
+        
         let { data: currentEmployee, error: empCheckError } = await supabase
           .from('employees')
           .select('id, role, auth_user_id')
@@ -64,7 +66,7 @@ export default function PayslipPage() {
           .maybeSingle()
 
         // If auth_user_id doesn't work, try to find by email
-        if (!currentEmployee && user.email) {
+        if (!currentEmployee && user.email && tenantId) {
           const { data: empByEmail } = await supabase
             .from('employees')
             .select('id, role, auth_user_id, email')
@@ -89,7 +91,8 @@ export default function PayslipPage() {
 
         // Check if user is admin - be more flexible with role matching
         // Also check JWT/app_metadata for admin role
-        const role = currentEmployee?.role?.toLowerCase() || ''
+        const emp = currentEmployee as any
+        const role = emp?.role?.toLowerCase() || ''
         const userIsAdmin = 
           role === 'admin' || 
           role === 'administrator' || 
@@ -98,7 +101,7 @@ export default function PayslipPage() {
           (user.user_metadata as any)?.role === 'Admin' ||
           (user.app_metadata as any)?.role === 'admin' ||
           (user.app_metadata as any)?.role === 'Admin'
-        const userEmployeeId = currentEmployee?.id || null
+        const userEmployeeId = emp?.id || null
 
         console.log('🔍 Admin check:', { 
           currentEmployee, 

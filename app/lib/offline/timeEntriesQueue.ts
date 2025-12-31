@@ -131,12 +131,13 @@ export async function syncPendingTimeEntries(tenantId: string | null | undefined
     try {
       // CRITICAL FIX: Strippa approval-fält från payload när syncing offline entries
       // Detta förhindrar att gamla snapshots skriver över godkänd status på servern
+      const entryAny = entry as any
       const {
         approval_status, // eslint-disable-line @typescript-eslint/no-unused-vars
         approved_at,     // eslint-disable-line @typescript-eslint/no-unused-vars
         approved_by,     // eslint-disable-line @typescript-eslint/no-unused-vars
         ...safeEntry
-      } = entry
+      } = entryAny
 
       // Convert offline entry to API format (WITHOUT approval fields)
       const payload = {

@@ -80,7 +80,7 @@ export default function MaterialsPage() {
                 onChange={(e) => setFilters({ ...filters, category: e.target.value, page: 1 })}
               >
                 <option value="">Alla kategorier</option>
-                {categories.map((cat) => (
+                {categories.map((cat: string) => (
                   <option key={cat} value={cat}>
                     {cat}
                   </option>

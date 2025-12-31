@@ -5,8 +5,9 @@ import { extractErrorMessage } from '@/lib/errorUtils'
 
 export const runtime = 'nodejs'
 
-export async function GET(_: NextRequest, { params }: { params: { id: string } }) {
+export async function GET(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: quoteId } = await params
     const tenantId = await getTenantId()
     if (!tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -17,7 +18,7 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
       .from('quote_items')
       .select('*')
       .eq('tenant_id', tenantId)
-      .eq('quote_id', params.id)
+      .eq('quote_id', quoteId)
       .order('order_index', { ascending: true })
     
     if (error) throw error
@@ -27,19 +28,20 @@ export async function GET(_: NextRequest, { params }: { params: { id: string } }
   }
 }
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: quoteId } = await params
     const tenantId = await getTenantId()
     if (!tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     const body = await req.json()
     const admin = createAdminClient()
-    const payload = { ...body, tenant_id: tenantId, quote_id: params.id }
+    const payload = { ...body, tenant_id: tenantId, quote_id: quoteId }
 
     const { data, error } = await admin
       .from('quote_items')
-      .insert(payload)
+      .insert(payload as any)
       .select()
       .single()
     
@@ -50,8 +52,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   }
 }
 
-export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
+export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: quoteId } = await params
     const tenantId = await getTenantId()
     if (!tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -65,10 +68,10 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const { data, error } = await admin
       .from('quote_items')
-      .update(body)
+      .update(body as any)
       .eq('tenant_id', tenantId)
       .eq('id', body.id)
-      .eq('quote_id', params.id)
+      .eq('quote_id', quoteId)
       .select()
       .single()
     
@@ -79,8 +82,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
   }
 }
 
-export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+export async function DELETE(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: quoteId } = await params
     const tenantId = await getTenantId()
     if (!tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -97,7 +101,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
       .delete()
       .eq('tenant_id', tenantId)
       .eq('id', body.id)
-      .eq('quote_id', params.id)
+      .eq('quote_id', quoteId)
     
     if (error) throw error
     return NextResponse.json({ success: true }, { status: 204 })

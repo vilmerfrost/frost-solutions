@@ -8,12 +8,22 @@ import { Button } from './button'
 interface DialogProps {
   open: boolean
   onClose: () => void
-  title: string
+  title: React.ReactNode
   children: React.ReactNode
   footer?: React.ReactNode
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | 'full'
 }
 
-export function Dialog({ open, onClose, title, children, footer }: DialogProps) {
+export function Dialog({ open, onClose, title, children, footer, maxWidth = 'md' }: DialogProps) {
+  const maxWidthClasses = {
+    sm: 'max-w-sm',
+    md: 'max-w-md',
+    lg: 'max-w-lg',
+    xl: 'max-w-xl',
+    '2xl': 'max-w-2xl',
+    '3xl': 'max-w-3xl',
+    full: 'max-w-full',
+  }
   useEffect(() => {
     const handleEsc = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose()
@@ -41,10 +51,10 @@ export function Dialog({ open, onClose, title, children, footer }: DialogProps) 
       />
       
       {/* Dialog */}
-      <div className="relative bg-white rounded-lg shadow-xl max-w-md w-full mx-4 max-h-[90vh] flex flex-col">
+      <div className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-xl ${maxWidthClasses[maxWidth]} w-full mx-4 max-h-[90vh] flex flex-col`}>
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <h2 className="text-xl font-semibold">{title}</h2>
+        <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+          <div className="text-xl font-semibold text-gray-900 dark:text-white">{title}</div>
           <button
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600 transition-colors"
@@ -54,13 +64,13 @@ export function Dialog({ open, onClose, title, children, footer }: DialogProps) 
         </div>
         
         {/* Content */}
-        <div className="p-6 overflow-y-auto flex-1">
+        <div className="p-6 overflow-y-auto flex-1 text-gray-900 dark:text-gray-100">
           {children}
         </div>
         
         {/* Footer */}
         {footer && (
-          <div className="flex items-center justify-end gap-3 p-6 border-t">
+          <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-700">
             {footer}
           </div>
         )}

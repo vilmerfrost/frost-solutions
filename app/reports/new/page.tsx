@@ -75,7 +75,7 @@ export default function NewReportPage() {
   const [multiProjectMode, setMultiProjectMode] = useState(false)
   const [projectEntries, setProjectEntries] = useState<Array<{ projectId: string, hours: number }>>([{ projectId: '', hours: 0 }])
   const [breakMinutes, setBreakMinutes] = useState(0)
-  const [isOnline, setIsOnline] = useState<boolean | null>(null)
+  const [isOnline, setIsOnline] = useState<boolean>(true)
   const [fetchError, setFetchError] = useState<string | null>(null)
   const [isMounted, setIsMounted] = useState(false)
   const { isAdmin } = useAdmin()

@@ -5,8 +5,9 @@ import { logQuoteChange } from '@/lib/quotes/approval'
 
 export const runtime = 'nodejs'
 
-export async function POST(_: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: quoteId } = await params
     const tenantId = await getTenantId()
     if (!tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -17,7 +18,7 @@ export async function POST(_: NextRequest, { params }: { params: { id: string } 
       .from('quotes')
       .select('id, status, title, customer_id, total_amount')
       .eq('tenant_id', tenantId)
-      .eq('id', params.id)
+      .eq('id', quoteId)
       .maybeSingle()
     
     if (!q) {
@@ -49,9 +50,9 @@ export async function POST(_: NextRequest, { params }: { params: { id: string } 
       .from('quotes')
       .update({ status: 'archived' })
       .eq('tenant_id', tenantId)
-      .eq('id', params.id)
+      .eq('id', quoteId)
 
-    await logQuoteChange(tenantId, params.id, 'converted', { project_id: proj.id })
+    await logQuoteChange(tenantId, quoteId, 'converted', { project_id: proj.id })
 
     return NextResponse.json({ success: true, projectId: proj.id })
   } catch (e: any) {

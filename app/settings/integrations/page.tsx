@@ -18,7 +18,7 @@ import type { AccountingProvider } from '@/types/integrations';
  * Helt responsiv, mobil-först och premium-design.
  */
 export default function IntegrationsPage() {
-  const { isAdmin, isLoading: isAdminLoading } = useAdmin();
+  const { isAdmin, loading: isAdminLoading } = useAdmin();
   const { data: integrationStatus, isLoading: isLoadingIntegrations, isError } = useIntegrationStatus();
   const connectMutation = useConnectIntegration();
   const disconnectMutation = useDisconnectIntegration();

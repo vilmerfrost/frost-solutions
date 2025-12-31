@@ -213,7 +213,7 @@ export function buildEmployeeSelectQuery(
   availableColumns: string[]
 ): string {
   // Always include required columns
-  const selectColumns = REQUIRED_COLUMNS.filter((col) =>
+  const selectColumns: string[] = REQUIRED_COLUMNS.filter((col) =>
     availableColumns.includes(col)
   );
 

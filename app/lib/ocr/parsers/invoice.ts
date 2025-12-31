@@ -26,7 +26,7 @@ export function parseInvoiceFromTextract(
   const supplierName = queryAnswers?.['supplier_name'] || extractSupplierName(text);
   const invoiceNumber = queryAnswers?.['invoice_number'] || extractInvoiceNumber(text);
   const invoiceDate = queryAnswers?.['invoice_date'] || extractDate(text);
-  const dueDate = queryAnswers?.['due_date'] || calculateDueDate(invoiceDate);
+  const dueDate = queryAnswers?.['due_date'] || calculateDueDate(invoiceDate) || invoiceDate; // Fallback to invoiceDate if calculation fails
   const totalAmount = parseFloat(queryAnswers?.['total_amount'] || '0') || extractTotalAmount(text);
 
   // Extract line items from tables

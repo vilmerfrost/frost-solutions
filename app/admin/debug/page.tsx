@@ -47,12 +47,13 @@ export default function AdminDebugPage() {
             .eq('auth_user_id', user.id)
             .maybeSingle()
 
+          const emp = empData as any
           info.employeeData = {
             data: empData,
             error: empError?.message,
             found: !!empData,
-            role: empData?.role,
-            isAdmin: empData?.role === 'admin' || empData?.role === 'Admin',
+            role: emp?.role,
+            isAdmin: emp?.role === 'admin' || emp?.role === 'Admin',
           }
         } catch (err: any) {
           info.errors.push(`Employee query error: ${err.message}`)
@@ -94,12 +95,13 @@ export default function AdminDebugPage() {
               .eq('tenant_id', tenantId)
               .maybeSingle()
 
+            const empTenant = empWithTenant as any
             info.employeeWithTenant = {
               data: empWithTenant,
               error: tenantError?.message,
               found: !!empWithTenant,
-              role: empWithTenant?.role,
-              isAdmin: empWithTenant?.role === 'admin' || empWithTenant?.role === 'Admin',
+              role: empTenant?.role,
+              isAdmin: empTenant?.role === 'admin' || empTenant?.role === 'Admin',
             }
           } catch (err: any) {
             info.errors.push(`Employee with tenant query error: ${err.message}`)

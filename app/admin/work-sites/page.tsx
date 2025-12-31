@@ -66,9 +66,10 @@ export default function WorkSitesPage() {
               .eq('tenant_id', tenantId)
               .maybeSingle()
             
-            const isAdminCheck = empData?.role === 'admin' || 
-                                empData?.role === 'Admin' || 
-                                empData?.role?.toLowerCase() === 'admin'
+            const emp = empData as any
+            const isAdminCheck = emp?.role === 'admin' || 
+                                emp?.role === 'Admin' || 
+                                emp?.role?.toLowerCase() === 'admin'
             setIsAdmin(isAdminCheck || false)
           }
         } catch (fallbackErr) {

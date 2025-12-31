@@ -8,8 +8,9 @@ import { getBaseUrlFromHeaders } from '@/utils/url'
 
 export const runtime = 'nodejs'
 
-export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: quoteId } = await params
     const tenantId = await getTenantId()
     if (!tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       .from('quotes')
       .select('*, customer:clients(name)')
       .eq('tenant_id', tenantId)
-      .eq('id', params.id)
+      .eq('id', quoteId)
       .maybeSingle()
     
     if (!quote) {
@@ -32,17 +33,17 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       .from('quote_items')
       .select('*')
       .eq('tenant_id', tenantId)
-      .eq('quote_id', params.id)
+      .eq('quote_id', quoteId)
       .order('order_index', { ascending: true })
 
     const pdf = await generateQuotePDF(quote, items ?? [])
     // Use getBaseUrlFromHeaders to get current origin (works with ngrok, localhost, production)
     const baseUrl = getBaseUrlFromHeaders(req.headers)
-    const trackingUrl = `${baseUrl}/api/emails/track?tenant_id=${tenantId}&quote_id=${params.id}`
+    const trackingUrl = `${baseUrl}/api/emails/track?tenant_id=${tenantId}&quote_id=${quoteId}`
 
     await sendQuoteEmail({
       tenantId,
-      quoteId: params.id,
+      quoteId: quoteId,
       to,
       subject: `Offert ${quote.quote_number}`,
       pdfBuffer: pdf,
@@ -51,11 +52,11 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
     await admin
       .from('quotes')
-      .update({ status: 'sent' })
+      .update({ status: 'sent' } as any)
       .eq('tenant_id', tenantId)
-      .eq('id', params.id)
+      .eq('id', quoteId)
 
-    await logQuoteChange(tenantId, params.id, 'sent', { to })
+    await logQuoteChange(tenantId, quoteId, 'sent', { to })
 
     return NextResponse.json({ success: true })
   } catch (e: any) {

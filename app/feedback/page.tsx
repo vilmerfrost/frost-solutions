@@ -11,24 +11,36 @@ import AISummary from '@/components/AISummary'
 export default function FeedbackPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const [mounted, setMounted] = useState(false)
   
   // Pre-fill from URL params (for bug reports from errors)
   const typeParam = searchParams?.get('type') as 'bug' | 'feature' | 'other' | null
   const subjectParam = searchParams?.get('subject') || ''
   const messageParam = searchParams?.get('message') || ''
   
-  const [feedbackType, setFeedbackType] = useState<'bug' | 'feature' | 'other'>(typeParam || 'bug')
-  const [subject, setSubject] = useState(subjectParam)
-  const [message, setMessage] = useState(messageParam)
+  // Always start with default values to avoid hydration mismatch
+  const [feedbackType, setFeedbackType] = useState<'bug' | 'feature' | 'other'>('bug')
+  const [subject, setSubject] = useState('')
+  const [message, setMessage] = useState('')
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   
-  // Update form when URL params change
+  // Prevent hydration mismatch - set mounted state on client
   useEffect(() => {
+    setMounted(true)
+    // Set initial values from URL params after mount
     if (typeParam) setFeedbackType(typeParam)
     if (subjectParam) setSubject(subjectParam)
     if (messageParam) setMessage(messageParam)
-  }, [typeParam, subjectParam, messageParam])
+  }, [])
+  
+  // Update form when URL params change (only after mount)
+  useEffect(() => {
+    if (!mounted) return
+    if (typeParam) setFeedbackType(typeParam)
+    if (subjectParam) setSubject(subjectParam)
+    if (messageParam) setMessage(messageParam)
+  }, [mounted, typeParam, subjectParam, messageParam])
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -81,7 +93,7 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex flex-col lg:flex-row">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex flex-col lg:flex-row">
       <Sidebar />
       
       <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
@@ -89,12 +101,14 @@ export default function FeedbackPage() {
           {/* Header */}
           <div className="mb-8 flex flex-col items-center">
             <FrostLogo size={48} />
-            <h1 className="text-4xl sm:text-5xl font-black mt-4 mb-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent">
+            <h1 className="text-4xl sm:text-5xl font-black mt-4 mb-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent dark:text-white">
               Feedback & Support
             </h1>
-            <p className="text-gray-600 text-center">
-              Rapportera buggar, föreslå funktioner eller dela din feedback
-            </p>
+            {mounted && (
+              <p className="text-gray-600 dark:text-gray-400 text-center">
+                Rapportera buggar, föreslå funktioner eller dela din feedback
+              </p>
+            )}
           </div>
 
           {/* AI Help for Feedback */}
@@ -120,11 +134,11 @@ export default function FeedbackPage() {
           )}
 
           {/* Feedback Form */}
-          <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 sm:p-8 lg:p-10">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-6 sm:p-8 lg:p-10">
             <form onSubmit={handleSubmit} className="space-y-6">
               {/* Type Selection */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3">
                   Typ av feedback *
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -166,31 +180,31 @@ export default function FeedbackPage() {
 
               {/* Email */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Din e-post
                 </label>
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 !text-gray-900 dark:!text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder="din@email.se"
                 />
-                <p className="mt-1 text-xs text-gray-500">
+                <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">
                   Lämna tomt för att använda din inloggade e-post
                 </p>
               </div>
 
               {/* Subject */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Ämne *
                 </label>
                 <input
                   type="text"
                   value={subject}
                   onChange={(e) => setSubject(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 !text-gray-900 dark:!text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                   placeholder={feedbackType === 'bug' ? 'Beskriv buggen kortfattat...' : 'Vad vill du dela med dig?'}
                   required
                 />
@@ -198,14 +212,14 @@ export default function FeedbackPage() {
 
               {/* Message */}
               <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                   Meddelande *
                 </label>
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={8}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 !text-gray-900 dark:!text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
                   placeholder={
                     feedbackType === 'bug'
                       ? 'Beskriv buggen så detaljerat som möjligt:\n\n1. Vad hände?\n2. Vad förväntade du dig?\n3. Steg för att återskapa buggen...'
@@ -238,8 +252,8 @@ export default function FeedbackPage() {
           </div>
 
           {/* Help Text */}
-          <div className="mt-6 bg-blue-50 rounded-xl p-4 border border-blue-200">
-            <p className="text-sm text-blue-800">
+          <div className="mt-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl p-4 border border-blue-200 dark:border-blue-800">
+            <p className="text-sm text-blue-800 dark:text-blue-300">
               <strong>💡 Tips:</strong> För buggrapporter, inkludera gärna skärmdumpar och beskriv exakt vad du gjorde innan problemet uppstod. 
               Det hjälper oss att lösa problemet snabbare!
             </p>

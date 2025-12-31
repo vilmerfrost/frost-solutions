@@ -75,13 +75,17 @@ export default function AdminPage() {
 
     async function fetchData() {
       if (cancelled) return
+      if (!tenantId) return
+      
+      // TypeScript guard: tenantId is guaranteed to be non-null after the check above
+      const currentTenantId = tenantId
       
       try {
         // Employees
         const { data: empData } = await supabase
           .from('employees')
           .select('id, name, full_name, role, email')
-          .eq('tenant_id', tenantId)
+          .eq('tenant_id', currentTenantId)
         
         if (cancelled) return
         setEmployees((empData || []).map((e: any) => ({
@@ -93,7 +97,7 @@ export default function AdminPage() {
 
         // Projects - Use API route for consistency and better error handling
         try {
-          const projectsRes = await fetch(`/api/projects/list?tenantId=${tenantId}`, { cache: 'no-store' })
+          const projectsRes = await fetch(`/api/projects/list?tenantId=${currentTenantId}`, { cache: 'no-store' })
           if (cancelled) return
           
           if (projectsRes.ok) {
@@ -111,7 +115,7 @@ export default function AdminPage() {
             const { data: projData } = await supabase
               .from('projects')
               .select('id, name, status')
-              .eq('tenant_id', tenantId)
+              .eq('tenant_id', currentTenantId)
             
             if (cancelled) return
             setProjects(projData || [])
@@ -123,7 +127,7 @@ export default function AdminPage() {
           const { data: projData } = await supabase
             .from('projects')
             .select('id, name, status')
-            .eq('tenant_id', tenantId)
+            .eq('tenant_id', currentTenantId)
           
           if (cancelled) return
           setProjects(projData || [])
@@ -133,7 +137,7 @@ export default function AdminPage() {
         let { data: invData, error: invError } = await supabase
           .from('invoices')
           .select('id, number, amount, status, customer_name')
-          .eq('tenant_id', tenantId)
+          .eq('tenant_id', currentTenantId)
           .order('created_at', { ascending: false })
           .limit(10)
         
@@ -142,7 +146,7 @@ export default function AdminPage() {
           const fallback = await supabase
             .from('invoices')
             .select('id, number, amount, status, customer_name')
-            .eq('tenant_id', tenantId)
+            .eq('tenant_id', currentTenantId)
             .limit(10)
           
           if (!fallback.error) {

@@ -17,10 +17,8 @@ export class OptimizedQueryBuilder {
    * Build optimized query with tenant isolation and covering indexes
    */
   from(table: string) {
-    return this.db
-      .schema('app')
-      .from(table)
-      .eq('tenant_id', this.tenantId);
+    const query = this.db.schema('app').from(table) as any
+    return query.eq('tenant_id', this.tenantId)
   }
 
   /**

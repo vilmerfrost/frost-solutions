@@ -6,8 +6,9 @@ import { logQuoteChange } from '@/lib/quotes/approval'
 
 export const runtime = 'nodejs'
 
-export async function POST(_: NextRequest, { params }: { params: { id: string } }) {
+export async function POST(_: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   try {
+    const { id: quoteId } = await params
     const tenantId = await getTenantId()
     if (!tenantId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -18,7 +19,7 @@ export async function POST(_: NextRequest, { params }: { params: { id: string } 
       .from('quotes')
       .select('*')
       .eq('tenant_id', tenantId)
-      .eq('id', params.id)
+      .eq('id', quoteId)
       .maybeSingle()
     
     if (!quote) {
@@ -29,7 +30,7 @@ export async function POST(_: NextRequest, { params }: { params: { id: string } 
       .from('quote_items')
       .select('*')
       .eq('tenant_id', tenantId)
-      .eq('quote_id', params.id)
+      .eq('quote_id', quoteId)
       .order('order_index', { ascending: true })
 
     const newNumber = await generateQuoteNumber(tenantId)
@@ -47,12 +48,12 @@ export async function POST(_: NextRequest, { params }: { params: { id: string } 
         kma_enabled: quote.kma_enabled,
         status: 'draft',
         created_by: quote.created_by
-      })
+      } as any)
       .select()
       .single()
 
     if (items?.length) {
-      const cloned = items.map(i => ({
+      const cloned = items.map((i: any) => ({
         tenant_id: tenantId,
         quote_id: created.id,
         item_type: i.item_type,
@@ -65,10 +66,10 @@ export async function POST(_: NextRequest, { params }: { params: { id: string } 
         vat_rate: i.vat_rate,
         order_index: i.order_index
       }))
-      await admin.from('quote_items').insert(cloned)
+      await admin.from('quote_items').insert(cloned as any)
     }
 
-    await logQuoteChange(tenantId, created.id, 'duplicated', { source_quote_id: params.id })
+    await logQuoteChange(tenantId, created.id, 'duplicated', { source_quote_id: quoteId })
 
     return NextResponse.json({ success: true, data: created }, { status: 201 })
   } catch (e: any) {

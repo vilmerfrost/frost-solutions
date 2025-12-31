@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
-import supabase from '@/utils/supabase/supabaseClient'
 import AISummary from '@/components/AISummary'
 
 interface AnalyticsData {
@@ -30,90 +29,35 @@ export default function AnalyticsPage() {
 
     async function fetchAnalytics() {
       try {
-        const now = new Date()
-        let startDate: Date
+        // Use API route instead of direct Supabase calls (avoids RLS issues)
+        const response = await fetch(`/api/analytics?period=${period}&_t=${Date.now()}`, {
+          cache: 'no-store',
+          headers: {
+            'Cache-Control': 'no-cache, no-store, must-revalidate',
+            'Pragma': 'no-cache',
+          },
+          credentials: 'include',
+        });
 
-        if (period === 'week') {
-          startDate = new Date(now)
-          startDate.setDate(startDate.getDate() - 7)
-        } else if (period === 'month') {
-          startDate = new Date(now.getFullYear(), now.getMonth(), 1)
-        } else {
-          startDate = new Date(now.getFullYear(), 0, 1)
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP ${response.status}`);
         }
 
-        // Fetch time entries
-        const { data: timeEntries } = await supabase
-          .from('time_entries')
-          .select('hours_total, amount_total, date, is_billed')
-          .eq('tenant_id', tenantId)
-          .gte('date', startDate.toISOString().split('T')[0])
+        const result = await response.json();
 
-        // Fetch invoices
-        const { data: invoices } = await supabase
-          .from('invoices')
-          .select('amount, status, created_at')
-          .eq('tenant_id', tenantId)
-          .gte('created_at', startDate.toISOString())
-
-        // Fetch projects
-        const { data: projects } = await supabase
-          .from('projects')
-          .select('status')
-          .eq('tenant_id', tenantId)
-
-        // Fetch employees
-        const { data: employees } = await supabase
-          .from('employees')
-          .select('id')
-          .eq('tenant_id', tenantId)
-
-        // Calculate stats
-        const totalHours = (timeEntries || []).reduce((sum, e) => sum + Number(e.hours_total || 0), 0)
-        const totalRevenue = (invoices || []).filter(i => i.status === 'paid').reduce((sum, i) => sum + Number(i.amount || 0), 0)
-        const activeProjects = (projects || []).filter((p: any) => p.status === 'active').length
-        const employeesCount = (employees || []).length
-
-        // Group by month
-        const hoursByMonthMap = new Map<string, number>()
-        const revenueByMonthMap = new Map<string, number>()
-
-        ;(timeEntries || []).forEach((entry: any) => {
-          const month = new Date(entry.date).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short' })
-          hoursByMonthMap.set(month, (hoursByMonthMap.get(month) || 0) + Number(entry.hours_total || 0))
-        })
-
-        ;(invoices || []).forEach((inv: any) => {
-          if (inv.status === 'paid') {
-            const month = new Date(inv.created_at).toLocaleDateString('sv-SE', { year: 'numeric', month: 'short' })
-            revenueByMonthMap.set(month, (revenueByMonthMap.get(month) || 0) + Number(inv.amount || 0))
-          }
-        })
-
-        const hoursByMonth = Array.from(hoursByMonthMap.entries()).map(([month, hours]) => ({ month, hours }))
-        const revenueByMonth = Array.from(revenueByMonthMap.entries()).map(([month, revenue]) => ({ month, revenue }))
-
-        // Project status breakdown
-        const statusMap = new Map<string, number>()
-        ;(projects || []).forEach((p: any) => {
-          const status = p.status || 'unknown'
-          statusMap.set(status, (statusMap.get(status) || 0) + 1)
-        })
-        const projectStatus = Array.from(statusMap.entries()).map(([status, count]) => ({ status, count }))
-
-        setData({
-          totalHours,
-          totalRevenue,
-          activeProjects,
-          employeesCount,
-          hoursByMonth,
-          revenueByMonth,
-          projectStatus,
-        })
-      } catch (err) {
-        console.error('Error fetching analytics:', err)
+        if (result.success && result.data) {
+          setData(result.data);
+        } else {
+          throw new Error(result.error || 'Failed to fetch analytics');
+        }
+      } catch (err: any) {
+        // Only log if error has meaningful content
+        if (err && (err.message || err.code || typeof err === 'string')) {
+          console.error('Error fetching analytics:', err.message || err.code || err);
+        }
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
     }
 

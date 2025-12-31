@@ -17,6 +17,55 @@ const RotInput = z.object({
   projectAddress: z.string().optional(),
 });
 
+export async function GET(req: NextRequest) {
+  try {
+    const tenantId = await getTenantId();
+    if (!tenantId) {
+      return NextResponse.json({ error: 'Ingen tenant' }, { status: 401 });
+    }
+
+    const admin = createAdminClient();
+    const { searchParams } = new URL(req.url);
+    const invoiceId = searchParams.get('invoice_id');
+
+    if (invoiceId) {
+      // Get ROT deduction for specific invoice
+      const { data: rot, error } = await admin
+        .schema('app')
+        .from('rot_deductions')
+        .select('*')
+        .eq('invoice_id', invoiceId)
+        .eq('tenant_id', tenantId)
+        .maybeSingle();
+
+      if (error) {
+        throw error;
+      }
+
+      return NextResponse.json({ success: true, data: rot });
+    }
+
+    // Get all ROT deductions for tenant
+    const { data: rotList, error } = await admin
+      .schema('app')
+      .from('rot_deductions')
+      .select('*')
+      .eq('tenant_id', tenantId)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ success: true, data: rotList || [] });
+  } catch (e: any) {
+    return NextResponse.json(
+      { success: false, error: extractErrorMessage(e) },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(req: NextRequest) {
   try {
     const tenantId = await getTenantId();
@@ -65,7 +114,7 @@ export async function POST(req: NextRequest) {
         deduction_amount_sek: deduction,
         xml_payload: xml,
         status: 'queued',
-      })
+      } as any)
       .select()
       .single();
 
@@ -78,7 +127,7 @@ export async function POST(req: NextRequest) {
       rot_id: rot.id,
       action: 'created',
       meta: { percent, deduction },
-    });
+    } as any);
 
     return NextResponse.json({ success: true, data: rot });
   } catch (e: any) {

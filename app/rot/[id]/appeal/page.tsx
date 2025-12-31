@@ -22,6 +22,8 @@ export default function RotAppealPage() {
     if (!tenantId || !applicationId) return
 
     async function loadApplication() {
+      if (!tenantId) return
+      
       const { data } = await supabase
         .from('rot_applications')
         .select('*')
@@ -48,13 +50,18 @@ export default function RotAppealPage() {
     setLoading(true)
 
     try {
+      if (!tenantId) {
+        toast.error('Ingen tenant ID hittades')
+        return
+      }
+
       // Uppdatera ansökan till överklagad
       const { error: updateError } = await supabase
         .from('rot_applications')
         .update({
           status: 'appealed',
           updated_at: new Date().toISOString(),
-        })
+        } as any)
         .eq('id', applicationId)
 
       if (updateError) {
@@ -66,7 +73,7 @@ export default function RotAppealPage() {
         rot_application_id: applicationId,
         status: 'appealed',
         status_message: `Överklagande skickat. Orsak: ${appealReason}. ${additionalInfo ? `Ytterligare info: ${additionalInfo}` : ''}`,
-      })
+      } as any)
 
       // Logga överklagande (för framtida API-integration)
       await supabase.from('rot_api_logs').insert({
@@ -84,7 +91,7 @@ export default function RotAppealPage() {
           status: 'appealed',
           message: 'Överklagande registrerat',
         },
-      })
+      } as any)
 
       toast.success('Överklagande skickat! Skatteverket kommer att granska din överklagan.')
       router.push(`/rot/${applicationId}`)

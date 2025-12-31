@@ -243,7 +243,7 @@ export async function POST(req: Request) {
       // Strategy 1: Try updating updated_at if it exists
       const touchResult = await adminSupabase
         .from('tenants')
-        .update({ updated_at: new Date().toISOString() })
+        .update({ updated_at: new Date().toISOString() } as any)
         .eq('id', tenantId)
         .select('id')
       
@@ -421,7 +421,7 @@ export async function POST(req: Request) {
     // Insert with service role to bypass RLS
     const { data, error } = await adminSupabase
       .from('time_entries')
-      .insert([insertPayload])
+      .insert([insertPayload] as any)
       .select()
       .single()
 
@@ -495,7 +495,7 @@ export async function POST(req: Request) {
         delete insertPayload.description
         const retry = await adminSupabase
           .from('time_entries')
-          .insert([insertPayload])
+          .insert([insertPayload] as any)
           .select()
           .single()
 

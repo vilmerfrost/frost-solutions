@@ -7,6 +7,7 @@ import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import { RotCalculator } from '@/components/rot/RotCalculator'
+import { ROTAISummary } from '@/components/rot/ROTAISummary'
 
 interface RotApplication {
   id: string
@@ -69,66 +70,55 @@ export default function RotApplicationDetailPage() {
   const [checkingStatus, setCheckingStatus] = useState(false)
   const [showBankIdModal, setShowBankIdModal] = useState(false)
 
+  // Move loadData outside useEffect so it can be called from other functions
+  async function loadData() {
+    if (!tenantId || !applicationId) return
+
+    setLoading(true)
+    try {
+      // Load application
+      const { data: appData, error: appError } = await supabase
+        .from('rot_applications')
+        .select(`
+          *,
+          projects(name),
+          clients(name)
+        `)
+        .eq('id', applicationId)
+        .eq('tenant_id', tenantId)
+        .single()
+
+      if (appError || !appData) {
+        toast.error('Kunde inte ladda ROT-ansökan')
+        setLoading(false)
+        return
+      }
+
+      setApplication(appData as RotApplication)
+
+      // Load status history
+      const { data: historyData } = await supabase
+        .from('rot_status_history')
+        .select('*')
+        .eq('rot_application_id', applicationId)
+        .order('created_at', { ascending: false })
+
+      setStatusHistory((historyData || []) as StatusHistory[])
+    } catch (err: any) {
+      console.error('Error loading ROT application:', err)
+      toast.error('Kunde inte ladda ROT-ansökan')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   useEffect(() => {
     if (!tenantId || !applicationId) {
       setLoading(false)
       return
     }
 
-    let cancelled = false
-
-    async function loadData() {
-      if (!tenantId || !applicationId || cancelled) return
-
-      setLoading(true)
-      try {
-        if (cancelled) return
-
-        // Load application
-        const { data: appData, error: appError } = await supabase
-          .from('rot_applications')
-          .select(`
-            *,
-            projects(name),
-            clients(name)
-          `)
-          .eq('id', applicationId)
-          .eq('tenant_id', tenantId)
-          .single()
-
-        if (appError || !appData) {
-          toast.error('Kunde inte ladda ROT-ansökan')
-          setLoading(false)
-          return
-        }
-
-        setApplication(appData as any)
-
-        // Load status history
-        const { data: historyData } = await supabase
-          .from('rot_status_history')
-          .select('*')
-          .eq('rot_application_id', applicationId)
-          .order('created_at', { ascending: false })
-
-        if (cancelled) return
-        setStatusHistory((historyData || []) as StatusHistory[])
-    } catch (err) {
-      if (cancelled) return
-      console.error('Error loading ROT application:', err)
-      toast.error('Ett fel uppstod när ansökan skulle laddas')
-    } finally {
-      if (!cancelled) {
-        setLoading(false)
-      }
-    }
-    }
-
     loadData()
-
-    return () => {
-      cancelled = true
-    }
   }, [tenantId, applicationId])
 
   async function handleSubmitToSkatteverket() {
@@ -471,6 +461,28 @@ export default function RotApplicationDetailPage() {
                 invoiceDateISO={application.submission_date || new Date().toISOString()}
                 laborCost={application.work_cost_sek}
                 materialCost={application.material_cost_sek}
+              />
+            </div>
+
+            {/* AI Summary */}
+            <div className="mt-8">
+              <ROTAISummary
+                rotData={{
+                  customerName: application.clients?.name || 'Kund',
+                  projectDescription: `${application.work_type} på ${application.property_designation}`,
+                  workPeriod: application.submission_date
+                    ? `${new Date(application.submission_date).toLocaleDateString('sv-SE')} till ${new Date().toLocaleDateString('sv-SE')}`
+                    : 'Pågående',
+                  totalAmount: application.total_cost_sek,
+                  vatAmount: Math.round(application.total_cost_sek * 0.25),
+                  rotAmount: application.work_cost_sek,
+                  rutAmount: undefined,
+                }}
+                onSummaryGenerated={(summary) => {
+                  // Optionally save to database
+                  console.log('AI Summary generated:', summary);
+                  toast.success('AI-sammanfattning genererad!');
+                }}
               />
             </div>
           </div>

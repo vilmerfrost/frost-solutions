@@ -11,6 +11,7 @@ import SearchBar from '@/components/SearchBar'
 import FilterSortBar from '@/components/FilterSortBar'
 import { useAdmin } from '@/hooks/useAdmin'
 import { PermissionGuard } from '@/components/rbac/PermissionGuard'
+import { NewProjectModal } from '@/components/projects/NewProjectModal'
 
 function Notice({
   type = 'info',
@@ -51,6 +52,7 @@ export default function ProjectsContent() {
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [projectHours, setProjectHours] = useState<Map<string, number>>(new Map())
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [isModalOpen, setIsModalOpen] = useState(false)
   const { isAdmin, loading: adminLoading } = useAdmin()
 
   // Fetch clients on mount
@@ -91,6 +93,10 @@ export default function ProjectsContent() {
         // Try API route first for better reliability
         try {
           // Validate tenantId format before calling API
+          if (!tenantId) {
+            console.error('❌ ProjectsContent: No tenantId')
+            return
+          }
           const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
           if (!uuidRegex.test(tenantId)) {
             console.error('❌ ProjectsContent: Invalid tenantId format:', tenantId)
@@ -150,6 +156,8 @@ export default function ProjectsContent() {
         
         // Fallback to direct query
         // Fetch all projects - we'll filter on client side to avoid SQL issues
+        if (!tenantId) return
+        
         let { data, error } = await supabase
           .from('projects')
           .select('id, name, customer_name, created_at, base_rate_sek, budgeted_hours, status')
@@ -469,20 +477,30 @@ export default function ProjectsContent() {
           <Sidebar />
           <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
             <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto w-full">
-          <div className="mb-8 flex items-center justify-between">
+          <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <h1 className="text-4xl font-black text-gray-900 dark:text-white mb-2">Projekt</h1>
               <p className="text-gray-500 dark:text-gray-400">Hantera dina projekt</p>
             </div>
-            <PermissionGuard resource="projects" action="create">
-              <button
-                onClick={() => router.push('/projects/new')}
-                className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105"
-              >
-                + Nytt projekt
-              </button>
-            </PermissionGuard>
+            <button
+              onClick={() => setIsModalOpen(true)}
+              className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white px-6 py-3 rounded-xl font-bold shadow-lg hover:shadow-xl transition-all transform hover:scale-105 flex items-center gap-2 whitespace-nowrap"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              Nytt projekt
+            </button>
           </div>
+
+          <NewProjectModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onSuccess={() => {
+              setRefreshTrigger(prev => prev + 1)
+              setIsModalOpen(false)
+            }}
+          />
 
           {searchParams?.get('created') === 'true' && (
             <div className="mb-6">
@@ -539,7 +557,7 @@ export default function ProjectsContent() {
                     type="text"
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     required
                   />
                 </div>
@@ -548,7 +566,7 @@ export default function ProjectsContent() {
                   <select
                     value={formData.client_id}
                     onChange={(e) => setFormData({ ...formData, client_id: e.target.value })}
-                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     required
                   >
                     <option value="">Välj kund...</option>
@@ -571,7 +589,7 @@ export default function ProjectsContent() {
                       type="number"
                       value={formData.base_rate_sek}
                       onChange={(e) => setFormData({ ...formData, base_rate_sek: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       required
                       min={1}
                     />
@@ -582,7 +600,7 @@ export default function ProjectsContent() {
                       type="number"
                       value={formData.budgeted_hours}
                       onChange={(e) => setFormData({ ...formData, budgeted_hours: e.target.value })}
-                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                       min={0}
                     />
                   </div>
@@ -685,84 +703,197 @@ export default function ProjectsContent() {
                     </p>
                   ) : null}
                   
-                  <p className="text-xs text-gray-400 mb-4">
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mb-4">
                     Skapad: {p.created_at ? new Date(p.created_at).toLocaleDateString('sv-SE') : '—'}
                   </p>
-                  <div className="flex gap-2">
-                    <a
-                      className="text-sm underline text-green-600 hover:text-green-800 font-semibold"
-                      href={`/invoices/new?projectId=${p.id}`}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      📝 Skapa faktura
-                    </a>
-                    <button
-                      onClick={async (e) => {
-                        e.stopPropagation()
-                        if (!confirm(`Vill du markera projektet "${p.name}" som klart och arkivera det?`)) return
-                        setDeletingId(p.id)
-                        try {
-                          // Update status to completed/archived instead of deleting
-                          const updatePayload: any = {
-                            status: 'completed'
-                          }
+                  
+                  {/* Action Buttons */}
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex flex-col sm:flex-row gap-2">
+                      <a
+                        className="flex-1 text-center px-4 py-2.5 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-lg text-sm font-semibold hover:shadow-lg transition-all hover:scale-105 flex items-center justify-center gap-2"
+                        href={`/invoices/new?projectId=${p.id}`}
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Skapa faktura
+                      </a>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          if (!confirm(`Vill du markera projektet "${p.name}" som klart och arkivera det?`)) return
+                          setDeletingId(p.id)
+                          try {
+                            const updatePayload: any = {
+                              status: 'completed'
+                            }
 
-                          let { error } = await supabase
-                            .from('projects')
-                            .update(updatePayload)
-                            .eq('id', p.id)
-                            .eq('tenant_id', tenantId)
+                            if (!tenantId) {
+                              toast.error('Saknar tenant ID')
+                              return
+                            }
 
-                          // If status column doesn't exist, try to add archived flag or just update
-                          if (error && (error.code === '42703' || error.message?.includes('does not exist') || error.message?.includes('status'))) {
-                            // Try without status - in this case we'll just filter it out from active view
-                            // But we should ideally have a status column. For now, we'll just update it
-                            const { error: updateError } = await supabase
+                            let { error } = await supabase
                               .from('projects')
-                              .update({})
+                              .update(updatePayload as any)
                               .eq('id', p.id)
                               .eq('tenant_id', tenantId)
+
+                            if (error && (error.code === '42703' || error.message?.includes('does not exist') || error.message?.includes('status'))) {
+                              const { error: updateError } = await supabase
+                                .from('projects')
+                                .update({} as any)
+                                .eq('id', p.id)
+                                .eq('tenant_id', tenantId)
+                              
+                              if (updateError) {
+                                error = updateError
+                              } else {
+                                const updated = projects.filter(proj => proj.id !== p.id)
+                                setProjects(updated)
+                                setFilteredProjects(updated)
+                                toast.success('Projekt markerat som klart!')
+                                setDeletingId(null)
+                                return
+                              }
+                            }
+
+                            if (error) throw error
                             
-                            if (updateError) {
-                              error = updateError
-                            } else {
-                              // Success - filter out from view since we can't set status
-                              const updated = projects.filter(proj => proj.id !== p.id)
-                              setProjects(updated)
-                              setFilteredProjects(updated)
-                              toast.success('Projekt markerat som klart!')
+                            const updated = projects.filter(proj => proj.id !== p.id)
+                            setProjects(updated)
+                            setFilteredProjects(updated)
+                            toast.success('Projekt markerat som klart och arkiverat!')
+                          } catch (err: any) {
+                            console.error('Error marking project as completed:', err)
+                            toast.error('Kunde inte markera projekt som klart: ' + (err.message || 'Okänt fel'))
+                          } finally {
+                            setDeletingId(null)
+                          }
+                        }}
+                        disabled={deletingId === p.id}
+                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-lg text-sm font-semibold hover:shadow-lg transition-all hover:scale-105 disabled:opacity-50 flex items-center justify-center gap-2"
+                        aria-label={`Markera projekt ${p.name} som klart`}
+                      >
+                        {deletingId === p.id ? (
+                          <span className="animate-spin">⏳</span>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Klar
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={async (e) => {
+                          e.stopPropagation()
+                          const projectId = p.id // Capture project ID in closure
+                          const projectName = p.name // Capture project name in closure
+                          
+                          if (!confirm(`Är du säker på att du vill ta bort projektet "${projectName}"? Detta går inte att ångra.`)) return
+                          
+                          if (!tenantId) {
+                            toast.error('Saknar tenant ID')
+                            return
+                          }
+
+                          setDeletingId(projectId)
+                          try {
+                            // First, check if there are any invoices linked to this project
+                            const { data: invoices, error: invoiceCheckError } = await supabase
+                              .from('invoices')
+                              .select('id')
+                              .eq('project_id', projectId)
+                              .eq('tenant_id', tenantId)
+                              .limit(1)
+
+                            // Only log error if it's a real error (not just empty object or null)
+                            if (invoiceCheckError && (invoiceCheckError.message || invoiceCheckError.code)) {
+                              console.error('Error checking invoices:', invoiceCheckError)
+                            }
+
+                            if (invoices && invoices.length > 0) {
+                              toast.error(`Kan inte ta bort projektet "${projectName}" eftersom det finns fakturor kopplade till projektet. Ta bort eller koppla bort fakturorna först.`)
                               setDeletingId(null)
                               return
                             }
-                          }
 
-                          if (error) throw error
-                          
-                          // Update local state to reflect status change and filter out
-                          const updated = projects.filter(proj => proj.id !== p.id)
-                          setProjects(updated)
-                          setFilteredProjects(updated)
-                          toast.success('Projekt markerat som klart och arkiverat!')
-                        } catch (err: any) {
-                          console.error('Error marking project as completed:', err)
-                          toast.error('Kunde inte markera projekt som klart: ' + (err.message || 'Okänt fel'))
-                        } finally {
-                          setDeletingId(null)
-                        }
-                      }}
-                      disabled={deletingId === p.id}
-                      className="bg-gradient-to-r from-green-500 to-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:shadow-lg transition-all disabled:opacity-50 flex items-center gap-2"
-                      aria-label={`Markera projekt ${p.name} som klart`}
-                    >
-                      {deletingId === p.id ? (
-                        <span className="animate-spin">⏳</span>
-                      ) : (
-                        <>
-                          <span>✓</span>
-                          <span>Klar</span>
-                        </>
-                      )}
-                    </button>
+                            // Check supplier invoices too
+                            const { data: supplierInvoices, error: supplierCheckError } = await supabase
+                              .from('supplier_invoices')
+                              .select('id')
+                              .eq('project_id', projectId)
+                              .eq('tenant_id', tenantId)
+                              .limit(1)
+
+                            // Only log error if it's a real error (not just empty object or null)
+                            if (supplierCheckError && (supplierCheckError.message || supplierCheckError.code)) {
+                              console.error('Error checking supplier invoices:', supplierCheckError)
+                            }
+
+                            if (supplierInvoices && supplierInvoices.length > 0) {
+                              toast.error(`Kan inte ta bort projektet "${projectName}" eftersom det finns leverantörsfakturor kopplade till projektet. Ta bort eller koppla bort fakturorna först.`)
+                              setDeletingId(null)
+                              return
+                            }
+
+                            // Now delete the project
+                            const { error } = await supabase
+                              .from('projects')
+                              .delete()
+                              .eq('id', projectId)
+                              .eq('tenant_id', tenantId)
+
+                            if (error) {
+                              // Check if it's a foreign key constraint error
+                              if (error.message?.includes('foreign key constraint') || error.code === '23503') {
+                                toast.error(`Kan inte ta bort projektet "${projectName}" eftersom det finns relaterade data (fakturor, tidsregistreringar, etc.). Ta bort eller koppla bort dessa först.`)
+                              } else {
+                                throw error
+                              }
+                              return
+                            }
+                            
+                            // Update state using the captured projectId
+                            const updated = projects.filter(proj => proj.id !== projectId)
+                            setProjects(updated)
+                            setFilteredProjects(updated)
+                            toast.success(`Projekt "${projectName}" borttaget!`)
+                          } catch (err: any) {
+                            // Only log if error has meaningful content
+                            if (err && (err.message || err.code || typeof err === 'string')) {
+                              console.error('Error deleting project:', err.message || err.code || err)
+                            }
+                            if (err.message?.includes('foreign key constraint') || err.code === '23503') {
+                              toast.error(`Kan inte ta bort projektet "${projectName}" eftersom det finns relaterade data. Ta bort eller koppla bort dessa först.`)
+                            } else {
+                              const errorMsg = err?.message || (typeof err === 'string' ? err : 'Okänt fel')
+                              toast.error('Kunde inte ta bort projekt: ' + errorMsg)
+                            }
+                          } finally {
+                            setDeletingId(null)
+                          }
+                        }}
+                        disabled={deletingId === p.id}
+                        className="flex-1 px-4 py-2.5 bg-gradient-to-r from-red-500 to-pink-500 text-white rounded-lg text-sm font-semibold hover:shadow-lg transition-all hover:scale-105 disabled:opacity-50 flex items-center justify-center gap-2"
+                        aria-label={`Ta bort projekt ${p.name}`}
+                      >
+                        {deletingId === p.id ? (
+                          <span className="animate-spin">⏳</span>
+                        ) : (
+                          <>
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Ta bort
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

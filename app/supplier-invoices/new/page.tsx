@@ -7,10 +7,14 @@ import Sidebar from '@/components/Sidebar'
 import { Button } from '@/components/ui/button'
 import { InvoiceForm } from '@/components/supplier-invoices/InvoiceForm'
 import { InvoiceUpload } from '@/components/supplier-invoices/InvoiceUpload'
-import { ArrowLeft, FileText, Upload } from 'lucide-react'
+import { InvoiceOCRUpload } from '@/components/invoices/InvoiceOCRUpload'
+import { ArrowLeft, FileText, Upload, Sparkles } from 'lucide-react'
 import { useCreateSupplierInvoice } from '@/hooks/useSupplierInvoices'
+import type { InvoiceOCRResult } from '@/lib/ai/frost-bygg-ai-integration'
+import supabase from '@/utils/supabase/supabaseClient'
+import { toast } from '@/lib/toast'
 
-type TabType = 'manual' | 'upload'
+type TabType = 'manual' | 'upload' | 'ai-ocr'
 
 export default function NewSupplierInvoicePage() {
   const router = useRouter()
@@ -27,6 +31,41 @@ export default function NewSupplierInvoicePage() {
 
   const handleUploadComplete = async (data: { invoiceId: string }) => {
     router.push(`/supplier-invoices/${data.invoiceId}`)
+  }
+
+  const handleAIOCRComplete = async (data: InvoiceOCRResult) => {
+    try {
+      const { data: invoice, error } = await supabase
+        .from('supplier_invoices')
+        .insert({
+          supplier_name: data.supplierName,
+          invoice_number: data.invoiceNumber,
+          invoice_date: data.invoiceDate,
+          due_date: data.dueDate || null,
+          total_amount: data.totalAmount,
+          vat_amount: data.vatAmount,
+          subtotal: data.subtotal,
+          vat_rate: data.vatRate,
+          currency: data.currency,
+          // Map line items if needed
+        } as any)
+        .select()
+        .single()
+
+      if (error) {
+        toast.error('Kunde inte spara faktura: ' + error.message)
+        return
+      }
+
+      const invoiceData = invoice as any
+      toast.success('Faktura sparad!')
+      if (invoiceData?.id) {
+        router.push(`/supplier-invoices/${invoiceData.id}`)
+      }
+    } catch (error) {
+      console.error('Error saving AI OCR invoice:', error)
+      toast.error('Ett fel uppstod vid sparning')
+    }
   }
 
   return (
@@ -50,7 +89,7 @@ export default function NewSupplierInvoicePage() {
 
           {/* Tabs */}
           <div className="bg-gradient-to-br from-white via-gray-50 to-white dark:from-gray-800 dark:via-gray-800/50 dark:to-gray-800 rounded-xl shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 mb-6">
-            <div className="flex gap-4 mb-6">
+            <div className="flex gap-4 mb-6 flex-wrap">
               <button
                 onClick={() => setActiveTab('manual')}
                 className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
@@ -73,13 +112,45 @@ export default function NewSupplierInvoicePage() {
                 <Upload size={20} />
                 Upload & OCR
               </button>
+              <button
+                onClick={() => setActiveTab('ai-ocr')}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
+                  activeTab === 'ai-ocr'
+                    ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-lg'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
+                }`}
+              >
+                <Sparkles size={20} />
+                AI OCR (Ny)
+              </button>
             </div>
 
             {/* Content */}
             {activeTab === 'manual' ? (
               <InvoiceForm onSubmit={handleSubmit} isLoading={createMutation.isPending} />
-            ) : (
+            ) : activeTab === 'upload' ? (
               <InvoiceUpload onComplete={handleUploadComplete} />
+            ) : (
+              <div className="space-y-4">
+                <div className="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/20 dark:to-pink-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4 mb-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Sparkles size={20} className="text-purple-600 dark:text-purple-400" />
+                    <h3 className="font-semibold text-purple-900 dark:text-purple-100">
+                      AI-powered fakturaavläsning
+                    </h3>
+                  </div>
+                  <p className="text-sm text-purple-800 dark:text-purple-200">
+                    Använd vår nya AI-teknologi för att automatiskt extrahera all information från fakturan. 
+                    Snabbare, mer exakt och helt automatiskt!
+                  </p>
+                </div>
+                <InvoiceOCRUpload
+                  onInvoiceExtracted={handleAIOCRComplete}
+                  onError={(error) => {
+                    toast.error(error)
+                  }}
+                />
+              </div>
             )}
           </div>
         </div>
