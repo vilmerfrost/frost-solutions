@@ -19,19 +19,19 @@
  * @returns The base URL (e.g., 'http://localhost:3001', 'https://abc123.ngrok-free.dev', 'https://frostsolutions.se')
  */
 export function getBaseUrl(): string {
-  // In the browser, always use the current origin
-  // This ensures ngrok URLs work correctly
-  if (typeof window !== 'undefined') {
-    return window.location.origin;
-  }
+ // In the browser, always use the current origin
+ // This ensures ngrok URLs work correctly
+ if (typeof window !== 'undefined') {
+  return window.location.origin;
+ }
 
-  // On the server, use environment variable as fallback
-  // Prefer NEXT_PUBLIC_SITE_URL, fall back to NEXT_PUBLIC_APP_URL, then localhost
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.NEXT_PUBLIC_APP_URL ||
-    'http://localhost:3001'
-  );
+ // On the server, use environment variable as fallback
+ // Prefer NEXT_PUBLIC_SITE_URL, fall back to NEXT_PUBLIC_APP_URL, then localhost
+ return (
+  process.env.NEXT_PUBLIC_SITE_URL ||
+  process.env.NEXT_PUBLIC_APP_URL ||
+  'http://localhost:3001'
+ );
 }
 
 /**
@@ -42,18 +42,18 @@ export function getBaseUrl(): string {
  * @returns The base URL extracted from headers or environment
  */
 export function getBaseUrlFromHeaders(headers: Headers | { get: (name: string) => string | null }): string {
-  // Try to get from headers first (works with ngrok, proxies, etc.)
-  const forwardedHost = headers.get('x-forwarded-host');
-  const host = forwardedHost || headers.get('host') || undefined;
-  
-  const forwardedProto = headers.get('x-forwarded-proto');
-  const proto = forwardedProto || (process.env.NEXT_PUBLIC_SITE_URL?.startsWith('https') ? 'https' : 'http');
+ // Try to get from headers first (works with ngrok, proxies, etc.)
+ const forwardedHost = headers.get('x-forwarded-host');
+ const host = forwardedHost || headers.get('host') || undefined;
+ 
+ const forwardedProto = headers.get('x-forwarded-proto');
+ const proto = forwardedProto || (process.env.NEXT_PUBLIC_SITE_URL?.startsWith('https') ? 'https' : 'http');
 
-  if (host) {
-    return `${proto}://${host}`;
-  }
+ if (host) {
+  return `${proto}://${host}`;
+ }
 
-  // Fall back to environment variable or default
-  return getBaseUrl();
+ // Fall back to environment variable or default
+ return getBaseUrl();
 }
 

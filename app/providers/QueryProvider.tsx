@@ -8,56 +8,56 @@ import { queryClient } from '@/lib/queryClient'
 import { installFetchGuard } from '@/lib/guards/fetchRestGuard'
 
 export function QueryProvider({ children }: { children: ReactNode }) {
-  const [persister, setPersister] = useState<ReturnType<typeof createSyncStoragePersister> | null>(null)
+ const [persister, setPersister] = useState<ReturnType<typeof createSyncStoragePersister> | null>(null)
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return
+ useEffect(() => {
+  if (typeof window === 'undefined') return
 
-    // Install global fetch guard in dev mode
-    installFetchGuard()
+  // Install global fetch guard in dev mode
+  installFetchGuard()
 
-    try {
-      const syncPersister = createSyncStoragePersister({ storage: window.localStorage })
-      setPersister(syncPersister)
-    } catch (error) {
-      console.warn('QueryProvider: failed to initialise persistence, falling back to in-memory cache.', error)
-      setPersister(null)
-    }
-
-    const setStatus = () => {
-      const online = navigator.onLine
-      onlineManager.setOnline(online)
-    }
-
-    setStatus()
-    const handleOnline = () => {
-      onlineManager.setOnline(true)
-    }
-    const handleOffline = () => {
-      onlineManager.setOnline(false)
-    }
-
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
-    }
-  }, [])
-
-  if (!persister) {
-    return (
-      <QueryClientProvider client={queryClient}>
-        {children}
-      </QueryClientProvider>
-    )
+  try {
+   const syncPersister = createSyncStoragePersister({ storage: window.localStorage })
+   setPersister(syncPersister)
+  } catch (error) {
+   console.warn('QueryProvider: failed to initialise persistence, falling back to in-memory cache.', error)
+   setPersister(null)
   }
 
+  const setStatus = () => {
+   const online = navigator.onLine
+   onlineManager.setOnline(online)
+  }
+
+  setStatus()
+  const handleOnline = () => {
+   onlineManager.setOnline(true)
+  }
+  const handleOffline = () => {
+   onlineManager.setOnline(false)
+  }
+
+  window.addEventListener('online', handleOnline)
+  window.addEventListener('offline', handleOffline)
+
+  return () => {
+   window.removeEventListener('online', handleOnline)
+   window.removeEventListener('offline', handleOffline)
+  }
+ }, [])
+
+ if (!persister) {
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
-      {children}
-    </PersistQueryClientProvider>
+   <QueryClientProvider client={queryClient}>
+    {children}
+   </QueryClientProvider>
   )
+ }
+
+ return (
+  <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+   {children}
+  </PersistQueryClientProvider>
+ )
 }
 

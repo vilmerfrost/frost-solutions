@@ -13,141 +13,141 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  try {
-    const tenantId = await getTenantId();
-    if (!tenantId) {
-      return fail(new Error('Ingen tenant hittades'), 'Kunde inte identifiera organisation.');
-    }
-
-    const { projectId } = await req.json();
-    if (!projectId) {
-      return fail(new Error('projectId saknas'), 'Projekt-ID saknas.');
-    }
-
-    // Rate limit: 5 / min / tenant
-    try {
-      await enforceRateLimit(tenantId, 'invoice', 5);
-    } catch (rateLimitError: any) {
-      return NextResponse.json(
-        { success: false, error: rateLimitError.message || 'Rate limit uppnådd.' },
-        { status: 429 }
-      );
-    }
-
-    const admin = createAdminClient();
-
-    const [{ data: project, error: projectError }, { data: timeEntries, error: entriesError }] =
-      await Promise.all([
-        admin
-          .from('projects')
-          .select('id, name, client_id, base_rate_sek')
-          .eq('tenant_id', tenantId)
-          .eq('id', projectId)
-          .maybeSingle(),
-        admin
-          .from('time_entries')
-          .select('hours_total, ob_type')
-          .eq('tenant_id', tenantId)
-          .eq('project_id', projectId),
-      ]);
-
-    if (projectError || !project) {
-      return fail(new Error('Projekt saknas'), 'Projekt hittades inte.');
-    }
-
-    const hours = (timeEntries ?? []).reduce((a: any, b: any) => a + (parseFloat(b.hours_total || 0)), 0);
-    const baseRate = project.base_rate_sek ?? 600;
-    const roughTotal = Math.round(hours * baseRate);
-
-    const cacheKey = makeCacheKey(tenantId, { projectId, hrs: hours, baseRate });
-    try {
-      const cached = await getCached(tenantId, cacheKey);
-      if (cached && typeof cached === 'object') {
-        const cachedData = cached as InvoiceSuggestion;
-        return ok({ suggestion: cachedData, model: 'claude-haiku', cached: true });
-      }
-    } catch (cacheError) {
-      // Cache errors shouldn't block the request
-      if (process.env.NODE_ENV === 'development') {
-        console.warn('Cache read error (non-blocking):', cacheError);
-      }
-    }
-
-    // Prompt (liten för kostnadsoptimering)
-    const system =
-      'Du är en svensk ekonom med erfarenhet från bygg. Ge JSON som svar, inga förklaringar.';
-    const user = JSON.stringify({
-      project: { name: project.name, baseRate },
-      hours,
-      rules: { vat: 25, currency: 'SEK' },
-      format: {
-        totalAmount: 'number',
-        suggestedDiscount: 'number (0..100)',
-        invoiceRows: [
-          {
-            description: 'string',
-            quantity: 'number',
-            unitPrice: 'number',
-            vat: 'number',
-            amount: 'number',
-          },
-        ],
-        notes: 'string',
-        confidence: 'low|medium|high',
-      },
-    });
-
-    let suggestion: InvoiceSuggestion | null = null;
-
-    try {
-      const res = await claudeJSON('claude-3-5-haiku-latest', system, user, 900);
-      if (res?._raw) {
-        throw new Error('Non-JSON');
-      }
-
-      suggestion = {
-        totalAmount: Number(res.totalAmount ?? roughTotal),
-        suggestedDiscount: Number(res.suggestedDiscount ?? 0),
-        invoiceRows: Array.isArray(res.invoiceRows)
-          ? res.invoiceRows
-          : [
-              {
-                description: 'Arbetstid',
-                quantity: Math.round(hours * 100) / 100, // Round to 2 decimals
-                unitPrice: baseRate,
-                vat: 25,
-                amount: roughTotal,
-              },
-            ],
-        notes: String(res.notes ?? 'AI-genererat förslag'),
-        confidence: (['low', 'medium', 'high'].includes(res.confidence)
-          ? res.confidence
-          : 'medium') as 'low' | 'medium' | 'high',
-      };
-    } catch (error) {
-      console.error('Claude API error:', error);
-      suggestion = templateInvoiceSuggestion(roughTotal);
-    }
-
-    if (suggestion) {
-      // Cache the result (TTL: 7 days = 604800 seconds)
-      try {
-        await setCached(tenantId, cacheKey, suggestion, 604800);
-      } catch (cacheError) {
-        // Cache write errors shouldn't block the response
-        if (process.env.NODE_ENV === 'development') {
-          console.warn('Cache write error (non-blocking):', cacheError);
-        }
-      }
-    }
-
-    return ok({
-      suggestion: suggestion || templateInvoiceSuggestion(roughTotal),
-      model: 'claude-haiku',
-      cached: false,
-    });
-  } catch (e) {
-    return fail(e, 'Kunde inte ta fram faktureringsförslag.');
+ try {
+  const tenantId = await getTenantId();
+  if (!tenantId) {
+   return fail(new Error('Ingen tenant hittades'), 'Kunde inte identifiera organisation.');
   }
+
+  const { projectId } = await req.json();
+  if (!projectId) {
+   return fail(new Error('projectId saknas'), 'Projekt-ID saknas.');
+  }
+
+  // Rate limit: 5 / min / tenant
+  try {
+   await enforceRateLimit(tenantId, 'invoice', 5);
+  } catch (rateLimitError: any) {
+   return NextResponse.json(
+    { success: false, error: rateLimitError.message || 'Rate limit uppnådd.' },
+    { status: 429 }
+   );
+  }
+
+  const admin = createAdminClient();
+
+  const [{ data: project, error: projectError }, { data: timeEntries, error: entriesError }] =
+   await Promise.all([
+    admin
+     .from('projects')
+     .select('id, name, client_id, base_rate_sek')
+     .eq('tenant_id', tenantId)
+     .eq('id', projectId)
+     .maybeSingle(),
+    admin
+     .from('time_entries')
+     .select('hours_total, ob_type')
+     .eq('tenant_id', tenantId)
+     .eq('project_id', projectId),
+   ]);
+
+  if (projectError || !project) {
+   return fail(new Error('Projekt saknas'), 'Projekt hittades inte.');
+  }
+
+  const hours = (timeEntries ?? []).reduce((a: any, b: any) => a + (parseFloat(b.hours_total || 0)), 0);
+  const baseRate = project.base_rate_sek ?? 600;
+  const roughTotal = Math.round(hours * baseRate);
+
+  const cacheKey = makeCacheKey(tenantId, { projectId, hrs: hours, baseRate });
+  try {
+   const cached = await getCached(tenantId, cacheKey);
+   if (cached && typeof cached === 'object') {
+    const cachedData = cached as InvoiceSuggestion;
+    return ok({ suggestion: cachedData, model: 'claude-haiku', cached: true });
+   }
+  } catch (cacheError) {
+   // Cache errors shouldn't block the request
+   if (process.env.NODE_ENV === 'development') {
+    console.warn('Cache read error (non-blocking):', cacheError);
+   }
+  }
+
+  // Prompt (liten för kostnadsoptimering)
+  const system =
+   'Du är en svensk ekonom med erfarenhet från bygg. Ge JSON som svar, inga förklaringar.';
+  const user = JSON.stringify({
+   project: { name: project.name, baseRate },
+   hours,
+   rules: { vat: 25, currency: 'SEK' },
+   format: {
+    totalAmount: 'number',
+    suggestedDiscount: 'number (0..100)',
+    invoiceRows: [
+     {
+      description: 'string',
+      quantity: 'number',
+      unitPrice: 'number',
+      vat: 'number',
+      amount: 'number',
+     },
+    ],
+    notes: 'string',
+    confidence: 'low|medium|high',
+   },
+  });
+
+  let suggestion: InvoiceSuggestion | null = null;
+
+  try {
+   const res = await claudeJSON('claude-3-5-haiku-latest', system, user, 900);
+   if (res?._raw) {
+    throw new Error('Non-JSON');
+   }
+
+   suggestion = {
+    totalAmount: Number(res.totalAmount ?? roughTotal),
+    suggestedDiscount: Number(res.suggestedDiscount ?? 0),
+    invoiceRows: Array.isArray(res.invoiceRows)
+     ? res.invoiceRows
+     : [
+       {
+        description: 'Arbetstid',
+        quantity: Math.round(hours * 100) / 100, // Round to 2 decimals
+        unitPrice: baseRate,
+        vat: 25,
+        amount: roughTotal,
+       },
+      ],
+    notes: String(res.notes ?? 'AI-genererat förslag'),
+    confidence: (['low', 'medium', 'high'].includes(res.confidence)
+     ? res.confidence
+     : 'medium') as 'low' | 'medium' | 'high',
+   };
+  } catch (error) {
+   console.error('Claude API error:', error);
+   suggestion = templateInvoiceSuggestion(roughTotal);
+  }
+
+  if (suggestion) {
+   // Cache the result (TTL: 7 days = 604800 seconds)
+   try {
+    await setCached(tenantId, cacheKey, suggestion, 604800);
+   } catch (cacheError) {
+    // Cache write errors shouldn't block the response
+    if (process.env.NODE_ENV === 'development') {
+     console.warn('Cache write error (non-blocking):', cacheError);
+    }
+   }
+  }
+
+  return ok({
+   suggestion: suggestion || templateInvoiceSuggestion(roughTotal),
+   model: 'claude-haiku',
+   cached: false,
+  });
+ } catch (e) {
+  return fail(e, 'Kunde inte ta fram faktureringsförslag.');
+ }
 }
 

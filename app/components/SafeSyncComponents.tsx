@@ -15,31 +15,31 @@ import { initializeGlobalErrorHandlers } from '@/lib/error-handling/global-error
  * Om IndexedDB har problem, renderas komponenterna inte
  */
 export function SafeSyncComponents() {
-  // Initialize global error handlers on mount
-  useEffect(() => {
-    initializeGlobalErrorHandlers()
-  }, [])
+ // Initialize global error handlers on mount
+ useEffect(() => {
+  initializeGlobalErrorHandlers()
+ }, [])
 
-  return (
-    <>
-      <ErrorBoundary fallback={null}>
-        <OfflineBanner />
-      </ErrorBoundary>
-      <ErrorBoundary fallback={null}>
-        <SyncProgress />
-      </ErrorBoundary>
-    </>
-  )
+ return (
+  <>
+   <ErrorBoundary fallback={null}>
+    <OfflineBanner />
+   </ErrorBoundary>
+   <ErrorBoundary fallback={null}>
+    <SyncProgress />
+   </ErrorBoundary>
+  </>
+ )
 }
 
 /**
  * Safe wrapper för OnlineStatusIndicator
  */
 export function SafeOnlineStatusIndicator() {
-  return (
-    <ErrorBoundary fallback={<div className="text-sm text-gray-500">Online</div>}>
-      <OnlineStatusIndicator />
-    </ErrorBoundary>
-  )
+ return (
+  <ErrorBoundary fallback={<div className="text-sm text-gray-500">Online</div>}>
+   <OnlineStatusIndicator />
+  </ErrorBoundary>
+ )
 }
 

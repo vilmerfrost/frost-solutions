@@ -7,24 +7,24 @@ import { extractErrorMessage } from '@/lib/errorUtils'
 export const runtime = 'nodejs'
 
 export async function POST(
-  _: NextRequest,
-  { params }: { params: Promise<{ id: string }> }
+ _: NextRequest,
+ { params }: { params: Promise<{ id: string }> }
 ) {
-  try {
-    const tenantId = await getTenantId()
-    if (!tenantId) {
-      return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const { id } = await params
-    const result = await createCustomerInvoiceFromSupplierInvoice(id, tenantId)
-
-    return NextResponse.json({ success: true, data: result })
-  } catch (e: any) {
-    return NextResponse.json(
-      { success: false, error: extractErrorMessage(e) },
-      { status: 500 }
-    )
+ try {
+  const tenantId = await getTenantId()
+  if (!tenantId) {
+   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
   }
+
+  const { id } = await params
+  const result = await createCustomerInvoiceFromSupplierInvoice(id, tenantId)
+
+  return NextResponse.json({ success: true, data: result })
+ } catch (e: any) {
+  return NextResponse.json(
+   { success: false, error: extractErrorMessage(e) },
+   { status: 500 }
+  )
+ }
 }
 

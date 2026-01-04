@@ -6,28 +6,28 @@ import { createClient } from '@/utils/supabase/server'
 export const runtime = 'nodejs'
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  try {
-    const { id: quoteId } = await params
-    const tenantId = await getTenantId()
-    if (!tenantId) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    
-    if (!user) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
-    const body = await req.json()
-    const level = Number(body.level ?? 1)
-    
-    await approveQuote(tenantId, quoteId, user.id, level, body.reason)
-
-    return NextResponse.json({ success: true })
-  } catch (e: any) {
-    return NextResponse.json({ error: e.message }, { status: 400 })
+ try {
+  const { id: quoteId } = await params
+  const tenantId = await getTenantId()
+  if (!tenantId) {
+   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
+
+  const supabase = createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  
+  if (!user) {
+   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const body = await req.json()
+  const level = Number(body.level ?? 1)
+  
+  await approveQuote(tenantId, quoteId, user.id, level, body.reason)
+
+  return NextResponse.json({ success: true })
+ } catch (e: any) {
+  return NextResponse.json({ error: e.message }, { status: 400 })
+ }
 }
 

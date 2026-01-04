@@ -8,597 +8,597 @@ import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
 
 export default function OnboardingPage() {
-  const router = useRouter()
-  const { tenantId, setTenantId } = useTenant()
-  const [step, setStep] = useState(1)
-  const [loading, setLoading] = useState(false)
-  const [finalTenantId, setFinalTenantId] = useState<string | null>(tenantId) // Store tenant ID from step 1
-  
-  // Step 1: Company info
-  const [companyName, setCompanyName] = useState('')
-  const [orgNumber, setOrgNumber] = useState('')
-  
-  // Step 2: Admin user info
-  const [adminName, setAdminName] = useState('')
-  const [adminEmail, setAdminEmail] = useState('')
-  const [adminBaseRate, setAdminBaseRate] = useState('360')
-  
-  // Step 3: First customer
-  const [customerName, setCustomerName] = useState('')
-  const [customerEmail, setCustomerEmail] = useState('')
-  const [customerAddress, setCustomerAddress] = useState('')
-  const [customerOrgNumber, setCustomerOrgNumber] = useState('')
-  const [clientId, setClientId] = useState<string | null>(null) // Store client ID from step 3
-  
-  // Step 4: First project
-  const [projectName, setProjectName] = useState('')
-  const [projectBudget, setProjectBudget] = useState('')
-  const [projectRate, setProjectRate] = useState('360')
+ const router = useRouter()
+ const { tenantId, setTenantId } = useTenant()
+ const [step, setStep] = useState(1)
+ const [loading, setLoading] = useState(false)
+ const [finalTenantId, setFinalTenantId] = useState<string | null>(tenantId) // Store tenant ID from step 1
+ 
+ // Step 1: Company info
+ const [companyName, setCompanyName] = useState('')
+ const [orgNumber, setOrgNumber] = useState('')
+ 
+ // Step 2: Admin user info
+ const [adminName, setAdminName] = useState('')
+ const [adminEmail, setAdminEmail] = useState('')
+ const [adminBaseRate, setAdminBaseRate] = useState('360')
+ 
+ // Step 3: First customer
+ const [customerName, setCustomerName] = useState('')
+ const [customerEmail, setCustomerEmail] = useState('')
+ const [customerAddress, setCustomerAddress] = useState('')
+ const [customerOrgNumber, setCustomerOrgNumber] = useState('')
+ const [clientId, setClientId] = useState<string | null>(null) // Store client ID from step 3
+ 
+ // Step 4: First project
+ const [projectName, setProjectName] = useState('')
+ const [projectBudget, setProjectBudget] = useState('')
+ const [projectRate, setProjectRate] = useState('360')
 
-  async function handleStep1() {
-    if (!companyName.trim()) {
-      toast.error('Företagsnamn krävs')
-      return
+ async function handleStep1() {
+  if (!companyName.trim()) {
+   toast.error('Företagsnamn krävs')
+   return
+  }
+  
+  setLoading(true)
+  try {
+   const { data: userData } = await supabase.auth.getUser()
+   const userId = userData?.user?.id
+
+   if (!userId) {
+    toast.error('Du är inte inloggad')
+    setLoading(false)
+    return
+   }
+
+   // Update or create tenant
+   let currentTenantId = tenantId || finalTenantId
+   
+   if (!currentTenantId) {
+    // Create new tenant via API route (bypasses RLS)
+    const createTenantRes = await fetch('/api/onboarding/create-tenant', {
+     method: 'POST',
+     headers: { 'content-type': 'application/json' },
+     body: JSON.stringify({
+      name: companyName,
+      orgNumber: orgNumber || null,
+      userId: userId,
+     }),
+    })
+
+    if (!createTenantRes.ok) {
+     const errorData = await createTenantRes.json().catch(() => ({}))
+     throw new Error(errorData.error || 'Kunde inte skapa tenant')
+    }
+
+    const resultData = await createTenantRes.json()
+    const newTenantId = resultData.tenantId || resultData.tenant_id
+    
+    if (!newTenantId) {
+     console.error('Create tenant response:', resultData)
+     throw new Error('Kunde inte skapa tenant - inget tenant ID returnerades. Response: ' + JSON.stringify(resultData))
     }
     
-    setLoading(true)
-    try {
-      const { data: userData } = await supabase.auth.getUser()
-      const userId = userData?.user?.id
-
-      if (!userId) {
-        toast.error('Du är inte inloggad')
-        setLoading(false)
-        return
-      }
-
-      // Update or create tenant
-      let currentTenantId = tenantId || finalTenantId
-      
-      if (!currentTenantId) {
-        // Create new tenant via API route (bypasses RLS)
-        const createTenantRes = await fetch('/api/onboarding/create-tenant', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
-          body: JSON.stringify({
-            name: companyName,
-            orgNumber: orgNumber || null,
-            userId: userId,
-          }),
-        })
-
-        if (!createTenantRes.ok) {
-          const errorData = await createTenantRes.json().catch(() => ({}))
-          throw new Error(errorData.error || 'Kunde inte skapa tenant')
-        }
-
-        const resultData = await createTenantRes.json()
-        const newTenantId = resultData.tenantId || resultData.tenant_id
-        
-        if (!newTenantId) {
-          console.error('Create tenant response:', resultData)
-          throw new Error('Kunde inte skapa tenant - inget tenant ID returnerades. Response: ' + JSON.stringify(resultData))
-        }
-        
-        currentTenantId = newTenantId
-        setFinalTenantId(newTenantId) // Store in state for step 2
-        const employeeId = resultData.employeeId || null
-        
-        if (!employeeId) {
-          console.warn('Employee record was not created during tenant creation')
-          // Don't show error toast - dashboard will auto-create it as fallback
-          // toast.error('Varning: Kunde inte skapa anställd-record automatiskt. Du kan behöva skapa den manuellt.')
-        } else {
-          console.log('Employee record created successfully:', employeeId)
-        }
-
-        // CRITICAL: Set tenant in user metadata and cookie immediately
-        try {
-          const setTenantRes = await fetch('/api/auth/set-tenant', {
-            method: 'POST',
-            headers: { 'content-type': 'application/json' },
-            body: JSON.stringify({ 
-              tenantId: currentTenantId,
-              userId: userId
-            }),
-          })
-          
-          if (!setTenantRes.ok) {
-            const errorData = await setTenantRes.json().catch(() => ({}))
-            console.error('Failed to set tenant:', errorData)
-            throw new Error('Kunde inte sätta tenant: ' + (errorData.error || 'Okänt fel'))
-          }
-          
-          // Update TenantContext immediately
-          setTenantId(currentTenantId)
-        } catch (err: any) {
-          console.error('Failed to set tenant in metadata:', err)
-          toast.error('Varning: Kunde inte sätta tenant korrekt. Försök logga in igen.')
-          throw err
-        }
-      } else {
-        // Update existing tenant - try with org_number first, fallback without it
-        const updatePayload: any = { name: companyName }
-        if (orgNumber && orgNumber.trim()) {
-          updatePayload.org_number = orgNumber.trim()
-        }
-        
-        const updateResult = await supabase
-          .from('tenants')
-          .update(updatePayload as any)
-          .eq('id', currentTenantId)
-        
-        if (updateResult.error && (updateResult.error.code === '42703' || updateResult.error.message?.includes('org_number'))) {
-          // org_number column doesn't exist, try without it
-          await supabase
-            .from('tenants')
-            .update({ name: companyName } as any)
-            .eq('id', currentTenantId)
-        }
-        
-        setFinalTenantId(currentTenantId) // Store in state for step 2
-      }
-
-        // Tenant will be synced via TenantContext
-        
-      // Pre-fill admin email from current user (userData is already defined above)
-      if (userData?.user?.email) {
-        setAdminEmail(userData.user.email)
-      }
-      if (userData?.user?.user_metadata?.full_name) {
-        setAdminName(userData.user.user_metadata.full_name)
-      } else if (userData?.user?.email) {
-        // Extract name from email
-        const emailName = userData.user.email.split('@')[0]
-        setAdminName(emailName.charAt(0).toUpperCase() + emailName.slice(1))
-      }
-        
-      setStep(2)
-    } catch (err: any) {
-      toast.error('Fel: ' + err.message)
-    } finally {
-      setLoading(false)
+    currentTenantId = newTenantId
+    setFinalTenantId(newTenantId) // Store in state for step 2
+    const employeeId = resultData.employeeId || null
+    
+    if (!employeeId) {
+     console.warn('Employee record was not created during tenant creation')
+     // Don't show error toast - dashboard will auto-create it as fallback
+     // toast.error('Varning: Kunde inte skapa anställd-record automatiskt. Du kan behöva skapa den manuellt.')
+    } else {
+     console.log('Employee record created successfully:', employeeId)
     }
-  }
 
-  async function handleStep2() {
-    if (!adminName.trim()) {
-      toast.error('Admin-namn krävs')
-      return
+    // CRITICAL: Set tenant in user metadata and cookie immediately
+    try {
+     const setTenantRes = await fetch('/api/auth/set-tenant', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ 
+       tenantId: currentTenantId,
+       userId: userId
+      }),
+     })
+     
+     if (!setTenantRes.ok) {
+      const errorData = await setTenantRes.json().catch(() => ({}))
+      console.error('Failed to set tenant:', errorData)
+      throw new Error('Kunde inte sätta tenant: ' + (errorData.error || 'Okänt fel'))
+     }
+     
+     // Update TenantContext immediately
+     setTenantId(currentTenantId)
+    } catch (err: any) {
+     console.error('Failed to set tenant in metadata:', err)
+     toast.error('Varning: Kunde inte sätta tenant korrekt. Försök logga in igen.')
+     throw err
+    }
+   } else {
+    // Update existing tenant - try with org_number first, fallback without it
+    const updatePayload: any = { name: companyName }
+    if (orgNumber && orgNumber.trim()) {
+     updatePayload.org_number = orgNumber.trim()
     }
     
-    setLoading(true)
-    try {
-      const { data: userData } = await supabase.auth.getUser()
-      const userId = userData?.user?.id
-
-      if (!userId) {
-        toast.error('Du är inte inloggad')
-        setLoading(false)
-        return
-      }
-
-      // Use finalTenantId from step 1 (state), or fallback to tenantId from context
-      const currentTenantId = finalTenantId || tenantId
-      
-      if (!currentTenantId) {
-        toast.error('Ingen tenant hittad. Gå tillbaka till steg 1 och skapa företag först.')
-        setLoading(false)
-        return
-      }
-
-      // Update admin employee record via API route (bypasses RLS)
-      const updateAdminRes = await fetch('/api/onboarding/update-admin', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          tenantId: currentTenantId,
-          userId: userId,
-          fullName: adminName,
-          email: adminEmail || null,
-          baseRate: Number(adminBaseRate) || 360,
-        }),
-      })
-
-      if (!updateAdminRes.ok) {
-        const errorData = await updateAdminRes.json().catch(() => ({}))
-        console.error('Update admin error:', errorData)
-        throw new Error(errorData.error || 'Kunde inte uppdatera admin-användare')
-      }
-
-      const adminResult = await updateAdminRes.json()
-      console.log('Admin employee updated/created:', adminResult)
-
-      setStep(3)
-    } catch (err: any) {
-      console.error('Error in handleStep2:', err)
-      toast.error('Fel: ' + err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleStep3() {
-    if (!customerName.trim()) {
-      toast.error('Kundnamn krävs')
-      return
+    const updateResult = await supabase
+     .from('tenants')
+     .update(updatePayload as any)
+     .eq('id', currentTenantId)
+    
+    if (updateResult.error && (updateResult.error.code === '42703' || updateResult.error.message?.includes('org_number'))) {
+     // org_number column doesn't exist, try without it
+     await supabase
+      .from('tenants')
+      .update({ name: companyName } as any)
+      .eq('id', currentTenantId)
     }
     
-    setLoading(true)
-    try {
-      // Use finalTenantId from step 1 (state), or fallback to tenantId from context
-      const currentTenantId = finalTenantId || tenantId
-      
-      if (!currentTenantId) {
-        toast.error('Ingen tenant hittad. Gå tillbaka till steg 1 och skapa företag först.')
-        setLoading(false)
-        return
-      }
+    setFinalTenantId(currentTenantId) // Store in state for step 2
+   }
 
-      console.log('Creating client with tenantId:', currentTenantId)
-      console.log('finalTenantId from state:', finalTenantId)
-      console.log('tenantId from context:', tenantId)
-
-      // Create customer via API route (bypasses RLS)
-      const createClientRes = await fetch('/api/onboarding/create-client', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          tenantId: currentTenantId, // Use the tenant ID from step 1
-          name: customerName,
-          email: customerEmail || null,
-          address: customerAddress || null,
-          orgNumber: customerOrgNumber || null,
-          clientType: 'company', // Default to company for onboarding
-        }),
-      })
-
-      if (!createClientRes.ok) {
-        const errorData = await createClientRes.json().catch(() => ({}))
-        console.error('Create client error:', errorData)
-        throw new Error(errorData.error || 'Kunde inte skapa kund')
-      }
-
-      const clientResult = await createClientRes.json()
-      if (clientResult.clientId) {
-        setClientId(clientResult.clientId)
-        console.log('Client created with ID:', clientResult.clientId)
-      }
-
-      setStep(4)
-    } catch (err: any) {
-      console.error('Error in handleStep3:', err)
-      toast.error('Fel: ' + err.message)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  async function handleStep4() {
-    if (!projectName.trim()) {
-      toast.error('Projektnamn krävs')
-      return
-    }
+    // Tenant will be synced via TenantContext
     
-    setLoading(true)
-    try {
-      // Use finalTenantId from step 1 (state), or fallback to tenantId from context
-      const currentTenantId = finalTenantId || tenantId
-      
-      if (!currentTenantId) {
-        toast.error('Ingen tenant hittad. Gå tillbaka till steg 1 och skapa företag först.')
-        setLoading(false)
-        return
-      }
-
-      console.log('Creating project with tenantId:', currentTenantId)
-      console.log('Client ID from step 3:', clientId)
-      console.log('finalTenantId from state:', finalTenantId)
-      console.log('tenantId from context:', tenantId)
-
-      // Note: We don't verify tenant from frontend because RLS might block it
-      // The API route (which uses service role) will handle verification
-
-      // Add a longer delay between client creation and project creation
-      // This ensures all database transactions are fully committed
-      // Increased delay to handle potential read replica lag or connection pool issues
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      // Create project via API route (bypasses RLS)
-      const createProjectRes = await fetch('/api/onboarding/create-project', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({
-          tenantId: currentTenantId,
-          name: projectName,
-          clientId: clientId || null, // Use client ID from step 2 if available
-          baseRate: Number(projectRate) || 360,
-          budgetedHours: projectBudget ? Number(projectBudget) : null,
-        }),
-      })
-
-      if (!createProjectRes.ok) {
-        const errorData = await createProjectRes.json().catch(() => ({}))
-        console.error('Create project error:', errorData)
-        throw new Error(errorData.error || 'Kunde inte skapa projekt')
-      }
-
-      // CRITICAL: Ensure tenant is set before redirect
-      // Wait a bit to ensure cookie is set, then do full page reload
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      toast.success('Onboarding klar!')
-      toast.info('💡 Viktigt: Logga ut och in igen för att se tidsrapporter och stämpelklockan.')
-      
-      // Wait a moment for toasts to show, then redirect
-      setTimeout(() => {
-        // Force full page reload to ensure cookies/metadata are available
-        window.location.href = '/dashboard'
-      }, 3000)
-    } catch (err: any) {
-      console.error('Error in handleStep3:', err)
-      toast.error('Fel: ' + err.message)
-    } finally {
-      setLoading(false)
-    }
+   // Pre-fill admin email from current user (userData is already defined above)
+   if (userData?.user?.email) {
+    setAdminEmail(userData.user.email)
+   }
+   if (userData?.user?.user_metadata?.full_name) {
+    setAdminName(userData.user.user_metadata.full_name)
+   } else if (userData?.user?.email) {
+    // Extract name from email
+    const emailName = userData.user.email.split('@')[0]
+    setAdminName(emailName.charAt(0).toUpperCase() + emailName.slice(1))
+   }
+    
+   setStep(2)
+  } catch (err: any) {
+   toast.error('Fel: ' + err.message)
+  } finally {
+   setLoading(false)
   }
+ }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white dark:bg-gray-800 rounded-xl sm:rounded-2xl shadow-2xl border border-gray-100 dark:border-gray-700 p-6 sm:p-8 lg:p-10">
-        <div className="flex flex-col items-center mb-8">
-          <FrostLogo size={64} />
-          <h1 className="font-black text-4xl mt-4 mb-2 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent dark:bg-clip-text dark:text-white">
-            Välkommen till Frost Solutions!
-          </h1>
-          <p className="text-gray-600 dark:text-gray-300">Låt oss sätta upp ditt konto</p>
-        </div>
+ async function handleStep2() {
+  if (!adminName.trim()) {
+   toast.error('Admin-namn krävs')
+   return
+  }
+  
+  setLoading(true)
+  try {
+   const { data: userData } = await supabase.auth.getUser()
+   const userId = userData?.user?.id
 
-        {/* Progress */}
-        <div className="mb-8">
-          <div className="flex justify-between mb-2">
-            {[1, 2, 3, 4].map((s) => (
-              <div
-                key={s}
-                className={`w-1/4 h-2 rounded-full mx-1 ${
-                  s <= step ? 'bg-gradient-to-r from-blue-500 to-purple-500' : 'bg-gray-200'
-                }`}
-              />
-            ))}
-          </div>
-          <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>Företag</span>
-            <span>Admin</span>
-            <span>Kund</span>
-            <span>Projekt</span>
-          </div>
-        </div>
+   if (!userId) {
+    toast.error('Du är inte inloggad')
+    setLoading(false)
+    return
+   }
 
-        {/* Step 1: Company */}
-        {step === 1 && (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Företagsnamn *
-              </label>
-              <input
-                type="text"
-                value={companyName}
-                onChange={(e) => setCompanyName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Frost Solutions AB"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Organisationsnummer
-              </label>
-              <input
-                type="text"
-                value={orgNumber}
-                onChange={(e) => setOrgNumber(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="556677-8899"
-              />
-            </div>
-            <button
-              onClick={handleStep1}
-              disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-xl py-4 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-            >
-              {loading ? 'Sparar...' : 'Fortsätt →'}
-            </button>
-          </div>
-        )}
+   // Use finalTenantId from step 1 (state), or fallback to tenantId from context
+   const currentTenantId = finalTenantId || tenantId
+   
+   if (!currentTenantId) {
+    toast.error('Ingen tenant hittad. Gå tillbaka till steg 1 och skapa företag först.')
+    setLoading(false)
+    return
+   }
 
-        {/* Step 2: Admin User */}
-        {step === 2 && (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Ditt namn (Admin) *
-              </label>
-              <input
-                type="text"
-                value={adminName}
-                onChange={(e) => setAdminName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Anna Andersson"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                E-post
-              </label>
-              <input
-                type="email"
-                value={adminEmail}
-                onChange={(e) => setAdminEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="anna@exempel.se"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Grundlön per timme (SEK)
-              </label>
-              <input
-                type="number"
-                value={adminBaseRate}
-                onChange={(e) => setAdminBaseRate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="360"
-              />
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setStep(1)}
-                className="flex-1 px-6 py-4 rounded-xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                ← Tillbaka
-              </button>
-              <button
-                onClick={handleStep2}
-                disabled={loading}
-                className="flex-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-xl py-4 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-              >
-                {loading ? 'Sparar...' : 'Fortsätt →'}
-              </button>
-            </div>
-          </div>
-        )}
+   // Update admin employee record via API route (bypasses RLS)
+   const updateAdminRes = await fetch('/api/onboarding/update-admin', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+     tenantId: currentTenantId,
+     userId: userId,
+     fullName: adminName,
+     email: adminEmail || null,
+     baseRate: Number(adminBaseRate) || 360,
+    }),
+   })
 
-        {/* Step 3: Customer */}
-        {step === 3 && (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Kundnamn *
-              </label>
-              <input
-                type="text"
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Kundens företag"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                E-post
-              </label>
-              <input
-                type="email"
-                value={customerEmail}
-                onChange={(e) => setCustomerEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="kund@exempel.se"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Adress
-              </label>
-              <input
-                type="text"
-                value={customerAddress}
-                onChange={(e) => setCustomerAddress(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Gatuadress 1, 123 45 Stad"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Organisationsnummer <span className="text-xs text-gray-400 dark:text-gray-500">(valfritt - endast för företag)</span>
-              </label>
-              <input
-                type="text"
-                value={customerOrgNumber}
-                onChange={(e) => setCustomerOrgNumber(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="556677-8899 (lämna tomt för privatkund)"
-              />
-              <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
-                Privata kunder behöver inget org.nr. Org.nr sparas i projektet om det anges.
-              </p>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setStep(2)}
-                className="flex-1 px-6 py-4 rounded-xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                ← Tillbaka
-              </button>
-              <button
-                onClick={handleStep3}
-                disabled={loading}
-                className="flex-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-xl py-4 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-              >
-                {loading ? 'Sparar...' : 'Fortsätt →'}
-              </button>
-            </div>
-          </div>
-        )}
+   if (!updateAdminRes.ok) {
+    const errorData = await updateAdminRes.json().catch(() => ({}))
+    console.error('Update admin error:', errorData)
+    throw new Error(errorData.error || 'Kunde inte uppdatera admin-användare')
+   }
 
-        {/* Step 4: Project */}
-        {step === 4 && (
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Projektnamn *
-              </label>
-              <input
-                type="text"
-                value={projectName}
-                onChange={(e) => setProjectName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                placeholder="Altanbygge, Köksrenovering..."
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Budget (timmar)
-                </label>
-                <input
-                  type="number"
-                  value={projectBudget}
-                  onChange={(e) => setProjectBudget(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="100"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                  Timpris (SEK)
-                </label>
-                <input
-                  type="number"
-                  value={projectRate}
-                  onChange={(e) => setProjectRate(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  placeholder="360"
-                />
-              </div>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setStep(3)}
-                className="flex-1 px-6 py-4 rounded-xl border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-              >
-                ← Tillbaka
-              </button>
-              <button
-                onClick={handleStep4}
-                disabled={loading}
-                className="flex-1 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded-xl py-4 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
-              >
-                {loading ? 'Sparar...' : 'Slutför 🎉'}
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+   const adminResult = await updateAdminRes.json()
+   console.log('Admin employee updated/created:', adminResult)
+
+   setStep(3)
+  } catch (err: any) {
+   console.error('Error in handleStep2:', err)
+   toast.error('Fel: ' + err.message)
+  } finally {
+   setLoading(false)
+  }
+ }
+
+ async function handleStep3() {
+  if (!customerName.trim()) {
+   toast.error('Kundnamn krävs')
+   return
+  }
+  
+  setLoading(true)
+  try {
+   // Use finalTenantId from step 1 (state), or fallback to tenantId from context
+   const currentTenantId = finalTenantId || tenantId
+   
+   if (!currentTenantId) {
+    toast.error('Ingen tenant hittad. Gå tillbaka till steg 1 och skapa företag först.')
+    setLoading(false)
+    return
+   }
+
+   console.log('Creating client with tenantId:', currentTenantId)
+   console.log('finalTenantId from state:', finalTenantId)
+   console.log('tenantId from context:', tenantId)
+
+   // Create customer via API route (bypasses RLS)
+   const createClientRes = await fetch('/api/onboarding/create-client', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+     tenantId: currentTenantId, // Use the tenant ID from step 1
+     name: customerName,
+     email: customerEmail || null,
+     address: customerAddress || null,
+     orgNumber: customerOrgNumber || null,
+     clientType: 'company', // Default to company for onboarding
+    }),
+   })
+
+   if (!createClientRes.ok) {
+    const errorData = await createClientRes.json().catch(() => ({}))
+    console.error('Create client error:', errorData)
+    throw new Error(errorData.error || 'Kunde inte skapa kund')
+   }
+
+   const clientResult = await createClientRes.json()
+   if (clientResult.clientId) {
+    setClientId(clientResult.clientId)
+    console.log('Client created with ID:', clientResult.clientId)
+   }
+
+   setStep(4)
+  } catch (err: any) {
+   console.error('Error in handleStep3:', err)
+   toast.error('Fel: ' + err.message)
+  } finally {
+   setLoading(false)
+  }
+ }
+
+ async function handleStep4() {
+  if (!projectName.trim()) {
+   toast.error('Projektnamn krävs')
+   return
+  }
+  
+  setLoading(true)
+  try {
+   // Use finalTenantId from step 1 (state), or fallback to tenantId from context
+   const currentTenantId = finalTenantId || tenantId
+   
+   if (!currentTenantId) {
+    toast.error('Ingen tenant hittad. Gå tillbaka till steg 1 och skapa företag först.')
+    setLoading(false)
+    return
+   }
+
+   console.log('Creating project with tenantId:', currentTenantId)
+   console.log('Client ID from step 3:', clientId)
+   console.log('finalTenantId from state:', finalTenantId)
+   console.log('tenantId from context:', tenantId)
+
+   // Note: We don't verify tenant from frontend because RLS might block it
+   // The API route (which uses service role) will handle verification
+
+   // Add a longer delay between client creation and project creation
+   // This ensures all database transactions are fully committed
+   // Increased delay to handle potential read replica lag or connection pool issues
+   await new Promise(resolve => setTimeout(resolve, 1000))
+
+   // Create project via API route (bypasses RLS)
+   const createProjectRes = await fetch('/api/onboarding/create-project', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+     tenantId: currentTenantId,
+     name: projectName,
+     clientId: clientId || null, // Use client ID from step 2 if available
+     baseRate: Number(projectRate) || 360,
+     budgetedHours: projectBudget ? Number(projectBudget) : null,
+    }),
+   })
+
+   if (!createProjectRes.ok) {
+    const errorData = await createProjectRes.json().catch(() => ({}))
+    console.error('Create project error:', errorData)
+    throw new Error(errorData.error || 'Kunde inte skapa projekt')
+   }
+
+   // CRITICAL: Ensure tenant is set before redirect
+   // Wait a bit to ensure cookie is set, then do full page reload
+   await new Promise(resolve => setTimeout(resolve, 1000))
+   
+   toast.success('Onboarding klar!')
+   toast.info('💡 Viktigt: Logga ut och in igen för att se tidsrapporter och stämpelklockan.')
+   
+   // Wait a moment for toasts to show, then redirect
+   setTimeout(() => {
+    // Force full page reload to ensure cookies/metadata are available
+    window.location.href = '/dashboard'
+   }, 3000)
+  } catch (err: any) {
+   console.error('Error in handleStep3:', err)
+   toast.error('Fel: ' + err.message)
+  } finally {
+   setLoading(false)
+  }
+ }
+
+ return (
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 dark:from-gray-900 dark: dark:to-gray-900 flex items-center justify-center p-4">
+   <div className="w-full max-w-2xl bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-2xl border border-gray-100 dark:border-gray-700 p-6 sm:p-8 lg:p-10">
+    <div className="flex flex-col items-center mb-8">
+     <FrostLogo size={64} />
+     <h1 className="font-semibold text-4xl mt-4 mb-2 text-gray-900 dark:text-white dark:bg-clip-text dark:text-white">
+      Välkommen till Frost Solutions!
+     </h1>
+     <p className="text-gray-600 dark:text-gray-300">Låt oss sätta upp ditt konto</p>
     </div>
-  )
+
+    {/* Progress */}
+    <div className="mb-8">
+     <div className="flex justify-between mb-2">
+      {[1, 2, 3, 4].map((s) => (
+       <div
+        key={s}
+        className={`w-1/4 h-2 rounded-full mx-1 ${
+         s <= step ? 'bg-primary-500 hover:bg-primary-600' : 'bg-gray-200'
+        }`}
+       />
+      ))}
+     </div>
+     <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+      <span>Företag</span>
+      <span>Admin</span>
+      <span>Kund</span>
+      <span>Projekt</span>
+     </div>
+    </div>
+
+    {/* Step 1: Company */}
+    {step === 1 && (
+     <div className="space-y-6">
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Företagsnamn *
+       </label>
+       <input
+        type="text"
+        value={companyName}
+        onChange={(e) => setCompanyName(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="Frost Solutions AB"
+       />
+      </div>
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Organisationsnummer
+       </label>
+       <input
+        type="text"
+        value={orgNumber}
+        onChange={(e) => setOrgNumber(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="556677-8899"
+       />
+      </div>
+      <button
+       onClick={handleStep1}
+       disabled={loading}
+       className="w-full bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+      >
+       {loading ? 'Sparar...' : 'Fortsätt →'}
+      </button>
+     </div>
+    )}
+
+    {/* Step 2: Admin User */}
+    {step === 2 && (
+     <div className="space-y-6">
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Ditt namn (Admin) *
+       </label>
+       <input
+        type="text"
+        value={adminName}
+        onChange={(e) => setAdminName(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="Anna Andersson"
+       />
+      </div>
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        E-post
+       </label>
+       <input
+        type="email"
+        value={adminEmail}
+        onChange={(e) => setAdminEmail(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="anna@exempel.se"
+       />
+      </div>
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Grundlön per timme (SEK)
+       </label>
+       <input
+        type="number"
+        value={adminBaseRate}
+        onChange={(e) => setAdminBaseRate(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="360"
+       />
+      </div>
+      <div className="flex gap-4">
+       <button
+        onClick={() => setStep(1)}
+        className="flex-1 px-6 py-4 rounded-[8px] border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+       >
+        ← Tillbaka
+       </button>
+       <button
+        onClick={handleStep2}
+        disabled={loading}
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+       >
+        {loading ? 'Sparar...' : 'Fortsätt →'}
+       </button>
+      </div>
+     </div>
+    )}
+
+    {/* Step 3: Customer */}
+    {step === 3 && (
+     <div className="space-y-6">
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Kundnamn *
+       </label>
+       <input
+        type="text"
+        value={customerName}
+        onChange={(e) => setCustomerName(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="Kundens företag"
+       />
+      </div>
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        E-post
+       </label>
+       <input
+        type="email"
+        value={customerEmail}
+        onChange={(e) => setCustomerEmail(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="kund@exempel.se"
+       />
+      </div>
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Adress
+       </label>
+       <input
+        type="text"
+        value={customerAddress}
+        onChange={(e) => setCustomerAddress(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="Gatuadress 1, 123 45 Stad"
+       />
+      </div>
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Organisationsnummer <span className="text-xs text-gray-400 dark:text-gray-500">(valfritt - endast för företag)</span>
+       </label>
+       <input
+        type="text"
+        value={customerOrgNumber}
+        onChange={(e) => setCustomerOrgNumber(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="556677-8899 (lämna tomt för privatkund)"
+       />
+       <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
+        Privata kunder behöver inget org.nr. Org.nr sparas i projektet om det anges.
+       </p>
+      </div>
+      <div className="flex gap-4">
+       <button
+        onClick={() => setStep(2)}
+        className="flex-1 px-6 py-4 rounded-[8px] border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+       >
+        ← Tillbaka
+       </button>
+       <button
+        onClick={handleStep3}
+        disabled={loading}
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+       >
+        {loading ? 'Sparar...' : 'Fortsätt →'}
+       </button>
+      </div>
+     </div>
+    )}
+
+    {/* Step 4: Project */}
+    {step === 4 && (
+     <div className="space-y-6">
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Projektnamn *
+       </label>
+       <input
+        type="text"
+        value={projectName}
+        onChange={(e) => setProjectName(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        placeholder="Altanbygge, Köksrenovering..."
+       />
+      </div>
+      <div className="grid grid-cols-2 gap-4">
+       <div>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+         Budget (timmar)
+        </label>
+        <input
+         type="number"
+         value={projectBudget}
+         onChange={(e) => setProjectBudget(e.target.value)}
+         className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+         placeholder="100"
+        />
+       </div>
+       <div>
+        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+         Timpris (SEK)
+        </label>
+        <input
+         type="number"
+         value={projectRate}
+         onChange={(e) => setProjectRate(e.target.value)}
+         className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+         placeholder="360"
+        />
+       </div>
+      </div>
+      <div className="flex gap-4">
+       <button
+        onClick={() => setStep(3)}
+        className="flex-1 px-6 py-4 rounded-[8px] border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+       >
+        ← Tillbaka
+       </button>
+       <button
+        onClick={handleStep4}
+        disabled={loading}
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+       >
+        {loading ? 'Sparar...' : 'Slutför 🎉'}
+       </button>
+      </div>
+     </div>
+    )}
+   </div>
+  </div>
+ )
 }

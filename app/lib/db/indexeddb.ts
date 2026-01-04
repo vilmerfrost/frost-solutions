@@ -4,9 +4,9 @@
 export type { LocalWorkOrder, SyncQueueItem } from './types';
 export { getDatabase, db } from './database';
 export {
-  addToSyncQueue,
-  getPendingSyncItems,
-  markAsSynced,
-  incrementAttempts,
-  getSyncItemByClientId
+ addToSyncQueue,
+ getPendingSyncItems,
+ markAsSynced,
+ incrementAttempts,
+ getSyncItemByClientId
 } from './sync-queue';

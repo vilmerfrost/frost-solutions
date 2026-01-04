@@ -9,19 +9,19 @@ type ExposedSchema = 'public' | 'app' | 'graphql_public'
  * @param timeoutMs - Timeout in milliseconds (default: 8000)
  */
 function makeTimeoutFetch(timeoutMs: number) {
-  return async (input: RequestInfo | URL, init?: RequestInit) => {
-    const ctrl = new AbortController()
-    const timeoutId = setTimeout(() => ctrl.abort(), timeoutMs)
+ return async (input: RequestInfo | URL, init?: RequestInit) => {
+  const ctrl = new AbortController()
+  const timeoutId = setTimeout(() => ctrl.abort(), timeoutMs)
 
-    try {
-      return await fetch(input, {
-        ...(init || {}),
-        signal: ctrl.signal,
-      })
-    } finally {
-      clearTimeout(timeoutId)
-    }
+  try {
+   return await fetch(input, {
+    ...(init || {}),
+    signal: ctrl.signal,
+   })
+  } finally {
+   clearTimeout(timeoutId)
   }
+ }
 }
 
 /**
@@ -43,27 +43,27 @@ function makeTimeoutFetch(timeoutMs: number) {
  * @throws Error if service role key or URL is missing
  */
 export function createAdminClient(timeoutMs = 8000, schema: ExposedSchema = 'public'): SupabaseClient {
-  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+ const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
+ const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
-  if (!supabaseUrl || !serviceKey) {
-    throw new Error(
-      'Missing SUPABASE_SERVICE_ROLE_KEY or SUPABASE_URL. ' +
-      'Please check your .env.local file.'
-    )
-  }
+ if (!supabaseUrl || !serviceKey) {
+  throw new Error(
+   'Missing SUPABASE_SERVICE_ROLE_KEY or SUPABASE_URL. ' +
+   'Please check your .env.local file.'
+  )
+ }
 
-  return createClient(supabaseUrl, serviceKey, {
-    db: { schema },
-    global: {
-      fetch: makeTimeoutFetch(timeoutMs),
-      headers: { 'X-Client-Info': 'frost-backend' },
-    },
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false,
-    },
-  })
+ return createClient(supabaseUrl, serviceKey, {
+  db: { schema },
+  global: {
+   fetch: makeTimeoutFetch(timeoutMs),
+   headers: { 'X-Client-Info': 'frost-backend' },
+  },
+  auth: {
+   autoRefreshToken: false,
+   persistSession: false,
+  },
+ })
 }
 
 /**
@@ -74,7 +74,7 @@ export function createAdminClient(timeoutMs = 8000, schema: ExposedSchema = 'pub
  * @returns Supabase client configured for app schema
  */
 export function createAppSchemaClient(timeoutMs = 8000): SupabaseClient {
-  return createAdminClient(timeoutMs, 'app')
+ return createAdminClient(timeoutMs, 'app')
 }
 
 /**
@@ -85,24 +85,24 @@ export function createAppSchemaClient(timeoutMs = 8000): SupabaseClient {
  * @returns true if schema is accessible, false otherwise
  */
 export async function assertSchemaExposed(schema: ExposedSchema = 'app'): Promise<boolean> {
-  try {
-    const db = createAdminClient(5000, schema)
-    // Try a minimal query to check if schema is accessible
-    const { error } = await db.from('supplier_invoices').select('id').limit(0)
-    
-    if (error?.message?.includes('schema must be one of')) {
-      console.warn(
-        `⚠️ Schema "${schema}" is not exposed in Supabase API settings. ` +
-        `Add "${schema}" to Database → API → Exposed schemas. ` +
-        `Using RPC functions as fallback.`
-      )
-      return false
-    }
-    
-    return !error
-  } catch (err) {
-    console.warn(`⚠️ Could not verify schema "${schema}":`, err)
-    return false
+ try {
+  const db = createAdminClient(5000, schema)
+  // Try a minimal query to check if schema is accessible
+  const { error } = await db.from('supplier_invoices').select('id').limit(0)
+  
+  if (error?.message?.includes('schema must be one of')) {
+   console.warn(
+    `⚠️ Schema "${schema}" is not exposed in Supabase API settings. ` +
+    `Add "${schema}" to Database → API → Exposed schemas. ` +
+    `Using RPC functions as fallback.`
+   )
+   return false
   }
+  
+  return !error
+ } catch (err) {
+  console.warn(`⚠️ Could not verify schema "${schema}":`, err)
+  return false
+ }
 }
 

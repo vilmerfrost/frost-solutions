@@ -9,224 +9,224 @@ import type { ScheduleSlot, CreateScheduleRequest, UpdateScheduleRequest, Schedu
 
 // Helper type for optimistic updates
 type OptimisticUpdateContext = {
-  previousSchedules?: ScheduleSlot[];
+ previousSchedules?: ScheduleSlot[];
 };
 
 // Query key helper
 const getScheduleQueryKey = (tenantId: string | null, filters: ScheduleFilters) => 
-  ['schedules', tenantId, filters];
+ ['schedules', tenantId, filters];
 
 /**
  * Hook för att hämta schemapass baserat på filter
  * NOTE: Employee och project names enrichas i komponenterna med useEmployees() och useProjects()
  */
 export const useSchedules = (filters: ScheduleFilters) => {
-  const { tenantId } = useTenant();
-  const queryKey = getScheduleQueryKey(tenantId, filters);
+ const { tenantId } = useTenant();
+ const queryKey = getScheduleQueryKey(tenantId, filters);
 
-  return useQuery<ScheduleSlot[]>({
-    queryKey: queryKey,
-    queryFn: async () => {
-      if (!tenantId) throw new Error('Tenant ID saknas');
-      if (!filters.start_date || !filters.end_date) {
-        throw new Error('start_date och end_date krävs');
-      }
+ return useQuery<ScheduleSlot[]>({
+  queryKey: queryKey,
+  queryFn: async () => {
+   if (!tenantId) throw new Error('Tenant ID saknas');
+   if (!filters.start_date || !filters.end_date) {
+    throw new Error('start_date och end_date krävs');
+   }
 
-      const params = new URLSearchParams();
-      if (filters.employee_id) params.append('employee_id', filters.employee_id);
-      if (filters.project_id) params.append('project_id', filters.project_id);
-      if (filters.status) params.append('status', filters.status);
-      params.append('start_date', filters.start_date);
-      params.append('end_date', filters.end_date);
+   const params = new URLSearchParams();
+   if (filters.employee_id) params.append('employee_id', filters.employee_id);
+   if (filters.project_id) params.append('project_id', filters.project_id);
+   if (filters.status) params.append('status', filters.status);
+   params.append('start_date', filters.start_date);
+   params.append('end_date', filters.end_date);
 
-      const response = await fetch(`/api/schedules?${params.toString()}`, {
-        cache: 'no-store',
-      });
+   const response = await fetch(`/api/schedules?${params.toString()}`, {
+    cache: 'no-store',
+   });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Kunde inte hämta scheman' }));
-        throw new Error(error.error || 'Kunde inte hämta scheman');
-      }
+   if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Kunde inte hämta scheman' }));
+    throw new Error(error.error || 'Kunde inte hämta scheman');
+   }
 
-      const schedules = await response.json() as ScheduleSlot[];
-      
-      // Return schedules as-is - enrichment happens in components using useEmployees() and useProjects()
-      return schedules || [];
-    },
-    enabled: !!tenantId && !!filters.start_date && !!filters.end_date,
-  });
+   const schedules = await response.json() as ScheduleSlot[];
+   
+   // Return schedules as-is - enrichment happens in components using useEmployees() and useProjects()
+   return schedules || [];
+  },
+  enabled: !!tenantId && !!filters.start_date && !!filters.end_date,
+ });
 };
 
 /**
  * Hook för att skapa ett nytt schemapass
  */
 export const useCreateSchedule = (filters: ScheduleFilters) => {
-  const queryClient = useQueryClient();
-  const { tenantId } = useTenant();
-  const queryKey = getScheduleQueryKey(tenantId, filters);
+ const queryClient = useQueryClient();
+ const { tenantId } = useTenant();
+ const queryKey = getScheduleQueryKey(tenantId, filters);
 
-  return useMutation<ScheduleSlot, Error, CreateScheduleRequest>({
-    mutationFn: async (newSchedule) => {
-      if (!tenantId) throw new Error('Tenant ID saknas');
+ return useMutation<ScheduleSlot, Error, CreateScheduleRequest>({
+  mutationFn: async (newSchedule) => {
+   if (!tenantId) throw new Error('Tenant ID saknas');
 
-      const response = await fetch('/api/schedules', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newSchedule),
-      });
+   const response = await fetch('/api/schedules', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(newSchedule),
+   });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Kunde inte skapa schema' }));
-        throw new Error(error.error || 'Kunde inte skapa schema');
-      }
+   if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Kunde inte skapa schema' }));
+    throw new Error(error.error || 'Kunde inte skapa schema');
+   }
 
-      return await response.json() as ScheduleSlot;
-    },
-    onSuccess: () => {
-      toast.success('Schema sparat');
-      queryClient.invalidateQueries({ queryKey });
-    },
-    onError: (error) => {
-      toast.error(`Kunde inte spara: ${extractErrorMessage(error)}`);
-    },
-  });
+   return await response.json() as ScheduleSlot;
+  },
+  onSuccess: () => {
+   toast.success('Schema sparat');
+   queryClient.invalidateQueries({ queryKey });
+  },
+  onError: (error) => {
+   toast.error(`Kunde inte spara: ${extractErrorMessage(error)}`);
+  },
+ });
 };
 
 /**
  * Hook för att uppdatera ett schemapass (med optimistisk uppdatering)
  */
 export const useUpdateSchedule = (filters: ScheduleFilters) => {
-  const queryClient = useQueryClient();
-  const { tenantId } = useTenant();
-  const queryKey = getScheduleQueryKey(tenantId, filters);
+ const queryClient = useQueryClient();
+ const { tenantId } = useTenant();
+ const queryKey = getScheduleQueryKey(tenantId, filters);
 
-  return useMutation<
-    ScheduleSlot, 
-    Error, 
-    UpdateScheduleRequest & { id: string }, 
-    OptimisticUpdateContext
-  >({
-    mutationFn: async (updatedSchedule) => {
-      if (!tenantId) throw new Error('Tenant ID saknas');
+ return useMutation<
+  ScheduleSlot, 
+  Error, 
+  UpdateScheduleRequest & { id: string }, 
+  OptimisticUpdateContext
+ >({
+  mutationFn: async (updatedSchedule) => {
+   if (!tenantId) throw new Error('Tenant ID saknas');
 
-      const response = await fetch(`/api/schedules/${updatedSchedule.id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedSchedule),
-      });
+   const response = await fetch(`/api/schedules/${updatedSchedule.id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updatedSchedule),
+   });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Kunde inte uppdatera schema' }));
-        throw new Error(error.error || 'Kunde inte uppdatera schema');
-      }
+   if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Kunde inte uppdatera schema' }));
+    throw new Error(error.error || 'Kunde inte uppdatera schema');
+   }
 
-      return await response.json() as ScheduleSlot;
-    },
-    onMutate: async (updatedSchedule) => {
-      await queryClient.cancelQueries({ queryKey });
-      const previousSchedules = queryClient.getQueryData<ScheduleSlot[]>(queryKey);
+   return await response.json() as ScheduleSlot;
+  },
+  onMutate: async (updatedSchedule) => {
+   await queryClient.cancelQueries({ queryKey });
+   const previousSchedules = queryClient.getQueryData<ScheduleSlot[]>(queryKey);
 
-      queryClient.setQueryData<ScheduleSlot[]>(queryKey, (oldData) =>
-        oldData?.map((slot) =>
-          slot.id === updatedSchedule.id ? { ...slot, ...updatedSchedule } : slot
-        ) || []
-      );
+   queryClient.setQueryData<ScheduleSlot[]>(queryKey, (oldData) =>
+    oldData?.map((slot) =>
+     slot.id === updatedSchedule.id ? { ...slot, ...updatedSchedule } : slot
+    ) || []
+   );
 
-      return { previousSchedules };
-    },
-    onError: (err, variables, context) => {
-      toast.error(`Fel vid uppdatering: ${extractErrorMessage(err)}`);
-      if (context?.previousSchedules) {
-        queryClient.setQueryData(queryKey, context.previousSchedules);
-      }
-    },
-    onSuccess: () => {
-      toast.success('Schema uppdaterat');
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
-  });
+   return { previousSchedules };
+  },
+  onError: (err, variables, context) => {
+   toast.error(`Fel vid uppdatering: ${extractErrorMessage(err)}`);
+   if (context?.previousSchedules) {
+    queryClient.setQueryData(queryKey, context.previousSchedules);
+   }
+  },
+  onSuccess: () => {
+   toast.success('Schema uppdaterat');
+  },
+  onSettled: () => {
+   queryClient.invalidateQueries({ queryKey });
+  },
+ });
 };
 
 /**
  * Hook för att ta bort ett schemapass (med optimistisk uppdatering)
  */
 export const useDeleteSchedule = (filters: ScheduleFilters) => {
-  const queryClient = useQueryClient();
-  const { tenantId } = useTenant();
-  const queryKey = getScheduleQueryKey(tenantId, filters);
+ const queryClient = useQueryClient();
+ const { tenantId } = useTenant();
+ const queryKey = getScheduleQueryKey(tenantId, filters);
 
-  return useMutation<void, Error, string, OptimisticUpdateContext>({
-    mutationFn: async (scheduleId) => {
-      if (!tenantId) throw new Error('Tenant ID saknas');
+ return useMutation<void, Error, string, OptimisticUpdateContext>({
+  mutationFn: async (scheduleId) => {
+   if (!tenantId) throw new Error('Tenant ID saknas');
 
-      const response = await fetch(`/api/schedules/${scheduleId}`, {
-        method: 'DELETE',
-      });
+   const response = await fetch(`/api/schedules/${scheduleId}`, {
+    method: 'DELETE',
+   });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Kunde inte ta bort schema' }));
-        throw new Error(error.error || 'Kunde inte ta bort schema');
-      }
-    },
-    onMutate: async (scheduleId) => {
-      await queryClient.cancelQueries({ queryKey });
-      const previousSchedules = queryClient.getQueryData<ScheduleSlot[]>(queryKey);
+   if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Kunde inte ta bort schema' }));
+    throw new Error(error.error || 'Kunde inte ta bort schema');
+   }
+  },
+  onMutate: async (scheduleId) => {
+   await queryClient.cancelQueries({ queryKey });
+   const previousSchedules = queryClient.getQueryData<ScheduleSlot[]>(queryKey);
 
-      queryClient.setQueryData<ScheduleSlot[]>(queryKey, (oldData) =>
-        (oldData || []).filter((slot) => slot.id !== scheduleId)
-      );
+   queryClient.setQueryData<ScheduleSlot[]>(queryKey, (oldData) =>
+    (oldData || []).filter((slot) => slot.id !== scheduleId)
+   );
 
-      return { previousSchedules };
-    },
-    onSuccess: () => {
-      toast.success('Schema borttaget');
-    },
-    onError: (err, variables, context) => {
-      toast.error(`Kunde inte ta bort: ${extractErrorMessage(err)}`);
-      if (context?.previousSchedules) {
-        queryClient.setQueryData(queryKey, context.previousSchedules);
-      }
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey });
-    },
-  });
+   return { previousSchedules };
+  },
+  onSuccess: () => {
+   toast.success('Schema borttaget');
+  },
+  onError: (err, variables, context) => {
+   toast.error(`Kunde inte ta bort: ${extractErrorMessage(err)}`);
+   if (context?.previousSchedules) {
+    queryClient.setQueryData(queryKey, context.previousSchedules);
+   }
+  },
+  onSettled: () => {
+   queryClient.invalidateQueries({ queryKey });
+  },
+ });
 };
 
 /**
  * Hook för att markera ett pass som slutfört (triggar backend-logik)
  */
 export const useCompleteSchedule = (filters: ScheduleFilters) => {
-  const queryClient = useQueryClient();
-  const { tenantId } = useTenant();
-  const scheduleQueryKey = getScheduleQueryKey(tenantId, filters);
+ const queryClient = useQueryClient();
+ const { tenantId } = useTenant();
+ const scheduleQueryKey = getScheduleQueryKey(tenantId, filters);
 
-  return useMutation<{ schedule: ScheduleSlot; timeEntry: any }, Error, string>({
-    mutationFn: async (scheduleId) => {
-      if (!tenantId) throw new Error('Tenant ID saknas');
+ return useMutation<{ schedule: ScheduleSlot; timeEntry: any }, Error, string>({
+  mutationFn: async (scheduleId) => {
+   if (!tenantId) throw new Error('Tenant ID saknas');
 
-      const response = await fetch(`/api/schedules/${scheduleId}/complete`, {
-        method: 'POST',
-      });
+   const response = await fetch(`/api/schedules/${scheduleId}/complete`, {
+    method: 'POST',
+   });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Kunde inte slutföra schema' }));
-        throw new Error(error.error || 'Kunde inte slutföra schema');
-      }
+   if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Kunde inte slutföra schema' }));
+    throw new Error(error.error || 'Kunde inte slutföra schema');
+   }
 
-      return await response.json();
-    },
-    onSuccess: () => {
-      toast.success('Pass slutfört och tid rapporterad');
-      queryClient.invalidateQueries({ queryKey: scheduleQueryKey });
-      queryClient.invalidateQueries({ queryKey: ['time-entries'] });
-    },
-    onError: (err) => {
-      toast.error(`Kunde inte slutföra: ${extractErrorMessage(err)}`);
-    },
-  });
+   return await response.json();
+  },
+  onSuccess: () => {
+   toast.success('Pass slutfört och tid rapporterad');
+   queryClient.invalidateQueries({ queryKey: scheduleQueryKey });
+   queryClient.invalidateQueries({ queryKey: ['time-entries'] });
+  },
+  onError: (err) => {
+   toast.error(`Kunde inte slutföra: ${extractErrorMessage(err)}`);
+  },
+ });
 };
 
 /**
@@ -234,37 +234,37 @@ export const useCompleteSchedule = (filters: ScheduleFilters) => {
  * Backend endpoint är GET med query params
  */
 export const useScheduleConflicts = () => {
-  const { tenantId } = useTenant();
+ const { tenantId } = useTenant();
 
-  return useMutation<
-    ConflictCheckResponse,
-    Error,
-    { start_time: string; end_time: string; employee_id: string; exclude_id?: string }
-  >({
-    mutationFn: async (checkData) => {
-      if (!tenantId) throw new Error('Tenant ID saknas');
+ return useMutation<
+  ConflictCheckResponse,
+  Error,
+  { start_time: string; end_time: string; employee_id: string; exclude_id?: string }
+ >({
+  mutationFn: async (checkData) => {
+   if (!tenantId) throw new Error('Tenant ID saknas');
 
-      const params = new URLSearchParams({
-        employee_id: checkData.employee_id,
-        start_time: checkData.start_time,
-        end_time: checkData.end_time,
-      });
-      if (checkData.exclude_id) {
-        params.append('exclude_id', checkData.exclude_id);
-      }
+   const params = new URLSearchParams({
+    employee_id: checkData.employee_id,
+    start_time: checkData.start_time,
+    end_time: checkData.end_time,
+   });
+   if (checkData.exclude_id) {
+    params.append('exclude_id', checkData.exclude_id);
+   }
 
-      const response = await fetch(`/api/schedules/conflicts?${params.toString()}`, {
-        method: 'GET',
-      });
+   const response = await fetch(`/api/schedules/conflicts?${params.toString()}`, {
+    method: 'GET',
+   });
 
-      if (!response.ok) {
-        const error = await response.json().catch(() => ({ error: 'Kunde inte kontrollera konflikter' }));
-        throw new Error(error.error || 'Kunde inte kontrollera konflikter');
-      }
+   if (!response.ok) {
+    const error = await response.json().catch(() => ({ error: 'Kunde inte kontrollera konflikter' }));
+    throw new Error(error.error || 'Kunde inte kontrollera konflikter');
+   }
 
-      return await response.json() as ConflictCheckResponse;
-    },
-    // No automatic toasts - called in real-time during drag
-  });
+   return await response.json() as ConflictCheckResponse;
+  },
+  // No automatic toasts - called in real-time during drag
+ });
 };
 

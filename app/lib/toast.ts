@@ -1,20 +1,28 @@
 // app/lib/toast.ts
 'use client'
 
-import { toast as sonnerToast } from 'sonner'
+import { toast as sonnerToast, ExternalToast } from 'sonner'
 
 export const toast = {
-  success: (message: string, options?: { description?: string; duration?: number }) => {
-    sonnerToast.success(message, options)
+  success: (message: string, description?: string) => {
+    sonnerToast.success(message, { description })
   },
-  error: (message: string, options?: { description?: string; duration?: number }) => {
-    sonnerToast.error(message, options)
+  error: (message: string, description?: string) => {
+    sonnerToast.error(message, { description })
   },
-  info: (message: string, options?: { description?: string; duration?: number }) => {
-    sonnerToast.info(message, options)
+  info: (message: string, description?: string) => {
+    sonnerToast.info(message, { description })
   },
-  warning: (message: string, options?: { description?: string; duration?: number }) => {
-    sonnerToast.warning(message, options)
+  warning: (message: string, description?: string) => {
+    sonnerToast.warning(message, { description })
   },
+  promise: <T,>(
+    promise: Promise<T>,
+    { loading, success, error }: { loading: string; success: string; error: string }
+  ) => {
+    return sonnerToast.promise(promise, { loading, success, error })
+  },
+  custom: (message: string, data?: ExternalToast) => {
+    sonnerToast(message, data)
+  }
 }
-

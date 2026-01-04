@@ -7,16 +7,16 @@ export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  try {
-    const { projectType } = await req.json();
-    if (!projectType) {
-      return fail(new Error('projectType saknas'), 'Projekttyp saknas.');
-    }
-
-    const out = templateKMA(String(projectType));
-    return ok({ checklist: out });
-  } catch (e) {
-    return fail(e, 'Kunde inte generera KMA-checklista.');
+ try {
+  const { projectType } = await req.json();
+  if (!projectType) {
+   return fail(new Error('projectType saknas'), 'Projekttyp saknas.');
   }
+
+  const out = templateKMA(String(projectType));
+  return ok({ checklist: out });
+ } catch (e) {
+  return fail(e, 'Kunde inte generera KMA-checklista.');
+ }
 }
 

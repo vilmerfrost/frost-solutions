@@ -1,16 +1,18 @@
 // app/components/ui/card.tsx
-
 import React from 'react';
 
 interface CardProps {
   children: React.ReactNode;
   className?: string;
+  hover?: boolean;
 }
 
-export function Card({ children, className = '' }: CardProps) {
+export function Card({ children, className = '', hover = false }: CardProps) {
   return (
     <div
-      className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 ${className}`}
+      className={`bg-white dark:bg-gray-700 rounded-[8px] shadow-sm border border-gray-200 dark:border-gray-600 ${
+        hover ? 'transition-all duration-200 hover:-translate-y-1 hover:shadow-lg' : ''
+      } ${className}`}
     >
       {children}
     </div>
@@ -25,7 +27,7 @@ export function CardHeader({
   className?: string;
 }) {
   return (
-    <div className={`p-6 border-b border-gray-200 dark:border-gray-700 ${className}`}>
+    <div className={`p-6 border-b border-gray-200 dark:border-gray-600 ${className}`}>
       {children}
     </div>
   );
@@ -39,7 +41,7 @@ export function CardTitle({
   className?: string;
 }) {
   return (
-    <h3 className={`text-xl font-bold text-gray-900 dark:text-white ${className}`}>
+    <h3 className={`text-xl font-semibold text-gray-900 dark:text-white ${className}`}>
       {children}
     </h3>
   );
@@ -77,9 +79,8 @@ export function CardFooter({
   className?: string;
 }) {
   return (
-    <div className={`p-6 pt-0 border-t border-gray-200 dark:border-gray-700 ${className}`}>
+    <div className={`p-6 pt-0 ${className}`}>
       {children}
     </div>
   );
 }
-

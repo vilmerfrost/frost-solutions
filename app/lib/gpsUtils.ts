@@ -8,22 +8,22 @@
  * GPS location interface
  */
 export interface GPSLocation {
-  latitude: number;
-  longitude: number;
-  accuracy?: number;
+ latitude: number;
+ longitude: number;
+ accuracy?: number;
 }
 
 /**
  * Work site interface
  */
 export interface WorkSite {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-  radius_meters: number;
-  auto_checkin_enabled: boolean;
-  auto_checkin_distance: number;
+ id: string;
+ name: string;
+ latitude: number;
+ longitude: number;
+ radius_meters: number;
+ auto_checkin_enabled: boolean;
+ auto_checkin_distance: number;
 }
 
 /**
@@ -35,18 +35,18 @@ export interface WorkSite {
  * @returns Distance in meters
  */
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
-  const R = 6371e3; // Earth's radius in meters
-  const φ1 = (lat1 * Math.PI) / 180;
-  const φ2 = (lat2 * Math.PI) / 180;
-  const Δφ = ((lat2 - lat1) * Math.PI) / 180;
-  const Δλ = ((lon2 - lon1) * Math.PI) / 180;
+ const R = 6371e3; // Earth's radius in meters
+ const φ1 = (lat1 * Math.PI) / 180;
+ const φ2 = (lat2 * Math.PI) / 180;
+ const Δφ = ((lat2 - lat1) * Math.PI) / 180;
+ const Δλ = ((lon2 - lon1) * Math.PI) / 180;
 
-  const a =
-    Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
-    Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
-  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+ const a =
+  Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
+  Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+ const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
-  return R * c; // Distance in meters
+ return R * c; // Distance in meters
 }
 
 /**
@@ -54,30 +54,30 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
  * @returns Promise that resolves to GPSLocation or rejects with error
  */
 export function getCurrentPosition(): Promise<GPSLocation> {
-  return new Promise((resolve, reject) => {
-    if (!navigator.geolocation) {
-      reject(new Error('Geolocation is not supported by your browser'));
-      return;
-    }
+ return new Promise((resolve, reject) => {
+  if (!navigator.geolocation) {
+   reject(new Error('Geolocation is not supported by your browser'));
+   return;
+  }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve({
-          latitude: position.coords.latitude,
-          longitude: position.coords.longitude,
-          accuracy: position.coords.accuracy || undefined,
-        });
-      },
-      (error) => {
-        reject(error);
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 10000,
-        maximumAge: 0,
-      }
-    );
-  });
+  navigator.geolocation.getCurrentPosition(
+   (position) => {
+    resolve({
+     latitude: position.coords.latitude,
+     longitude: position.coords.longitude,
+     accuracy: position.coords.accuracy || undefined,
+    });
+   },
+   (error) => {
+    reject(error);
+   },
+   {
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0,
+   }
+  );
+ });
 }
 
 /**
@@ -87,29 +87,29 @@ export function getCurrentPosition(): Promise<GPSLocation> {
  * @returns Nearest work site with distance, or null if no sites
  */
 export function findNearestWorkSite(
-  location: GPSLocation,
-  workSites: WorkSite[]
+ location: GPSLocation,
+ workSites: WorkSite[]
 ): { site: WorkSite; distance: number } | null {
-  if (!workSites || workSites.length === 0) {
-    return null;
+ if (!workSites || workSites.length === 0) {
+  return null;
+ }
+
+ let nearest: { site: WorkSite; distance: number } | null = null;
+
+ for (const site of workSites) {
+  const distance = calculateDistance(
+   location.latitude,
+   location.longitude,
+   site.latitude,
+   site.longitude
+  );
+
+  if (!nearest || distance < nearest.distance) {
+   nearest = { site, distance };
   }
+ }
 
-  let nearest: { site: WorkSite; distance: number } | null = null;
-
-  for (const site of workSites) {
-    const distance = calculateDistance(
-      location.latitude,
-      location.longitude,
-      site.latitude,
-      site.longitude
-    );
-
-    if (!nearest || distance < nearest.distance) {
-      nearest = { site, distance };
-    }
-  }
-
-  return nearest;
+ return nearest;
 }
 
 /**
@@ -119,18 +119,18 @@ export function findNearestWorkSite(
  * @returns True if within auto-checkin distance
  */
 export function isWithinAutoCheckinDistance(location: GPSLocation, site: WorkSite): boolean {
-  if (!site.auto_checkin_enabled) {
-    return false;
-  }
+ if (!site.auto_checkin_enabled) {
+  return false;
+ }
 
-  const distance = calculateDistance(
-    location.latitude,
-    location.longitude,
-    site.latitude,
-    site.longitude
-  );
+ const distance = calculateDistance(
+  location.latitude,
+  location.longitude,
+  site.latitude,
+  site.longitude
+ );
 
-  return distance <= site.auto_checkin_distance;
+ return distance <= site.auto_checkin_distance;
 }
 
 /**
@@ -140,30 +140,30 @@ export function isWithinAutoCheckinDistance(location: GPSLocation, site: WorkSit
  * @returns Interval ID that can be used with stopGPSTracking
  */
 export function startGPSTracking(
-  callback: (location: GPSLocation) => void,
-  intervalMs: number = 2 * 60 * 1000
+ callback: (location: GPSLocation) => void,
+ intervalMs: number = 2 * 60 * 1000
 ): number {
-  // Get initial position
+ // Get initial position
+ getCurrentPosition()
+  .then((location) => {
+   callback(location);
+  })
+  .catch((error) => {
+   console.error('Error getting initial GPS position:', error);
+  });
+
+ // Set up periodic tracking
+ const intervalId = window.setInterval(() => {
   getCurrentPosition()
-    .then((location) => {
-      callback(location);
-    })
-    .catch((error) => {
-      console.error('Error getting initial GPS position:', error);
-    });
+   .then((location) => {
+    callback(location);
+   })
+   .catch((error) => {
+    console.error('Error getting GPS position during tracking:', error);
+   });
+ }, intervalMs);
 
-  // Set up periodic tracking
-  const intervalId = window.setInterval(() => {
-    getCurrentPosition()
-      .then((location) => {
-        callback(location);
-      })
-      .catch((error) => {
-        console.error('Error getting GPS position during tracking:', error);
-      });
-  }, intervalMs);
-
-  return intervalId;
+ return intervalId;
 }
 
 /**
@@ -171,8 +171,8 @@ export function startGPSTracking(
  * @param intervalId Interval ID returned from startGPSTracking
  */
 export function stopGPSTracking(intervalId: number): void {
-  if (intervalId) {
-    clearInterval(intervalId);
-  }
+ if (intervalId) {
+  clearInterval(intervalId);
+ }
 }
 

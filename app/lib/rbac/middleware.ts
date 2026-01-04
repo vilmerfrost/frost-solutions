@@ -11,30 +11,30 @@ import { requirePermission, Resource, Action } from './permissions';
  * @returns NextResponse
  */
 export function withPermission(
-  resource: Resource,
-  action: Action,
-  handler: (req: NextRequest, context: any) => Promise<NextResponse>
+ resource: Resource,
+ action: Action,
+ handler: (req: NextRequest, context: any) => Promise<NextResponse>
 ) {
-  return async (req: NextRequest, context: any) => {
-    const supabase = createServerSupabase();
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
+ return async (req: NextRequest, context: any) => {
+  const supabase = createServerSupabase();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-    if (authError || !user) {
-      return NextResponse.json(
-        { success: false, error: 'Ej inloggad' },
-        { status: 401 }
-      );
-    }
+  if (authError || !user) {
+   return NextResponse.json(
+    { success: false, error: 'Ej inloggad' },
+    { status: 401 }
+   );
+  }
 
-    try {
-      await requirePermission(user.id, resource, action);
-      return handler(req, context);
-    } catch (error: any) {
-      return NextResponse.json(
-        { success: false, error: error.message || 'Behörighet saknas' },
-        { status: 403 }
-      );
-    }
-  };
+  try {
+   await requirePermission(user.id, resource, action);
+   return handler(req, context);
+  } catch (error: any) {
+   return NextResponse.json(
+    { success: false, error: error.message || 'Behörighet saknas' },
+    { status: 403 }
+   );
+  }
+ };
 }
 

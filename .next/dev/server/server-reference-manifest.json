@@ -1,6 +1,6 @@
 {
   "node": {
-    "40a7f75847fa0b78e991ecc687cc708f35e298a173": {
+    "40f0ca93aaef9c7e500db5d77265d1686897243019": {
       "workers": {
         "app/projects/page": {
           "moduleId": "[project]/.next-internal/server/app/projects/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/projects/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
@@ -14,23 +14,8 @@
       },
       "filename": "app/projects/actions.ts",
       "exportedName": "createProject"
-    },
-    "400505864e32bf48762953576010e32872a85a1307": {
-      "workers": {
-        "app/invoices/[id]/page": {
-          "moduleId": "[project]/.next-internal/server/app/invoices/[id]/page/actions.js { ACTIONS_MODULE0 => \"[project]/app/invoices/[id]/actions.ts [app-rsc] (ecmascript)\" } [app-rsc] (server actions loader, ecmascript)",
-          "async": false,
-          "exportedName": "sendInvoiceEmail",
-          "filename": "app/invoices/[id]/actions.ts"
-        }
-      },
-      "layer": {
-        "app/invoices/[id]/page": "action-browser"
-      },
-      "filename": "app/invoices/[id]/actions.ts",
-      "exportedName": "sendInvoiceEmail"
     }
   },
   "edge": {},
-  "encryptionKey": "e3lBi0M5G5fd1FZY8XPHU31Qn00tBVsNMO6T2PxPIig="
+  "encryptionKey": "xy4bmUCBwIwxB6yd/LPmPaWiVX+xXrNvPeQd8+IdQa0="
 }

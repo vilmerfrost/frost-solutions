@@ -11,12 +11,12 @@ import type { Notification } from '@/types/workflow';
 type ConnectionStatus = 'connected' | 'disconnected' | 'reconnecting';
 
 interface WorkflowState {
-  connection: ConnectionStatus;
-  setConnection: (status: ConnectionStatus) => void;
-  notifications: Notification[];
-  addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
-  markAsRead: (id: string) => void;
-  clearNotifications: () => void;
+ connection: ConnectionStatus;
+ setConnection: (status: ConnectionStatus) => void;
+ notifications: Notification[];
+ addNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
+ markAsRead: (id: string) => void;
+ clearNotifications: () => void;
 }
 
 /**
@@ -24,31 +24,31 @@ interface WorkflowState {
  * såsom anslutningsstatus och notis-listan.
  */
 export const useWorkflowStore = create<WorkflowState>((set) => ({
-  connection: 'disconnected',
-  setConnection: (status) => set({ connection: status }),
+ connection: 'disconnected',
+ setConnection: (status) => set({ connection: status }),
 
-  notifications: [],
+ notifications: [],
 
-  addNotification: (notification) =>
-    set((state) => ({
-      notifications: [
-        {
-          ...notification,
-          id: crypto.randomUUID(),
-          timestamp: new Date().toISOString(),
-          read: false,
-        },
-        ...state.notifications,
-      ],
-    })),
+ addNotification: (notification) =>
+  set((state) => ({
+   notifications: [
+    {
+     ...notification,
+     id: crypto.randomUUID(),
+     timestamp: new Date().toISOString(),
+     read: false,
+    },
+    ...state.notifications,
+   ],
+  })),
 
-  markAsRead: (id) =>
-    set((state) => ({
-      notifications: state.notifications.map((n) =>
-        n.id === id ? { ...n, read: true } : n
-      ),
-    })),
+ markAsRead: (id) =>
+  set((state) => ({
+   notifications: state.notifications.map((n) =>
+    n.id === id ? { ...n, read: true } : n
+   ),
+  })),
 
-  clearNotifications: () => set({ notifications: [] }),
+ clearNotifications: () => set({ notifications: [] }),
 }));
 

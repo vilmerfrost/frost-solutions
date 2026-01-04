@@ -9,29 +9,29 @@
  * Example: 199001011234 -> ********1234
  */
 export function maskPersonnummer(pnr: string): string {
-  if (!pnr || pnr.length < 4) return '****';
-  const cleaned = pnr.replace(/\D/g, '');
-  if (cleaned.length < 4) return '****';
-  return '*'.repeat(Math.max(0, cleaned.length - 4)) + cleaned.slice(-4);
+ if (!pnr || pnr.length < 4) return '****';
+ const cleaned = pnr.replace(/\D/g, '');
+ if (cleaned.length < 4) return '****';
+ return '*'.repeat(Math.max(0, cleaned.length - 4)) + cleaned.slice(-4);
 }
 
 /**
  * Format personnummer for input (YYYYMMDD-XXXX)
  */
 export function formatPersonnummer(pnr: string): string {
-  const cleaned = pnr.replace(/\D/g, '');
-  if (cleaned.length <= 8) return cleaned;
-  if (cleaned.length <= 12) {
-    return `${cleaned.slice(0, 8)}-${cleaned.slice(8)}`;
-  }
-  return cleaned.slice(0, 12);
+ const cleaned = pnr.replace(/\D/g, '');
+ if (cleaned.length <= 8) return cleaned;
+ if (cleaned.length <= 12) {
+  return `${cleaned.slice(0, 8)}-${cleaned.slice(8)}`;
+ }
+ return cleaned.slice(0, 12);
 }
 
 /**
  * Validate Swedish personnummer format
  */
 export function isValidPersonnummerFormat(pnr: string): boolean {
-  const cleaned = pnr.replace(/\D/g, '');
-  return cleaned.length === 10 || cleaned.length === 12;
+ const cleaned = pnr.replace(/\D/g, '');
+ return cleaned.length === 10 || cleaned.length === 12;
 }
 

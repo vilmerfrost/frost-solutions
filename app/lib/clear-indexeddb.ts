@@ -12,25 +12,25 @@ const IDB_KEY = 'frost-react-query-cache'
  * Används när det finns corrupt data
  */
 export async function clearReactQueryCache(): Promise<void> {
-  try {
-    await del(IDB_KEY)
-    console.log('✅ React Query cache cleared from IndexedDB')
-  } catch (error) {
-    console.error('❌ Failed to clear cache:', error)
-    // Try to clear entire IndexedDB if needed
-    if (typeof window !== 'undefined' && 'indexedDB' in window) {
-      try {
-        const deleteReq = indexedDB.deleteDatabase('keyval-store')
-        deleteReq.onsuccess = () => {
-          console.log('✅ Cleared entire keyval-store')
-        }
-        deleteReq.onerror = () => {
-          console.error('❌ Failed to clear keyval-store')
-        }
-      } catch {
-        // Ignore
-      }
+ try {
+  await del(IDB_KEY)
+  console.log('✅ React Query cache cleared from IndexedDB')
+ } catch (error) {
+  console.error('❌ Failed to clear cache:', error)
+  // Try to clear entire IndexedDB if needed
+  if (typeof window !== 'undefined' && 'indexedDB' in window) {
+   try {
+    const deleteReq = indexedDB.deleteDatabase('keyval-store')
+    deleteReq.onsuccess = () => {
+     console.log('✅ Cleared entire keyval-store')
     }
+    deleteReq.onerror = () => {
+     console.error('❌ Failed to clear keyval-store')
+    }
+   } catch {
+    // Ignore
+   }
   }
+ }
 }
 
