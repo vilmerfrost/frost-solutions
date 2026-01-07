@@ -111,7 +111,35 @@ export interface MarkupCalculation {
 export interface OCRResult {
  text: string
  confidence?: number
- fields?: Record<string, string>
+ fields?: Record<string, string | undefined>
+ // Structured data from Gemini AI (when available)
+ structuredData?: {
+  supplierName: string
+  supplierEmail?: string | null
+  supplierPhone?: string | null
+  supplierOrgNumber?: string | null
+  invoiceNumber: string
+  invoiceDate: string
+  dueDate?: string | null
+  subtotal: number
+  vatRate: number
+  vatAmount: number
+  totalAmount: number
+  currency: string
+  lineItems: Array<{
+   description: string
+   quantity: number
+   unit: string
+   unitPrice: number
+   total: number
+   taxRate?: number | null
+  }>
+  projectReference?: string | null
+  projectNumber?: string | null
+  ocrConfidence: number
+  extractedAt: string
+  rawText: string
+ }
 }
 
 export interface SupplierInvoiceHistory {

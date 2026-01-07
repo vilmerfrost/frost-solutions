@@ -1,9 +1,11 @@
 // app/lib/ocr/supplierInvoices.ts
+// Optimized OCR: Gemini 2.0 Flash (primary) > Google Vision (fallback) > Tesseract (free backup)
 import fs from 'node:fs'
 import path from 'node:path'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { createClient } from '@supabase/supabase-js'
 import type { OCRResult } from '@/types/supplierInvoices'
+import { processInvoiceOCR as geminiInvoiceOCR } from '@/lib/ai/frost-bygg-ai-integration'
 
 type TesseractModule = typeof import('tesseract.js')
 
@@ -92,6 +94,40 @@ export async function scanInvoiceWithTesseract(buffer: Buffer): Promise<OCRResul
   }
  } catch (error) {
   console.error('Tesseract OCR error:', error)
+  throw error
+ }
+}
+
+/**
+ * Scan invoice using Gemini 2.0 Flash (RECOMMENDED - best quality + cheaper)
+ */
+export async function scanInvoiceWithGemini(
+ buffer: Buffer,
+ filename?: string
+): Promise<OCRResult> {
+ const geminiKey = process.env.GEMINI_API_KEY
+ if (!geminiKey) {
+  throw new Error('GEMINI_API_KEY saknas')
+ }
+
+ try {
+  const result = await geminiInvoiceOCR(buffer, filename)
+  
+  return {
+   text: result.rawText,
+   confidence: result.ocrConfidence,
+   fields: {
+    invoiceNumber: result.invoiceNumber,
+    invoiceDate: result.invoiceDate,
+    amount: String(result.totalAmount),
+    supplier: result.supplierName,
+    projectReference: result.projectReference || undefined,
+   },
+   // Full structured data from Gemini
+   structuredData: result,
+  }
+ } catch (error) {
+  console.error('[Gemini OCR] Error:', error)
   throw error
  }
 }
@@ -199,45 +235,50 @@ export async function processScannedInvoice(
 ): Promise<{ invoiceId: string; ocrResult: OCRResult }> {
  const admin = createAdminClient() // Use default 'public' schema for RPC calls
 
- // 1) OCR
+ // 1) OCR - Priority: Gemini 2.0 Flash > Google Vision > Tesseract (free)
  const mimeType = options?.mimeType ?? ''
  const isImage = mimeType.startsWith('image/')
+ const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY)
  const hasVisionKey = Boolean(process.env.GOOGLE_VISION_API_KEY)
- const preferVision = options?.useVision || (!isImage && hasVisionKey)
 
  let ocr: OCRResult | null = null
 
- try {
-  if (!preferVision && isImage) {
-   ocr = await scanInvoiceWithTesseract(fileBuffer)
-  } else if (hasVisionKey) {
-   ocr = await scanInvoiceWithGoogleVision(fileBuffer, process.env.GOOGLE_VISION_API_KEY)
-  } else {
-   console.warn('[OCR] Skipping OCR providers for mime type:', mimeType || 'okänt')
+ // Try Gemini 2.0 Flash first (best quality + cheaper)
+ if (hasGeminiKey) {
+  try {
+   console.log('[OCR] Attempting Gemini 2.0 Flash OCR...')
+   ocr = await scanInvoiceWithGemini(fileBuffer, fileName)
+   console.log('[OCR] Gemini OCR successful, confidence:', ocr.confidence)
+  } catch (geminiError) {
+   console.warn('[OCR] Gemini OCR failed:', geminiError)
   }
+ }
 
-  // If confidence too low, try Google Vision as fallback
-  if (
-   ocr &&
-   (ocr.confidence ?? 0) < 75 &&
-   hasVisionKey &&
-   !preferVision
-  ) {
-   try {
-    ocr = await scanInvoiceWithGoogleVision(fileBuffer, process.env.GOOGLE_VISION_API_KEY)
-   } catch (visionError) {
-    console.warn('Google Vision fallback failed, using Tesseract result:', visionError)
-   }
+ // Fallback to Google Vision if Gemini failed or unavailable
+ if (!ocr && hasVisionKey) {
+  try {
+   console.log('[OCR] Attempting Google Vision OCR...')
+   ocr = await scanInvoiceWithGoogleVision(fileBuffer, process.env.GOOGLE_VISION_API_KEY)
+   console.log('[OCR] Google Vision OCR successful, confidence:', ocr.confidence)
+  } catch (visionError) {
+   console.warn('[OCR] Google Vision OCR failed:', visionError)
   }
- } catch (e) {
-  console.error('OCR failed:', e)
-  if (hasVisionKey && !preferVision) {
-   try {
-    ocr = await scanInvoiceWithGoogleVision(fileBuffer, process.env.GOOGLE_VISION_API_KEY)
-   } catch (visionError) {
-    console.warn('Google Vision fallback after failure also failed:', visionError)
-   }
+ }
+
+ // Final fallback to Tesseract (free, works offline)
+ if (!ocr && isImage) {
+  try {
+   console.log('[OCR] Attempting Tesseract OCR (free fallback)...')
+   ocr = await scanInvoiceWithTesseract(fileBuffer)
+   console.log('[OCR] Tesseract OCR successful, confidence:', ocr.confidence)
+  } catch (tesseractError) {
+   console.warn('[OCR] Tesseract OCR failed:', tesseractError)
   }
+ }
+
+ // If all OCR methods failed, log warning
+ if (!ocr) {
+  console.warn('[OCR] All OCR methods failed or unavailable for mime type:', mimeType || 'okänt')
  }
 
  if (!ocr) {

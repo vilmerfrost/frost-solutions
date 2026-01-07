@@ -1,9 +1,9 @@
-// app/api/ai/invoice-ocr/route.ts
-// Gemini-powered invoice OCR scanning with payment
+// app/api/ai/validate-payroll/route.ts
+// AI-powered payroll validation with payment
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantId } from '@/lib/serverTenant';
 import { withPayment } from '@/lib/ai/payment-wrapper';
-import { processInvoiceOCR } from '@/lib/ai/frost-bygg-ai-integration';
+import { validatePayroll } from '@/lib/ai/frost-bygg-ai-integration';
 import { extractErrorMessage } from '@/lib/errorUtils';
 
 export const runtime = 'nodejs';
@@ -19,32 +19,44 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Parse form data with file
-    const formData = await req.formData();
-    const file = formData.get('file') as File | null;
-    
-    if (!file) {
+    const body = await req.json();
+    const { 
+      employeeName, 
+      hours, 
+      hourlyRate, 
+      obKvall,
+      obNatt,
+      obHelg,
+      taxRate 
+    } = body;
+
+    // Validate required fields
+    if (!employeeName || hours === undefined || hourlyRate === undefined) {
       return NextResponse.json(
-        { success: false, error: 'Ingen fil uppladdad' },
+        { success: false, error: 'Saknade fält: employeeName, hours, hourlyRate' },
         { status: 400 }
       );
     }
 
-    // Convert file to buffer
-    const buffer = Buffer.from(await file.arrayBuffer());
-    const filename = file.name;
-
     // Process with payment wrapper
     const result = await withPayment(
       tenantId,
-      'supplier_invoice_ocr',
-      async () => processInvoiceOCR(buffer, filename),
+      'payroll_validation',
+      async () => validatePayroll({
+        employeeName,
+        hours,
+        hourlyRate,
+        obKvall,
+        obNatt,
+        obHelg,
+        taxRate,
+      }),
       {
-        description: `OCR-scanning av faktura: ${filename}`,
+        description: `Lönevalidering för ${employeeName}`,
         metadata: {
-          filename,
-          fileSize: buffer.length,
-          mimeType: file.type,
+          employeeName,
+          hours,
+          hourlyRate,
         },
       }
     );
@@ -67,10 +79,11 @@ export async function POST(req: NextRequest) {
       balanceAfter: result.balanceAfter,
     });
   } catch (error: any) {
-    console.error('[AI Invoice OCR] Error:', error);
+    console.error('[AI Payroll Validation] Error:', error);
     return NextResponse.json(
       { success: false, error: extractErrorMessage(error) },
       { status: 500 }
     );
   }
 }
+

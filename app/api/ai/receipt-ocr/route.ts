@@ -1,9 +1,9 @@
-// app/api/ai/invoice-ocr/route.ts
-// Gemini-powered invoice OCR scanning with payment
+// app/api/ai/receipt-ocr/route.ts
+// Gemini-powered receipt OCR scanning with payment
 import { NextRequest, NextResponse } from 'next/server';
 import { getTenantId } from '@/lib/serverTenant';
 import { withPayment } from '@/lib/ai/payment-wrapper';
-import { processInvoiceOCR } from '@/lib/ai/frost-bygg-ai-integration';
+import { processReceiptOCR } from '@/lib/ai/frost-bygg-ai-integration';
 import { extractErrorMessage } from '@/lib/errorUtils';
 
 export const runtime = 'nodejs';
@@ -37,10 +37,10 @@ export async function POST(req: NextRequest) {
     // Process with payment wrapper
     const result = await withPayment(
       tenantId,
-      'supplier_invoice_ocr',
-      async () => processInvoiceOCR(buffer, filename),
+      'receipt_ocr',
+      async () => processReceiptOCR(buffer, filename),
       {
-        description: `OCR-scanning av faktura: ${filename}`,
+        description: `OCR-scanning av kvitto: ${filename}`,
         metadata: {
           filename,
           fileSize: buffer.length,
@@ -67,10 +67,11 @@ export async function POST(req: NextRequest) {
       balanceAfter: result.balanceAfter,
     });
   } catch (error: any) {
-    console.error('[AI Invoice OCR] Error:', error);
+    console.error('[AI Receipt OCR] Error:', error);
     return NextResponse.json(
       { success: false, error: extractErrorMessage(error) },
       { status: 500 }
     );
   }
 }
+
