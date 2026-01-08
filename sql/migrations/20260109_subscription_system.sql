@@ -105,41 +105,21 @@ CREATE TABLE IF NOT EXISTS public.subscription_events (
 );
 
 -- ============================================================================
--- Insert Default Plans
+-- Insert Default Plan (Single Plan - All Inclusive)
 -- ============================================================================
 INSERT INTO public.subscription_plans (
   name, display_name, description, price_monthly_sek, price_yearly_sek,
   features, limits, is_active, is_popular, sort_order
 ) VALUES
 (
-  'starter',
-  'Starter',
-  'Perfekt för enskilda hantverkare',
-  299,
-  2990,
-  '["5 aktiva projekt", "Tidrapportering", "Fakturering", "Mobilapp", "E-postsupport"]',
-  '{"max_projects": 5, "max_employees": 1, "max_invoices_month": 20, "ai_scans_month": 10}',
-  true, false, 1
-),
-(
-  'professional',
-  'Professional',
-  'För växande byggföretag',
-  699,
-  6990,
-  '["25 aktiva projekt", "Obegränsade anställda", "ROT/RUT-avdrag", "Fortnox-integration", "AI-funktioner", "Prioriterad support"]',
-  '{"max_projects": 25, "max_employees": -1, "max_invoices_month": -1, "ai_scans_month": 50}',
-  true, true, 2
-),
-(
-  'enterprise',
-  'Enterprise',
-  'För stora byggföretag',
-  1499,
-  14990,
-  '["Obegränsade projekt", "Obegränsade anställda", "Alla integrationer", "Obegränsade AI-funktioner", "Dedikerad support", "API-åtkomst", "Anpassade rapporter"]',
+  'allt_i_ett',
+  'Allt-i-Ett',
+  'Komplett lösning för byggföretag - 1 månad gratis vid registrering!',
+  499,
+  4990,
+  '["Obegränsade projekt", "Obegränsade anställda", "Tidrapportering", "Fakturering", "ROT/RUT-avdrag", "Fortnox & Visma integration", "AI-funktioner", "Leverantörsfaktura OCR", "Mobilapp", "Prioriterad support", "API-åtkomst"]',
   '{"max_projects": -1, "max_employees": -1, "max_invoices_month": -1, "ai_scans_month": -1}',
-  true, false, 3
+  true, true, 1
 )
 ON CONFLICT (name) DO UPDATE SET
   display_name = EXCLUDED.display_name,
@@ -152,6 +132,11 @@ ON CONFLICT (name) DO UPDATE SET
   is_popular = EXCLUDED.is_popular,
   sort_order = EXCLUDED.sort_order,
   updated_at = NOW();
+
+-- Deactivate old plans if they exist
+UPDATE public.subscription_plans 
+SET is_active = false, updated_at = NOW() 
+WHERE name IN ('starter', 'professional', 'enterprise');
 
 -- ============================================================================
 -- Indexes
@@ -201,10 +186,10 @@ CREATE POLICY "Service role manages events" ON public.subscription_events
 -- Functions
 -- ============================================================================
 
--- Get or create subscription for tenant (with trial)
+-- Get or create subscription for tenant (with 1 month free trial)
 CREATE OR REPLACE FUNCTION public.get_or_create_subscription(
   p_tenant_id UUID,
-  p_plan_name TEXT DEFAULT 'starter'
+  p_plan_name TEXT DEFAULT 'allt_i_ett'
 )
 RETURNS public.subscriptions
 LANGUAGE plpgsql
@@ -220,13 +205,13 @@ BEGIN
     RETURN v_subscription;
   END IF;
   
-  -- Get plan
+  -- Get the all-in-one plan
   SELECT * INTO v_plan FROM public.subscription_plans WHERE name = p_plan_name AND is_active = true;
   IF NOT FOUND THEN
-    SELECT * INTO v_plan FROM public.subscription_plans WHERE name = 'starter' AND is_active = true;
+    SELECT * INTO v_plan FROM public.subscription_plans WHERE name = 'allt_i_ett' AND is_active = true;
   END IF;
   
-  -- Create trial subscription
+  -- Create subscription with 1 month free trial
   INSERT INTO public.subscriptions (
     tenant_id,
     plan_id,
@@ -242,9 +227,9 @@ BEGIN
     'trialing',
     'monthly',
     NOW(),
-    NOW() + INTERVAL '14 days',
+    NOW() + INTERVAL '1 month',
     NOW(),
-    NOW() + INTERVAL '14 days'
+    NOW() + INTERVAL '1 month'
   )
   RETURNING * INTO v_subscription;
   
@@ -252,7 +237,8 @@ BEGIN
   INSERT INTO public.subscription_events (tenant_id, subscription_id, event_type, data)
   VALUES (p_tenant_id, v_subscription.id, 'trial_started', jsonb_build_object(
     'plan', v_plan.name,
-    'trial_days', 14
+    'trial_days', 30,
+    'message', '1 månad gratis!'
   ));
   
   RETURN v_subscription;
@@ -316,8 +302,8 @@ BEGIN
   WHERE s.tenant_id = p_tenant_id;
   
   IF NOT FOUND THEN
-    -- No subscription, use starter limits
-    SELECT * INTO v_plan FROM public.subscription_plans WHERE name = 'starter';
+    -- No subscription, use allt-i-ett limits (all unlimited)
+    SELECT * INTO v_plan FROM public.subscription_plans WHERE name = 'allt_i_ett';
   END IF;
   
   v_limit := (v_plan.limits ->> p_limit_key)::INTEGER;
