@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/SidebarClient';
-import { useCurrentSubscription, useCustomerPortal, useCreateCheckout } from '@/hooks/useSubscription';
+import { useCurrentSubscription, useCustomerPortal } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, Calendar, CheckCircle, AlertCircle, ExternalLink, Sparkles } from 'lucide-react';
 import { toast } from '@/lib/toast';
@@ -13,7 +13,6 @@ export default function SubscriptionPage() {
   const searchParams = useSearchParams();
   const { data, isLoading, refetch } = useCurrentSubscription();
   const portalMutation = useCustomerPortal();
-  const checkoutMutation = useCreateCheckout();
 
   // Handle checkout success/cancel redirects
   useEffect(() => {
@@ -65,12 +64,9 @@ export default function SubscriptionPage() {
   };
 
   const handleUpgrade = () => {
-    if (plan?.id) {
-      checkoutMutation.mutate({
-        planId: plan.id,
-        billingCycle: 'monthly',
-      });
-    }
+    // Use direct Stripe payment link
+    const paymentLink = 'https://buy.stripe.com/cNi4gr9um8mq6TeesMdQQ00';
+    window.location.href = paymentLink;
   };
 
   return (
@@ -211,7 +207,6 @@ export default function SubscriptionPage() {
                     onClick={handleManageSubscription}
                     disabled={portalMutation.isPending}
                     className="flex-1"
-                    variant="default"
                   >
                     {portalMutation.isPending ? (
                       <>
@@ -229,21 +224,10 @@ export default function SubscriptionPage() {
                 ) : (
                   <Button
                     onClick={handleUpgrade}
-                    disabled={checkoutMutation.isPending}
                     className="flex-1"
-                    variant="default"
                   >
-                    {checkoutMutation.isPending ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Laddar...
-                      </>
-                    ) : (
-                      <>
-                        <CreditCard className="w-4 h-4 mr-2" />
-                        Aktivera betalning
-                      </>
-                    )}
+                    <CreditCard className="w-4 h-4 mr-2" />
+                    Aktivera betalning
                   </Button>
                 )}
               </div>
