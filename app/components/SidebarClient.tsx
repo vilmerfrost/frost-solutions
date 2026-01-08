@@ -38,7 +38,8 @@ import {
  Search as SearchIcon,
  Bug,
  Menu,
- X
+ X,
+ CreditCard
 } from 'lucide-react'
 
 interface NavItem {
@@ -70,6 +71,7 @@ const navItems: NavItem[] = [
  { name: 'FAQ', href: '/faq', icon: <HelpCircle className="w-5 h-5" /> },
  { name: 'Utseende', href: '/settings/utseende', icon: <Palette className="w-5 h-5" /> },
  { name: 'Integrationer', href: '/settings/integrations', icon: <Link className="w-5 h-5" /> },
+ { name: 'Prenumeration', href: '/settings/subscription', icon: <CreditCard className="w-5 h-5" /> },
  { name: 'Följesedlar', href: '/delivery-notes', icon: <FileCheck className="w-5 h-5" /> },
  { name: 'Arbetsflöden', href: '/workflows', icon: <SettingsIcon className="w-5 h-5" /> },
 ]

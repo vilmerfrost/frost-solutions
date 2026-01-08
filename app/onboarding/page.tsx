@@ -377,6 +377,51 @@ export default function OnboardingPage() {
     {/* Step 1: Company */}
     {step === 1 && (
      <div className="space-y-6">
+      {/* Plan Info Card */}
+      <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg p-6 text-white shadow-lg mb-6">
+       <div className="flex items-center gap-2 mb-3">
+        <span className="text-2xl">🎉</span>
+        <h2 className="text-2xl font-bold">1 Månad Gratis!</h2>
+       </div>
+       <p className="text-white/90 mb-4">
+        Få full tillgång till <strong>Allt-i-Ett</strong> planen helt gratis i 30 dagar. 
+        Ingen betalning krävs nu!
+       </p>
+       <div className="bg-white/20 rounded-lg p-4">
+        <div className="text-sm text-white/80 mb-2">Därefter:</div>
+        <div className="text-3xl font-bold mb-3">499 kr/månad</div>
+        <ul className="space-y-2 text-sm">
+         <li className="flex items-center gap-2">
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          Obegränsade projekt & anställda
+         </li>
+         <li className="flex items-center gap-2">
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          ROT/RUT-avdrag
+         </li>
+         <li className="flex items-center gap-2">
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          Fortnox & Visma integration
+         </li>
+         <li className="flex items-center gap-2">
+          <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          AI-funktioner & OCR
+         </li>
+        </ul>
+       </div>
+       <p className="text-xs text-white/70 mt-4">
+        💡 Du kan säga upp när som helst. Ingen bindningstid.
+       </p>
+      </div>
+
       <div>
        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
         Företagsnamn *
