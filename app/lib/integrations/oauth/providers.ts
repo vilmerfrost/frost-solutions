@@ -16,11 +16,9 @@ function getBaseUrl(overrideBaseUrl?: string): string {
   return overrideBaseUrl.replace(/\/$/, '');
  }
  
- const baseUrl = process.env.NEXT_PUBLIC_APP_URL;
- 
- if (!baseUrl) {
-  throw new Error('NEXT_PUBLIC_APP_URL environment variable is required. Set it in .env.local');
- }
+ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
+  process.env.NEXT_PUBLIC_SITE_URL || 
+  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
  
  // Remove trailing slash if present
  return baseUrl.replace(/\/$/, '');
@@ -103,6 +101,7 @@ export function validateProviderConfig(provider: AccountingProvider): void {
  const config = getProviderConfig(provider);
  
  const errors: string[] = [];
+ const warnings: string[] = [];
  
  if (!config.clientId) {
   errors.push(`Missing ${provider.toUpperCase()}_CLIENT_ID`);
@@ -112,8 +111,13 @@ export function validateProviderConfig(provider: AccountingProvider): void {
   errors.push(`Missing ${provider.toUpperCase()}_CLIENT_SECRET`);
  }
  
- if (!process.env.NEXT_PUBLIC_APP_URL) {
-  errors.push('Missing NEXT_PUBLIC_APP_URL');
+ // Only warn about NEXT_PUBLIC_APP_URL since we have fallbacks
+ if (!process.env.NEXT_PUBLIC_APP_URL && !process.env.NEXT_PUBLIC_SITE_URL) {
+  warnings.push('NEXT_PUBLIC_APP_URL not set - using default. For production, set this in .env.local');
+ }
+ 
+ if (warnings.length > 0) {
+  console.warn(`[OAuth] Configuration warnings:\n${warnings.join('\n')}`);
  }
  
  if (errors.length > 0) {

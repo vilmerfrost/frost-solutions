@@ -71,7 +71,7 @@ export function SyncAnalytics({
 
  if (isLoading) {
   return (
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8">
     <div className="animate-pulse space-y-4">
      <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
      {[...Array(3)].map((_, i) => (

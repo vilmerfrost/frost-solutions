@@ -213,7 +213,7 @@ export function InvoiceOCRUpload({
    )}
 
    {result && (
-    <div className="p-6 bg-gray-50 dark:bg-gray-900 dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-blue-200 dark:border-blue-700">
+    <div className="p-6 bg-gray-50 dark:bg-gray-900 dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-blue-200 dark:border-blue-700">
      <div className="flex items-center gap-3 mb-4">
       <svg
        className="h-5 w-5 text-blue-600 dark:text-blue-400"

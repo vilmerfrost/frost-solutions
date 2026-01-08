@@ -425,7 +425,7 @@ export default function PayslipPage() {
        </div>
       </div>
 
-      <div className="bg-primary-500 hover:bg-primary-600 dark:/20 dark:/20 rounded-[8px] p-6 space-y-3 border border-blue-200 dark:border-blue-800">
+      <div className="bg-primary-500 hover:bg-primary-600 dark:bg-blue-900/20 rounded-[8px] p-6 space-y-3 border border-blue-200 dark:border-blue-800">
        <div className="flex justify-between text-lg">
         <span className="font-semibold text-gray-700 dark:text-gray-300">Bruttolön</span>
         <span className="font-bold text-gray-900 dark:text-white">{sek(gross)}</span>

@@ -59,7 +59,7 @@ export function SyncLogsTable({ logs, isLoading }: SyncLogsTableProps) {
 
  if (isLoading) {
   return (
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8">
     <div className="animate-pulse space-y-4">
      {[...Array(5)].map((_, i) => (
       <div key={i} className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
@@ -75,7 +75,7 @@ export function SyncLogsTable({ logs, isLoading }: SyncLogsTableProps) {
    : logs.filter((log) => log.status === filterStatus);
 
  return (
-  <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+  <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
    {/* Header with Filter */}
    <div className="p-6 border-b border-gray-200 dark:border-gray-700">
     <div className="flex items-center justify-between">

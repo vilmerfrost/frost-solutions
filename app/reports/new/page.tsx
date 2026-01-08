@@ -1288,7 +1288,7 @@ export default function NewReportPage() {
        
        <CommentBox value={notes} onChange={setNotes} />
        
-       <div className="p-4 bg-primary-500 hover:bg-primary-600 dark:/20 dark:/20 rounded-[8px] border border-blue-100 dark:border-blue-900/50">
+       <div className="p-4 bg-primary-500 hover:bg-primary-600 dark:bg-blue-900/20 rounded-[8px] border border-blue-100 dark:border-blue-900/50">
         <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
          {multiProjectMode ? 'Totalt timmar (fördelat på projekt)' : 'Totalt rapporterade timmar'}
         </div>

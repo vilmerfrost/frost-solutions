@@ -8,12 +8,12 @@ interface AICardProps {
 
 const variants = {
  default:
-  ' dark:/20 dark:/20 border-primary-200 dark:border-primary-800',
+  'bg-blue-50 dark:bg-primary-900/20 border-primary-200 dark:border-primary-800',
  green:
-  'from-green-50  dark:/20 border-green-200 dark:border-green-800',
+  'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
  yellow:
-  'from-amber-50 to-yellow-50  border-amber-200 dark:border-amber-800',
- red: 'from-red-50 to-rose-50  border-red-200 dark:border-red-800',
+  'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800',
+ red: 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
 };
 
 export function AICard({ children, className = '', variant = 'default' }: AICardProps) {

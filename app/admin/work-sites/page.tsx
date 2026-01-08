@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
+import { MapPin, Edit2, Trash2, Plus, Navigation, Check, X, Info } from 'lucide-react'
 
 interface WorkSite {
  id: string
@@ -292,13 +293,35 @@ export default function WorkSitesPage() {
    
    <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
     <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto w-full">
-     <div className="mb-6 sm:mb-8">
-      <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white mb-2">
-       🗺️ Arbetsplatser
-      </h1>
-      <p className="text-gray-600 dark:text-gray-400">
-       Hantera arbetsplatser för GPS-tracking och auto-checkin
-      </p>
+     {/* Header */}
+     <div className="mb-8">
+      <div className="flex items-center gap-3 mb-3">
+       <div className="p-2 bg-primary-100 dark:bg-primary-900/30 rounded-xl">
+        <MapPin className="w-7 h-7 text-primary-600 dark:text-primary-400" />
+       </div>
+       <div>
+        <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white">
+         Arbetsplatser
+        </h1>
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
+         Hantera arbetsplatser för GPS-tracking och auto-checkin
+        </p>
+       </div>
+      </div>
+     </div>
+
+     {/* Info Box */}
+     <div className="mb-6 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800 p-4">
+      <div className="flex items-start gap-3">
+       <Info className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 flex-shrink-0" />
+       <div className="text-sm text-blue-800 dark:text-blue-200">
+        <p className="font-medium mb-1">Om arbetsplatser</p>
+        <p className="text-blue-700 dark:text-blue-300">
+         Definiera geografiska platser där anställda kan checka in. När en anställd är inom radien räknas de som "på plats".
+         Med auto-checkin kan systemet automatiskt registrera ankomst och avfärd.
+        </p>
+       </div>
+      </div>
      </div>
 
      {/* Add/Edit Form */}
@@ -445,62 +468,106 @@ export default function WorkSitesPage() {
      {!showForm && (
       <button
        onClick={() => setShowForm(true)}
-       className="mb-6 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
+       className="mb-6 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-xl transition-all flex items-center gap-2"
       >
-       + Lägg till arbetsplats
+       <Plus className="w-5 h-5" />
+       Lägg till arbetsplats
       </button>
      )}
 
      {loading ? (
-      <div className="text-center py-10 text-gray-500">Laddar...</div>
+      <div className="flex justify-center py-10">
+       <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary-200 border-t-primary-600"></div>
+      </div>
      ) : workSites.length === 0 ? (
-      <div className="bg-gray-50 dark:bg-gray-800 rounded-[8px] p-8 text-center">
-       <p className="text-gray-600 dark:text-gray-400 mb-4">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-12 text-center">
+       <div className="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
+        <MapPin className="w-8 h-8 text-gray-400" />
+       </div>
+       <p className="text-lg font-medium text-gray-900 dark:text-white mb-2">
         Inga arbetsplatser ännu
+       </p>
+       <p className="text-gray-500 dark:text-gray-400 mb-6">
+        Skapa din första arbetsplats för att komma igång
        </p>
        <button
         onClick={() => setShowForm(true)}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold"
+        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
        >
+        <Plus className="w-5 h-5" />
         Skapa första arbetsplatsen
        </button>
       </div>
      ) : (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
        {workSites.map((site) => (
         <div
          key={site.id}
-         className="bg-gray-50 dark:bg-gray-900 rounded-[8px] shadow-md p-6 border border-gray-100 dark:border-gray-700"
+         className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden hover:shadow-lg transition-shadow"
         >
-         <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">
-          {site.name}
-         </h3>
-         {site.address && (
-          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-           📍 {site.address}
-          </p>
-         )}
-         <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400 mb-4">
-          <p>Koordinater: {Number(site.latitude).toFixed(6)}, {Number(site.longitude).toFixed(6)}</p>
-          <p>Radie: {site.radius_meters}m</p>
-          <p>
-           Auto-checkin: {site.auto_checkin_enabled ? '✅ Ja' : '❌ Nej'}
-           {site.auto_checkin_enabled && ` (${site.auto_checkin_distance}m)`}
-          </p>
+         {/* Card Header */}
+         <div className="bg-gradient-to-r from-primary-500 to-primary-600 px-5 py-4">
+          <h3 className="text-lg font-semibold text-white flex items-center gap-2">
+           <MapPin className="w-5 h-5" />
+           {site.name}
+          </h3>
          </div>
-         <div className="flex gap-2">
-          <button
-           onClick={() => startEdit(site)}
-           className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-          >
-           Redigera
-          </button>
-          <button
-           onClick={() => handleDelete(site.id)}
-           className="flex-1 bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-          >
-           Ta bort
-          </button>
+         
+         {/* Card Body */}
+         <div className="p-5">
+          {site.address && (
+           <div className="flex items-start gap-2 mb-3 pb-3 border-b border-gray-100 dark:border-gray-700">
+            <Navigation className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+             {site.address}
+            </p>
+           </div>
+          )}
+          
+          <div className="space-y-2 text-sm mb-4">
+           <div className="flex justify-between">
+            <span className="text-gray-500 dark:text-gray-400">Koordinater</span>
+            <span className="text-gray-900 dark:text-white font-medium">
+             {Number(site.latitude).toFixed(5)}, {Number(site.longitude).toFixed(5)}
+            </span>
+           </div>
+           <div className="flex justify-between">
+            <span className="text-gray-500 dark:text-gray-400">Radie</span>
+            <span className="text-gray-900 dark:text-white font-medium">{site.radius_meters}m</span>
+           </div>
+           <div className="flex justify-between items-center">
+            <span className="text-gray-500 dark:text-gray-400">Auto-checkin</span>
+            {site.auto_checkin_enabled ? (
+             <span className="inline-flex items-center gap-1 text-green-600 dark:text-green-400 font-medium">
+              <Check className="w-4 h-4" />
+              Ja ({site.auto_checkin_distance}m)
+             </span>
+            ) : (
+             <span className="inline-flex items-center gap-1 text-gray-500 dark:text-gray-400">
+              <X className="w-4 h-4" />
+              Nej
+             </span>
+            )}
+           </div>
+          </div>
+          
+          {/* Card Actions */}
+          <div className="flex gap-2 pt-3 border-t border-gray-100 dark:border-gray-700">
+           <button
+            onClick={() => startEdit(site)}
+            className="flex-1 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+           >
+            <Edit2 className="w-4 h-4" />
+            Redigera
+           </button>
+           <button
+            onClick={() => handleDelete(site.id)}
+            className="flex-1 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 text-red-600 dark:text-red-400 px-4 py-2.5 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+           >
+            <Trash2 className="w-4 h-4" />
+            Ta bort
+           </button>
+          </div>
          </div>
         </div>
        ))}

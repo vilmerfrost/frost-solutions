@@ -13,21 +13,24 @@ import { FileText, Folder, Sparkles } from 'lucide-react'
 export default function NewInvoiceContent() {
  const router = useRouter()
  const searchParams = useSearchParams()
- const projectId = searchParams?.get('projectId')
+ const initialProjectId = searchParams?.get('projectId')
  const rotApplicationId = searchParams?.get('rotApplicationId')
  const preFilledAmount = searchParams?.get('amount')
  const preFilledClientId = searchParams?.get('clientId')
  const { tenantId } = useTenant()
  
- const [activeTab, setActiveTab] = useState<'manual' | 'project' | 'ai'>(projectId ? 'project' : 'manual')
+ const [activeTab, setActiveTab] = useState<'manual' | 'project' | 'ai'>(initialProjectId ? 'project' : 'manual')
+ const [projectId, setProjectId] = useState<string | null>(initialProjectId)
  const [amount, setAmount] = useState(preFilledAmount ? parseFloat(preFilledAmount) : 0)
  const [desc, setDesc] = useState('')
  const [customer_id, setCustomerId] = useState<string>(preFilledClientId || '')
  const [customer_name, setCustomerName] = useState('')
  const [customer_orgnr, setCustomerOrgnr] = useState('')
  const [clients, setClients] = useState<Array<{ id: string; name: string; org_number?: string }>>([])
+ const [projects, setProjects] = useState<Array<{ id: string; name: string; client_id?: string; customer_name?: string }>>([])
  const [loading, setLoading] = useState(false)
- const [loadingProject, setLoadingProject] = useState(!!projectId || !!rotApplicationId)
+ const [loadingProject, setLoadingProject] = useState(!!initialProjectId || !!rotApplicationId)
+ const [loadingProjects, setLoadingProjects] = useState(false)
  const [rotApplication, setRotApplication] = useState<any>(null)
 
  // Fetch clients on mount
@@ -75,6 +78,28 @@ export default function NewInvoiceContent() {
   }
 
   fetchClients()
+ }, [tenantId])
+
+ // Fetch projects on mount
+ useEffect(() => {
+  async function fetchProjects() {
+   if (!tenantId) return
+
+   setLoadingProjects(true)
+   try {
+    const response = await fetch(`/api/projects/list?tenantId=${tenantId}`)
+    if (response.ok) {
+     const data = await response.json()
+     setProjects(data.projects || [])
+    }
+   } catch (err) {
+    console.error('Error fetching projects:', err)
+   } finally {
+    setLoadingProjects(false)
+   }
+  }
+
+  fetchProjects()
  }, [tenantId])
 
  useEffect(() => {
@@ -394,12 +419,117 @@ export default function NewInvoiceContent() {
         <p className="text-sm text-gray-600 dark:text-gray-400">
          Välj ett projekt för att automatiskt fylla i fakturainformation baserat på ofakturerade timmar.
         </p>
-        {/* Add project selection here in future */}
-        <div className="p-4 bg-yellow-50 dark:bg-yellow-500/10 rounded-lg border border-yellow-200 dark:border-yellow-700">
-         <p className="text-sm text-yellow-800 dark:text-yellow-300">
-          Projektbaserad fakturering kommer snart. Använd 'Manuell' för att skapa faktura nu.
-         </p>
+        
+        <div>
+         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Välj projekt *
+         </label>
+         <select
+          value={projectId || ''}
+          onChange={async (e) => {
+           const selectedProjectId = e.target.value
+           setProjectId(selectedProjectId || null)
+           
+           if (selectedProjectId) {
+            setLoadingProject(true)
+            try {
+             // Fetch project details
+             const projectResponse = await fetch(`/api/projects/${selectedProjectId}`)
+             if (projectResponse.ok) {
+              const { project } = await projectResponse.json()
+              
+              // Set customer info from project
+              if (project.clients?.id) {
+               setCustomerId(project.clients.id)
+               setCustomerName(project.clients.name)
+               setCustomerOrgnr(project.clients.org_number || '')
+              } else if (project.client_id) {
+               setCustomerId(project.client_id)
+               const client = clients.find(c => c.id === project.client_id)
+               if (client) {
+                setCustomerName(client.name)
+                setCustomerOrgnr(client.org_number || '')
+               }
+              } else if (project.customer_name) {
+               setCustomerName(project.customer_name)
+              }
+              
+              // Fetch unbilled hours
+              const hoursResponse = await fetch(`/api/projects/${selectedProjectId}/unbilled-hours`)
+              if (hoursResponse.ok) {
+               const result = await hoursResponse.json()
+               if (result.success && result.data) {
+                const { unbilledHours, totalAmount } = result.data
+                const rate = Number(project.base_rate_sek) || 360
+                setAmount(totalAmount || (unbilledHours * rate))
+                setDesc(`${unbilledHours.toFixed(1)} timmar @ ${rate} kr/tim = ${(totalAmount || unbilledHours * rate).toLocaleString('sv-SE')} kr`)
+               } else {
+                setAmount(0)
+                setDesc('Inga ofakturerade timmar för detta projekt')
+               }
+              }
+             }
+            } catch (err) {
+             console.error('Error loading project:', err)
+             toast.error('Kunde inte ladda projektdata')
+            } finally {
+             setLoadingProject(false)
+            }
+           } else {
+            // Reset form when no project selected
+            setCustomerId('')
+            setCustomerName('')
+            setCustomerOrgnr('')
+            setAmount(0)
+            setDesc('')
+           }
+          }}
+          className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+         >
+          <option value="">Välj projekt...</option>
+          {projects.map((project) => (
+           <option key={project.id} value={project.id}>
+            {project.name} {project.customer_name ? `(${project.customer_name})` : ''}
+           </option>
+          ))}
+         </select>
+         {loadingProjects && (
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Laddar projekt...</p>
+         )}
+         {!loadingProjects && projects.length === 0 && (
+          <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
+           Inga projekt hittades. <a href="/projects/new" className="text-primary-500 dark:text-primary-400 hover:underline">Skapa projekt</a>
+          </p>
+         )}
         </div>
+        
+        {projectId && amount > 0 && (
+         <div className="p-4 bg-success-50 dark:bg-success-900/20 rounded-lg border border-success-200 dark:border-success-800">
+          <p className="text-sm font-semibold text-success-800 dark:text-success-300 mb-2">
+           ✓ Projektdata laddad
+          </p>
+          <p className="text-sm text-success-700 dark:text-success-400">
+           Kund: {customer_name || 'Ej angiven'}
+           <br />
+           Belopp: {amount.toLocaleString('sv-SE', { style: 'currency', currency: 'SEK' })}
+          </p>
+          <button
+           type="button"
+           onClick={() => setActiveTab('manual')}
+           className="mt-3 text-sm font-medium text-success-600 dark:text-success-400 hover:underline"
+          >
+           Gå vidare till manuell redigering →
+          </button>
+         </div>
+        )}
+        
+        {projectId && amount === 0 && !loadingProject && (
+         <div className="p-4 bg-yellow-50 dark:bg-yellow-500/10 rounded-lg border border-yellow-200 dark:border-yellow-700">
+          <p className="text-sm text-yellow-800 dark:text-yellow-300">
+           Det finns inga ofakturerade timmar för detta projekt. Du kan fortfarande skapa en manuell faktura.
+          </p>
+         </div>
+        )}
        </div>
       )}
 

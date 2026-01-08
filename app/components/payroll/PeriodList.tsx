@@ -43,7 +43,7 @@ export function PeriodList({ periods, isLoading }: PeriodListProps) {
 
  if (isLoading) {
   return (
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8 text-center">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8 text-center">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
     <p className="mt-4 text-gray-600 dark:text-gray-400">Laddar löneperioder...</p>
    </div>
@@ -52,7 +52,7 @@ export function PeriodList({ periods, isLoading }: PeriodListProps) {
 
  if (periods.length === 0) {
   return (
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-12 text-center">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-12 text-center">
     <p className="text-gray-600 dark:text-gray-400 mb-4">
      Inga löneperioder ännu. Skapa din första period.
     </p>
@@ -64,7 +64,7 @@ export function PeriodList({ periods, isLoading }: PeriodListProps) {
  }
 
  return (
-  <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+  <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
    <Table>
     <TableHeader>
      <TableRow>

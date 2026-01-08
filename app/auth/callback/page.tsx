@@ -13,28 +13,58 @@ function CallbackContent() {
 
   async function handleCallback() {
    try {
-    // Step 1: Check for errors in query parameters first (Supabase sometimes returns errors in query params)
+    // Step 1: Check for errors in query parameters first (Supabase/OAuth returns errors in query params)
     const error = searchParams?.get('error');
     const errorCode = searchParams?.get('error_code');
     const errorDescription = searchParams?.get('error_description');
     
-    if (error || errorCode) {
-     console.error('OAuth error in query params:', { error, errorCode, errorDescription });
+    // Also check for Microsoft-specific error format
+    const msError = searchParams?.get('error_reason');
+    const msErrorDesc = searchParams?.get('error_description'); // Microsoft uses same param
+    
+    // Log all query params for debugging
+    console.log('OAuth callback params:', {
+     error: error || '(none)',
+     errorCode: errorCode || '(none)', 
+     errorDescription: errorDescription || '(none)',
+     msError: msError || '(none)',
+     allParams: searchParams?.toString() || '(none)',
+    });
+    
+    if (error || errorCode || msError) {
+     const actualError = error || msError || 'unknown';
+     const actualDescription = errorDescription || msErrorDesc || '';
+     
+     console.error('OAuth error detected:', { 
+      error: actualError, 
+      errorCode: errorCode || '(none)', 
+      errorDescription: actualDescription,
+     });
      
      // Build error message for redirect
      let errorMessage = 'auth_failed';
      if (errorCode === 'flow_state_not_found') {
       errorMessage = 'session_expired';
-     } else if (error === 'server_error') {
+     } else if (actualError === 'server_error') {
       errorMessage = 'server_error';
-     } else if (error) {
-      errorMessage = error;
+     } else if (actualError === 'access_denied') {
+      errorMessage = 'access_denied';
+     } else if (actualError === 'invalid_request') {
+      errorMessage = 'invalid_request';
+     } else if (actualError !== 'unknown') {
+      errorMessage = actualError;
      }
      
      if (mounted) {
-      router.replace(`/login?error=${errorMessage}${errorDescription ? `&message=${encodeURIComponent(errorDescription)}` : ''}`);
+      router.replace(`/login?error=${errorMessage}${actualDescription ? `&message=${encodeURIComponent(actualDescription)}` : ''}`);
      }
      return;
+    }
+    
+    // Step 1.1: Check if we have a valid code (authorization code flow)
+    const code = searchParams?.get('code');
+    if (!code && !window.location.hash) {
+     console.log('No code or hash present, checking for session...');
     }
     
     // Step 1.5: Check if there's a hash in the URL (OAuth redirect)

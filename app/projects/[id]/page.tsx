@@ -89,52 +89,27 @@ export default function ProjectDetailPage() {
 
     console.log('🔍 Loading project:', { projectId, tenantId })
     
-    // Fetch project - try multiple approaches
-    // First: try with full client join
-    let { data: projectData, error: projectError } = await supabase
-     .from('projects')
-     .select('*, clients(id, name, org_number), client_id')
-     .eq('id', projectId)
-     .eq('tenant_id', tenantId)
-     .maybeSingle()
+    // Fetch project via API route (avoids REST-GUARD issues)
+    let projectData = null
+    let projectError = null
     
-    // If error about org_number, retry without it
-    if (projectError && projectError.message?.includes('org_number')) {
-     console.log('⚠️ Retrying without org_number')
-     const retry = await supabase
-      .from('projects')
-      .select('*, clients(id, name), client_id')
-      .eq('id', projectId)
-      .eq('tenant_id', tenantId)
-      .maybeSingle()
-     
-     if (!retry.error && retry.data) {
-      projectData = retry.data
-      projectError = null
-     } else {
-      projectError = retry.error
-     }
-    }
-    
-    // If still error and it's a "not found" error, try without tenant filter (might be RLS issue)
-    if (projectError && (projectError.code === 'PGRST116' || projectError.message?.includes('No rows'))) {
-     console.log('⚠️ Project not found with tenant filter, trying without tenant check')
-     const retryNoTenant = await supabase
-      .from('projects')
-      .select('*, clients(id, name), client_id')
-      .eq('id', projectId)
-      .maybeSingle()
-     
-     if (!retryNoTenant.error && retryNoTenant.data) {
-      const retryData = retryNoTenant.data as any
-      // Verify tenant matches manually
-      if (retryData.tenant_id === tenantId) {
-       projectData = retryNoTenant.data
-       projectError = null
-      } else {
-       projectError = { message: 'Projektet tillhör en annan tenant' } as any
+    try {
+     const projectResponse = await fetch(`/api/projects/${projectId}?_t=${Date.now()}`, {
+      cache: 'no-store',
+      headers: {
+       'Cache-Control': 'no-cache',
       }
+     })
+     
+     if (projectResponse.ok) {
+      const result = await projectResponse.json()
+      projectData = result.project
+     } else {
+      const errorData = await projectResponse.json().catch(() => ({}))
+      projectError = { message: errorData.error || 'Could not fetch project' }
      }
+    } catch (fetchErr: any) {
+     projectError = { message: fetchErr.message || 'Network error' }
     }
 
     if (cancelled) return
@@ -153,16 +128,16 @@ export default function ProjectDetailPage() {
     const project = projectData as any
     console.log('✅ Project loaded:', project.name)
     console.log('📋 Project client info:', {
-     client_id: (projectData as any).client_id,
-     clients: (projectData as any).clients,
-     customer_name: (projectData as any).customer_name
+     client_id: project.client_id,
+     clients: project.clients,
+     customer_name: project.customer_name
     })
 
     // Ensure we preserve client_id and clients relation
     setProject({
      ...(projectData as ProjectRecord),
-     client_id: (projectData as any).client_id || null,
-     clients: (projectData as any).clients || null,
+     client_id: project.client_id || null,
+     clients: project.clients || null,
     } as ProjectRecord)
 
      // Hämta ofakturerade timmar och time entries för AI summary via API route
@@ -643,7 +618,7 @@ export default function ProjectDetailPage() {
      {/* AI-stöd Export-knapp */}
      {project && (
       <div className="mb-6 sm:mb-8">
-       <div className="bg-primary-500 hover:bg-primary-600 dark:/20 dark:/20 dark:/20 border border-blue-200 dark:border-blue-800 rounded-[8px] p-4 sm:p-6">
+       <div className="bg-primary-500 hover:bg-primary-600 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-[8px] p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
          <div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">

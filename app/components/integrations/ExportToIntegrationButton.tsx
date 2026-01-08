@@ -158,7 +158,7 @@ export function ExportToIntegrationButton({
    return (
     <button
      onClick={() => router.push('/settings/integrations')}
-     className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-primary-500 hover:bg-primary-600 dark:/20 dark:/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover: hover: dark:hover:/30 dark:hover:/30 transition-all ${className}`}
+     className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all ${className}`}
     >
      <Sparkles className="w-4 h-4" />
      <span>Anslut integration för export</span>
@@ -209,7 +209,7 @@ export function ExportToIntegrationButton({
    <button
     onClick={handleExport}
     disabled={isExporting}
-    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-primary-500 hover:bg-primary-600 dark:/20 dark:/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover: hover: dark:hover:/30 dark:hover:/30 transition-all disabled:opacity-70 ${className}`}
+    className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/30 transition-all disabled:opacity-70 ${className}`}
    >
     {isExporting ? (
      <>

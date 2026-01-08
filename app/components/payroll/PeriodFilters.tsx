@@ -30,7 +30,7 @@ export function PeriodFilters({ filters, onFiltersChange }: PeriodFiltersProps) 
  const hasFilters = filters.status || filters.start || filters.end;
 
  return (
-  <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 mb-6">
+  <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 mb-6">
    <div className="flex items-center gap-3 mb-4">
     <Filter size={20} className="text-primary-500 dark:text-primary-400" />
     <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

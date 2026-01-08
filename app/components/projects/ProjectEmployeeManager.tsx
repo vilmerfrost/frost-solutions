@@ -143,7 +143,7 @@ export function ProjectEmployeeManager({ projectId }: ProjectEmployeeManagerProp
 
  if (loading) {
   return (
-   <div className="bg-gray-50 dark:bg-gray-900 dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-primary-200 dark:border-primary-700 p-6">
+   <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-primary-200 dark:border-primary-700 p-6">
     <div className="flex items-center justify-center py-8">
      <Loader className="w-6 h-6 animate-spin text-primary-500 dark:text-primary-400" />
     </div>
@@ -152,7 +152,7 @@ export function ProjectEmployeeManager({ projectId }: ProjectEmployeeManagerProp
  }
 
  return (
-  <div className="bg-gray-50 dark:bg-gray-900 dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-primary-200 dark:border-primary-700 p-6">
+  <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-primary-200 dark:border-primary-700 p-6">
    <div className="flex items-center gap-3 mb-6">
     <div className="p-2 bg-primary-500 hover:bg-primary-600 rounded-lg">
      <Users className="w-5 h-5 text-white" />

@@ -105,7 +105,7 @@ export function QuoteForm({ quote, onSubmit, isLoading }: QuoteFormProps) {
    </Button>
 
    {/* Basic Info */}
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 backdrop-blur-sm">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 backdrop-blur-sm">
     <h2 className="text-xl font-semibold mb-6 text-gray-900 dark:text-white">
      Grundläggande Information
     </h2>

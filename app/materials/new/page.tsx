@@ -76,7 +76,7 @@ export default function NewMaterialPage() {
 
      {/* Form */}
      <form onSubmit={handleSubmit} className="max-w-2xl">
-      <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 backdrop-blur-sm">
+      <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 backdrop-blur-sm">
        <div className="space-y-6">
         <Input
          label="SKU (valfritt)"

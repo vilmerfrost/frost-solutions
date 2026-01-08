@@ -91,7 +91,7 @@ export function InvoiceHistoryTimeline({ history }: InvoiceHistoryTimelineProps)
        </div>
 
        {/* Content */}
-       <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-md border border-gray-200 dark:border-gray-700 p-4">
+       <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-md border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-start justify-between mb-2">
          <h4 className="font-semibold text-gray-900 dark:text-white">{label}</h4>
          <span className="text-xs text-gray-500 dark:text-gray-400">

@@ -681,11 +681,13 @@ export default function ProjectsContent() {
            </div>
            <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2 overflow-hidden">
             <div
-             className={`h-full ${
-              (Number(projectHours.get(p.id) || 0) / Number(p.budgeted_hours)) >= 0.9 ? 'from-red-500 to-red-600' :
-              (Number(projectHours.get(p.id) || 0) / Number(p.budgeted_hours)) >= 0.7 ? 'from-orange-500 to-orange-600' :
-              ' '
-             } rounded-full transition-all duration-500`}
+             className={`h-full rounded-full transition-all duration-500 ${
+              (Number(projectHours.get(p.id) || 0) / Number(p.budgeted_hours)) >= 0.9 
+                ? 'bg-gradient-to-r from-red-500 to-red-600' 
+                : (Number(projectHours.get(p.id) || 0) / Number(p.budgeted_hours)) >= 0.7 
+                  ? 'bg-gradient-to-r from-orange-500 to-orange-600' 
+                  : 'bg-gradient-to-r from-primary-500 to-primary-600'
+             }`}
              style={{ 
               width: `${Math.min((Number(projectHours.get(p.id) || 0) / Number(p.budgeted_hours)) * 100, 100)}%` 
              }}

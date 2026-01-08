@@ -88,7 +88,7 @@ export default function NewSupplierInvoicePage() {
      </div>
 
      {/* Tabs */}
-     <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 mb-6">
+     <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 mb-6">
       <div className="flex gap-4 mb-6 flex-wrap">
        <button
         onClick={() => setActiveTab('manual')}
@@ -132,7 +132,7 @@ export default function NewSupplierInvoicePage() {
        <InvoiceUpload onComplete={handleUploadComplete} />
       ) : (
        <div className="space-y-4">
-        <div className="bg-primary-500 hover:bg-primary-600 dark:/20 dark:/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-4">
+        <div className="bg-primary-500 hover:bg-primary-600 dark:bg-blue-900/20 border border-primary-200 dark:border-primary-800 rounded-lg p-4 mb-4">
          <div className="flex items-center gap-2 mb-2">
           <Sparkles size={20} className="text-primary-500 dark:text-primary-400" />
           <h3 className="font-semibold text-purple-900 dark:text-purple-100">

@@ -113,7 +113,7 @@ export function ExportButton({ periodId, disabled }: ExportButtonProps) {
 
    {/* Visa varningar efter lyckad export */}
    {showWarnings && warnings.length > 0 && (
-    <div className="bg-gray-50 dark:bg-gray-900 dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-yellow-200 dark:border-yellow-700 p-6">
+    <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-yellow-200 dark:border-yellow-700 p-6">
      <div className="flex items-center gap-3 mb-4">
       <AlertTriangleIcon size={20} className="text-yellow-600 dark:text-yellow-400" />
       <h3 className="font-semibold text-gray-900 dark:text-white">

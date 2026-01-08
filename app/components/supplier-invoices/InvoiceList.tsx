@@ -52,7 +52,7 @@ export function InvoiceList({ filters, onPageChange }: InvoiceListProps) {
 
  if (isLoading) {
   return (
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8 text-center">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8 text-center">
     <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto"></div>
     <p className="mt-4 text-gray-600 dark:text-gray-400">Laddar fakturor...</p>
    </div>
@@ -61,7 +61,7 @@ export function InvoiceList({ filters, onPageChange }: InvoiceListProps) {
 
  if (error) {
   return (
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-8">
     <p className="text-red-600">Ett fel uppstod: {error.message}</p>
    </div>
   )
@@ -72,7 +72,7 @@ export function InvoiceList({ filters, onPageChange }: InvoiceListProps) {
 
  if (invoices.length === 0) {
   return (
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-12 text-center">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-12 text-center">
     <p className="text-gray-600 dark:text-gray-400 mb-4">Inga fakturor hittades.</p>
     <Link href="/supplier-invoices/new">
      <Button>Skapa din första faktura</Button>
@@ -82,7 +82,7 @@ export function InvoiceList({ filters, onPageChange }: InvoiceListProps) {
  }
 
  return (
-  <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+  <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
    <Table>
     <TableHeader>
      <TableRow>

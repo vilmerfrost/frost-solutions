@@ -74,7 +74,7 @@ export function IntegrationCard({
  const StatusIcon = integration ? statusIcons[integration.status] : null;
 
  return (
-  <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+  <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
    {/* Header */}
    <div className="flex items-start justify-between mb-4">
     <div className="flex items-center gap-3">

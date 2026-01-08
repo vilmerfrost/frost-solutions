@@ -23,7 +23,7 @@ export function SyncStatusCard({ stats, isLoading }: SyncStatusCardProps) {
 
  if (isLoading) {
   return (
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
     <div className="animate-pulse space-y-4">
      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/3"></div>
      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
@@ -41,7 +41,7 @@ export function SyncStatusCard({ stats, isLoading }: SyncStatusCardProps) {
  }
 
  return (
-  <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+  <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
    {/* Header */}
    <div className="flex items-center gap-3 mb-6">
     <div className="p-2 bg-primary-500 hover:bg-primary-600 rounded-lg">
@@ -60,7 +60,7 @@ export function SyncStatusCard({ stats, isLoading }: SyncStatusCardProps) {
    {/* Stats Grid */}
    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
     {/* Total */}
-    <div className="bg-gray-50 dark:bg-gray-900 dark:/20 dark:/20 rounded-lg p-4 border-2 border-blue-200 dark:border-blue-800">
+    <div className="bg-gray-50 dark:bg-gray-900 dark:bg-blue-900/20 rounded-lg p-4 border-2 border-blue-200 dark:border-blue-800">
      <div className="flex items-center justify-between mb-2">
       <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
        Totalt
@@ -73,7 +73,7 @@ export function SyncStatusCard({ stats, isLoading }: SyncStatusCardProps) {
     </div>
 
     {/* Success */}
-    <div className="bg-gray-50 dark:bg-gray-900 dark:/20 rounded-lg p-4 border-2 border-green-200 dark:border-green-800">
+    <div className="bg-gray-50 dark:bg-gray-900 dark:bg-green-900/20 rounded-lg p-4 border-2 border-green-200 dark:border-green-800">
      <div className="flex items-center justify-between mb-2">
       <span className="text-sm font-medium text-green-700 dark:text-green-300">
        Lyckade

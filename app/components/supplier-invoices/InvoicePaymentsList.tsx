@@ -67,7 +67,7 @@ export function InvoicePaymentsList({
    </Table>
 
    {/* Payment Summary */}
-   <div className="bg-gray-50 dark:bg-gray-900 dark:/20 dark:/20 rounded-[8px] p-6 border-2 border-emerald-200 dark:border-emerald-800">
+   <div className="bg-gray-50 dark:bg-gray-900 dark:bg-emerald-900/20 rounded-[8px] p-6 border-2 border-emerald-200 dark:border-emerald-800">
     <div className="flex items-center gap-2 mb-4">
      <DollarSign size={20} className="text-emerald-600 dark:text-emerald-400" />
      <h3 className="font-semibold text-gray-900 dark:text-white">Betalningsöversikt</h3>

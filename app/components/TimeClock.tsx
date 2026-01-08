@@ -1284,7 +1284,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
     </div>
    ) : (
     <div className="space-y-4">
-     <div className="bg-primary-500 hover:bg-primary-600 dark:/20 dark:/20 rounded-[8px] p-6 border border-blue-200 dark:border-blue-800">
+     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-[8px] p-6 border border-blue-200 dark:border-blue-800">
       <div className="text-center">
        <div className="text-3xl font-semibold text-gray-900 dark:text-white mb-2">
         {formatElapsedTime(elapsedTime)}

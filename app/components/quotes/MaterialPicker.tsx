@@ -17,7 +17,7 @@ export function MaterialPicker({ onSelect, onClose }: MaterialPickerProps) {
  const { data: materials, isLoading } = useMaterials(search)
 
  return (
-  <div className="space-y-4 bg-gray-50 dark:bg-gray-900 dark:/20 dark: dark:/20 rounded-[8px] border-2 border-blue-200 dark:border-blue-700 p-6 shadow-md">
+  <div className="space-y-4 bg-gray-50 dark:bg-gray-900 dark:bg-blue-900/20 rounded-[8px] border-2 border-blue-200 dark:border-blue-700 p-6 shadow-md">
    <div className="flex items-center justify-between mb-4">
     <div className="flex items-center gap-3">
      <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">

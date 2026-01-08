@@ -21,9 +21,20 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
  return (
   <div className="space-y-6">
    {/* Header */}
-   <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 dark:/30 dark: dark:/30 rounded-[8px] shadow-xl border-2 border-emerald-300 dark:border-emerald-700 p-6 backdrop-blur-sm">
+   <div className="flex items-center justify-between bg-gray-50 dark:bg-gray-900 dark:bg-gray-800/30 rounded-[8px] shadow-xl border-2 border-emerald-300 dark:border-emerald-700 p-6 backdrop-blur-sm">
     <div className="flex items-center gap-4">
-     <Button variant="ghost" onClick={() => router.back()} className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+     <Button 
+      variant="ghost" 
+      onClick={() => {
+        // Try to go back, fallback to quotes list
+        if (window.history.length > 1) {
+          router.back()
+        } else {
+          router.push('/quotes')
+        }
+      }} 
+      className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+    >
       <ArrowLeft size={16} className="mr-2" />
       Tillbaka
      </Button>
@@ -49,7 +60,7 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
    <QuoteActions quote={quote} />
 
    {/* Basic Info */}
-   <div className="bg-gray-50 dark:bg-gray-900 dark:/30 dark: dark:/30 rounded-[8px] shadow-xl border-2 border-blue-200 dark:border-blue-700 p-6 backdrop-blur-sm">
+   <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-800/30 rounded-[8px] shadow-xl border-2 border-blue-200 dark:border-blue-700 p-6 backdrop-blur-sm">
     <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
      Information
     </h2>
@@ -96,7 +107,7 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
    <QuoteItemsList quoteId={quote.id} />
 
    {/* Totals */}
-   <div className="bg-gray-50 dark:bg-gray-900 dark:/30 dark: dark:/30 rounded-[8px] shadow-xl border-2 border-primary-200 dark:border-primary-700 p-6 backdrop-blur-sm">
+   <div className="bg-gray-50 dark:bg-gray-900 dark:bg-gray-800/30 rounded-[8px] shadow-xl border-2 border-primary-200 dark:border-primary-700 p-6 backdrop-blur-sm">
     <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
      Summering
     </h2>

@@ -291,7 +291,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
 
      {/* Budget Preview */}
      {budgetHours > 0 && (
-      <div className="bg-primary-500 hover:bg-primary-600 dark:/20 dark:/20 dark:/20 border-2 border-primary-200 dark:border-primary-700 rounded-[8px] p-4">
+      <div className="bg-primary-500 hover:bg-primary-600 dark:bg-primary-900/20 border-2 border-primary-200 dark:border-primary-700 rounded-[8px] p-4">
        <div className="flex items-center gap-2 mb-2">
         <Calendar className="w-5 h-5 text-primary-500 dark:text-primary-400" />
         <span className="font-semibold text-gray-900 dark:text-white">Budgetberäkning</span>

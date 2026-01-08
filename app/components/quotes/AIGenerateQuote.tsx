@@ -94,7 +94,7 @@ export function AIGenerateQuote({ onGenerate, isLoading = false, onClose }: AIGe
  }
 
  return (
-  <div className="bg-gray-50 dark:bg-gray-900 dark:/20 dark:/20 dark:/20 rounded-[8px] border-2 border-primary-200 dark:border-primary-700 p-6 shadow-xl mb-6">
+  <div className="bg-gray-50 dark:bg-gray-900 dark:bg-primary-900/20 rounded-[8px] border-2 border-primary-200 dark:border-primary-700 p-6 shadow-xl mb-6">
    <div className="flex items-center justify-between mb-6">
     <div className="flex items-center gap-3">
      <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">

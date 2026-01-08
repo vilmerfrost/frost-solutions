@@ -54,7 +54,7 @@ export default function KMAPage() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-       <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+       <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between">
          <div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -70,7 +70,7 @@ export default function KMAPage() {
         </div>
        </div>
 
-       <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+       <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between">
          <div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -86,7 +86,7 @@ export default function KMAPage() {
         </div>
        </div>
 
-       <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+       <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
         <div className="flex items-center justify-between">
          <div>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">
@@ -105,7 +105,7 @@ export default function KMAPage() {
      </div>
 
      {/* Search */}
-     <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 mb-6 backdrop-blur-sm">
+     <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6 mb-6 backdrop-blur-sm">
       <Input
        label="Sök offerter"
        type="search"

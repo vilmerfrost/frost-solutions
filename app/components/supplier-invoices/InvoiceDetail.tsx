@@ -156,7 +156,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
    </div>
 
    {/* Tabs */}
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 overflow-hidden">
     <div className="flex border-b border-gray-200 dark:border-gray-700">
      <button
       onClick={() => setActiveTab('info')}
@@ -250,7 +250,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
         </div>
 
         {/* Amounts Card */}
-        <div className="bg-gray-50 dark:bg-gray-900 dark:/20 dark:/20 rounded-[8px] p-6 border-2 border-emerald-200 dark:border-emerald-800">
+        <div className="bg-gray-50 dark:bg-gray-900 dark:bg-emerald-900/20 rounded-[8px] p-6 border-2 border-emerald-200 dark:border-emerald-800">
          <div className="flex items-center gap-2 mb-4">
           <DollarSign size={20} className="text-emerald-600 dark:text-emerald-400" />
           <h3 className="font-semibold text-gray-900 dark:text-white">Belopp</h3>
@@ -353,7 +353,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
            Registrera betalning
           </Button>
          ) : (
-          <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-md border-2 border-gray-200 dark:border-gray-700 p-6">
+          <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-md border-2 border-gray-200 dark:border-gray-700 p-6">
            <PaymentForm
             invoiceId={invoice.id}
             maxAmount={invoice.amount_remaining}

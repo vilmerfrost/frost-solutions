@@ -134,7 +134,7 @@ export function InvoiceUploadArea({
 
    {/* AI Badge */}
    <div className="mt-6 text-center">
-    <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 dark:/10 border border-primary-200 dark:border-primary-500/30 rounded-[6px]">
+    <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500 hover:bg-primary-600 dark:bg-primary-900/10 border border-primary-200 dark:border-primary-500/30 rounded-[6px]">
      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
       🤖 Powered by Google Gemini 2.0 Flash
      </span>

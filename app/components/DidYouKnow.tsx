@@ -91,7 +91,7 @@ export default function DidYouKnow() {
  if (!show) return null
 
  return (
-  <div className="bg-primary-500 hover:bg-primary-600 dark:/20 dark:/20 rounded-[8px] p-4 mb-6 border border-blue-200 dark:border-blue-800 relative">
+  <div className="bg-blue-50 dark:bg-blue-900/20 rounded-[8px] p-4 mb-6 border border-blue-200 dark:border-blue-800 relative">
    <button
     onClick={() => setShow(false)}
     className="absolute top-2 right-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"

@@ -59,7 +59,7 @@ export function PeriodForm({ onSubmit, isLoading }: PeriodFormProps) {
 
  return (
   <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-   <div className="bg-white dark:from-gray-800 dark:/50 dark:to-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
+   <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-xl border-2 border-gray-200 dark:border-gray-700 p-6">
     <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
      Period information
     </h2>

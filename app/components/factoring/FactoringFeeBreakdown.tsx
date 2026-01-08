@@ -21,7 +21,7 @@ export function FactoringFeeBreakdown({
  className,
 }: FactoringFeeBreakdownProps) {
  return (
-  <Card className={cn('bg-gray-50 dark:bg-gray-900 dark:/20 dark:/20', className)}>
+  <Card className={cn('bg-gray-50 dark:bg-gray-900 dark:bg-gray-800/20', className)}>
    <CardContent className="p-4 space-y-3">
     <div className="flex justify-between text-sm">
      <span className="text-gray-600 dark:text-gray-400">Fakturabelopp:</span>

@@ -119,7 +119,6 @@ export default function EmployeesPage() {
       <div>
        <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">Anställda</h1>
        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">Hantera dina anställda</p>
-       <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">* 89 kr per användare/månad</p>
       </div>
       {isAdmin && (
        <button
