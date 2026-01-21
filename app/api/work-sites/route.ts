@@ -126,9 +126,12 @@ export async function POST(req: Request) {
    if (adminEmployee) {
     isAdmin = true
    }
-  } else if (employeeData && (employeeData.role === 'admin' || employeeData.role === 'Admin' || employeeData.role === 'ADMIN')) {
-   adminEmployee = employeeData
-   isAdmin = true
+  } else if (employeeData) {
+   const emp = employeeData as any
+   if (emp.role === 'admin' || emp.role === 'Admin' || emp.role === 'ADMIN') {
+    adminEmployee = emp
+    isAdmin = true
+   }
   }
   
   if (!isAdmin && user.email) {
@@ -145,9 +148,12 @@ export async function POST(req: Request) {
     if (adminEmployee) {
      isAdmin = true
     }
-   } else if (emailEmployeeList && (emailEmployeeList.role === 'admin' || emailEmployeeList.role === 'Admin' || emailEmployeeList.role === 'ADMIN')) {
-    adminEmployee = emailEmployeeList
-    isAdmin = true
+   } else if (emailEmployeeList) {
+    const emailEmp = emailEmployeeList as any
+    if (emailEmp.role === 'admin' || emailEmp.role === 'Admin' || emailEmp.role === 'ADMIN') {
+     adminEmployee = emailEmp
+     isAdmin = true
+    }
    }
   }
 

@@ -6,6 +6,7 @@ import { useMaterials } from '@/hooks/useMaterials'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Search, Package, X } from 'lucide-react'
+import type { Material } from '@/types/materials'
 
 interface MaterialPickerProps {
  onSelect: (material: any) => void
@@ -14,7 +15,7 @@ interface MaterialPickerProps {
 
 export function MaterialPicker({ onSelect, onClose }: MaterialPickerProps) {
  const [search, setSearch] = useState('')
- const { data: materials, isLoading } = useMaterials(search)
+ const { data: materials, isLoading } = useMaterials({ search })
 
  return (
   <div className="space-y-4 bg-gray-50 dark:bg-gray-900 dark:bg-blue-900/20 rounded-[8px] border-2 border-blue-200 dark:border-blue-700 p-6 shadow-md">
@@ -65,7 +66,7 @@ export function MaterialPicker({ onSelect, onClose }: MaterialPickerProps) {
 
    {materials && materials.length > 0 && (
     <div className="max-h-96 overflow-y-auto border-2 border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-900 shadow-inner">
-     {materials.map((material) => (
+     {materials.map((material: Material) => (
       <div
        key={material.id}
        className="flex items-center justify-between p-4 hover:hover: hover: dark:hover:/20 dark:hover:/20 border-b border-gray-200 dark:border-gray-700 last:border-b-0 transition-colors cursor-pointer"

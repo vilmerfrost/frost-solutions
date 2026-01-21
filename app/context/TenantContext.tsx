@@ -77,11 +77,14 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
 
     console.log('🔍 Fetching tenant from employees table for user:', userId)
 
-    let { data: employeeData, error: empError } = await supabase
+    const employeeResult = await supabase
      .from('employees')
      .select('tenant_id')
      .eq('auth_user_id', userId)
      .maybeSingle()
+    
+    let employeeData: any = employeeResult.data
+    let empError = employeeResult.error
 
     if (empError || !employeeData) {
      const userEmail = userData?.user?.email

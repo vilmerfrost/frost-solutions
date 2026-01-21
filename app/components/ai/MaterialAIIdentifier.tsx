@@ -127,9 +127,9 @@ export function MaterialAIIdentifier() {
         <ShoppingBag className="w-4 h-4" /> Matchande artiklar
        </h4>
        <ul className="mt-2 space-y-2">
-        {result.supplierItems.map((item) => (
+        {result.supplierItems.map((item, index) => (
          <li
-          key={item.id}
+          key={index}
           className="flex justify-between items-center p-3 bg-gray-100 dark:bg-gray-800 rounded-lg"
          >
           <div>

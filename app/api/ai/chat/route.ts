@@ -9,7 +9,7 @@ import { makeCacheKey, getCached, setCached } from '@/lib/ai/cache';
 const BodySchema = z.object({
  conversationId: z.string().uuid().optional(),
  pageContext: z.string().default(''),
- pageData: z.record(z.unknown()).default({}),
+ pageData: z.record(z.string(), z.unknown()).default({}),
  query: z.string().min(1),
  useCache: z.boolean().default(true),
 });

@@ -1,8 +1,8 @@
 // app/types/integrations.ts
 
-export type AccountingProvider = 'fortnox' | 'visma';
+export type AccountingProvider = 'fortnox' | 'visma' | 'visma_payroll' | 'visma_eaccounting';
 
-export type IntegrationStatus = 'active' | 'expired' | 'error' | 'pending';
+export type IntegrationStatus = 'active' | 'connected' | 'expired' | 'error' | 'pending' | 'misconfigured' | 'disconnected';
 
 export interface AccountingIntegration {
  id: string;
@@ -18,6 +18,9 @@ export interface AccountingIntegration {
  created_at: string;
  updated_at: string;
 }
+
+// Alias for compatibility
+export type Integration = AccountingIntegration;
 
 export interface OAuthTokens {
  access_token: string;
@@ -36,6 +39,9 @@ export interface SyncLog {
  resource_type: 'invoice' | 'customer' | 'product';
  resource_id?: string;
  status: 'success' | 'error' | 'pending';
+ level: 'info' | 'warn' | 'error';
+ message: string;
+ context?: Record<string, any>;
  error_code?: string;
  error_message?: string;
  duration_ms?: number;

@@ -13,9 +13,7 @@ import { Save, AlertTriangle } from '@/lib/ui/icons';
 const periodSchema = z.object({
  startDate: z.string().min(1, 'Startdatum är obligatoriskt'),
  endDate: z.string().min(1, 'Slutdatum är obligatoriskt'),
- format: z.enum(['fortnox-paxml', 'visma-csv'], {
-  errorMap: () => ({ message: 'Välj ett exportformat' }),
- }),
+ format: z.enum(['fortnox-paxml', 'visma-csv']),
 }).refine((data) => {
  const start = new Date(data.startDate);
  const end = new Date(data.endDate);

@@ -7,7 +7,7 @@ import { useState } from 'react';
 
 export function ExportButtons({ integrationId }: { integrationId: string }) {
  const exportMutation = useExportToFortnox();
- const [loading, setLoading] = useState<'customers' | 'invoices' | null>(null);
+ const [loading, setLoading] = useState<'customer' | 'invoice' | null>(null);
 
  const handleExport = async (type: 'customer' | 'invoice') => {
   // För bulk export, använd 'all' som ID
@@ -32,20 +32,20 @@ export function ExportButtons({ integrationId }: { integrationId: string }) {
     {/* Exportera Kunder */}
     <button
      onClick={() => handleExport('customer')}
-     disabled={loading === 'customers' || exportMutation.isPending}
+     disabled={loading === 'customer' || exportMutation.isPending}
      className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 min-h-[44px] disabled:opacity-70 disabled:cursor-not-allowed"
     >
-     {loading === 'customers' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+     {loading === 'customer' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
      <span>Exportera alla Kunder</span>
     </button>
 
     {/* Exportera Fakturor */}
     <button
      onClick={() => handleExport('invoice')}
-     disabled={loading === 'invoices' || exportMutation.isPending}
+     disabled={loading === 'invoice' || exportMutation.isPending}
      className="flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700 min-h-[44px] disabled:opacity-70 disabled:cursor-not-allowed"
     >
-     {loading === 'invoices' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+     {loading === 'invoice' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
      <span>Exportera alla Fakturor</span>
     </button>
    </div>

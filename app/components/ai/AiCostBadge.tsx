@@ -24,7 +24,7 @@ export function AiCostBadge({ tokens, cost, className }: AiCostBadgeProps) {
 
  return (
   <Badge
-   variant="outline"
+   variant="default"
    className={cn(
     'text-xs font-mono border-gray-300 dark:border-gray-600',
     colorClass,

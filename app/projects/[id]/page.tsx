@@ -880,9 +880,9 @@ export default function ProjectDetailPage() {
           }
 
           try {
-           const { error } = await supabase
-            .from('projects')
-            .update({ status: 'active' } as any)
+           const { error } = await (supabase
+            .from('projects') as any)
+            .update({ status: 'active' })
             .eq('id', projectId)
             .eq('tenant_id', tenantId)
            
@@ -921,17 +921,17 @@ export default function ProjectDetailPage() {
 
          try {
           // First try with status column
-          let { error } = await supabase
-           .from('projects')
-           .update({ status: 'archived' } as any)
+          let { error } = await (supabase
+           .from('projects') as any)
+           .update({ status: 'archived' })
            .eq('id', projectId)
            .eq('tenant_id', tenantId)
           
           // If status column doesn't exist, try 'completed'
           if (error && (error.code === '42703' || error.message?.includes('status'))) {
-           const fallback = await supabase
-            .from('projects')
-            .update({ status: 'completed' } as any)
+           const fallback = await (supabase
+            .from('projects') as any)
+            .update({ status: 'completed' })
             .eq('id', projectId)
             .eq('tenant_id', tenantId)
            

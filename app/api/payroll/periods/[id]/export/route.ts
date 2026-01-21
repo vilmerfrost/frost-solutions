@@ -97,7 +97,7 @@ export async function POST(
   const res = await exportPeriod(id, user.id);
   
   console.log('[POST /api/payroll/periods/[id]/export] ✅ Export completed:', {
-   hasDownloadUrl: !!res.downloadUrl,
+   hasSignedUrl: !!res.signedUrl,
    warnings: res.warnings?.length || 0,
   });
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');

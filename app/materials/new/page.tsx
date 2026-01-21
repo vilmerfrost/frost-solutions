@@ -134,7 +134,7 @@ export default function NewMaterialPage() {
        <div className="flex items-center justify-end gap-3 mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
         <Button
          type="button"
-         variant="outline"
+         variant="secondary"
          onClick={() => router.back()}
          disabled={createMutation.isPending}
         >

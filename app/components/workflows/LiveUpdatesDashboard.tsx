@@ -55,7 +55,7 @@ export function LiveUpdatesDashboard({ userId }: { userId: string }) {
      onChange={(e) => setFilter(e.target.value)}
      className="max-w-xs"
     />
-    <Button variant="outline" onClick={() => refetch()} disabled={isRefetching}>
+    <Button variant="secondary" onClick={() => refetch()} disabled={isRefetching}>
      <RefreshCw className={`h-4 w-4 ${isRefetching ? 'animate-spin' : ''}`} />
     </Button>
    </div>

@@ -97,18 +97,16 @@ export function useExportToFortnox() {
    return result;
   },
   onSuccess: (_, variables) => {
-   toast.success('Export köad!', {
-    description:
-     variables.type === 'payroll'
-      ? `Lönespec ${variables.month} skickas till Fortnox/Visma`
-      : `Typ: ${variables.type}`,
-   });
+   toast.success(
+    'Export köad!',
+    variables.type === 'payroll'
+     ? `Lönespec ${variables.month} skickas till Fortnox/Visma`
+     : `Typ: ${variables.type}`
+   );
    queryClient.invalidateQueries({ queryKey: ['integration_jobs'] });
   },
   onError: (error: Error) => {
-   toast.error('Export misslyckades', {
-    description: error.message,
-   });
+   toast.error('Export misslyckades', error.message);
   },
  });
 }
@@ -160,15 +158,11 @@ export function useSyncInvoice() {
    // Invalidate queries to refresh data
    queryClient.invalidateQueries({ queryKey: ['integrations'] });
    queryClient.invalidateQueries({ queryKey: ['invoices'] });
-   toast.success('Faktura synkad!', {
-    description: result.externalId ? `ID: ${result.externalId}` : undefined,
-   });
+   toast.success('Faktura synkad!', result.externalId ? `ID: ${result.externalId}` : undefined);
   },
   onError: (error: Error, variables) => {
    console.error('[useSyncInvoice] ❌ Failed:', error);
-   toast.error('Synkronisering misslyckades', {
-    description: error.message,
-   });
+   toast.error('Synkronisering misslyckades', error.message);
   },
  });
 }
@@ -197,15 +191,11 @@ export function useSyncCustomer() {
 
    queryClient.invalidateQueries({ queryKey: ['integrations'] });
    queryClient.invalidateQueries({ queryKey: ['clients'] });
-   toast.success('Kund synkad!', {
-    description: result.externalId ? `ID: ${result.externalId}` : undefined,
-   });
+   toast.success('Kund synkad!', result.externalId ? `ID: ${result.externalId}` : undefined);
   },
   onError: (error: Error) => {
    console.error('[useSyncCustomer] ❌ Failed:', error);
-   toast.error('Synkronisering misslyckades', {
-    description: error.message,
-   });
+   toast.error('Synkronisering misslyckades', error.message);
   },
  });
 }

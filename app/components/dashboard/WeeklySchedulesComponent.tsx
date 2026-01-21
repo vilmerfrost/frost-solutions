@@ -55,7 +55,8 @@ export function WeeklySchedules() {
  };
 
  const getEmployeeName = (employeeId: string) => {
-  return employees?.find(e => e.id === employeeId)?.full_name || employees?.find(e => e.id === employeeId)?.name || 'Okänd';
+  const employee = employees?.find(e => e.id === employeeId);
+  return employee?.full_name || (employee as any)?.name || 'Okänd';
  };
 
  const formatTime = (isoString: string) => {

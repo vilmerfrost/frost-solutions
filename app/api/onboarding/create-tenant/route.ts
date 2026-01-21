@@ -155,7 +155,7 @@ export async function POST(req: Request) {
     .maybeSingle()
    
    if (existing.data) {
-    empResult = { data: existing.data, error: null }
+    empResult = { data: existing.data, error: null } as any
    } else {
     // Försök med absolut minimal payload
     const minimalPayload: any = {

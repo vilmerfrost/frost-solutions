@@ -9,7 +9,7 @@ import { FactoringOfferCard } from './FactoringOfferCard';
 import { useQueryClient } from '@tanstack/react-query';
 import { toast } from '@/lib/toast';
 import { Loader2, Banknote } from 'lucide-react';
-import { createBrowserClient } from '@supabase/ssr';
+import supabase from '@/utils/supabase/supabaseClient';
 
 interface FactoringWidgetProps {
  tenantId: string;
@@ -31,7 +31,6 @@ export function FactoringWidget({
  // Real-time subscription for status updates
  useEffect(() => {
   if (typeof window === 'undefined' || !tenantId) return;
-  const supabase = createBrowserClient();
   const channel = supabase
    .channel(`factoring_offers:${tenantId}`)
    .on(
@@ -61,7 +60,7 @@ export function FactoringWidget({
  return (
   <div className="w-full">
    <div className="flex gap-2">
-    <Button onClick={() => setOpen(true)} variant="outline" className="gap-2">
+    <Button onClick={() => setOpen(true)} variant="secondary" className="gap-2">
      <Banknote className="h-4 w-4" /> Fakturaförsäljning
     </Button>
     <Button onClick={onCreate} disabled={createOffer.isPending} className="gap-2">

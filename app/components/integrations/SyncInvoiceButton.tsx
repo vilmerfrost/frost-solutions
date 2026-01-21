@@ -14,14 +14,14 @@ import type { AccountingProvider } from '@/types/integrations';
 interface SyncInvoiceButtonProps {
  invoiceId: string;
  disabled?: boolean;
- variant?: 'default' | 'outline' | 'ghost';
+ variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
  size?: 'sm' | 'md' | 'lg';
 }
 
 export function SyncInvoiceButton({
  invoiceId,
  disabled,
- variant = 'default',
+ variant = 'primary',
  size = 'md',
 }: SyncInvoiceButtonProps) {
  const [isOpen, setIsOpen] = useState(false);
@@ -75,7 +75,7 @@ export function SyncInvoiceButton({
     footer={
      <>
       <Button
-       variant="outline"
+       variant="secondary"
        onClick={() => setIsOpen(false)}
        disabled={syncMutation.isPending}
       >

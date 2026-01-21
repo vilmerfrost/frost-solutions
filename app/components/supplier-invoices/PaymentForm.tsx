@@ -117,7 +117,7 @@ export function PaymentForm({ invoiceId, maxAmount, currency, onSuccess, onCance
      <Save size={16} className="mr-2" />
      {registerMutation.isPending ? 'Registrerar...' : 'Registrera betalning'}
     </Button>
-    <Button type="button" variant="outline" onClick={onCancel}>
+    <Button type="button" variant="secondary" onClick={onCancel}>
      <X size={16} className="mr-2" />
      Avbryt
     </Button>

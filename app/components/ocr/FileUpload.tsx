@@ -373,7 +373,7 @@ export default function FileUpload({
       onChange={handleFileChange}
      />
      <div className="mt-3">
-      <Button type="button" variant="outline" onClick={() => inputRef.current?.click()}>
+      <Button type="button" variant="secondary" onClick={() => inputRef.current?.click()}>
        Välj fil
       </Button>
      </div>
@@ -425,7 +425,7 @@ export default function FileUpload({
          >
           Starta OCR
          </Button>
-         <Button variant="outline" onClick={resetAll}>Återställ</Button>
+         <Button variant="secondary" onClick={resetAll}>Återställ</Button>
         </div>
        )}
        {(errors.file || errorMsg) && (

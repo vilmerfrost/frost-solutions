@@ -600,7 +600,7 @@ export function ProjectInsightsDisplay({ projectId }: { projectId: string }) {
      <div className="mb-6">
       <h3 className="font-semibold mb-2">Risks</h3>
       <div className="space-y-2">
-       {insights.risks.map((risk: string, idx: number) => (
+       {insights.risks.map((risk: any, idx: number) => (
         <div
          key={idx}
          className={`p-3 rounded-md ${

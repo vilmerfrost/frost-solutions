@@ -85,16 +85,19 @@ export async function PATCH(
 
   // Log status change in history (changed_by = me.user.id)
   // Note: The trigger will also log, but we want to include the reason from API
-  await admin
-   .from('work_order_status_history')
-   .insert({
-    work_order_id: id,
-    from_status: wo.status,
-    to_status: parsed.to_status,
-    changed_by: user.id,
-    reason: parsed.reason ?? null
-   })
-   .catch(() => {}); // Ignore errors from history insert (trigger handles it too)
+  try {
+   await admin
+    .from('work_order_status_history')
+    .insert({
+     work_order_id: id,
+     from_status: wo.status,
+     to_status: parsed.to_status,
+     changed_by: user.id,
+     reason: parsed.reason ?? null
+    })
+  } catch {
+   // Ignore errors from history insert (trigger handles it too)
+  }
 
   return NextResponse.json(data);
  } catch (e) {

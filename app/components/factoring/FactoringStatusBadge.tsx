@@ -22,7 +22,7 @@ const statusConfig: Record<
  },
  offered: {
   label: 'Erbjudande',
-  variant: 'info',
+  variant: 'default',
   icon: AlertCircle,
  },
  accepted: {

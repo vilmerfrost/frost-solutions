@@ -7,11 +7,34 @@
 
 /**
  * Gets a feature flag value
- * @param flagName Name of the feature flag
+ * Supports both simple usage: getFeatureFlag('flagName')
+ * And tenant-aware usage: getFeatureFlag(tenantId, 'flagName')
+ * @param tenantIdOrFlagName Either the tenant ID (if two args) or flag name (if one arg)
+ * @param flagNameOrDefault Either the flag name (if two args) or default value (if one arg)
  * @param defaultValue Default value if flag is not set (default: true)
  * @returns Feature flag value
  */
-export function getFeatureFlag(flagName: string, defaultValue: boolean = true): boolean {
+export async function getFeatureFlag(
+ tenantIdOrFlagName: string,
+ flagNameOrDefault?: string | boolean,
+ defaultValue: boolean = true
+): Promise<boolean> {
+ // Determine which calling convention is being used
+ let flagName: string;
+ let defValue: boolean = defaultValue;
+ 
+ if (typeof flagNameOrDefault === 'string') {
+  // Two-arg tenant-aware call: getFeatureFlag(tenantId, flagName)
+  // tenantId is ignored for now (could be used for per-tenant flags later)
+  flagName = flagNameOrDefault;
+ } else {
+  // One-arg simple call: getFeatureFlag(flagName) or getFeatureFlag(flagName, defaultValue)
+  flagName = tenantIdOrFlagName;
+  if (typeof flagNameOrDefault === 'boolean') {
+   defValue = flagNameOrDefault;
+  }
+ }
+ 
  // Check environment variable first
  const envValue = process.env[`FEATURE_${flagName.toUpperCase()}`];
  if (envValue !== undefined) {
@@ -31,7 +54,7 @@ export function getFeatureFlag(flagName: string, defaultValue: boolean = true): 
  }
 
  // Return default value
- return defaultValue;
+ return defValue;
 }
 
 /**

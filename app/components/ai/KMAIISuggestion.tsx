@@ -85,7 +85,7 @@ export function KMAIISuggestion({ projectType }: { projectType: string }) {
          {item.title}
         </span>
         {item.requiresPhoto && (
-         <Camera className="w-4 h-4 text-gray-500 ml-2" title="Foto krävs" />
+         <span title="Foto krävs"><Camera className="w-4 h-4 text-gray-500 ml-2" /></span>
         )}
        </label>
       ))}

@@ -62,6 +62,7 @@ export default function ClientDetailPage() {
   }
 
   async function fetchClientData() {
+   if (!tenantId) return
    try {
     // Fetch client
     let { data: clientData, error: clientError } = await supabase
@@ -73,7 +74,7 @@ export default function ClientDetailPage() {
 
     // Fallback if columns don't exist
     if (clientError && (clientError.code === '42703' || clientError.code === '400')) {
-     const fallback = await supabase
+     const fallback: any = await supabase
       .from('clients')
       .select('id, name, email, address')
       .eq('id', clientId)
@@ -81,7 +82,7 @@ export default function ClientDetailPage() {
       .single()
      
      if (!fallback.error && fallback.data) {
-      clientData = { ...fallback.data, org_number: null, phone: null }
+      clientData = { ...fallback.data, org_number: null, phone: null } as any
       clientError = null
      }
     }
@@ -155,7 +156,7 @@ export default function ClientDetailPage() {
      .eq('tenant_id', tenantId)
      .eq('is_billed', false)
 
-    const hours = (timeEntriesData || []).reduce((sum, entry) => sum + Number(entry.hours_total || 0), 0)
+    const hours = ((timeEntriesData || []) as any[]).reduce((sum, entry) => sum + Number(entry.hours_total || 0), 0)
     setTotalHours(hours)
 
    } catch (err: any) {

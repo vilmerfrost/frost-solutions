@@ -2,7 +2,6 @@
 "use client";
 
 import { useState } from 'react';
-import { useSyncLogs } from '@/hooks/useIntegrations';
 import { Loader2, Info, AlertTriangle, XCircle, ChevronDown } from 'lucide-react';
 import type { SyncLog } from '@/types/integrations';
 
@@ -51,7 +50,9 @@ const LogRow = ({ log }: { log: SyncLog }) => {
 
 export function SyncHistory({ integrationId }: { integrationId: string }) {
  const [filter, setFilter] = useState<SyncLog['level'] | 'all'>('all');
- const { data: logs, isLoading } = useSyncLogs(integrationId);
+ // TODO: Implement useSyncLogs hook
+ const logs: SyncLog[] = [];
+ const isLoading = false;
 
  const filteredLogs = logs
   ?.filter(log => filter === 'all' || log.level === filter)

@@ -125,7 +125,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
     {/* Actions */}
     <div className="flex gap-3">
      {invoice.file_path && (
-      <Button variant="outline" onClick={handleDownloadPDF}>
+      <Button variant="secondary" onClick={handleDownloadPDF}>
        <Download size={16} className="mr-2" />
        Ladda ner PDF
       </Button>
@@ -147,7 +147,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
       </Button>
      )}
      <Link href={`/supplier-invoices/${invoice.id}/edit`}>
-      <Button variant="outline">
+      <Button variant="secondary">
        <Edit size={16} className="mr-2" />
        Redigera
       </Button>

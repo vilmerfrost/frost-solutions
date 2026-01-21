@@ -199,7 +199,7 @@ export default function PayrollPeriodDetailPage() {
          <Button
           onClick={handleUnlock}
           disabled={unlockMutation.isPending}
-          variant="outline"
+          variant="secondary"
          >
           <Unlock size={16} className="mr-2" />
           Lås upp

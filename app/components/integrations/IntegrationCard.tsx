@@ -25,7 +25,7 @@ interface IntegrationCardProps {
  isDisconnecting?: boolean;
 }
 
-const providerInfo = {
+const providerInfo: Record<AccountingProvider, { name: string; description: string; logo: string; color: string }> = {
  fortnox: {
   name: 'Fortnox',
   description: 'Svensk bokföringsprogramvara',
@@ -38,27 +38,48 @@ const providerInfo = {
   logo: '🇳🇴',
   color: 'from-green-500 ',
  },
+ visma_payroll: {
+  name: 'Visma Lönespec',
+  description: 'Lönehantering från Visma',
+  logo: '💼',
+  color: 'from-green-500 ',
+ },
+ visma_eaccounting: {
+  name: 'Visma eAccounting',
+  description: 'Bokföring och redovisning',
+  logo: '📊',
+  color: 'from-green-500 ',
+ },
 };
 
 const statusColors: Record<string, 'default' | 'success' | 'warning' | 'danger'> = {
  active: 'success',
+ connected: 'success',
  expired: 'warning',
  error: 'danger',
  pending: 'default',
+ misconfigured: 'warning',
+ disconnected: 'default',
 };
 
-const statusIcons = {
+const statusIcons: Record<string, typeof CheckCircle> = {
  active: CheckCircle,
+ connected: CheckCircle,
  expired: AlertTriangle,
  error: XCircle,
  pending: Loader2,
+ misconfigured: AlertTriangle,
+ disconnected: XCircle,
 };
 
-const statusLabels = {
+const statusLabels: Record<string, string> = {
  active: 'Ansluten',
+ connected: 'Ansluten',
  expired: 'Utgången',
  error: 'Fel',
  pending: 'Väntar',
+ misconfigured: 'Felkonfigurerad',
+ disconnected: 'Frånkopplad',
 };
 
 export function IntegrationCard({
@@ -153,7 +174,7 @@ export function IntegrationCard({
      </Button>
     ) : (
      <Button
-      variant="outline"
+      variant="secondary"
       onClick={onDisconnect}
       disabled={isDisconnecting}
       className="flex-1"

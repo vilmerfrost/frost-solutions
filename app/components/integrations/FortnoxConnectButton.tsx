@@ -1,14 +1,14 @@
 // app/components/integrations/FortnoxConnectButton.tsx
 "use client";
 
-import { useConnectFortnox } from '@/hooks/useIntegrations';
+import { useConnectIntegration } from '@/hooks/useIntegrations';
 import { Loader2, Building } from 'lucide-react';
 
 export function FortnoxConnectButton() {
- const connectMutation = useConnectFortnox();
+ const connectMutation = useConnectIntegration();
 
  const handleConnect = () => {
-  connectMutation.mutate();
+  connectMutation.mutate('fortnox');
  };
 
  return (

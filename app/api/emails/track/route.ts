@@ -10,19 +10,20 @@ export async function GET(req: NextRequest) {
   const tenantId = url.searchParams.get('tenant_id')
   
   if (quoteId && tenantId) {
-   const admin = createAdminClient()
-   await admin
-    .from('quotes')
-    .update({ 
-     opened_at: new Date().toISOString(),
-     status: 'viewed'
-    })
-    .eq('id', quoteId)
-    .eq('tenant_id', tenantId)
-    .in('status', ['sent', 'viewed'])
-    .catch(() => {
-     // Silent fail for tracking
-    })
+   try {
+    const admin = createAdminClient()
+    await admin
+     .from('quotes')
+     .update({ 
+      opened_at: new Date().toISOString(),
+      status: 'viewed'
+     })
+     .eq('id', quoteId)
+     .eq('tenant_id', tenantId)
+     .in('status', ['sent', 'viewed'])
+   } catch {
+    // Silent fail for tracking
+   }
   }
 
   // Returnera 1x1 transparent GIF pixel

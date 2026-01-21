@@ -10,7 +10,7 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import { useQueryClient } from '@tanstack/react-query';
-import { X, CreditCard, Check, Loader } from '@/lib/ui/icons';
+import { X, CreditCard, Check, Loader } from 'lucide-react';
 import { toast } from 'sonner';
 
 // Initialize Stripe

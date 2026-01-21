@@ -1,8 +1,9 @@
 // app/components/integrations/VismaConnectButton.tsx
 "use client";
 
-import { useConnectVisma } from '@/hooks/useIntegrations';
+import { useConnectIntegration } from '@/hooks/useIntegrations';
 import { Loader2, FileText, Users } from 'lucide-react';
+import type { AccountingProvider } from '@/types/integrations';
 
 type VismaProvider = 'visma_eaccounting' | 'visma_payroll';
 
@@ -11,10 +12,10 @@ interface VismaConnectButtonProps {
 }
 
 export function VismaConnectButton({ provider }: VismaConnectButtonProps) {
- const connectMutation = useConnectVisma();
+ const connectMutation = useConnectIntegration();
 
  const handleConnect = () => {
-  connectMutation.mutate(provider);
+  connectMutation.mutate(provider as AccountingProvider);
  };
 
  const isEAccounting = provider === 'visma_eaccounting';

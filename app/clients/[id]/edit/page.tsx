@@ -55,6 +55,7 @@ export default function EditClientPage() {
   }
 
   async function fetchClient() {
+   if (!tenantId) return
    try {
     let { data: clientData, error: clientError } = await supabase
      .from('clients')
@@ -65,7 +66,7 @@ export default function EditClientPage() {
 
     // Fallback if columns don't exist
     if (clientError && (clientError.code === '42703' || clientError.code === '400')) {
-     const fallback = await supabase
+     const fallback: any = await supabase
       .from('clients')
       .select('id, name, email, address')
       .eq('id', clientId)
@@ -73,7 +74,7 @@ export default function EditClientPage() {
       .single()
      
      if (!fallback.error && fallback.data) {
-      clientData = { ...fallback.data, org_number: null, phone: null }
+      clientData = { ...fallback.data, org_number: undefined, phone: undefined }
       clientError = null
      }
     }
@@ -85,12 +86,13 @@ export default function EditClientPage() {
     }
 
     // Populate form with client data
-    setName(clientData.name || '')
-    setEmail(clientData.email || '')
-    setAddress(clientData.address || '')
-    setOrgNumber(clientData.org_number || '')
-    setPhone(clientData.phone || '')
-    setClientType(clientData.org_number ? 'company' : 'private')
+    const client = clientData as Client
+    setName(client.name || '')
+    setEmail(client.email || '')
+    setAddress(client.address || '')
+    setOrgNumber(client.org_number || '')
+    setPhone(client.phone || '')
+    setClientType(client.org_number ? 'company' : 'private')
    } catch (err: any) {
     console.error('Error fetching client:', err)
     toast.error('Ett fel uppstod: ' + err.message)

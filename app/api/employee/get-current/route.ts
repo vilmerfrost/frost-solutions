@@ -223,7 +223,7 @@ export async function GET() {
   // Try with regular client first
   const { data: employeeData, error: empError } = await supabase
    .from('employees')
-   .select('id, role, name, email')
+   .select('id, role, name, email, full_name, tenant_id')
    .eq('auth_user_id', user.id)
    .eq('tenant_id', tenantId)
    .maybeSingle()
@@ -245,7 +245,7 @@ export async function GET() {
    // Try to find by auth_user_id (get all matches first)
    let { data: adminEmpDataList } = await adminSupabase
     .from('employees')
-    .select('id, role, name, email, auth_user_id, tenant_id, created_at')
+    .select('id, role, name, email, full_name, auth_user_id, tenant_id, created_at')
     .eq('auth_user_id', user.id)
     .order('created_at', { ascending: false }) // Senaste först
     .limit(10)
@@ -283,7 +283,7 @@ export async function GET() {
    if (!adminEmpData && tenantId) {
     const { data: tenantFiltered } = await adminSupabase
      .from('employees')
-     .select('id, role, name, email')
+     .select('id, role, name, email, full_name, tenant_id')
      .eq('auth_user_id', user.id)
      .eq('tenant_id', tenantId)
      .maybeSingle()

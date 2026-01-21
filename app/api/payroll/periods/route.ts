@@ -122,14 +122,14 @@ export async function POST(req: NextRequest) {
   
   if (!parse.success) {
    console.error('[POST /api/payroll/periods] ❌ Validation failed:', {
-    errors: parse.error.errors,
+    errors: parse.error.issues,
     message: parse.error.message,
    });
    return NextResponse.json(
     { 
      success: false, 
      error: parse.error.message,
-     details: parse.error.errors,
+     details: parse.error.issues,
     }, 
     { status: 400 }
    );

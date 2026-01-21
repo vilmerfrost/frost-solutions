@@ -13,7 +13,7 @@ export async function exportInvoice(tenantId: string, integrationId: string, inv
 
  const fx = new FortnoxClient(integrationId);
  const payload = mapFrostInvoiceToFortnox(inv);
- const res = await fx.createInvoice(payload);
+ const res: any = await fx.createInvoice(payload);
 
  // spara mapping
  await admin.from('integration_mappings').upsert({
@@ -35,7 +35,7 @@ export async function exportCustomer(tenantId: string, integrationId: string, cu
 
  const fx = new FortnoxClient(integrationId);
  const payload = mapFrostClientToFortnox(c);
- const res = await fx.createCustomer(payload);
+ const res: any = await fx.createCustomer(payload);
 
  await admin.from('integration_mappings').upsert({
   tenant_id: tenantId,

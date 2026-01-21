@@ -67,7 +67,7 @@ export function parseInvoiceFromTextract(
   );
  }
 
- return parsed.data;
+ return parsed.data as InvoiceOCRResult;
 }
 
 /**

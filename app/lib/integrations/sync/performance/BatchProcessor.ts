@@ -132,14 +132,14 @@ export class BatchSyncProcessor {
 
  private getOptimalChunkSize(provider: AccountingProvider): number {
   // Dynamic chunk sizing based on rate limits and performance
-  const baseSizes = { fortnox: 10, visma: 5 };
+  const baseSizes: Record<string, number> = { fortnox: 10, visma: 5, visma_payroll: 5, visma_eaccounting: 5 };
   const remaining = this.rateLimiter.getRemainingRequests(
    provider,
    'invoice'
   );
 
   return Math.min(
-   baseSizes[provider],
+   baseSizes[provider] || 5,
    Math.max(1, Math.floor(remaining * 0.1))
   ); // Use 10% of remaining
  }

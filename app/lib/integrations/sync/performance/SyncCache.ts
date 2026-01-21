@@ -21,7 +21,7 @@ export class SyncCache {
   // Fallback to database cache
   const { data } = await this.supabase
    .from('api_cache')
-   .select('value')
+   .select('value, expires_at')
    .eq('key', key)
    .gt('expires_at', new Date())
    .maybeSingle();
@@ -29,7 +29,7 @@ export class SyncCache {
   if (data) {
    this.cache.set(key, {
     value: data.value,
-    expires: new Date(data.expires_at).getTime(),
+    expires: new Date((data as any).expires_at).getTime(),
    });
    return data.value;
   }

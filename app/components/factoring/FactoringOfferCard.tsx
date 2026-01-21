@@ -70,7 +70,7 @@ export function FactoringOfferCard({
      {onReject && (
       <Button
        onClick={onReject}
-       variant="outline"
+       variant="secondary"
        disabled={isLoading}
        aria-label={`Neka factoring-erbjudande för faktura ${offer.invoice_id}`}
       >

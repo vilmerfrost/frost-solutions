@@ -6,7 +6,7 @@ import { createAdminClient } from '@/utils/supabase/admin';
 import { headers } from 'next/headers';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2024-12-18.acacia',
+  apiVersion: '2025-12-15.clover',
 });
 
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
@@ -165,17 +165,23 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     paused: 'paused',
   };
 
+  // Cast to any to handle Stripe API version differences
+  const sub = subscription as any;
   const { error } = await admin
     .from('subscriptions')
     .update({
       status: statusMap[subscription.status] || subscription.status,
-      current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
-      current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
-      cancel_at: subscription.cancel_at 
-        ? new Date(subscription.cancel_at * 1000).toISOString() 
+      current_period_start: sub.current_period_start 
+        ? new Date(sub.current_period_start * 1000).toISOString() 
         : null,
-      canceled_at: subscription.canceled_at 
-        ? new Date(subscription.canceled_at * 1000).toISOString() 
+      current_period_end: sub.current_period_end 
+        ? new Date(sub.current_period_end * 1000).toISOString() 
+        : null,
+      cancel_at: sub.cancel_at 
+        ? new Date(sub.cancel_at * 1000).toISOString() 
+        : null,
+      canceled_at: sub.canceled_at 
+        ? new Date(sub.canceled_at * 1000).toISOString() 
         : null,
       updated_at: new Date().toISOString(),
     })
@@ -226,13 +232,14 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
+  const inv = invoice as any;
   console.log('[Stripe Webhook] Invoice paid:', {
     id: invoice.id,
-    subscription: invoice.subscription,
+    subscription: inv.subscription,
     amount_paid: invoice.amount_paid,
   });
 
-  if (!invoice.subscription) return;
+  if (!inv.subscription) return;
 
   const admin = createAdminClient();
 
@@ -240,7 +247,7 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   const { data: sub } = await admin
     .from('subscriptions')
     .select('tenant_id')
-    .eq('stripe_subscription_id', invoice.subscription as string)
+    .eq('stripe_subscription_id', inv.subscription as string)
     .maybeSingle();
 
   if (!sub?.tenant_id) return;
@@ -249,18 +256,18 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   await admin.from('subscription_invoices').upsert({
     tenant_id: sub.tenant_id,
     stripe_invoice_id: invoice.id,
-    stripe_payment_intent_id: invoice.payment_intent as string,
+    stripe_payment_intent_id: inv.payment_intent as string,
     amount_due: invoice.amount_due / 100,
     amount_paid: invoice.amount_paid / 100,
     currency: invoice.currency.toUpperCase(),
     status: 'paid',
-    invoice_pdf_url: invoice.invoice_pdf || null,
-    hosted_invoice_url: invoice.hosted_invoice_url || null,
-    period_start: invoice.period_start 
-      ? new Date(invoice.period_start * 1000).toISOString() 
+    invoice_pdf_url: inv.invoice_pdf || null,
+    hosted_invoice_url: inv.hosted_invoice_url || null,
+    period_start: inv.period_start 
+      ? new Date(inv.period_start * 1000).toISOString() 
       : null,
-    period_end: invoice.period_end 
-      ? new Date(invoice.period_end * 1000).toISOString() 
+    period_end: inv.period_end 
+      ? new Date(inv.period_end * 1000).toISOString() 
       : null,
     paid_at: new Date().toISOString(),
   }, {
@@ -269,19 +276,20 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
+  const inv = invoice as any;
   console.log('[Stripe Webhook] Invoice payment failed:', {
     id: invoice.id,
-    subscription: invoice.subscription,
+    subscription: inv.subscription,
   });
 
-  if (!invoice.subscription) return;
+  if (!inv.subscription) return;
 
   const admin = createAdminClient();
 
   const { data: sub } = await admin
     .from('subscriptions')
     .select('tenant_id')
-    .eq('stripe_subscription_id', invoice.subscription as string)
+    .eq('stripe_subscription_id', inv.subscription as string)
     .maybeSingle();
 
   if (!sub?.tenant_id) return;
@@ -292,7 +300,7 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     stripe_event_id: invoice.id,
     data: {
       amount_due: invoice.amount_due / 100,
-      attempt_count: invoice.attempt_count,
+      attempt_count: inv.attempt_count,
     },
   });
 }

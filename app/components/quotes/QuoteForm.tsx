@@ -206,7 +206,7 @@ export function QuoteForm({ quote, onSubmit, isLoading }: QuoteFormProps) {
    <div className="flex items-center justify-end gap-3 pt-6 border-t-2 border-gray-200 dark:border-gray-700 mt-8">
     <Button
      type="button"
-     variant="outline"
+     variant="secondary"
      onClick={() => router.back()}
      disabled={isLoading}
      className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors border-2"

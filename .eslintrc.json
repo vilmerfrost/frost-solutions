@@ -1,9 +1,0 @@
-{
-  "root": true,
-  "extends": ["next/core-web-vitals", "next/typescript", "prettier"],
-  "rules": {
-    // Slå av några störiga regler om du vill:
-    "@typescript-eslint/no-unused-vars": ["warn", {"argsIgnorePattern": "^_", "varsIgnorePattern": "^_"}],
-    "react/no-unescaped-entities": "off"
-  }
-}

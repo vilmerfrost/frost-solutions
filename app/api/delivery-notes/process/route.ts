@@ -131,6 +131,7 @@ export async function POST(req: NextRequest) {
 
   let textractOk = true;
   let parsed;
+  let textractError: string | null = null;
 
   try {
    const tx = await runTextract(bytes, mimeType);
@@ -149,6 +150,7 @@ export async function POST(req: NextRequest) {
    );
   } catch (err) {
    textractOk = false;
+   textractError = String(err);
    await logOcrStep({
     tenantId,
     correlationId,
@@ -156,7 +158,7 @@ export async function POST(req: NextRequest) {
     stage: 'textract_failed',
     level: 'warn',
     message: 'Textract failed, trying DocAI',
-    meta: { err: String(err) },
+    meta: { err: textractError },
    });
   }
 
@@ -187,7 +189,7 @@ export async function POST(req: NextRequest) {
     throw new OCRProcessingError(
      'Alla OCR-tjänster misslyckades',
      'ALL_OCR_FAILED',
-     { textractError: String(err), docaiError: String(docaiErr) }
+     { textractError: textractError ?? 'N/A', docaiError: String(docaiErr) }
     );
    }
   }

@@ -28,23 +28,18 @@ export function WorkflowNotifications() {
    .slice(0, 5)
    .forEach((n) => {
     if (!shownToasts.has(n.id)) {
-     const options = {
-      id: n.id,
-      duration: 10000,
-     };
-
      switch (n.type) {
       case 'success':
-       toast.success(n.message, options);
+       toast.success(n.message);
        break;
       case 'error':
-       toast.error(n.message, options);
+       toast.error(n.message);
        break;
       case 'warning':
-       toast.warning(n.message, options);
+       toast.warning(n.message);
        break;
       default:
-       toast.info(n.message, options);
+       toast.info(n.message);
        break;
      }
 

@@ -75,9 +75,13 @@ export async function PATCH(
    if (adminEmployee) {
     isAdmin = true
    }
-  } else if (employeeData && (employeeData.role === 'admin' || employeeData.role === 'Admin' || employeeData.role === 'ADMIN')) {
-   adminEmployee = employeeData
-   isAdmin = true
+  } else if (employeeData) {
+   // Handle single object case (shouldn't happen with .limit() but just in case)
+   const emp = employeeData as any
+   if (emp.role === 'admin' || emp.role === 'Admin' || emp.role === 'ADMIN') {
+    adminEmployee = emp
+    isAdmin = true
+   }
   }
   
   // Fallback: Try by email if not found by auth_user_id
@@ -96,9 +100,13 @@ export async function PATCH(
     if (adminEmployee) {
      isAdmin = true
     }
-   } else if (emailEmployeeList && (emailEmployeeList.role === 'admin' || emailEmployeeList.role === 'Admin' || emailEmployeeList.role === 'ADMIN')) {
-    adminEmployee = emailEmployeeList
-    isAdmin = true
+   } else if (emailEmployeeList) {
+    // Handle single object case (shouldn't happen with .limit() but just in case)
+    const emp = emailEmployeeList as any
+    if (emp.role === 'admin' || emp.role === 'Admin' || emp.role === 'ADMIN') {
+     adminEmployee = emp
+     isAdmin = true
+    }
    }
   }
 

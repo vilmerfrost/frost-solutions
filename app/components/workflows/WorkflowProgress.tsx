@@ -26,8 +26,8 @@ export function WorkflowProgress({ workflow }: { workflow: WorkflowExecution }) 
 
  // Filtrera stegen baserat på arbetsflödestyp
  const relevantSteps = ALL_STEPS.filter((step) => {
-  if (workflow_type === 'invoice' && step.id === 'material_registration') return false;
-  if (workflow_type === 'delivery_note' && step.id === 'project_matching')
+  if (workflow_type === 'invoice_approval' && step.id === 'material_registration') return false;
+  if (workflow_type === 'delivery_note_processing' && step.id === 'project_matching')
    return false;
   return true;
  });

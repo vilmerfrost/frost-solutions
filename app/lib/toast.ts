@@ -3,18 +3,26 @@
 
 import { toast as sonnerToast, ExternalToast } from 'sonner'
 
+type ToastOptions = string | ExternalToast
+
+function normalizeOptions(options?: ToastOptions): ExternalToast | undefined {
+  if (!options) return undefined
+  if (typeof options === 'string') return { description: options }
+  return options
+}
+
 export const toast = {
-  success: (message: string, description?: string) => {
-    sonnerToast.success(message, { description })
+  success: (message: string, options?: ToastOptions) => {
+    sonnerToast.success(message, normalizeOptions(options))
   },
-  error: (message: string, description?: string) => {
-    sonnerToast.error(message, { description })
+  error: (message: string, options?: ToastOptions) => {
+    sonnerToast.error(message, normalizeOptions(options))
   },
-  info: (message: string, description?: string) => {
-    sonnerToast.info(message, { description })
+  info: (message: string, options?: ToastOptions) => {
+    sonnerToast.info(message, normalizeOptions(options))
   },
-  warning: (message: string, description?: string) => {
-    sonnerToast.warning(message, { description })
+  warning: (message: string, options?: ToastOptions) => {
+    sonnerToast.warning(message, normalizeOptions(options))
   },
   promise: <T,>(
     promise: Promise<T>,

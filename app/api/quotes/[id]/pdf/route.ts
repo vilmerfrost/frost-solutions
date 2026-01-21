@@ -38,7 +38,7 @@ export async function GET(_: NextRequest, { params }: { params: Promise<{ id: st
 
   const pdf = await generateQuotePDF(quote, items ?? [])
 
-  return new NextResponse(pdf, {
+  return new NextResponse(new Uint8Array(pdf), {
    headers: {
     'Content-Type': 'application/pdf',
     'Content-Disposition': `attachment; filename="offert-${quote.quote_number}.pdf"`

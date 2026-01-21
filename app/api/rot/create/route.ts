@@ -224,17 +224,19 @@ export async function POST(req: Request) {
      .eq('id', verifiedTenantId)
      .single()
     
-    const { data: projectVerify } = project_id ? await adminSupabase
+    const projectVerifyResult = project_id ? await adminSupabase
      .from('projects')
      .select('id')
      .eq('id', project_id)
-     .single() : { data: null, error: null }
+     .single() : null
+    const projectVerify = projectVerifyResult?.data
     
-    const { data: clientVerify } = client_id ? await adminSupabase
+    const clientVerifyResult = client_id ? await adminSupabase
      .from('clients')
      .select('id')
      .eq('id', client_id)
-     .single() : { data: null, error: null }
+     .single() : null
+    const clientVerify = clientVerifyResult?.data
     
     return NextResponse.json(
      { 

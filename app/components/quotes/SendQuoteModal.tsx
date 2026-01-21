@@ -46,7 +46,7 @@ export function SendQuoteModal({ open, onClose, quoteId, quoteNumber, customerEm
    title="Skicka Offert via Email"
    footer={
     <>
-     <Button variant="outline" onClick={onClose}>
+     <Button variant="secondary" onClick={onClose}>
       Avbryt
      </Button>
      <Button onClick={handleSend} disabled={sendMutation.isPending}>

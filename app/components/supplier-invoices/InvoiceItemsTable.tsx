@@ -11,9 +11,9 @@ interface InvoiceItemsTableProps {
  currency: string
 }
 
-const itemTypeColors = {
+const itemTypeColors: Record<string, 'default' | 'success' | 'warning' | 'danger'> = {
  material: 'default',
- labor: 'info',
+ labor: 'success',
  transport: 'warning',
  other: 'default'
 }

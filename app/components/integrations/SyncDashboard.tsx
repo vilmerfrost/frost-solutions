@@ -2,25 +2,29 @@
 "use client";
 
 import { useState } from 'react';
-import { useSyncJobs } from '@/hooks/useIntegrations';
 import { Loader2, CheckCircle, XCircle, Clock, RefreshCw } from 'lucide-react';
 import type { SyncJob } from '@/types/integrations';
 
 type JobStatus = SyncJob['status'];
 
-const JobStatusBadge = ({ status }: { status: JobStatus }) => {
- const config = {
+const statusConfig = {
   queued: { icon: Clock, text: 'Köad', color: 'text-gray-500 bg-gray-100 dark:bg-gray-700' },
   running: { icon: Loader2, text: 'Körs', color: 'text-blue-500 bg-blue-100 dark:bg-blue-900' },
   success: { icon: CheckCircle, text: 'Slutförd', color: 'text-green-500 bg-green-100 dark:bg-green-900' },
   failed: { icon: XCircle, text: 'Misslyckad', color: 'text-red-500 bg-red-100 dark:bg-red-900' },
   retry: { icon: RefreshCw, text: 'Försöker igen', color: 'text-amber-500 bg-amber-100 dark:bg-amber-900' },
- }[status];
+  pending: { icon: Clock, text: 'Väntar', color: 'text-gray-500 bg-gray-100 dark:bg-gray-700' },
+  processing: { icon: Loader2, text: 'Bearbetar', color: 'text-blue-500 bg-blue-100 dark:bg-blue-900' },
+  completed: { icon: CheckCircle, text: 'Klar', color: 'text-green-500 bg-green-100 dark:bg-green-900' },
+  requires_manual_resolution: { icon: XCircle, text: 'Manuell åtgärd', color: 'text-amber-500 bg-amber-100 dark:bg-amber-900' },
+};
 
+const JobStatusBadge = ({ status }: { status: JobStatus }) => {
+ const config = statusConfig[status] || statusConfig.pending;
  const Icon = config.icon;
  return (
   <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium ${config.color}`}>
-   <Icon className={`w-3.5 h-3.5 ${status === 'running' ? 'animate-spin' : ''}`} />
+   <Icon className={`w-3.5 h-3.5 ${status === 'processing' ? 'animate-spin' : ''}`} />
    {config.text}
   </span>
  );
@@ -28,7 +32,9 @@ const JobStatusBadge = ({ status }: { status: JobStatus }) => {
 
 export function SyncDashboard({ integrationId }: { integrationId: string }) {
  const [filter, setFilter] = useState<JobStatus | 'all'>('all');
- const { data: jobs, isLoading } = useSyncJobs(integrationId);
+ // TODO: Implement useSyncJobs hook
+ const jobs: SyncJob[] = [];
+ const isLoading = false;
 
  const filteredJobs = jobs?.filter(job => filter === 'all' || job.status === filter) || [];
 
@@ -46,7 +52,7 @@ export function SyncDashboard({ integrationId }: { integrationId: string }) {
     >
      Alla
     </button>
-    {(['queued', 'running', 'success', 'failed', 'retry'] as const).map((status) => (
+    {(['pending', 'processing', 'completed', 'failed', 'requires_manual_resolution'] as const).map((status) => (
      <button
       key={status}
       onClick={() => setFilter(status)}
@@ -56,7 +62,7 @@ export function SyncDashboard({ integrationId }: { integrationId: string }) {
         : 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
       }`}
      >
-      {status === 'queued' ? 'Köad' : status === 'running' ? 'Körs' : status === 'success' ? 'Slutförd' : status === 'failed' ? 'Misslyckad' : 'Försöker igen'}
+      {status === 'pending' ? 'Väntar' : status === 'processing' ? 'Bearbetar' : status === 'completed' ? 'Klar' : status === 'failed' ? 'Misslyckad' : 'Manuell åtgärd'}
      </button>
     ))}
    </div>
@@ -73,9 +79,9 @@ export function SyncDashboard({ integrationId }: { integrationId: string }) {
      <div key={job.id} className="p-4 hover:bg-gray-50 dark:hover:bg-gray-700/50">
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
        <div>
-        <span className="font-semibold text-gray-900 dark:text-white">{job.job_type}</span>
+        <span className="font-semibold text-gray-900 dark:text-white">{job.resource_type} ({job.action})</span>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-         Försök: {job.attempts}/{job.max_attempts}
+         Försök: {job.retry_count} • Prioritet: {job.priority}
         </p>
        </div>
        <div className="flex-shrink-0">
@@ -89,7 +95,7 @@ export function SyncDashboard({ integrationId }: { integrationId: string }) {
       )}
       <div className="mt-2 text-xs text-gray-400 dark:text-gray-500">
        Skapad: {new Date(job.created_at).toLocaleString('sv-SE')}
-       {job.finished_at && ` • Slutförd: ${new Date(job.finished_at).toLocaleString('sv-SE')}`}
+       {job.updated_at && ` • Uppdaterad: ${new Date(job.updated_at).toLocaleString('sv-SE')}`}
       </div>
      </div>
     ))}

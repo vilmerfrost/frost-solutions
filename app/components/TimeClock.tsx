@@ -338,7 +338,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
       console.warn('Work sites table may not exist yet. Run SUPABASE_CREATE_WORK_SITES.sql')
      }
     } else if (data) {
-     setWorkSites(data.map(site => ({
+     setWorkSites((data as any[]).map((site: any) => ({
       id: site.id,
       name: site.name,
       latitude: Number(site.latitude),
@@ -396,7 +396,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
     if (nearest && isWithinAutoCheckinDistance(location, nearest.site)) {
      // Auto-checkin reminder - DO NOT auto-checkin, only show notification
      if (projects.length > 0 && !isCheckedIn) {
-      toast.info(`📍 Du är nära ${nearest.site.name} - Kom ihåg att stämpla in!`, { duration: 5000 })
+      toast.info(`📍 Du är nära ${nearest.site.name} - Kom ihåg att stämpla in!`)
       // NOTE: GPS auto-checkin does NOT automatically check in - user must click manually
      }
     }
@@ -412,7 +412,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
      if (updatedNearest && isWithinAutoCheckinDistance(newLocation, updatedNearest.site)) {
       // Show reminder if not checked in
       if (!isCheckedIn && projects.length > 0) {
-       toast.info(`📍 Du är nära ${updatedNearest.site.name} - Kom ihåg att stämpla in!`, { duration: 5000 })
+       toast.info(`📍 Du är nära ${updatedNearest.site.name} - Kom ihåg att stämpla in!`)
       }
      }
     }, 2 * 60 * 1000) // Check every 2 minutes
@@ -463,8 +463,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
    // 8 hours = 480 minutes
    if (actualWorkMinutes >= 480 && !eightHourReminderShown) {
     toast.warning(
-     '⏰ Du har jobbat i 8 timmar! Jobbar du fortfarande? Glöm inte att signa ut!',
-     { duration: 10000 }
+     '⏰ Du har jobbat i 8 timmar! Jobbar du fortfarande? Glöm inte att signa ut!'
     )
     setEightHourReminderShown(true)
    }
@@ -523,7 +522,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
     .eq('tenant_id', tenantId)
     .maybeSingle()
 
-   const baseRate = Number(empData?.base_rate_sek || empData?.default_rate_sek || 360)
+   const baseRate = Number((empData as any)?.base_rate_sek || (empData as any)?.default_rate_sek || 360)
 
    // Get GPS location and work site
    let startLocation: GPSLocation | null = null
@@ -764,7 +763,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
     .eq('tenant_id', tenantId)
     .maybeSingle()
 
-   const baseRate = Number(empData?.base_rate_sek || empData?.default_rate_sek || 360)
+   const baseRate = Number((empData as any)?.base_rate_sek || (empData as any)?.default_rate_sek || 360)
 
    // Calculate OB hours for this work period
    // Note: OB is calculated based on actual clock times, but we'll adjust hours_total to reflect actual work time minus pauses

@@ -127,7 +127,7 @@ export function QuoteItemsEditor({ quoteId }: QuoteItemsEditorProps) {
     <div className="flex gap-2">
      <Button
       type="button"
-      variant="outline"
+      variant="secondary"
       size="sm"
       onClick={() => setShowMaterialPicker(!showMaterialPicker)}
       className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
@@ -227,7 +227,7 @@ export function QuoteItemsEditor({ quoteId }: QuoteItemsEditorProps) {
       </Button>
       <Button
        type="button"
-       variant="outline"
+       variant="secondary"
        size="sm"
        onClick={() => {
         setShowAddForm(false)
@@ -270,7 +270,7 @@ export function QuoteItemsEditor({ quoteId }: QuoteItemsEditorProps) {
       </Button>
       <Button
        type="button"
-       variant="outline"
+       variant="secondary"
        size="lg"
        onClick={() => setShowMaterialPicker(true)}
        className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"

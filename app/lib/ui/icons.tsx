@@ -1,5 +1,6 @@
 // app/lib/ui/icons.tsx
 // Centralized SVG icon components to avoid lucide-react HMR cache issues
+// Updated: build fix for missing exports
 
 import React from 'react';
 
@@ -373,3 +374,36 @@ export const MoreVertical = ({ size = 20, className = '' }: IconProps) => (
   </svg>
 );
 
+export const Filter = ({ size = 20, className = '' }: IconProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
+  </svg>
+);
+
+export const Save = ({ size = 20, className = '' }: IconProps) => (
+  <svg
+    width={size}
+    height={size}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+    className={className}
+  >
+    <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+    <polyline points="17 21 17 13 7 13 7 21" />
+    <polyline points="7 3 7 8 15 8" />
+  </svg>
+);

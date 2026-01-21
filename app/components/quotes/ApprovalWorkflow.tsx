@@ -33,7 +33,7 @@ export function ApprovalWorkflow({ open, onClose, quoteId }: ApprovalWorkflowPro
    title="Godkänn Offert"
    footer={
     <>
-     <Button variant="outline" onClick={onClose}>
+     <Button variant="secondary" onClick={onClose}>
       Avbryt
      </Button>
      <Button onClick={handleApprove} disabled={approveMutation.isPending}>

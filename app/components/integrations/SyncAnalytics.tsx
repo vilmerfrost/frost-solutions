@@ -236,7 +236,7 @@ export function SyncAnalytics({
           return (
            <div className="bg-gray-50 dark:bg-gray-900 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md">
             <p className="font-semibold text-gray-900 dark:text-white mb-2">
-             {new Date(label).toLocaleDateString('sv-SE', { 
+             {new Date(label as string | number).toLocaleDateString('sv-SE', { 
               weekday: 'long', 
               year: 'numeric', 
               month: 'long', 
@@ -309,7 +309,7 @@ export function SyncAnalytics({
            return (
             <div className="bg-gray-50 dark:bg-gray-900 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md">
              <p className="font-semibold text-gray-900 dark:text-white mb-1">
-              {new Date(label).toLocaleDateString('sv-SE')}
+              {new Date(label as string | number).toLocaleDateString('sv-SE')}
              </p>
              <p className="text-blue-600 dark:text-blue-400 font-semibold">
               {value.toFixed(1)}%
@@ -354,7 +354,7 @@ export function SyncAnalytics({
            return (
             <div className="bg-gray-50 dark:bg-gray-900 p-3 border border-gray-200 dark:border-gray-700 rounded-lg shadow-md">
              <p className="font-semibold text-gray-900 dark:text-white mb-1">
-              {new Date(label).toLocaleDateString('sv-SE')}
+              {new Date(label as string | number).toLocaleDateString('sv-SE')}
              </p>
              <p className="text-primary-500 dark:text-primary-400 font-semibold">
               {value > 1000 ? `${(value / 1000).toFixed(1)}s` : `${value}ms`}
@@ -405,11 +405,11 @@ export function SyncAnalytics({
        <ResponsiveContainer width="100%" height={250}>
         <PieChart>
          <Pie
-          data={providerBreakdown}
+          data={providerBreakdown as any[]}
           cx="50%"
           cy="50%"
           labelLine={false}
-          label={({ provider, total }) => `${provider}: ${total}`}
+          label={({ provider, total }: any) => `${provider}: ${total}`}
           outerRadius={80}
           fill="#0ea5e9"
           dataKey="total"

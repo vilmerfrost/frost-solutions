@@ -1,14 +1,14 @@
 // app/components/integrations/IntegrationConnectionControls.tsx
 "use client";
 
-import { useConnectFortnox, useConnectVisma, useDisconnectIntegration } from '@/hooks/useIntegrations';
-import type { IntegrationStatus, IntegrationProvider } from '@/types/integrations';
+import { useConnectIntegration, useDisconnectIntegration } from '@/hooks/useIntegrations';
+import type { IntegrationStatus, AccountingProvider } from '@/types/integrations';
 import { Loader2, Building, Power, RefreshCw } from 'lucide-react';
 
 interface IntegrationConnectionControlsProps {
  integrationId: string;
  status: IntegrationStatus;
- provider: IntegrationProvider;
+ provider: AccountingProvider;
 }
 
 export function IntegrationConnectionControls({ 
@@ -16,8 +16,7 @@ export function IntegrationConnectionControls({
  status, 
  provider 
 }: IntegrationConnectionControlsProps) {
- const connectFortnoxMutation = useConnectFortnox();
- const connectVismaMutation = useConnectVisma();
+ const connectMutation = useConnectIntegration();
  const disconnectMutation = useDisconnectIntegration();
 
  // Enhetlig styling för knapparna
@@ -26,7 +25,7 @@ export function IntegrationConnectionControls({
  const redButton = `${baseButton} text-red-700 bg-red-100 hover:bg-red-200 dark:text-red-200 dark:bg-red-900/50 dark:hover:bg-red-900`;
  const grayButton = `${baseButton} bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600`;
  
- const isLoading = connectFortnoxMutation.isPending || connectVismaMutation.isPending || disconnectMutation.isPending;
+ const isLoading = connectMutation.isPending || disconnectMutation.isPending;
 
  // Responsiv wrapper: stapla knappar på mobil
  const Wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -45,7 +44,7 @@ export function IntegrationConnectionControls({
      <RefreshCw className="w-4 h-4" /> Inställningar
     </button>
     <button
-     onClick={() => disconnectMutation.mutate(integrationId)}
+     onClick={() => disconnectMutation.mutate(provider)}
      disabled={isLoading}
      className={redButton}
     >
@@ -61,13 +60,7 @@ export function IntegrationConnectionControls({
   return (
    <Wrapper>
     <button
-     onClick={() => {
-      if (provider === 'fortnox') {
-       connectFortnoxMutation.mutate();
-      } else if (provider === 'visma_eaccounting' || provider === 'visma_payroll') {
-       connectVismaMutation.mutate(provider);
-      }
-     }}
+     onClick={() => connectMutation.mutate(provider)}
      disabled={isLoading}
      className={gradientButton}
     >
@@ -93,11 +86,7 @@ export function IntegrationConnectionControls({
  };
 
  const handleConnect = () => {
-  if (provider === 'fortnox') {
-   connectFortnoxMutation.mutate();
-  } else if (provider === 'visma_eaccounting' || provider === 'visma_payroll') {
-   connectVismaMutation.mutate(provider);
-  }
+  connectMutation.mutate(provider);
  };
 
  return (

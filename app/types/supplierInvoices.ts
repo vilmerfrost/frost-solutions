@@ -152,3 +152,11 @@ export interface SupplierInvoiceHistory {
  created_at: string
 }
 
+export interface SupplierInvoiceFilters {
+ status?: SupplierInvoiceStatus | 'all'
+ supplierId?: string | 'all'
+ projectId?: string | 'all'
+ search?: string
+ dateFrom?: string
+ dateTo?: string
+}

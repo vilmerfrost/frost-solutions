@@ -14,7 +14,7 @@ const Upsert = z.object({
  client_change_id: z.string().min(1),
  id: UUID.optional(),
  base_updated_at: ISO.nullable().optional(),
- new_values: z.record(z.any())
+ new_values: z.record(z.string(), z.any())
 });
 
 const Del = z.object({
@@ -204,7 +204,7 @@ export async function POST(req: NextRequest) {
  } catch (e) {
   if (e instanceof z.ZodError) {
    return NextResponse.json(
-    { error: e.errors[0]?.message ?? 'Ogiltig data.' },
+    { error: e.issues[0]?.message ?? 'Ogiltig data.' },
     { status: 400 }
    );
   }

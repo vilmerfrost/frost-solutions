@@ -52,6 +52,7 @@ export default function ClientsPage() {
   }
 
   async function fetchClients() {
+   if (!tenantId) return
    try {
     console.log('🔍 ClientsPage: Fetching clients for tenantId:', tenantId)
 
@@ -155,6 +156,7 @@ export default function ClientsPage() {
  }, [clients, searchQuery, statusFilter, sortBy, sortDirection])
 
  async function handleDeleteClient(clientId: string) {
+  if (!tenantId) return
   if (!confirm('Är du säker på att du vill radera denna kund? Detta går inte att ångra.')) {
    return
   }
@@ -179,8 +181,9 @@ export default function ClientsPage() {
  }
 
  async function handleToggleArchive(clientId: string, currentArchived: boolean) {
+  if (!tenantId) return
   try {
-   const { error } = await supabase
+   const { error } = await (supabase as any)
     .from('clients')
     .update({
      archived: !currentArchived,
@@ -244,7 +247,7 @@ export default function ClientsPage() {
         Hantera dina kunder och företag
        </p>
       </div>
-      <PermissionGuard permission="create:client">
+      <PermissionGuard resource="clients" action="create">
        <button
         onClick={() => router.push('/clients/new')}
         className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] font-semibold shadow-sm hover:shadow-md transition-all"
@@ -256,25 +259,34 @@ export default function ClientsPage() {
 
      {/* Search and Filters */}
      <div className="mb-6 space-y-4">
-      <SearchBar value={searchQuery} onChange={setSearchQuery} placeholder="Sök kunder..." />
+      <SearchBar onSearch={setSearchQuery} placeholder="Sök kunder..." />
 
-      <FilterSortBar
-       statusFilter={statusFilter}
-       onStatusFilterChange={setStatusFilter}
-       sortBy={sortBy}
-       onSortByChange={setSortBy}
-       sortDirection={sortDirection}
-       onSortDirectionChange={setSortDirection}
-       statusOptions={[
-        { value: 'all', label: 'Alla kunder' },
-        { value: 'active', label: 'Aktiva' },
-        { value: 'archived', label: 'Arkiverade' },
-       ]}
-       sortOptions={[
-        { value: 'name', label: 'Namn' },
-        { value: 'created_at', label: 'Skapad' },
-       ]}
-      />
+      {/* Simple inline filters */}
+      <div className="flex flex-wrap gap-4 items-center">
+       <select 
+        value={statusFilter} 
+        onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
+        className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+       >
+        <option value="all">Alla kunder</option>
+        <option value="active">Aktiva</option>
+        <option value="archived">Arkiverade</option>
+       </select>
+       <select 
+        value={sortBy} 
+        onChange={(e) => setSortBy(e.target.value as typeof sortBy)}
+        className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+       >
+        <option value="name">Sortera: Namn</option>
+        <option value="created_at">Sortera: Skapad</option>
+       </select>
+       <button 
+        onClick={() => setSortDirection(d => d === 'asc' ? 'desc' : 'asc')}
+        className="px-3 py-2 border border-gray-200 dark:border-gray-700 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100"
+       >
+        {sortDirection === 'asc' ? '↑' : '↓'}
+       </button>
+      </div>
      </div>
 
      {/* Loading State */}
@@ -291,7 +303,7 @@ export default function ClientsPage() {
        <div className="mb-4 text-4xl">👥</div>
        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Inga kunder ännu</h3>
        <p className="text-gray-600 dark:text-gray-400 mb-6">Kom igång genom att lägga till din första kund.</p>
-       <PermissionGuard permission="create:client">
+       <PermissionGuard resource="clients" action="create">
         <button
          onClick={() => router.push('/clients/new')}
          className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] font-semibold shadow-sm hover:shadow-md transition-all"
@@ -392,11 +404,11 @@ export default function ClientsPage() {
 
          {/* Export Button */}
          <div className="mt-3">
-          <ExportToIntegrationButton
-           resourceType="client"
-           resourceId={client.id}
-           resourceName={client.name}
-          />
+<ExportToIntegrationButton
+            type="customer"
+            resourceId={client.id}
+            resourceName={client.name}
+           />
          </div>
         </div>
        ))}

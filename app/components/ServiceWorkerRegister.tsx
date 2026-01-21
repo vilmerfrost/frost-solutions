@@ -25,16 +25,8 @@ export default function ServiceWorkerRegister() {
         ) {
          // Ny version är installerad och väntar
          console.log('[SW] Ny version tillgänglig')
-         toast.info('En ny version finns tillgänglig!', {
-          action: {
-           label: 'Ladda om',
-           onClick: () => {
-            installingWorker.postMessage({ type: 'SKIP_WAITING' })
-            window.location.reload()
-           },
-          },
-          duration: Infinity,
-         })
+         toast.info('En ny version finns tillgänglig!', 'Ladda om sidan för att uppdatera.')
+         installingWorker.postMessage({ type: 'SKIP_WAITING' })
         }
        })
       }

@@ -1,11 +1,11 @@
-// app/lib/clients/openai/openai-client.ts
+// app/lib/ai/openai-client.ts
 import OpenAI from 'openai';
 import type {
  IOpenAiClient,
  OpenAiChatRequest,
  OpenAiChatResponse,
  OpenAiStreamChunk,
-} from './openai.interface';
+} from '@/lib/clients/openai/openai.interface';
 import { AiProviderError } from '@/lib/domain/ai/errors';
 import { withRetry } from '@/lib/utils/retry';
 import { createLogger } from '@/lib/utils/logger';

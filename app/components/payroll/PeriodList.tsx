@@ -106,7 +106,7 @@ function PeriodRow({
 
  const handleLock = () => {
   if (confirm('Lås denna period? Den kan inte redigeras efter låsning.')) {
-   lockMutation.mutate();
+   lockMutation.mutate({});
   }
  };
 

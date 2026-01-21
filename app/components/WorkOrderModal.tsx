@@ -231,7 +231,7 @@ export function WorkOrderModal({ isOpen, onClose, workOrder }: WorkOrderModalPro
        >
         <option value="">{isLoadingEmployees ? 'Laddar...' : employees && employees.length === 0 ? 'Inga anställda tillgängliga' : 'Ej tilldelad'}</option>
         {employees && employees.length > 0 ? (
-         employees.map(emp => (
+         employees.map((emp: any) => (
           <option key={emp.id} value={emp.id}>{emp.full_name || emp.name || emp.email}</option>
          ))
         ) : (

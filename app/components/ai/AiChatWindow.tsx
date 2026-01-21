@@ -156,7 +156,7 @@ export function AiChatWindow({
        )}
       </Button>
       {isStreaming && (
-       <Button onClick={cancelStreaming} variant="outline">
+       <Button onClick={cancelStreaming} variant="secondary">
         Avbryt
        </Button>
       )}

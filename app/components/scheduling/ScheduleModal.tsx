@@ -431,7 +431,7 @@ export function ScheduleModal({
        >
         <option value="">{isLoadingEmployees ? 'Laddar...' : 'Välj anställd'}</option>
         {employees && employees.length > 0 ? (
-         employees.map(emp => (
+         employees.map((emp: any) => (
           <option key={emp.id} value={emp.id}>
            {emp.full_name || emp.name || emp.email || emp.id}
           </option>

@@ -206,7 +206,7 @@ export function AIGenerateQuote({ onGenerate, isLoading = false, onClose }: AIGe
     <div className="flex items-center justify-end gap-3 pt-4 border-t border-primary-200 dark:border-primary-700">
      <Button
       type="button"
-      variant="outline"
+      variant="secondary"
       onClick={() => {
        setShowForm(false)
        onClose?.()

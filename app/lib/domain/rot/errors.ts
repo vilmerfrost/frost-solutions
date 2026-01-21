@@ -2,12 +2,12 @@
 import { AppError } from '@/lib/utils/errors';
 
 export class RotError extends AppError {
- readonly statusCode = 400;
- readonly code = 'ROT_ERROR';
+ readonly statusCode: number = 400;
+ readonly code: string = 'ROT_ERROR';
 }
 
 export class InvalidPersonnummerError extends RotError {
- readonly code = 'INVALID_PERSONNUMMER';
+ override readonly code: string = 'INVALID_PERSONNUMMER';
 
  constructor(personnummer?: string) {
   super('Ogiltigt personnummer', {
@@ -17,7 +17,7 @@ export class InvalidPersonnummerError extends RotError {
 }
 
 export class IneligibleWorkTypeError extends RotError {
- readonly code = 'INELIGIBLE_WORK_TYPE';
+ override readonly code: string = 'INELIGIBLE_WORK_TYPE';
 
  constructor(workType: string, reason: string) {
   super(`Arbetstyp ${workType} är inte berättigad: ${reason}`, {
@@ -28,7 +28,7 @@ export class IneligibleWorkTypeError extends RotError {
 }
 
 export class MaxDeductionExceededError extends RotError {
- readonly code = 'MAX_DEDUCTION_EXCEEDED';
+ override readonly code: string = 'MAX_DEDUCTION_EXCEEDED';
 
  constructor(requestedAmount: number, maxAmount: number) {
   super(`Begärt avdrag (${requestedAmount} kr) överstiger maxgräns (${maxAmount} kr)`, {
@@ -39,8 +39,8 @@ export class MaxDeductionExceededError extends RotError {
 }
 
 export class XmlGenerationError extends RotError {
- readonly statusCode = 500;
- readonly code = 'XML_GENERATION_ERROR';
+ override readonly statusCode: number = 500;
+ override readonly code: string = 'XML_GENERATION_ERROR';
 
  constructor(message: string, context?: Record<string, unknown>) {
   super(`XML-generering misslyckades: ${message}`, context);

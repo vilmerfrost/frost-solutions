@@ -139,21 +139,21 @@ export async function GET() {
     )
    }
    
-   projects = fallback.data
+   projects = fallback.data?.map(p => ({ ...p, status: 'active' as const })) ?? null
   }
 
   // Filter out completed/archived projects
-  if (projects) {
-   projects = projects
-    .filter((p: any) => {
-     if (!p.status) return true
-     return p.status !== 'completed' && p.status !== 'archived'
-    })
-    .map((p: any) => ({ id: p.id, name: p.name }))
-  }
+  const filteredProjects = projects
+   ? projects
+      .filter((p: any) => {
+       if (!p.status) return true
+       return p.status !== 'completed' && p.status !== 'archived'
+      })
+      .map((p: any) => ({ id: p.id, name: p.name }))
+   : []
 
   return NextResponse.json({
-   projects: projects || [],
+   projects: filteredProjects,
    tenantId: tenantId,
   })
  } catch (err: any) {

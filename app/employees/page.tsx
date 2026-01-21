@@ -46,7 +46,7 @@ export default function EmployeesPage() {
     const { data, error } = await supabase
      .from('employees')
      .select('id, name, full_name, role, email')
-     .eq('tenant_id', tenantId)
+     .eq('tenant_id', tenantId as string)
      .order('full_name', { ascending: true })
 
     if (error) {
@@ -56,7 +56,7 @@ export default function EmployeesPage() {
       const fallback = await supabase
        .from('employees')
        .select('id, name, full_name')
-       .eq('tenant_id', tenantId)
+       .eq('tenant_id', tenantId as string)
        .order('name', { ascending: true })
       
       if (!fallback.error && fallback.data) {
@@ -195,7 +195,7 @@ export default function EmployeesPage() {
                   .from('employees')
                   .delete()
                   .eq('id', emp.id)
-                  .eq('tenant_id', tenantId)
+                  .eq('tenant_id', tenantId as string)
                  
                  if (error) {
                   console.error('Error deleting employee:', error)

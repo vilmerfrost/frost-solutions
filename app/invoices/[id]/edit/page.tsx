@@ -30,21 +30,24 @@ export default function EditInvoicePage() {
   async function fetchInvoice() {
    try {
     // Progressive fallback for missing columns
-    let { data, error } = await supabase
+    const result = await supabase
      .from('invoices')
      .select('id, amount, customer_name, desc, description, status, issue_date, due_date, project_id, customer_id, client_id')
-     .eq('id', invoiceId)
-     .eq('tenant_id', tenantId)
+     .eq('id', invoiceId as string)
+     .eq('tenant_id', tenantId as string)
      .single()
+    
+    let data: any = result.data
+    let error: any = result.error
 
     // Fallback if desc or other columns don't exist
     if (error && (error.code === '42703' || error.message?.includes('does not exist'))) {
      // Try without desc
-     const fallback1 = await supabase
+     const fallback1: any = await supabase
       .from('invoices')
       .select('id, amount, customer_name, description, status, issue_date, due_date, project_id, customer_id, client_id')
-      .eq('id', invoiceId)
-      .eq('tenant_id', tenantId)
+      .eq('id', invoiceId as string)
+      .eq('tenant_id', tenantId as string)
       .single()
      
      if (!fallback1.error && fallback1.data) {
@@ -52,11 +55,11 @@ export default function EditInvoicePage() {
       error = null
      } else if (fallback1.error && (fallback1.error.code === '42703' || fallback1.error.message?.includes('does not exist'))) {
       // Try with minimal columns
-      const fallback2 = await supabase
+      const fallback2: any = await supabase
        .from('invoices')
        .select('id, amount, customer_name, status, project_id, customer_id, client_id')
-       .eq('id', invoiceId)
-       .eq('tenant_id', tenantId)
+       .eq('id', invoiceId as string)
+       .eq('tenant_id', tenantId as string)
        .single()
       
       if (!fallback2.error && fallback2.data) {
@@ -117,8 +120,8 @@ export default function EditInvoicePage() {
     due_date: formData.get('due_date')?.toString() || null,
    }
 
-   const { error } = await supabase
-    .from('invoices')
+   const { error } = await (supabase
+    .from('invoices') as any)
     .update(updateData)
     .eq('id', invoiceId)
     .eq('tenant_id', tenantId)

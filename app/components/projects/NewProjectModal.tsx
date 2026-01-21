@@ -144,7 +144,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
   <Dialog
    open={isOpen}
    onClose={onClose}
-   maxWidth="3xl"
+   size="xl"
    title={
     <div className="text-2xl font-semibold text-gray-900 dark:text-white flex items-center gap-3">
      <Briefcase className="w-6 h-6 text-primary-500" />
@@ -155,7 +155,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
     <div className="flex gap-3 w-full">
      <Button
       type="button"
-      variant="outline"
+      variant="secondary"
       onClick={onClose}
       className="flex-1"
      >

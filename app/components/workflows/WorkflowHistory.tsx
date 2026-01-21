@@ -7,6 +7,7 @@
 
 'use client';
 
+import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import supabase from '@/utils/supabase/supabaseClient';
@@ -54,7 +55,7 @@ export function WorkflowHistory({ userId }: { userId: string }) {
  if (!data || data.workflows.length === 0) {
   return (
    <EmptyState
-    icon={FileText}
+    icon={<FileText size={24} />}
     title="Ingen historik hittades"
     description="När du har slutfört några arbetsflöden kommer de att visas här."
    />
@@ -74,7 +75,7 @@ export function WorkflowHistory({ userId }: { userId: string }) {
    {/* Pagination */}
    <div className="flex items-center justify-between">
     <Button
-     variant="outline"
+     variant="secondary"
      onClick={() => setPage((p) => Math.max(0, p - 1))}
      disabled={page === 0}
     >
@@ -84,7 +85,7 @@ export function WorkflowHistory({ userId }: { userId: string }) {
      Sida {page + 1} · Totalt {data.total} arbetsflöden
     </span>
     <Button
-     variant="outline"
+     variant="secondary"
      onClick={() => setPage((p) => p + 1)}
      disabled={!data.hasMore}
     >
@@ -96,17 +97,21 @@ export function WorkflowHistory({ userId }: { userId: string }) {
 }
 
 function WorkflowHistoryItem({ workflow }: { workflow: WorkflowExecution }) {
- const statusIcons = {
+ const statusIcons: Record<string, React.ReactNode> = {
   success: <CheckCircle className="w-5 h-5 text-green-500" />,
   failed: <AlertTriangle className="w-5 h-5 text-red-500" />,
   partial_success: <AlertTriangle className="w-5 h-5 text-yellow-500" />,
+  pending: <Clock className="w-5 h-5 text-gray-500" />,
+  processing: <Clock className="w-5 h-5 text-blue-500" />,
  };
 
- const statusBadges = {
+ const statusBadges: Record<string, 'success' | 'danger' | 'warning' | 'default'> = {
   success: 'success',
   failed: 'danger',
   partial_success: 'warning',
- } as const;
+  pending: 'default',
+  processing: 'default',
+ };
 
  return (
   <div className="flex items-center justify-between p-4 border rounded-lg shadow-sm bg-gray-50 dark:bg-gray-900 hover:shadow-md transition-shadow">

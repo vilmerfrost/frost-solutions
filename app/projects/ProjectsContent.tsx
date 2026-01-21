@@ -737,16 +737,16 @@ export default function ProjectsContent() {
                return
               }
 
-              let { error } = await supabase
-               .from('projects')
-               .update(updatePayload as any)
+              let { error } = await (supabase
+               .from('projects') as any)
+               .update(updatePayload)
                .eq('id', p.id)
                .eq('tenant_id', tenantId)
 
               if (error && (error.code === '42703' || error.message?.includes('does not exist') || error.message?.includes('status'))) {
-               const { error: updateError } = await supabase
-                .from('projects')
-                .update({} as any)
+               const { error: updateError } = await (supabase
+                .from('projects') as any)
+                .update({})
                 .eq('id', p.id)
                 .eq('tenant_id', tenantId)
                

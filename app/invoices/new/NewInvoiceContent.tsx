@@ -44,18 +44,21 @@ export default function NewInvoiceContent() {
    console.log('Fetching clients for tenant:', tenantId)
    try {
     // Try with org_number first
-    let { data: clientsData, error } = await supabase
+    const result = await supabase
      .from('clients')
      .select('id, name, org_number')
-     .eq('tenant_id', tenantId)
+     .eq('tenant_id', tenantId as string)
      .order('name', { ascending: true })
+    
+    let clientsData: any = result.data
+    let error: any = result.error
 
     // If org_number column doesn't exist, retry without it
     if (error && (error.code === '42703' || error.message?.includes('does not exist'))) {
-     const fallback = await supabase
+     const fallback: any = await supabase
       .from('clients')
       .select('id, name')
-      .eq('tenant_id', tenantId)
+      .eq('tenant_id', tenantId as string)
       .order('name', { ascending: true })
      
      if (!fallback.error && fallback.data) {
@@ -109,12 +112,15 @@ export default function NewInvoiceContent() {
    setLoadingProject(true)
    try {
     // Fetch project details with client relation
-    const { data: projectData, error: projectError } = await supabase
+    const projectResult: any = await supabase
      .from('projects')
      .select('customer_name, base_rate_sek, client_id, clients(id, name, org_number)')
      .eq('id', projectId)
-     .eq('tenant_id', tenantId)
+     .eq('tenant_id', tenantId as string)
      .single()
+    
+    const projectData = projectResult.data
+    const projectError = projectResult.error
 
     if (projectError) {
      console.error('Error fetching project:', projectError)
@@ -124,7 +130,7 @@ export default function NewInvoiceContent() {
 
     if (projectData) {
      // Prefer client from relation if available
-     const projectClient = (projectData as any)?.clients
+     const projectClient = projectData?.clients
      if (projectClient?.id) {
       setCustomerId(projectClient.id)
       setCustomerName(projectClient.name)
@@ -251,8 +257,8 @@ export default function NewInvoiceContent() {
    if (data) {
     // Link ROT application to invoice if applicable
     if (rotApplicationId && data.id) {
-     await supabase
-      .from('rot_applications')
+     await (supabase
+      .from('rot_applications') as any)
       .update({ invoice_id: data.id })
       .eq('id', rotApplicationId)
     }
@@ -270,13 +276,13 @@ export default function NewInvoiceContent() {
 
       if (!entriesError && entriesData && entriesData.length > 0) {
        // Get project rate
-       const { data: projectData } = await supabase
+       const projectRateResult: any = await supabase
         .from('projects')
         .select('base_rate_sek')
         .eq('id', projectId)
         .single()
 
-       const rate = Number(projectData?.base_rate_sek) || 360
+       const rate = Number(projectRateResult.data?.base_rate_sek) || 360
 
        // Create invoice lines from time entries
        const invoiceLines = entriesData.map((entry: any, index: number) => ({
@@ -291,8 +297,8 @@ export default function NewInvoiceContent() {
        }))
 
        // Insert invoice lines
-       const { error: linesError } = await supabase
-        .from('invoice_lines')
+       const { error: linesError } = await (supabase
+        .from('invoice_lines') as any)
         .insert(invoiceLines)
 
        if (linesError) {
@@ -301,8 +307,8 @@ export default function NewInvoiceContent() {
        }
 
        // Mark time entries as billed
-       await supabase
-        .from('time_entries')
+       await (supabase
+        .from('time_entries') as any)
         .update({ is_billed: true })
         .eq('project_id', projectId)
         .eq('is_billed', false)

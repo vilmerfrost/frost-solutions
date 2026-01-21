@@ -95,7 +95,7 @@ export default function IntegrationsPage() {
         </div>
        </div>
        <Button
-        variant="outline"
+        variant="secondary"
         onClick={() => refetch()}
         disabled={isLoading}
         size="lg"

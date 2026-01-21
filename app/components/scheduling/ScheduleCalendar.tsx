@@ -392,11 +392,11 @@ export function ScheduleCalendar({ projectId, employeeId }: ScheduleCalendarProp
 
   // Öppna en modal för att välja anställd, projekt och shift_type
   const employeeId = prompt('Välj anställd (skriv nummer eller namn):\n' + 
-   employees.map((e, i) => `${i + 1}. ${e.full_name || e.name || e.id}`).join('\n'));
+   employees.map((e: any, i: number) => `${i + 1}. ${e.full_name || e.name || e.id}`).join('\n'));
   
   if (!employeeId) return;
   
-  const selectedEmployee = employees.find((e, i) => 
+  const selectedEmployee = employees.find((e: any, i: number) => 
    (i + 1).toString() === employeeId || 
    e.full_name?.toLowerCase().includes(employeeId.toLowerCase()) ||
    e.name?.toLowerCase().includes(employeeId.toLowerCase())
@@ -457,7 +457,7 @@ export function ScheduleCalendar({ projectId, employeeId }: ScheduleCalendarProp
     await createSchedule.mutateAsync(schedule);
    }
 
-   toast.success(`Schema skapat för hela veckan för ${selectedEmployee.full_name || selectedEmployee.name}`);
+   toast.success(`Schema skapat för hela veckan för ${(selectedEmployee as any).full_name || (selectedEmployee as any).name}`);
   } catch (error) {
    toast.error(`Fel vid skapande av veckoschema: ${extractErrorMessage(error)}`);
   } finally {

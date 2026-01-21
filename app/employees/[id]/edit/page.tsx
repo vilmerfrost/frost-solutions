@@ -50,28 +50,27 @@ export default function EditEmployeePage() {
   async function fetchEmployee() {
    try {
     // Try with full columns first
-    let { data, error } = await supabase
+    const result = await supabase
      .from('employees')
      .select('id, name, full_name, role, email, base_rate_sek, default_rate_sek')
-     .eq('id', employeeId)
-     .eq('tenant_id', tenantId)
+     .eq('id', employeeId as string)
+     .eq('tenant_id', tenantId as string)
      .single()
+    
+    let data: any = result.data
+    let error: any = result.error
 
     // If default_rate_sek doesn't exist, retry without it
     if (error && (error.code === '42703' || error.message?.includes('default_rate_sek'))) {
      const retry = await supabase
       .from('employees')
       .select('id, name, full_name, role, email, base_rate_sek')
-      .eq('id', employeeId)
-      .eq('tenant_id', tenantId)
+      .eq('id', employeeId as string)
+      .eq('tenant_id', tenantId as string)
       .single()
      
-     if (!retry.error && retry.data) {
-      data = retry.data
-      error = null
-     } else {
-      error = retry.error
-     }
+     data = (retry as any).data
+     error = (retry as any).error
     }
 
     // If base_rate_sek also doesn't exist, try without both
@@ -79,16 +78,12 @@ export default function EditEmployeePage() {
      const retryMinimal = await supabase
       .from('employees')
       .select('id, name, full_name, role, email')
-      .eq('id', employeeId)
-      .eq('tenant_id', tenantId)
+      .eq('id', employeeId as string)
+      .eq('tenant_id', tenantId as string)
       .single()
      
-     if (!retryMinimal.error && retryMinimal.data) {
-      data = retryMinimal.data
-      error = null
-     } else {
-      error = retryMinimal.error
-     }
+     data = (retryMinimal as any).data
+     error = (retryMinimal as any).error
     }
 
     if (error) {

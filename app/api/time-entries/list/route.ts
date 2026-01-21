@@ -113,7 +113,7 @@ export async function GET(req: Request) {
   }
 
   // Logga approval-status för första raderna för debugging
-  const sampleWithApproval = entries?.slice(0, 5).map(e => ({
+  const sampleWithApproval = (entries as any[])?.slice(0, 5).map(e => ({
    id: e.id,
    hours: e.hours_total,
    date: e.date,

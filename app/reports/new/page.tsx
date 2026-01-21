@@ -321,19 +321,19 @@ export default function NewReportPage() {
        setFetchError(null)
       } else {
        // No cache available
-       if (isOnline === false) {
+       if (!isOnline) {
         setFetchError('offline')
        }
       }
      } else {
       // No cache available
-      if (isOnline === false) {
+      if (!isOnline) {
        setFetchError('offline')
       }
      }
     } catch (cacheErr) {
      console.warn('Could not read cached employee ID:', cacheErr)
-     if (isOnline === false) {
+     if (!isOnline) {
       setFetchError('offline')
      }
     }

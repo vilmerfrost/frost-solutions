@@ -50,7 +50,7 @@ export function WorkflowStatus({ executionId }: { executionId: string }) {
 
  // Enkel progress-beräkning
  const totalSteps =
-  workflow.workflow_type === 'invoice' ? 6 : 5;
+  workflow.workflow_type === 'invoice_approval' ? 6 : 5;
  const currentStepIndex =
   (workflow.state_log?.length || 0) + (workflow.status === 'processing' ? 1 : 0);
  const progress = (currentStepIndex / totalSteps) * 100;

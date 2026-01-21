@@ -25,7 +25,7 @@ export default function MaterialsPage() {
  const meta = data?.meta
 
  // Unika kategorier
- const categories = Array.from(new Set(materials.map((m: any) => m.category).filter(Boolean)))
+ const categories: string[] = Array.from(new Set(materials.map((m: any) => m.category).filter(Boolean))) as string[]
 
  const handleDelete = async (id: string, name: string) => {
   if (confirm(`Är du säker på att du vill radera "${name}"?`)) {
@@ -206,7 +206,7 @@ export default function MaterialsPage() {
          </div>
          <div className="flex gap-2">
           <Button
-           variant="outline"
+           variant="secondary"
            size="sm"
            disabled={meta.page === 1}
            onClick={() => setFilters({ ...filters, page: meta.page - 1 })}
@@ -214,7 +214,7 @@ export default function MaterialsPage() {
            Föregående
           </Button>
           <Button
-           variant="outline"
+           variant="secondary"
            size="sm"
            disabled={meta.page * meta.limit >= meta.count}
            onClick={() => setFilters({ ...filters, page: meta.page + 1 })}

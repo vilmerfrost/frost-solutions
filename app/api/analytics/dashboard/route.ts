@@ -101,7 +101,7 @@ export async function GET(req: NextRequest) {
   const [projectsResult, invoicesResult, employeesResult, timeEntriesResult] = await Promise.all([
    admin
     .from('projects')
-    .select('id, status, budgeted_hours, base_rate_sek')
+    .select('id, name, status, budgeted_hours, base_rate_sek')
     .eq('tenant_id', tenantId),
    admin
     .from('invoices')

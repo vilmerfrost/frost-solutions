@@ -133,6 +133,16 @@ export class PerformanceRateLimiter {
     windowMs: 60000,
     provider: 'visma',
    },
+   visma_payroll: {
+    maxRequests: 200,
+    windowMs: 60000,
+    provider: 'visma_payroll',
+   },
+   visma_eaccounting: {
+    maxRequests: 200,
+    windowMs: 60000,
+    provider: 'visma_eaccounting',
+   },
   };
   return configs[provider];
  }

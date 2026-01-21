@@ -44,7 +44,7 @@ export function QuoteActions({ quote }: QuoteActionsProps) {
    <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] shadow-xl border border-gray-200 dark:border-gray-700 p-4 backdrop-blur-sm bg-opacity-95">
     <div className="flex flex-wrap gap-3">
      <Button
-      variant="outline"
+      variant="secondary"
       onClick={() => setShowSendModal(true)}
       disabled={!canSend}
       className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"
@@ -54,7 +54,7 @@ export function QuoteActions({ quote }: QuoteActionsProps) {
      </Button>
 
      <Button
-      variant="outline"
+      variant="secondary"
       onClick={handleDownloadPDF}
       className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
      >
@@ -64,7 +64,7 @@ export function QuoteActions({ quote }: QuoteActionsProps) {
 
      {canApprove && (
       <Button
-       variant="outline"
+       variant="secondary"
        onClick={() => setShowApprovalModal(true)}
        className="hover:bg-green-50 dark:hover:bg-green-900/20 transition-colors"
       >
@@ -85,7 +85,7 @@ export function QuoteActions({ quote }: QuoteActionsProps) {
      )}
 
      <Button
-      variant="outline"
+      variant="secondary"
       onClick={handleDuplicate}
       disabled={duplicateMutation.isPending}
       className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors disabled:opacity-50"

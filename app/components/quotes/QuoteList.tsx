@@ -172,7 +172,7 @@ export function QuoteList({ filters, onPageChange }: QuoteListProps) {
      </div>
      <div className="flex gap-2">
       <Button
-       variant="outline"
+       variant="secondary"
        size="sm"
        disabled={meta.page === 1}
        onClick={() => onPageChange(meta.page - 1)}
@@ -181,7 +181,7 @@ export function QuoteList({ filters, onPageChange }: QuoteListProps) {
        Föregående
       </Button>
       <Button
-       variant="outline"
+       variant="secondary"
        size="sm"
        disabled={meta.page * meta.limit >= meta.count}
        onClick={() => onPageChange(meta.page + 1)}

@@ -104,7 +104,7 @@ export function SyncLogsTable({ logs, isLoading }: SyncLogsTableProps) {
     <Table>
      <TableHeader>
       <TableRow>
-       <TableHead className="w-12"></TableHead>
+       <TableHead className="w-12">&nbsp;</TableHead>
        <TableHead>Tidpunkt</TableHead>
        <TableHead>Operation</TableHead>
        <TableHead>Resurs</TableHead>

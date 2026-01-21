@@ -15,7 +15,7 @@ interface SyncCustomerButtonProps {
  clientId: string;
  clientName: string;
  disabled?: boolean;
- variant?: 'default' | 'outline' | 'ghost';
+ variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
  size?: 'sm' | 'md' | 'lg';
 }
 
@@ -23,7 +23,7 @@ export function SyncCustomerButton({
  clientId,
  clientName,
  disabled,
- variant = 'default',
+ variant = 'primary',
  size = 'md',
 }: SyncCustomerButtonProps) {
  const [isOpen, setIsOpen] = useState(false);
@@ -77,7 +77,7 @@ export function SyncCustomerButton({
     footer={
      <>
       <Button
-       variant="outline"
+       variant="secondary"
        onClick={() => setIsOpen(false)}
        disabled={syncMutation.isPending}
       >

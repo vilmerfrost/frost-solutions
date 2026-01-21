@@ -41,7 +41,7 @@ export function QuoteTemplatePicker({ onSelect }: QuoteTemplatePickerProps) {
      </div>
      <Button
       size="sm"
-      variant="outline"
+      variant="secondary"
       className="w-full mt-3"
       onClick={() => onSelect(template)}
      >

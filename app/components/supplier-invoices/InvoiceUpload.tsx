@@ -286,7 +286,7 @@ export function InvoiceUpload({ onComplete }: InvoiceUploadProps) {
        <CheckCircle size={20} className="mr-2" />
        Fortsätt till faktura
       </Button>
-      <Button type="button" variant="outline" onClick={handleReset} size="lg">
+      <Button type="button" variant="secondary" onClick={handleReset} size="lg">
        Ladda upp ny fil
       </Button>
      </div>

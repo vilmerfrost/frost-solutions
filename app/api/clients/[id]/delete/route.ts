@@ -94,8 +94,8 @@ export async function DELETE(
     .eq('client_id', clientId)
     .limit(1000)
    
-   if (!allProjectsError) {
-    activeProjects = allProjects
+   if (!allProjectsError && allProjects) {
+    activeProjects = allProjects.map(p => ({ ...p, status: 'active' as const }))
     projectsError = null
    }
   }

@@ -123,16 +123,16 @@ export default function OnboardingPage() {
      updatePayload.org_number = orgNumber.trim()
     }
     
-    const updateResult = await supabase
-     .from('tenants')
-     .update(updatePayload as any)
+    const updateResult = await (supabase
+     .from('tenants') as any)
+     .update(updatePayload)
      .eq('id', currentTenantId)
     
     if (updateResult.error && (updateResult.error.code === '42703' || updateResult.error.message?.includes('org_number'))) {
      // org_number column doesn't exist, try without it
-     await supabase
-      .from('tenants')
-      .update({ name: companyName } as any)
+     await (supabase
+      .from('tenants') as any)
+      .update({ name: companyName })
       .eq('id', currentTenantId)
     }
     

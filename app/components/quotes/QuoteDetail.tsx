@@ -48,7 +48,7 @@ export function QuoteDetail({ quote }: QuoteDetailProps) {
     <div className="flex items-center gap-3">
      <QuoteStatusBadge status={quote.status} />
      <Link href={`/quotes/${quote.id}/edit`}>
-      <Button variant="outline" className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+      <Button variant="secondary" className="hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
        <Edit size={16} className="mr-2" />
        Redigera
       </Button>

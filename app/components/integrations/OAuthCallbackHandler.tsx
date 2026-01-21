@@ -49,11 +49,11 @@ export function OAuthCallbackHandler() {
   // Handle error cases
   else if (errorCode) {
    const errorMessage = OAUTH_ERROR_MESSAGES[errorCode] || 'Ett okänt OAuth-fel inträffade.';
-   toast.error('Anslutning misslyckades', { description: errorMessage });
+   toast.error('Anslutning misslyckades', errorMessage);
    toastShown = true;
   } else if (error) {
    const errorMessage = OAUTH_ERROR_MESSAGES[error] || message || 'Ett okänt fel inträffade.';
-   toast.error('Anslutning misslyckades', { description: errorMessage });
+   toast.error('Anslutning misslyckades', errorMessage);
    toastShown = true;
   }
 

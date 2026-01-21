@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
   if (!validation.success) {
    console.error('[Sync Invoice API] ❌ Validation failed:', validation.error);
    return NextResponse.json(
-    { error: 'Invalid request', details: validation.error.errors },
+    { error: 'Invalid request', details: validation.error.issues },
     { status: 400 }
    );
   }

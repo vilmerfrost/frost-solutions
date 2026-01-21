@@ -209,7 +209,7 @@ export class PayrollAPI {
 
    const result: ApiResponse<PayrollExportResult> = await res.json().catch(() => ({
     success: false,
-    error: `HTTP ${res.status}: ${res.statusText}`,
+    errors: [`HTTP ${res.status}: ${res.statusText}`],
    }));
 
    // Handle warnings as success (not errors)
@@ -231,7 +231,7 @@ export class PayrollAPI {
 
    // Only throw on actual errors (not warnings)
    if (!res.ok) {
-    const errorData = result.error || `HTTP ${res.status}: ${res.statusText}`;
+    const errorData = (result.errors && result.errors[0]) || `HTTP ${res.status}: ${res.statusText}`;
 
     console.error('[PayrollAPI.export] ❌ Failed', {
      status: res.status,

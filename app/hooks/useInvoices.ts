@@ -112,14 +112,14 @@ export function useInvoice(invoiceId: string | undefined) {
 
    // Fallback 1: If desc doesn't exist
    if (error && (error.code === '42703' || error.code === '400') && error.message?.includes('desc')) {
-    const fallback1 = await supabase
+    const fallback1: any = await supabase
      .from('invoices')
      .select('id, amount, customer_name, description, status, issue_date, project_id, client_id')
      .eq('id', invoiceId)
      .eq('tenant_id', tenantId)
      .single()
     
-    if (!fallback1.error) {
+    if (!fallback1.error && fallback1.data) {
      data = { ...fallback1.data, desc: fallback1.data.description || null }
      error = null
     } else {
@@ -129,14 +129,14 @@ export function useInvoice(invoiceId: string | undefined) {
 
    // Fallback 2: If description also doesn't exist
    if (error && (error.code === '42703' || error.code === '400') && error.message?.includes('description')) {
-    const fallback2 = await supabase
+    const fallback2: any = await supabase
      .from('invoices')
      .select('id, amount, customer_name, status, issue_date, project_id, client_id')
      .eq('id', invoiceId)
      .eq('tenant_id', tenantId)
      .single()
     
-    if (!fallback2.error) {
+    if (!fallback2.error && fallback2.data) {
      data = fallback2.data
      error = null
     } else {
@@ -146,14 +146,14 @@ export function useInvoice(invoiceId: string | undefined) {
 
    // Fallback 3: Minimal set
    if (error && (error.code === '42703' || error.code === '400')) {
-    const fallback3 = await supabase
+    const fallback3: any = await supabase
      .from('invoices')
      .select('id, amount, customer_name, project_id, client_id')
      .eq('id', invoiceId)
      .eq('tenant_id', tenantId)
      .single()
     
-    if (!fallback3.error) {
+    if (!fallback3.error && fallback3.data) {
      data = fallback3.data
      error = null
     } else {
@@ -182,8 +182,8 @@ export function useUpdateInvoice() {
   mutationFn: async ({ invoiceId, data }: { invoiceId: string; data: Partial<Invoice> }) => {
    if (!tenantId) throw new Error('Ingen tenant ID')
 
-   const { error } = await supabase
-    .from('invoices')
+   const { error } = await (supabase
+    .from('invoices') as any)
     .update(data)
     .eq('id', invoiceId)
     .eq('tenant_id', tenantId)

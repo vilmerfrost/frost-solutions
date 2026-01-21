@@ -4,7 +4,7 @@ import { createAdminClient } from '@/utils/supabase/admin';
 import type { PerformanceMetrics, AccountingProvider } from '@/types/integrations';
 
 export class PerformanceMonitor {
- private metrics: {
+ private metrics!: {
   syncDurations: Map<string, number[]>;
   apiCallCounts: Map<string, number>;
   errors: Map<string, number>;
@@ -43,9 +43,6 @@ export class PerformanceMonitor {
   const key = `${provider}:${endpoint}`;
   const current = this.metrics.apiCallCounts.get(key) || 0;
   this.metrics.apiCallCounts.set(key, current + 1);
-
-  // Track rate limit usage
-  this.trackRateLimitUsage(provider);
  }
 
  trackError(

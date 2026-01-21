@@ -114,7 +114,7 @@ export default function QuoteDetailPage() {
         {/* Action buttons */}
         <div className="flex flex-col sm:flex-row gap-3">
          <Button
-          variant="default"
+          variant="primary"
           onClick={() => router.push('/quotes')}
           className="flex-1"
          >
@@ -124,7 +124,7 @@ export default function QuoteDetailPage() {
          
          {!is401 && (
           <Button
-           variant="outline"
+           variant="secondary"
            onClick={() => {
             console.log('[QuoteDetailPage] Retrying fetch...')
             refetch()

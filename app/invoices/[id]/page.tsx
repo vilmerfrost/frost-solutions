@@ -62,20 +62,23 @@ export default function InvoicePage() {
   async function fetchInvoice() {
    try {
     // Progressive fallback - start without problematic columns (due_date, number, customer_id)
-    let { data: invData, error: invError } = await supabase
+    const result = await supabase
      .from('invoices')
      .select('id, amount, customer_name, desc, description, status, issue_date, project_id, client_id, tenant_id')
-     .eq('id', invoiceId)
-     .eq('tenant_id', tenantId)
+     .eq('id', invoiceId as string)
+     .eq('tenant_id', tenantId as string)
      .single()
+    
+    let invData: any = result.data
+    let invError: any = result.error
 
     // Fallback 1: If desc column doesn't exist, try without it
     if (invError && (invError.code === '42703' || invError.code === '400' || invError.message?.includes('desc'))) {
-     const fallback1 = await supabase
+     const fallback1: any = await supabase
       .from('invoices')
       .select('id, amount, customer_name, description, status, issue_date, project_id, client_id, tenant_id')
-      .eq('id', invoiceId)
-      .eq('tenant_id', tenantId)
+      .eq('id', invoiceId as string)
+      .eq('tenant_id', tenantId as string)
       .single()
      
      if (!fallback1.error && fallback1.data) {
@@ -88,11 +91,11 @@ export default function InvoicePage() {
 
     // Fallback 2: If description also fails, try without both
     if (invError && (invError.code === '42703' || invError.code === '400' || invError.message?.includes('description'))) {
-     const fallback2 = await supabase
+     const fallback2: any = await supabase
       .from('invoices')
       .select('id, amount, customer_name, status, issue_date, project_id, client_id, tenant_id')
-      .eq('id', invoiceId)
-      .eq('tenant_id', tenantId)
+      .eq('id', invoiceId as string)
+      .eq('tenant_id', tenantId as string)
       .single()
      
      if (!fallback2.error && fallback2.data) {
@@ -105,11 +108,11 @@ export default function InvoicePage() {
 
     // Fallback 3: If other columns don't exist, try minimal set
     if (invError && (invError.code === '42703' || invError.code === '400' || invError.message?.includes('does not exist'))) {
-     const fallback3 = await supabase
+     const fallback3: any = await supabase
       .from('invoices')
       .select('id, amount, customer_name, client_id, project_id, tenant_id')
-      .eq('id', invoiceId)
-      .eq('tenant_id', tenantId)
+      .eq('id', invoiceId as string)
+      .eq('tenant_id', tenantId as string)
       .single()
      
      if (!fallback3.error && fallback3.data) {
@@ -122,11 +125,11 @@ export default function InvoicePage() {
 
     // Fallback 4: Absolute minimal set
     if (invError && (invError.code === '42703' || invError.code === '400')) {
-     const fallback4 = await supabase
+     const fallback4: any = await supabase
       .from('invoices')
       .select('id, tenant_id')
-      .eq('id', invoiceId)
-      .eq('tenant_id', tenantId)
+      .eq('id', invoiceId as string)
+      .eq('tenant_id', tenantId as string)
       .single()
      
      if (!fallback4.error && fallback4.data) {
@@ -160,26 +163,29 @@ export default function InvoicePage() {
     setInvoice(invoiceData)
 
     // Hämta kundens email från client-record om client_id finns
-    if (invoiceData.client_id || invoiceData.customer_id) {
-     const clientId = invoiceData.client_id || invoiceData.customer_id
-     const { data: clientData } = await supabase
+    if (invData.client_id || invData.customer_id) {
+     const clientId = invData.client_id || invData.customer_id
+     const clientResult: any = await supabase
       .from('clients')
       .select('email')
       .eq('id', clientId)
       .maybeSingle()
      
-     if (clientData?.email) {
-      setClientEmail(clientData.email)
+     if (clientResult.data?.email) {
+      setClientEmail(clientResult.data.email)
      }
     }
 
     // Hämta fakturarader om de finns - progressive fallback för saknade kolumner
     // Try without quantity first (column might not exist)
-    let { data: linesData, error: linesError } = await supabase
+    const linesResult = await supabase
      .from('invoice_lines')
      .select('id, description, unit, rate_sek, amount_sek, sort_order')
-     .eq('invoice_id', invoiceId)
+     .eq('invoice_id', invoiceId as string)
      .order('sort_order', { ascending: true })
+    
+    let linesData: any = linesResult.data
+    let linesError: any = linesResult.error
 
     // Fallback 1: Om sort_order saknas
     if (linesError && (linesError.code === '42703' || linesError.code === '400') && linesError.message?.includes('sort_order')) {
@@ -424,8 +430,8 @@ export default function InvoicePage() {
     return
    }
 
-   const { error } = await supabase
-    .from('invoices')
+   const { error } = await (supabase
+    .from('invoices') as any)
     .update({ status: 'paid' })
     .eq('id', invoiceId)
     .eq('tenant_id', tenantId) // Security: Ensure tenant match
@@ -479,8 +485,8 @@ export default function InvoicePage() {
      return
     }
 
-    const { error } = await supabase
-     .from('invoice_lines')
+    const { error } = await (supabase
+     .from('invoice_lines') as any)
      .update({
       description: updatedLine.description,
       quantity: updatedLine.quantity,
@@ -654,8 +660,8 @@ export default function InvoicePage() {
            <td colSpan={5} className="py-8 text-center text-gray-500">
             <div className="mb-2">Inga fakturarader ännu</div>
             <div className="text-sm">Totalt belopp: <span className="font-semibold">{total.toLocaleString('sv-SE')} kr</span></div>
-            {invoice.desc || invoice.description ? (
-             <div className="text-sm mt-2 text-gray-600">{invoice.desc || invoice.description}</div>
+            {(invoice as any)?.desc || (invoice as any)?.description ? (
+             <div className="text-sm mt-2 text-gray-600">{(invoice as any)?.desc || (invoice as any)?.description}</div>
             ) : null}
            </td>
           </tr>

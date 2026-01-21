@@ -11,7 +11,7 @@ import { Check, Edit, Zap, Percent } from 'lucide-react';
 import { toast } from '@/lib/toast';
 
 interface InvoiceAISuggestionProps {
- projectId: string;
+ projectId?: string;
  onUseSuggestion?: (suggestion: any) => void;
 }
 
@@ -20,6 +20,10 @@ export function InvoiceAISuggestion({ projectId, onUseSuggestion }: InvoiceAISug
  const invoiceMutation = useAIInvoiceSuggestion();
 
  const handleGenerate = () => {
+  if (!projectId) {
+   toast.error('Inget projekt valt');
+   return;
+  }
   invoiceMutation.mutate(projectId, {
    onSuccess: (data) => {
     setResponse({ suggestion: data.suggestion, cached: data.cached });
