@@ -3,7 +3,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { createClient } from '@/utils/supabase/client';
+import supabase from '@/utils/supabase/supabaseClient';
 import { Button } from '@/components/ui/button';
 import { CreditCard, Clock, CheckCircle2, Loader2, ArrowLeft, Shield, Zap } from 'lucide-react';
 import FrostLogo from '@/components/FrostLogo';
@@ -12,7 +12,6 @@ export default function PaymentRequiredPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleUpgrade = async () => {
     setLoading(true);
