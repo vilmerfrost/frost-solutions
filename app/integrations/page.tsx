@@ -2,7 +2,7 @@
 
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/Sidebar';
 import { IntegrationCard } from '@/components/integrations/IntegrationCard';
@@ -16,10 +16,10 @@ import {
  useDisconnectIntegration,
  useIntegrationAnalytics,
 } from '@/hooks/useIntegrations';
-import { Settings, RefreshCw } from 'lucide-react';
+import { Settings, RefreshCw, Loader2 } from 'lucide-react';
 import { toast } from '@/lib/toast';
 
-export default function IntegrationsPage() {
+function IntegrationsPageContent() {
  const router = useRouter();
  const searchParams = useSearchParams();
  const [timeRange, setTimeRange] = React.useState(30);
@@ -175,5 +175,17 @@ export default function IntegrationsPage() {
    </main>
   </div>
  );
+}
+
+export default function IntegrationsPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    }>
+      <IntegrationsPageContent />
+    </Suspense>
+  );
 }
 

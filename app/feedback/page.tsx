@@ -1,14 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import FrostLogo from '@/components/FrostLogo'
 import { toast } from '@/lib/toast'
 import supabase from '@/utils/supabase/supabaseClient'
 import AISummary from '@/components/AISummary'
+import { Loader2 } from 'lucide-react'
 
-export default function FeedbackPage() {
+function FeedbackPageContent() {
  const router = useRouter()
  const searchParams = useSearchParams()
  const [mounted, setMounted] = useState(false)
@@ -262,5 +263,17 @@ export default function FeedbackPage() {
    </main>
   </div>
  )
+}
+
+export default function FeedbackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    }>
+      <FeedbackPageContent />
+    </Suspense>
+  );
 }
 
