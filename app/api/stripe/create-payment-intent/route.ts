@@ -7,9 +7,16 @@ import { createAdminClient } from '@/utils/supabase/admin';
 import { createClient } from '@/utils/supabase/server';
 import { extractErrorMessage } from '@/lib/errorUtils';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-12-15.clover',
-});
+// Initialize Stripe lazily to avoid build-time errors
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error('STRIPE_SECRET_KEY is not configured');
+  }
+  return new Stripe(key, {
+    apiVersion: '2025-12-15.clover',
+  });
+}
 
 export const runtime = 'nodejs';
 
@@ -23,6 +30,16 @@ const TOPUP_OPTIONS = [
 
 export async function POST(req: NextRequest) {
   try {
+    // Check Stripe configuration
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json(
+        { success: false, error: 'Stripe är inte konfigurerat' },
+        { status: 503 }
+      );
+    }
+
+    const stripe = getStripe();
+
     const tenantId = await getTenantId();
     if (!tenantId) {
       return NextResponse.json(

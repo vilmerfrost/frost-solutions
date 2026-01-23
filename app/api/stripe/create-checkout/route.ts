@@ -5,14 +5,31 @@ import Stripe from 'stripe';
 import { createClient } from '@/utils/supabase/server';
 import { createAdminClient } from '@/utils/supabase/admin';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2025-12-15.clover',
-});
+// Initialize Stripe lazily to avoid build-time errors
+function getStripe() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error('STRIPE_SECRET_KEY is not configured');
+  }
+  return new Stripe(key, {
+    apiVersion: '2025-12-15.clover',
+  });
+}
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
+    // Check Stripe configuration
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json(
+        { success: false, error: 'Stripe är inte konfigurerat. Kontakta administratören.' },
+        { status: 503 }
+      );
+    }
+
+    const stripe = getStripe();
+
     // Get authenticated user
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -143,6 +160,16 @@ export async function POST(req: NextRequest) {
 // GET endpoint to retrieve checkout session status
 export async function GET(req: NextRequest) {
   try {
+    // Check Stripe configuration
+    if (!process.env.STRIPE_SECRET_KEY) {
+      return NextResponse.json(
+        { success: false, error: 'Stripe är inte konfigurerat' },
+        { status: 503 }
+      );
+    }
+
+    const stripe = getStripe();
+
     const { searchParams } = new URL(req.url);
     const sessionId = searchParams.get('session_id');
 

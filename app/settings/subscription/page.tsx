@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/SidebarClient';
 import { useCurrentSubscription, useCustomerPortal } from '@/hooks/useSubscription';
@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, Calendar, CheckCircle, AlertCircle, ExternalLink, Sparkles } from 'lucide-react';
 import { toast } from '@/lib/toast';
 
-export default function SubscriptionPage() {
+function SubscriptionPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data, isLoading, refetch } = useCurrentSubscription();
