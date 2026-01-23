@@ -117,7 +117,11 @@ export async function POST(req: NextRequest) {
       : plan.stripe_price_id_monthly;
 
     // If no Stripe price configured, create dynamic checkout
-    const baseUrl = req.nextUrl.origin;
+    // Use environment variable for production URL, with request origin as fallback
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL 
+      || process.env.NEXT_PUBLIC_SITE_URL 
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+      || req.nextUrl.origin;
     
     let sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,

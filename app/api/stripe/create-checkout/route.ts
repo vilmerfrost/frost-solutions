@@ -89,8 +89,11 @@ export async function POST(req: NextRequest) {
         .eq('id', user.id);
     }
 
-    // Determine URLs
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    // Determine URLs - use environment variables for production
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL 
+      || process.env.NEXT_PUBLIC_SITE_URL 
+      || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
+      || req.nextUrl.origin;
     const finalSuccessUrl = successUrl || `${baseUrl}/settings/subscription?success=true`;
     const finalCancelUrl = cancelUrl || `${baseUrl}/settings/subscription?canceled=true`;
 
