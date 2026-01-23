@@ -1,0 +1,42 @@
+# =============================================================================
+# Vercel Ignore File
+# Files and directories to exclude from Vercel deployment
+# =============================================================================
+
+# Documentation (internal only)
+docs/
+
+# SQL scripts (run via Supabase, not deployed)
+sql/
+
+# Test files and reports
+tests/
+__tests__/
+playwright-report/
+test-results/
+*.spec.ts
+*.test.ts
+
+# Development scripts
+scripts/
+
+# IDE and editor files
+.cursor/
+.vscode/
+.idea/
+
+# Git files
+.git/
+
+# Package manager files (Vercel handles this)
+node_modules/
+
+# Misc development files
+*.log
+*.tsbuildinfo
+coverage/
+.turbo/
+
+# OS files
+.DS_Store
+Thumbs.db

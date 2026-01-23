@@ -56,12 +56,12 @@ export default function RotAppealPage() {
    }
 
    // Uppdatera ansökan till överklagad
-   const { error: updateError } = await supabase
+   const { error: updateError } = await (supabase as any)
     .from('rot_applications')
     .update({
      status: 'appealed',
      updated_at: new Date().toISOString(),
-    } as any)
+    })
     .eq('id', applicationId)
 
    if (updateError) {

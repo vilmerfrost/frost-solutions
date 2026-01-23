@@ -9,6 +9,8 @@ export default function SignupPage() {
  const [email, setEmail] = useState('')
  const [password, setPassword] = useState('')
  const [fullName, setFullName] = useState('')
+ const [companyName, setCompanyName] = useState('')
+ const [orgNumber, setOrgNumber] = useState('')
  const [loading, setLoading] = useState(false)
  const [error, setError] = useState('')
  
@@ -18,6 +20,20 @@ export default function SignupPage() {
   e.preventDefault()
   setLoading(true)
   setError('')
+
+  // Validate password length
+  if (password.length < 8) {
+   setError('Lösenordet måste vara minst 8 tecken.')
+   setLoading(false)
+   return
+  }
+
+  // Validate company name
+  if (!companyName.trim()) {
+   setError('Företagsnamn krävs.')
+   setLoading(false)
+   return
+  }
   
   try {
    // 1. Create auth user
@@ -27,6 +43,8 @@ export default function SignupPage() {
     options: {
      data: {
       full_name: fullName,
+      company_name: companyName,
+      org_number: orgNumber || null,
      },
     }
    })
@@ -56,6 +74,8 @@ export default function SignupPage() {
      userId: authData.user.id,
      fullName: fullName,
      email: email,
+     companyName: companyName,
+     orgNumber: orgNumber || null,
      trialStartedAt: new Date().toISOString(),
      trialEndsAt: trialEnds.toISOString(),
      subscriptionStatus: 'trial'
@@ -76,7 +96,7 @@ export default function SignupPage() {
    if (err.message?.includes('already registered')) {
     setError('Den här e-postadressen är redan registrerad. Testa att logga in istället.')
    } else if (err.message?.includes('Password')) {
-    setError('Lösenordet måste vara minst 6 tecken.')
+    setError('Lösenordet måste vara minst 8 tecken.')
    } else {
     setError(err.message || 'Något gick fel vid registreringen')
    }
@@ -109,7 +129,7 @@ export default function SignupPage() {
     <form onSubmit={handleSignup} className="space-y-4">
      <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
-       Fullständigt namn
+       Fullständigt namn *
       </label>
       <input
        type="text"
@@ -123,7 +143,7 @@ export default function SignupPage() {
      
      <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
-       E-postadress
+       E-postadress *
       </label>
       <input
        type="email"
@@ -137,16 +157,43 @@ export default function SignupPage() {
      
      <div>
       <label className="block text-sm font-medium text-gray-700 mb-2">
-       Lösenord
+       Lösenord *
       </label>
       <input
        type="password"
        value={password}
        onChange={(e) => setPassword(e.target.value)}
        required
-       minLength={6}
+       minLength={8}
        className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
-       placeholder="Minst 6 tecken"
+       placeholder="Minst 8 tecken"
+      />
+     </div>
+
+     <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+       Företagsnamn *
+      </label>
+      <input
+       type="text"
+       value={companyName}
+       onChange={(e) => setCompanyName(e.target.value)}
+       required
+       className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+       placeholder="Bygg AB"
+      />
+     </div>
+
+     <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+       Organisationsnummer <span className="text-gray-400 font-normal">(valfritt)</span>
+      </label>
+      <input
+       type="text"
+       value={orgNumber}
+       onChange={(e) => setOrgNumber(e.target.value)}
+       className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+       placeholder="556123-4567"
       />
      </div>
      

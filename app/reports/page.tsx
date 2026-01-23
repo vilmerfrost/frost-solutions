@@ -418,7 +418,7 @@ export default function ReportsPage() {
     const { data } = await supabase
      .from('projects')
      .select('id, name')
-     .eq('tenant_id', tenantId)
+     .eq('tenant_id', tenantId as string)
      .order('name', { ascending: true })
 
     if (data) {

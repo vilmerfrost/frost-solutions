@@ -42,7 +42,7 @@ function makeTimeoutFetch(timeoutMs: number) {
  * @returns Supabase client configured with service role
  * @throws Error if service role key or URL is missing
  */
-export function createAdminClient(timeoutMs = 8000, schema: ExposedSchema = 'public'): SupabaseClient {
+export function createAdminClient(timeoutMs = 8000, schema: ExposedSchema = 'public') {
  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
@@ -73,7 +73,7 @@ export function createAdminClient(timeoutMs = 8000, schema: ExposedSchema = 'pub
  * @param timeoutMs - Request timeout in milliseconds (default: 8000)
  * @returns Supabase client configured for app schema
  */
-export function createAppSchemaClient(timeoutMs = 8000): SupabaseClient {
+export function createAppSchemaClient(timeoutMs = 8000) {
  return createAdminClient(timeoutMs, 'app')
 }
 

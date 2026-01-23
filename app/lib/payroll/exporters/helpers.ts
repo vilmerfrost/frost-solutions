@@ -1,4 +1,3 @@
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PayrollValidationIssue } from '@/types/payroll';
 import {
  getAvailableEmployeeColumns,
@@ -13,12 +12,15 @@ type EmployeeRow = {
  hourly_rate_sek?: number | null;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AdminClient = any;
+
 /**
  * Fetch employees for payroll export with robust column detection
  * Uses RPC-based column detection with caching (ChatGPT 5 + Claude 4.5 approach)
  */
 export async function fetchEmployeesForPayroll(
- admin: SupabaseClient,
+ admin: AdminClient,
  tenantId: string,
  warningList: PayrollValidationIssue[]
 ): Promise<EmployeeRow[]> {

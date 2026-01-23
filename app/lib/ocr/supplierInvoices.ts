@@ -6,6 +6,7 @@ import { createAdminClient } from '@/utils/supabase/admin'
 import { createClient } from '@supabase/supabase-js'
 import type { OCRResult } from '@/types/supplierInvoices'
 import { processInvoiceOCR as geminiInvoiceOCR } from '@/lib/ai/frost-bygg-ai-integration'
+import { ocrLogger as logger } from '@/lib/logger'
 
 type TesseractModule = typeof import('tesseract.js')
 
@@ -16,7 +17,7 @@ async function loadTesseract(): Promise<TesseractModule | null> {
   tesseractPromise = import('tesseract.js')
    .then((mod) => (mod.default ? (mod.default as unknown as TesseractModule) : (mod as unknown as TesseractModule)))
    .catch((err) => {
-    console.error('Failed to load tesseract.js', err)
+    logger.error({ error: err }, 'Failed to load tesseract.js')
     return null
    })
  }
@@ -39,7 +40,7 @@ function resolveTesseractPaths() {
    langPath: 'https://tessdata.projectnaptha.com/4.0.0_fast/', // Remote tessdata
   }
  } catch (err) {
-  console.warn('Unable to resolve tesseract.js paths, falling back to defaults', err)
+  logger.warn({ error: err }, 'Unable to resolve tesseract.js paths, falling back to defaults')
   return undefined
  }
 }
@@ -93,7 +94,7 @@ export async function scanInvoiceWithTesseract(buffer: Buffer): Promise<OCRResul
    fields: extractInvoiceFields(text)
   }
  } catch (error) {
-  console.error('Tesseract OCR error:', error)
+  logger.error({ error }, 'Tesseract OCR error')
   throw error
  }
 }
@@ -127,7 +128,7 @@ export async function scanInvoiceWithGemini(
    structuredData: result,
   }
  } catch (error) {
-  console.error('[Gemini OCR] Error:', error)
+  logger.error({ error }, 'Gemini OCR error')
   throw error
  }
 }
@@ -181,7 +182,7 @@ export async function scanInvoiceWithGoogleVision(
    fields: extractInvoiceFields(text)
   }
  } catch (error) {
-  console.error('Google Vision OCR error:', error)
+  logger.error({ error }, 'Google Vision OCR error')
   throw error
  }
 }
@@ -246,39 +247,39 @@ export async function processScannedInvoice(
  // Try Gemini 2.0 Flash first (best quality + cheaper)
  if (hasGeminiKey) {
   try {
-   console.log('[OCR] Attempting Gemini 2.0 Flash OCR...')
+   logger.info({ fileName }, 'Attempting Gemini 2.0 Flash OCR')
    ocr = await scanInvoiceWithGemini(fileBuffer, fileName)
-   console.log('[OCR] Gemini OCR successful, confidence:', ocr.confidence)
+   logger.info({ confidence: ocr.confidence }, 'Gemini OCR successful')
   } catch (geminiError) {
-   console.warn('[OCR] Gemini OCR failed:', geminiError)
+   logger.warn({ error: geminiError }, 'Gemini OCR failed')
   }
  }
 
  // Fallback to Google Vision if Gemini failed or unavailable
  if (!ocr && hasVisionKey) {
   try {
-   console.log('[OCR] Attempting Google Vision OCR...')
+   logger.info({ fileName }, 'Attempting Google Vision OCR')
    ocr = await scanInvoiceWithGoogleVision(fileBuffer, process.env.GOOGLE_VISION_API_KEY)
-   console.log('[OCR] Google Vision OCR successful, confidence:', ocr.confidence)
+   logger.info({ confidence: ocr.confidence }, 'Google Vision OCR successful')
   } catch (visionError) {
-   console.warn('[OCR] Google Vision OCR failed:', visionError)
+   logger.warn({ error: visionError }, 'Google Vision OCR failed')
   }
  }
 
  // Final fallback to Tesseract (free, works offline)
  if (!ocr && isImage) {
   try {
-   console.log('[OCR] Attempting Tesseract OCR (free fallback)...')
+   logger.info({ fileName }, 'Attempting Tesseract OCR (free fallback)')
    ocr = await scanInvoiceWithTesseract(fileBuffer)
-   console.log('[OCR] Tesseract OCR successful, confidence:', ocr.confidence)
+   logger.info({ confidence: ocr.confidence }, 'Tesseract OCR successful')
   } catch (tesseractError) {
-   console.warn('[OCR] Tesseract OCR failed:', tesseractError)
+   logger.warn({ error: tesseractError }, 'Tesseract OCR failed')
   }
  }
 
  // If all OCR methods failed, log warning
  if (!ocr) {
-  console.warn('[OCR] All OCR methods failed or unavailable for mime type:', mimeType || 'okänt')
+  logger.warn({ mimeType: mimeType || 'unknown' }, 'All OCR methods failed or unavailable')
  }
 
  if (!ocr) {
@@ -303,7 +304,7 @@ export async function processScannedInvoice(
 
  // 5) Create invoice using RPC function (handles both invoice and history in transaction)
  // Use JSONB wrapper (v2) for better schema cache compatibility
- console.log('[OCR] Calling RPC insert_supplier_invoice_v2 (JSONB wrapper)...')
+ logger.debug({ tenantId }, 'Calling RPC insert_supplier_invoice_v2 (JSONB wrapper)')
  
  // Build payload object (order doesn't matter with JSONB!)
  const payload = {
@@ -328,7 +329,7 @@ export async function processScannedInvoice(
   Object.entries(payload).filter(([_, value]) => value !== undefined)
  )
  
- console.log('[OCR] RPC payload:', JSON.stringify(cleanPayload, null, 2))
+ logger.debug({ payload: cleanPayload }, 'RPC payload')
  
  // Try v2 (JSONB wrapper) first, fallback to v1 if needed
  let invoiceData: any = null
@@ -342,7 +343,7 @@ export async function processScannedInvoice(
   rpcError = error
  } catch (err: any) {
   // If v2 doesn't exist or fails, try v1 (backwards compatibility)
-  console.warn('[OCR] v2 failed, trying v1...', err.message)
+  logger.warn({ error: err.message }, 'RPC v2 failed, trying v1')
   try {
    const { data, error } = await admin.rpc('insert_supplier_invoice', cleanPayload)
    invoiceData = data
@@ -353,11 +354,12 @@ export async function processScannedInvoice(
  }
 
  if (rpcError) {
-  console.error('[OCR] ❌ RPC call failed:', rpcError)
-  console.error('[OCR] Error code:', rpcError.code)
-  console.error('[OCR] Error message:', rpcError.message)
-  console.error('[OCR] Error details:', rpcError.details)
-  console.error('[OCR] Error hint:', rpcError.hint)
+  logger.error({
+   code: rpcError.code,
+   message: rpcError.message,
+   details: rpcError.details,
+   hint: rpcError.hint
+  }, 'RPC call failed')
   
   // Provide helpful error message
   let errorMsg = `Failed to create invoice: ${rpcError.message}`
@@ -370,15 +372,15 @@ export async function processScannedInvoice(
   throw new Error(errorMsg)
  }
 
- console.log('[OCR] ✅ RPC call successful, response:', invoiceData)
+ logger.info({ invoiceData }, 'RPC call successful')
 
  const invoiceId = invoiceData?.id
  if (!invoiceId) {
-  console.error('[OCR] ❌ No invoice ID in response:', invoiceData)
+  logger.error({ response: invoiceData }, 'No invoice ID in response')
   throw new Error('Invoice created but no ID returned from RPC function')
  }
 
- console.log('[OCR] ✅ Invoice created successfully, ID:', invoiceId)
+ logger.info({ invoiceId }, 'Invoice created successfully')
  return { invoiceId, ocrResult: ocr }
 }
 

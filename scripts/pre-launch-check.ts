@@ -267,6 +267,66 @@ async function runChecks() {
   console.log('');
 
   // ═══════════════════════════════════════════════
+  // 7. CHECK STRIPE CONFIGURATION
+  // ═══════════════════════════════════════════════
+  console.log('7️⃣  Checking Stripe Configuration...\n');
+  
+  const stripeKey = process.env.STRIPE_SECRET_KEY;
+  const stripePriceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID;
+  const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+
+  if (stripeKey && stripeKey.startsWith('sk_')) {
+    const isLive = stripeKey.startsWith('sk_live_');
+    console.log(`   ✅ STRIPE_SECRET_KEY set (${isLive ? 'LIVE' : 'TEST'} mode)`);
+    results.passed++;
+  } else {
+    console.log('   ⚠️  STRIPE_SECRET_KEY not set or invalid');
+    results.warnings++;
+  }
+
+  if (stripePriceId && stripePriceId.startsWith('price_')) {
+    console.log('   ✅ NEXT_PUBLIC_STRIPE_PRICE_ID set');
+    results.passed++;
+  } else {
+    console.log('   ⚠️  NEXT_PUBLIC_STRIPE_PRICE_ID not set');
+    results.warnings++;
+  }
+
+  if (stripeWebhookSecret && stripeWebhookSecret.startsWith('whsec_')) {
+    console.log('   ✅ STRIPE_WEBHOOK_SECRET set');
+    results.passed++;
+  } else {
+    console.log('   ⚠️  STRIPE_WEBHOOK_SECRET not set (needed for webhooks)');
+    results.warnings++;
+  }
+  console.log('');
+
+  // ═══════════════════════════════════════════════
+  // 8. CHECK FORTNOX/VISMA CONFIGURATION
+  // ═══════════════════════════════════════════════
+  console.log('8️⃣  Checking Integration Configuration...\n');
+
+  const fortnoxClientId = process.env.FORTNOX_CLIENT_ID;
+  const vismaClientId = process.env.VISMA_CLIENT_ID;
+
+  if (fortnoxClientId && !fortnoxClientId.includes('ditt_fortnox')) {
+    console.log('   ✅ FORTNOX_CLIENT_ID set');
+    results.passed++;
+  } else {
+    console.log('   ⚠️  FORTNOX_CLIENT_ID not set (optional)');
+    results.warnings++;
+  }
+
+  if (vismaClientId && !vismaClientId.includes('ditt_visma')) {
+    console.log('   ✅ VISMA_CLIENT_ID set');
+    results.passed++;
+  } else {
+    console.log('   ⚠️  VISMA_CLIENT_ID not set (optional)');
+    results.warnings++;
+  }
+  console.log('');
+
+  // ═══════════════════════════════════════════════
   // SUMMARY
   // ═══════════════════════════════════════════════
   printSummary(results);

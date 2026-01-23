@@ -11,12 +11,14 @@ import type {
 } from '@/types/supplierInvoices'
 
 export interface SupplierInvoiceFilters {
- status?: string
- projectId?: string
- supplierId?: string
+ status?: string | 'all'
+ projectId?: string | 'all'
+ supplierId?: string | 'all'
  search?: string
  from?: string
  to?: string
+ dateFrom?: string
+ dateTo?: string
  page?: number
  limit?: number
 }

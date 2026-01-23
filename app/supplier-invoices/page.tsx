@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button'
 import { InvoiceList } from '@/components/supplier-invoices/InvoiceList'
 import { InvoiceFilters } from '@/components/supplier-invoices/InvoiceFilters'
 import { Plus, FileText } from 'lucide-react'
-import type { SupplierInvoiceFilters } from '@/hooks/useSupplierInvoices'
+import type { SupplierInvoiceFilters } from '@/types/supplierInvoices'
 import { useSuppliers } from '@/hooks/useSuppliers'
 
 export default function SupplierInvoicesPage() {

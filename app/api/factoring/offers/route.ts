@@ -1,30 +1,34 @@
 // app/api/factoring/offers/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import { z } from 'zod';
-import { createAdminClient } from '@/utils/supabase/admin';
-import { getTenantId } from '@/lib/serverTenant';
-import { extractErrorMessage } from '@/lib/errorUtils';
-import { resursRequest } from '@/lib/factoring/resursClient';
+import { NextRequest, NextResponse } from 'next/server'
+import { z } from 'zod'
+import { createAdminClient } from '@/utils/supabase/admin'
+import { getTenantId } from '@/lib/serverTenant'
+import { extractErrorMessage } from '@/lib/errorUtils'
+import { resursRequest } from '@/lib/factoring/resursClient'
+import { decryptSecretForTenant } from '@/lib/factoring/factoring-utils'
+import { createLogger } from '@/lib/logger'
 
-export const runtime = 'nodejs';
-export const dynamic = 'force-dynamic';
+const logger = createLogger('factoring')
+
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 const OfferInput = z.object({
  invoiceId: z.string().uuid(),
  idempotencyKey: z.string().optional(),
-});
+})
 
 export async function POST(req: NextRequest) {
  try {
-  const tenantId = await getTenantId();
+  const tenantId = await getTenantId()
   if (!tenantId) {
-   return NextResponse.json({ error: 'Ingen tenant.' }, { status: 401 });
+   return NextResponse.json({ error: 'Ingen tenant.' }, { status: 401 })
   }
 
-  const body = await req.json();
-  const { invoiceId, idempotencyKey } = OfferInput.parse(body);
+  const body = await req.json()
+  const { invoiceId, idempotencyKey } = OfferInput.parse(body)
 
-  const admin = createAdminClient();
+  const admin = createAdminClient()
 
   // Hämta integration + decrypt secret
   const { data: integ, error: iErr } = await admin
@@ -33,21 +37,22 @@ export async function POST(req: NextRequest) {
    .select('*')
    .eq('tenant_id', tenantId)
    .eq('provider', 'resurs')
-   .maybeSingle();
+   .maybeSingle()
 
   if (iErr || !integ || !integ.is_active) {
-   throw new Error('Ingen aktiv Resurs-integration');
+   throw new Error('Ingen aktiv Resurs-integration')
   }
 
-  // TODO: Implement decryptSecretForTenant function
-  // For now, use placeholder
-  const secret = process.env.RESURS_API_SECRET || integ.api_key_enc;
+  // Decrypt the API secret
+  const secret = await decryptSecretForTenant(integ.api_key_enc, tenantId)
+  logger.debug({ tenantId }, 'Successfully decrypted Resurs API secret')
+  
   const cfg = {
    baseUrl: process.env.RESURS_BASE_URL || 'https://merchant.api.resurs.com/v2',
    merchantId: integ.merchant_id,
    keyId: integ.api_key_id,
    keySecret: secret,
-  };
+  }
 
   // Bygg payload från er invoices-tabell
   const { data: inv } = await admin

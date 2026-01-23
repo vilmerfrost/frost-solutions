@@ -9,6 +9,7 @@ export interface Supplier {
  org_number?: string | null
  email?: string | null
  phone?: string | null
+ notes?: string | null
  default_payment_terms_days: number
  currency: string
  created_at: string
@@ -159,4 +160,6 @@ export interface SupplierInvoiceFilters {
  search?: string
  dateFrom?: string
  dateTo?: string
+ page?: number
+ limit?: number
 }

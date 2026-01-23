@@ -2,8 +2,10 @@
 // Robust column detection for time_entries with caching and mutex protection
 // Based on best practices from Claude 4.5, Gemini 2.5, ChatGPT 5, and Deepseek
 
-import type { SupabaseClient } from '@supabase/supabase-js';
 import type { PayrollValidationIssue } from '@/types/payroll';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AdminClient = any;
 
 interface ColumnCheckResult {
  available: string[];
@@ -48,7 +50,7 @@ const DETECTION_LOCKS = new Map<string, Promise<ColumnCheckResult>>();
  * Based on Claude 4.5's comprehensive approach + ChatGPT 5's robust fallback
  */
 export async function getAvailableTimeEntryColumns(
- adminClient: SupabaseClient,
+ adminClient: AdminClient,
  tenantId: string
 ): Promise<ColumnCheckResult> {
  const cacheKey = `time_entries_${tenantId}`;

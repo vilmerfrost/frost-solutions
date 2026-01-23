@@ -223,9 +223,9 @@ export default function TimeTrackingPage() {
         placeholder="Beskriv vad som utfördes..."
        />
 
-       {/* Calculation */}
-       <CalculationBox
-        title={null}
+        {/* Calculation */}
+        <CalculationBox
+         title={undefined}
         items={[
          { label: `${startTime} - ${endTime} med ${breakDuration} rast`, value: `= ${totalHours.toFixed(1)}h` },
          { label: 'OB-tillägg', value: `${obHours > 0 ? obHours.toFixed(1) : 'Ingen'} OB`, icon: obHours > 0 ? '🌙' : undefined },

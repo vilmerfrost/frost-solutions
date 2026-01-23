@@ -75,7 +75,7 @@ export default function NewReportPage() {
  const [multiProjectMode, setMultiProjectMode] = useState(false)
  const [projectEntries, setProjectEntries] = useState<Array<{ projectId: string, hours: number }>>([{ projectId: '', hours: 0 }])
  const [breakMinutes, setBreakMinutes] = useState(0)
- const [isOnline, setIsOnline] = useState<boolean>(true)
+ const [isOnline, setIsOnline] = useState<boolean | null>(null)
  const [fetchError, setFetchError] = useState<string | null>(null)
  const [isMounted, setIsMounted] = useState(false)
  const { isAdmin } = useAdmin()
@@ -242,7 +242,7 @@ export default function NewReportPage() {
     }
    }
    
-   if (isOnline === false) {
+   if (!isOnline) {
     // Offline - försök läsa från cache
     try {
      const cached = localStorage.getItem('currentEmployeeId')
@@ -349,7 +349,7 @@ export default function NewReportPage() {
   if (isOnline === null) return
   
   // Offline handling - läs från cache
-  if (isOnline === false) {
+  if (!isOnline) {
    try {
     const cachedProjects = localStorage.getItem(`projects:${tenantId}`)
     const cachedEmployees = localStorage.getItem(`employees:${tenantId}`)
@@ -421,14 +421,14 @@ export default function NewReportPage() {
     } else {
      setProjects([])
      // No cache available
-     if (isOnline === false && projects.length === 0) {
+     if (!isOnline && projects.length === 0) {
       setFetchError('offline')
      }
     }
    } catch (cacheErr) {
     console.warn('Could not read cached projects:', cacheErr)
     setProjects([])
-    if (isOnline === false) {
+    if (!isOnline) {
      setFetchError('offline')
     }
    }
@@ -494,14 +494,14 @@ export default function NewReportPage() {
     } else {
      setEmployees([])
      // No cache available
-     if (isOnline === false && employees.length === 0) {
+     if (!isOnline && employees.length === 0) {
       setFetchError('offline')
      }
     }
    } catch (cacheErr) {
     console.warn('Could not read cached employees:', cacheErr)
     setEmployees([])
-    if (isOnline === false) {
+    if (!isOnline) {
      setFetchError('offline')
     }
    }
@@ -551,7 +551,7 @@ export default function NewReportPage() {
   
   // Don't block if online status is unknown (null) - assume online
   // Only block if explicitly offline
-  if (isOnline === false) {
+  if (!isOnline) {
    // This should not happen anymore since we save offline, but keep as safety
    console.log('Offline detected, saving to queue...')
   }
@@ -850,7 +850,7 @@ export default function NewReportPage() {
     }
     
     // Om offline, spara direkt till queue
-    if (isOnline === false) {
+    if (!isOnline) {
      console.log('📴 Offline: Saving to queue')
      if (saveOffline(entryPayload)) {
       offlineCount++
@@ -918,7 +918,7 @@ export default function NewReportPage() {
   
   // Single project mode - original logic
   // Om offline, spara direkt till queue
-  if (isOnline === false) {
+  if (!isOnline) {
    console.log('📴 Offline: Saving single entry to queue')
    if (saveOffline(basePayload)) {
     toast.success('Tidsrapport sparad offline och synkas när du är online igen!')
@@ -1066,7 +1066,7 @@ export default function NewReportPage() {
      )}
 
      {/* Offline banner */}
-     {isOnline === false && (
+     {!isOnline && (
       <div className="mb-6 rounded-md border border-amber-500 bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-300 px-4 py-3 text-sm">
        <div className="flex items-center gap-2">
         <span>📴</span>
