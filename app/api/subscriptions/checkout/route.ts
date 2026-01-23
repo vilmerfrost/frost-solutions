@@ -50,30 +50,51 @@ export async function POST(req: NextRequest) {
     }
 
     const body = await req.json();
-    const { planId, billingCycle = 'monthly' } = body;
+    const { planId, billingCycle = 'monthly', skipTrial = false } = body;
 
-    if (!planId) {
-      return NextResponse.json(
-        { success: false, error: 'Plan ID required' },
-        { status: 400 }
-      );
-    }
+    // planId is optional - use default Pro plan if not provided
+    const effectivePlanId = planId || 'pro';
 
     const admin = createAdminClient();
 
-    // Get plan
-    const { data: plan, error: planError } = await admin
+    // Get plan - try by id first, then by name
+    let plan = null;
+    let planError = null;
+    
+    const { data: planById, error: planByIdError } = await admin
       .from('subscription_plans')
       .select('*')
-      .eq('id', planId)
+      .eq('id', effectivePlanId)
       .eq('is_active', true)
-      .single();
+      .maybeSingle();
+    
+    if (planById) {
+      plan = planById;
+    } else {
+      // Try by name (e.g., 'pro')
+      const { data: planByName, error: planByNameError } = await admin
+        .from('subscription_plans')
+        .select('*')
+        .eq('name', effectivePlanId)
+        .eq('is_active', true)
+        .maybeSingle();
+      
+      plan = planByName;
+      planError = planByNameError;
+    }
 
     if (planError || !plan) {
-      return NextResponse.json(
-        { success: false, error: 'Invalid plan' },
-        { status: 400 }
-      );
+      // Use default values if no plan found in DB
+      plan = {
+        id: 'pro',
+        name: 'pro',
+        display_name: 'Frost Bygg Pro',
+        description: 'Komplett byggplattform för små och medelstora företag',
+        price_monthly_sek: 499,
+        price_yearly_sek: 4990,
+        stripe_price_id_monthly: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || null,
+        stripe_price_id_yearly: null,
+      };
     }
 
     // Get tenant info
@@ -123,26 +144,35 @@ export async function POST(req: NextRequest) {
       || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : null)
       || req.nextUrl.origin;
     
+    // Configure session based on whether to skip trial
+    const trialDays = skipTrial ? undefined : 30; // 30-day free trial
+    
     let sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,
       mode: 'subscription',
-      success_url: `${baseUrl}/settings/subscription?success=true&session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${baseUrl}/settings/subscription?canceled=true`,
+      // Don't require payment method during trial - only collect if skipping trial
+      payment_method_collection: skipTrial ? 'always' : 'if_required',
+      success_url: skipTrial 
+        ? `${baseUrl}/settings/subscription?payment_success=true&session_id={CHECKOUT_SESSION_ID}`
+        : `${baseUrl}/dashboard?trial_started=true`,
+      cancel_url: skipTrial 
+        ? `${baseUrl}/payment-required`
+        : `${baseUrl}/settings/subscription?canceled=true`,
       metadata: {
         tenant_id: tenantId,
-        plan_id: planId,
+        plan_id: plan.id,
         plan_name: plan.name,
         billing_cycle: billingCycle,
+        skip_trial: skipTrial ? 'true' : 'false',
       },
       subscription_data: {
         metadata: {
           tenant_id: tenantId,
-          plan_id: planId,
+          plan_id: plan.id,
         },
-        trial_period_days: 14, // 14-day trial
+        ...(trialDays ? { trial_period_days: trialDays } : {}),
       },
-      billing_address_collection: 'required',
-      tax_id_collection: { enabled: true },
+      billing_address_collection: 'auto',
       allow_promotion_codes: true,
     };
 
