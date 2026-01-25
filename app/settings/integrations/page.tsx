@@ -12,6 +12,7 @@ import { IntegrationCard } from '@/components/integrations/IntegrationCard';
 import { IntegrationWarning } from '@/components/integrations/IntegrationWarning';
 import { OAuthCallbackHandler } from '@/components/integrations/OAuthCallbackHandler';
 import type { AccountingProvider } from '@/types/integrations';
+import { BASE_PATH } from '@/utils/url';
 
 /**
  * Huvudsida för hantering av integrationer (t.ex. Fortnox).
@@ -106,7 +107,7 @@ export default function IntegrationsPage() {
           </p>
           <div className="pt-2 flex-shrink-0">
            <a
-            href="/faq#integrationer"
+            href={`${BASE_PATH}/faq#integrationer`}
             className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-500 dark:hover:bg-blue-600 text-white rounded-lg font-semibold text-sm transition-all shadow-md hover:shadow-md hover:scale-105 active:scale-95"
             style={{ 
              display: 'inline-flex', 

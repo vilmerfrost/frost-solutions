@@ -44,24 +44,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
      }
     }
     
-    // PRIORITY 3: JWT claim via /api/debug/me (if available)
-    const res = await fetch(`${BASE_PATH}/api/debug/me`, { cache: 'no-store' })
-    if (res.ok) {
-     const data = await res.json()
-     if (data?.error && data.error !== 'Cookies not available') {
-      console.warn('debug/me returned error:', data.error)
-     } else {
-      const claimTenant = data?.tenant_id || data?.app_metadata?.tenant_id
-      if (claimTenant) {
-       console.log('✅ TenantContext: Found tenant via JWT:', claimTenant)
-       setTenantId(claimTenant)
-       setIsLoading(false)
-       return
-      }
-     }
-    }
-    
-    // PRIORITY 4: Legacy fallback to employees table (should rarely be needed)
+    // PRIORITY 3: Legacy fallback to employees table (should rarely be needed)
     console.warn('⚠️ TenantContext: All API routes failed, trying legacy method...')
     const { data: userData, error: userError } = await supabase.auth.getUser()
     

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
 import FrostLogo from '@/components/FrostLogo'
+import { BASE_PATH } from '@/utils/url'
 
 interface FAQItem {
  question: string
@@ -575,7 +576,7 @@ export default function FAQPage() {
       </p>
       <div className="flex gap-3">
        <a
-        href="/feedback"
+        href={`${BASE_PATH}/feedback`}
         className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-[8px] font-semibold transition-colors"
        >
         💬 Kontakta Support

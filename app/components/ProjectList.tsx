@@ -1,4 +1,5 @@
 import ProjectCard from './ProjectCard'
+import Link from 'next/link'
 
 type ProjectType = {
  id: string
@@ -21,9 +22,9 @@ export default function ProjectList({ projects }: Props) {
    </div>
    {showAll && (
     <div className="mt-4 flex justify-end">
-     <a href="/projects" className="text-blue-600 underline font-semibold px-4 py-2">
+     <Link href="/projects" className="text-blue-600 underline font-semibold px-4 py-2">
       Visa alla projekt
-     </a>
+     </Link>
     </div>
    )}
   </section>

@@ -3,6 +3,7 @@ import { getTenantId } from '@/lib/serverTenant'
 import DashboardClient from './DashboardClient'
 import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
+import Link from 'next/link'
 
 interface ProjectType {
  id: string
@@ -81,16 +82,16 @@ export default async function DashboardPage() {
    <div className="min-h-screen bg-white flex items-center justify-center">
     <div className="text-center max-w-md p-8">
      <p className="text-gray-600 mb-4">Ingen tenant hittad. Du behöver slutföra onboarding först.</p>
-     <a 
+     <Link 
       href="/onboarding" 
       className="inline-block bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
      >
       Starta onboarding
-     </a>
+     </Link>
      <div className="mt-4">
-      <a href="/login" className="text-sm text-gray-500 hover:text-gray-700 underline">
+      <Link href="/login" className="text-sm text-gray-500 hover:text-gray-700 underline">
        Logga in igen
-      </a>
+      </Link>
      </div>
     </div>
    </div>

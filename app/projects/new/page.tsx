@@ -7,6 +7,7 @@ import Sidebar from '@/components/Sidebar'
 import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
 import supabase from '@/utils/supabase/supabaseClient'
+import { BASE_PATH } from '@/utils/url'
 
 export default function NewProjectPage() {
  const router = useRouter()
@@ -142,7 +143,7 @@ export default function NewProjectPage() {
        </select>
        {clients.length === 0 && (
         <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-         Inga kunder hittades. <a href="/clients/new" className="text-primary-500 dark:text-primary-400 hover:underline">Lägg till kund</a>
+         Inga kunder hittades. <a href={`${BASE_PATH}/clients/new`} className="text-primary-500 dark:text-primary-400 hover:underline">Lägg till kund</a>
         </p>
        )}
       </div>

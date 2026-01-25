@@ -188,23 +188,17 @@ function CallbackContent() {
 
     console.log('Cookies set, verifying...');
 
-    // Step 4: Wait for cookies to be set and verify
+    // Step 4: Wait for cookies to be set and verify via Supabase auth
     let cookiesSet = false;
     for (let i = 0; i < 5; i++) {
      await new Promise(resolve => setTimeout(resolve, 300));
      if (!mounted) return;
      
      try {
-      const verifyCookies = await fetch('/api/debug/me', {
-       credentials: 'include',
-       cache: 'no-store',
-      });
-      if (verifyCookies.ok) {
-       const data = await verifyCookies.json();
-       if (data?.hasCookie) {
-        cookiesSet = true;
-        break;
-       }
+      const { data: { user: verifyUser } } = await supabase.auth.getUser();
+      if (verifyUser) {
+       cookiesSet = true;
+       break;
       }
      } catch (e) {
       // Continue retrying
@@ -212,14 +206,14 @@ function CallbackContent() {
     }
     
     if (!cookiesSet) {
-     console.error('Cookies were not set after multiple retries');
+     console.error('Session not established after multiple retries');
      if (mounted) {
       router.replace('/login?error=cookies_failed');
      }
      return;
     }
 
-    // Step 5: Get user (should work now that cookies are set)
+    // Step 5: Get user (should work now that session is established)
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     if (userError || !user) {

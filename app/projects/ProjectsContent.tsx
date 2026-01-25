@@ -8,6 +8,7 @@ import Sidebar from '@/components/Sidebar'
 import { createProject } from './actions'
 import { toast } from '@/lib/toast'
 import SearchBar from '@/components/SearchBar'
+import { BASE_PATH } from '@/utils/url'
 import FilterSortBar from '@/components/FilterSortBar'
 import { useAdmin } from '@/hooks/useAdmin'
 import { PermissionGuard } from '@/components/rbac/PermissionGuard'
@@ -572,7 +573,7 @@ export default function ProjectsContent() {
          </select>
          {clients.length === 0 && (
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-           Inga kunder hittades. <a href="/clients/new" className="text-primary-500 dark:text-primary-400 hover:underline">Lägg till kund</a>
+           Inga kunder hittades. <a href={`${BASE_PATH}/clients/new`} className="text-primary-500 dark:text-primary-400 hover:underline">Lägg till kund</a>
           </p>
          )}
         </div>

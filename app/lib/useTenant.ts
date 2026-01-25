@@ -2,11 +2,10 @@
 
 import { useEffect, useState } from 'react'
 import { useTenant as useTenantContext } from '@/context/TenantContext'
-import { BASE_PATH } from '@/utils/url'
 
 /**
  * Unified tenant resolution hook for client components.
- * Priority: JWT claim (via /api/debug/me) > Context > localStorage fallback
+ * Priority: Context > localStorage fallback
  * 
  * Security: Server-side always validates via JWT app_metadata.tenant_id.
  * This hook is for UI convenience only.
@@ -26,30 +25,8 @@ export function useTenant(): { tenantId: string | null; isLoading: boolean } {
    return
   }
 
-  // Try to fetch from /api/debug/me (JWT claim)
+  // Try to get tenant from localStorage as fallback
   async function fetchFromServer() {
-   try {
-    const res = await fetch(`${BASE_PATH}/api/debug/me`)
-    if (res.ok) {
-     const data = await res.json()
-     const claimTenant = data?.tenant_id || data?.app_metadata?.tenant_id
-     if (claimTenant) {
-      setTenantId(claimTenant)
-      context.setTenantId(claimTenant)
-      // Sync to localStorage for legacy code (TODO: remove in PR cleanup)
-      if (typeof window !== 'undefined') {
-       try {
-        localStorage.setItem('tenantId', claimTenant)
-       } catch {}
-      }
-      setIsLoading(false)
-      return
-     }
-    }
-   } catch (err) {
-    // Silent fail, fall through
-   }
-
    // Fallback: localStorage (legacy, for migration period - TODO: remove)
    if (typeof window !== 'undefined') {
     try {

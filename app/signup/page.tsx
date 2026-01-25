@@ -321,7 +321,7 @@ function SignupContent() {
      {/* Login Link */}
      <p className="text-center text-gray-500 mt-6">
       Har du redan ett konto?{" "}
-      <a href="/login" className="text-primary-500 hover:text-primary-600 hover:underline font-medium transition-colors">
+      <a href={`${BASE_PATH}/login`} className="text-primary-500 hover:text-primary-600 hover:underline font-medium transition-colors">
        Logga in
       </a>
      </p>

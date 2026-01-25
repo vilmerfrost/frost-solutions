@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
+import { BASE_PATH } from '@/utils/url'
 
 interface Client {
  id: string
@@ -238,7 +239,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
        <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
         Inga kunder hittades.{' '}
         <a
-         href="/clients/new"
+         href={`${BASE_PATH}/clients/new`}
          className="text-primary-500 dark:text-primary-400 hover:underline"
          onClick={(e) => {
           e.preventDefault()

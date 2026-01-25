@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import InvoiceDownload from '@/projects/[id]/invoice/InvoiceDownload' // återanvänd knappen
+import Link from 'next/link'
 
 function sek(n: number) {
  try { return Number(n ?? 0).toLocaleString('sv-SE',{style:'currency',currency:'SEK'}) } catch { return `${Math.round(Number(n??0))} kr` }
@@ -14,7 +15,7 @@ export default async function LockedInvoicePage({ params }: { params: { id: stri
 
  const { data: { user } } = await supabase.auth.getUser()
  if (!user) {
-  return <div className="mx-auto max-w-xl p-8">Du är inte inloggad. <a className="underline" href="/login">Logga in</a></div>
+  return <div className="mx-auto max-w-xl p-8">Du är inte inloggad. <Link className="underline" href="/login">Logga in</Link></div>
  }
 
  const { data: invoice, error: invErr } = await supabase
@@ -48,7 +49,7 @@ export default async function LockedInvoicePage({ params }: { params: { id: stri
    <div className="flex items-center justify-between">
     <h1 className="text-2xl sm:text-3xl font-bold">Faktura {invoice.number}</h1>
     <div className="flex gap-2">
-     <a href="/projects" className="btn-secondary px-4 py-2">Projekt</a>
+     <Link href="/projects" className="btn-secondary px-4 py-2">Projekt</Link>
      <InvoiceDownload targetId="pdf-invoice" fileName={`faktura-${invoice.number}.pdf`} />
     </div>
    </div>

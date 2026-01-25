@@ -9,6 +9,7 @@ import { toast } from '@/lib/toast'
 import { InvoiceAISuggestion } from '@/components/ai/InvoiceAISuggestion'
 import { PillTabs } from '@/components/ui/pill-tabs'
 import { FileText, Folder, Sparkles } from 'lucide-react'
+import { BASE_PATH } from '@/utils/url'
 
 export default function NewInvoiceContent() {
  const router = useRouter()
@@ -504,7 +505,7 @@ export default function NewInvoiceContent() {
          )}
          {!loadingProjects && projects.length === 0 && (
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-           Inga projekt hittades. <a href="/projects/new" className="text-primary-500 dark:text-primary-400 hover:underline">Skapa projekt</a>
+           Inga projekt hittades. <a href={`${BASE_PATH}/projects/new`} className="text-primary-500 dark:text-primary-400 hover:underline">Skapa projekt</a>
           </p>
          )}
         </div>
@@ -572,7 +573,7 @@ export default function NewInvoiceContent() {
          </select>
          {clients.length === 0 && (
           <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">
-           Inga kunder hittades. <a href="/clients/new" className="text-primary-500 dark:text-primary-400 hover:underline">Lägg till kund</a>
+           Inga kunder hittades. <a href={`${BASE_PATH}/clients/new`} className="text-primary-500 dark:text-primary-400 hover:underline">Lägg till kund</a>
           </p>
          )}
         </div>

@@ -26,7 +26,7 @@ export default async function PayrollPage({ searchParams }: { searchParams?: Rec
  const { data: authData } = await supabase.auth.getUser()
  const user = authData?.user
  if (!user) {
-  return <div className="mx-auto max-w-xl p-8">Du är inte inloggad. <a className="underline" href="/login">Logga in</a></div>
+  return <div className="mx-auto max-w-xl p-8">Du är inte inloggad. <Link className="underline" href="/login">Logga in</Link></div>
  }
 
  // Use unified tenant resolution
