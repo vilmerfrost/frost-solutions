@@ -1,0 +1,283 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+/* Marketing-specific CSS variables - Bygglet-Inspired Clean Design */
+.marketing-wrapper {
+  /* Light Mode */
+  --background: 205 35% 96%;
+  --foreground: 213 35% 20%;
+
+  --card: 0 0% 100%;
+  --card-foreground: 213 35% 20%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 213 35% 20%;
+
+  /* Deep navy primary - professional, trustworthy */
+  --primary: 213 45% 25%;
+  --primary-foreground: 0 0% 100%;
+
+  /* Orange accent - matches Bygglet's CTA */
+  --accent: 24 85% 55%;
+  --accent-foreground: 0 0% 100%;
+
+  /* Secondary - muted navy */
+  --secondary: 213 25% 92%;
+  --secondary-foreground: 213 35% 25%;
+
+  --muted: 213 20% 94%;
+  --muted-foreground: 213 15% 45%;
+
+  /* Success green */
+  --success: 142 50% 45%;
+  --success-foreground: 0 0% 100%;
+
+  --destructive: 0 70% 50%;
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 213 20% 88%;
+  --input: 213 20% 88%;
+  --ring: 213 45% 25%;
+
+  --radius: 0.5rem;
+
+  /* Brand tokens */
+  --frost-navy: 213 45% 25%;
+  --frost-orange: 24 85% 55%;
+  --frost-teal: 175 45% 45%;
+  --frost-gray: 213 15% 45%;
+  --frost-light: 205 35% 96%;
+  
+  /* Clean shadows */
+  --shadow-sm: 0 1px 2px 0 hsl(213 35% 20% / 0.03);
+  --shadow-md: 0 4px 6px -1px hsl(213 35% 20% / 0.05);
+  --shadow-lg: 0 10px 15px -3px hsl(213 35% 20% / 0.08);
+  
+  /* Sidebar */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 213 35% 20%;
+  --sidebar-primary: 213 45% 25%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 213 20% 95%;
+  --sidebar-accent-foreground: 213 35% 25%;
+  --sidebar-border: 213 20% 90%;
+  --sidebar-ring: 213 45% 25%;
+}
+
+.marketing-wrapper.dark {
+  /* Dark Mode - Professional */
+  --background: 213 25% 10%;
+  --foreground: 213 10% 95%;
+
+  --card: 213 25% 13%;
+  --card-foreground: 213 10% 95%;
+
+  --popover: 213 25% 13%;
+  --popover-foreground: 213 10% 95%;
+
+  --primary: 24 85% 55%;
+  --primary-foreground: 0 0% 100%;
+
+  --accent: 175 45% 50%;
+  --accent-foreground: 213 25% 10%;
+
+  --secondary: 213 20% 20%;
+  --secondary-foreground: 213 10% 95%;
+
+  --muted: 213 20% 18%;
+  --muted-foreground: 213 10% 55%;
+
+  --success: 142 45% 50%;
+  --success-foreground: 0 0% 100%;
+
+  --destructive: 0 60% 45%;
+  --destructive-foreground: 213 10% 95%;
+
+  --border: 213 20% 22%;
+  --input: 213 20% 22%;
+  --ring: 24 85% 55%;
+
+  /* Brand tokens - Dark */
+  --frost-light: 213 25% 15%;
+  
+  /* Shadows - Dark */
+  --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.15);
+  --shadow-md: 0 4px 6px -1px hsl(0 0% 0% / 0.2);
+  --shadow-lg: 0 10px 15px -3px hsl(0 0% 0% / 0.25);
+  
+  /* Sidebar - Dark */
+  --sidebar-background: 213 25% 13%;
+  --sidebar-foreground: 213 10% 95%;
+  --sidebar-primary: 24 85% 55%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 213 20% 18%;
+  --sidebar-accent-foreground: 213 10% 95%;
+  --sidebar-border: 213 20% 22%;
+  --sidebar-ring: 24 85% 55%;
+}
+
+.marketing-wrapper {
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.marketing-wrapper * {
+  border-color: hsl(var(--border));
+}
+
+/* Section container with consistent max-width */
+.marketing-wrapper .section-container {
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 80rem;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .marketing-wrapper .section-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .marketing-wrapper .section-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Clean card style */
+.marketing-wrapper .card-clean {
+  border-radius: 0.5rem;
+  background-color: hsl(var(--card));
+  border: 1px solid hsl(var(--border));
+  box-shadow: var(--shadow-md);
+}
+
+/* Professional badge */
+.marketing-wrapper .badge-frost {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border-radius: 9999px;
+  background: hsl(var(--accent) / 0.1);
+  color: hsl(var(--accent));
+}
+
+.marketing-wrapper.dark .badge-frost {
+  background: hsl(var(--accent) / 0.15);
+}
+
+/* Link with underline animation */
+.marketing-wrapper .link-underline {
+  position: relative;
+}
+
+.marketing-wrapper .link-underline::after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  width: 0;
+  transition: all 200ms;
+  content: '';
+  background: hsl(var(--accent));
+}
+
+.marketing-wrapper .link-underline:hover::after {
+  width: 100%;
+}
+
+/* Glass effect for navbar */
+.marketing-wrapper .glass {
+  backdrop-filter: blur(12px);
+  background: hsl(var(--background) / 0.9);
+}
+
+/* Fade animations */
+.marketing-wrapper .animate-fade-in-up {
+  animation: fadeInUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  opacity: 0;
+}
+
+.marketing-wrapper .animate-fade-in {
+  animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Stagger delays */
+.marketing-wrapper .stagger-1 { animation-delay: 0.05s; }
+.marketing-wrapper .stagger-2 { animation-delay: 0.1s; }
+.marketing-wrapper .stagger-3 { animation-delay: 0.15s; }
+.marketing-wrapper .stagger-4 { animation-delay: 0.2s; }
+.marketing-wrapper .stagger-5 { animation-delay: 0.25s; }
+.marketing-wrapper .stagger-6 { animation-delay: 0.3s; }
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(-15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.marketing-wrapper .animate-slide-in-right {
+  animation: slideInRight 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Scrolling logos */
+@keyframes scroll-logos {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.marketing-wrapper .animate-scroll-logos {
+  animation: scroll-logos 40s linear infinite;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .marketing-wrapper .animate-fade-in-up,
+  .marketing-wrapper .animate-fade-in,
+  .marketing-wrapper .animate-slide-in-right,
+  .marketing-wrapper .animate-scroll-logos {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Text balance */
+.marketing-wrapper .text-balance {
+  text-wrap: balance;
+}
+
+/* Smooth scrolling */
+.marketing-wrapper {
+  scroll-behavior: smooth;
+}
