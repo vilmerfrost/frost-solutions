@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useTenant as useTenantContext } from '@/context/TenantContext'
+import { BASE_PATH } from '@/utils/url'
 
 /**
  * Unified tenant resolution hook for client components.
@@ -28,7 +29,7 @@ export function useTenant(): { tenantId: string | null; isLoading: boolean } {
   // Try to fetch from /api/debug/me (JWT claim)
   async function fetchFromServer() {
    try {
-    const res = await fetch('/api/debug/me')
+    const res = await fetch(`${BASE_PATH}/api/debug/me`)
     if (res.ok) {
      const data = await res.json()
      const claimTenant = data?.tenant_id || data?.app_metadata?.tenant_id

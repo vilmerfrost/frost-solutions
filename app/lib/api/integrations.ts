@@ -1,6 +1,7 @@
 // app/lib/api/integrations.ts
 
 import { extractErrorMessage } from '@/lib/errorUtils';
+import { BASE_PATH } from '@/utils/url';
 import type {
  AccountingIntegration,
  AccountingProvider,
@@ -110,7 +111,7 @@ export class IntegrationAPI {
   */
  static startOAuthFlow(provider: AccountingProvider): void {
   console.log('[IntegrationAPI] 🔐 Starting OAuth flow:', provider);
-  window.location.href = `/api/integrations/authorize/${provider}`;
+  window.location.href = `${BASE_PATH}/api/integrations/authorize/${provider}`;
  }
 
  /**

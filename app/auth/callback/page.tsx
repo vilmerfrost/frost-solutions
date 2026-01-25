@@ -2,11 +2,14 @@
 import { useEffect, Suspense } from 'react';
 import { supabase } from '@/utils/supabase/supabaseClient';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { BASE_PATH } from '@/utils/url';
 
 function CallbackContent() {
  const searchParams = useSearchParams();
  const router = useRouter();
- let redirectTo = searchParams?.get('redirect') || '/dashboard';
+ // Ensure redirectTo includes BASE_PATH for window.location.href usage
+ const rawRedirect = searchParams?.get('redirect') || '/dashboard';
+ let redirectTo = rawRedirect.startsWith(BASE_PATH) ? rawRedirect : `${BASE_PATH}${rawRedirect}`;
 
  useEffect(() => {
   let mounted = true;
@@ -274,14 +277,14 @@ function CallbackContent() {
        });
        
        // Update redirect to dashboard if tenant found and redirect was onboarding
-       if (redirectTo === '/onboarding') {
-        redirectTo = '/dashboard';
+       if (redirectTo === `${BASE_PATH}/onboarding` || rawRedirect === '/onboarding') {
+        redirectTo = `${BASE_PATH}/dashboard`;
        }
       } else {
        console.log('No tenant found for user');
        // If no tenant, redirect to onboarding
        if (mounted) {
-        window.location.href = '/onboarding';
+        window.location.href = `${BASE_PATH}/onboarding`;
         return;
        }
       }
@@ -289,7 +292,7 @@ function CallbackContent() {
       // API call failed - redirect to onboarding
       console.log('Tenant API call failed, redirecting to onboarding');
       if (mounted) {
-       window.location.href = '/onboarding';
+       window.location.href = `${BASE_PATH}/onboarding`;
        return;
       }
      }
@@ -297,7 +300,7 @@ function CallbackContent() {
      console.warn('Failed to get/set tenant:', tenantErr);
      // If error getting tenant, redirect to onboarding
      if (mounted) {
-      window.location.href = '/onboarding';
+      window.location.href = `${BASE_PATH}/onboarding`;
       return;
      }
     }

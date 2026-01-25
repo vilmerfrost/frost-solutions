@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Sparkles, Send, X, FileText, Calendar, Users, Briefcase, DollarSign } from 'lucide-react'
+import { BASE_PATH } from '@/utils/url'
 
 interface Message {
  role: 'user' | 'assistant'
@@ -119,7 +120,7 @@ export function AIChatbot() {
     
     // Navigate after message is complete
     setTimeout(() => {
-     window.location.href = action.path
+     window.location.href = `${BASE_PATH}${action.path}`
     }, 300)
    })
   }, 300)

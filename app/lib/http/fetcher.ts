@@ -1,13 +1,22 @@
 // app/lib/http/fetcher.ts
+import { BASE_PATH } from '@/utils/url';
+
 /**
  * Strict fetch wrapper with JSON in/out
  * Throws on !ok with clear error messages (Swedish for UI)
+ * Automatically prepends BASE_PATH for /api routes
  */
 export async function apiFetch<T>(
  input: RequestInfo | URL,
  init?: RequestInit & { parse?: 'json' | 'text' }
 ): Promise<T> {
- const res = await fetch(input, {
+ // Automatically prepend BASE_PATH for /api routes
+ let url = input;
+ if (typeof input === 'string' && input.startsWith('/api')) {
+  url = `${BASE_PATH}${input}`;
+ }
+ 
+ const res = await fetch(url, {
   ...init,
   headers: {
    'Content-Type': 'application/json',

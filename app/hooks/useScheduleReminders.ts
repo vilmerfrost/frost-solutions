@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTenant } from '@/context/TenantContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { toast } from '@/lib/toast';
+import { BASE_PATH } from '@/utils/url';
 import type { ScheduleSlot } from '@/types/scheduling';
 
 interface ScheduleReminder {
@@ -113,7 +114,7 @@ export function useScheduleReminders() {
        label: 'Meddela',
        onClick: () => {
         // TODO: Öppna modal för att meddela handläggare
-        window.location.href = '/reports/new';
+        window.location.href = `${BASE_PATH}/reports/new`;
        },
       },
      }

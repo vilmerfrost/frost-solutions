@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState } from 'react'
 import supabase from '@/utils/supabase/supabaseClient'
+import { BASE_PATH } from '@/utils/url'
 
 type TenantContextType = {
  tenantId: string | null
@@ -20,7 +21,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
    setIsLoading(true)
    try {
     // PRIORITY 1: Use centralized tenant API (single source of truth)
-    const tenantRes = await fetch('/api/tenant/get-tenant', { cache: 'no-store' })
+    const tenantRes = await fetch(`${BASE_PATH}/api/tenant/get-tenant`, { cache: 'no-store' })
     if (tenantRes.ok) {
      const tenantData = await tenantRes.json()
      if (tenantData.tenantId) {
@@ -32,7 +33,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
     }
     
     // PRIORITY 2: Fallback to employee API
-    const employeeRes = await fetch('/api/employee/get-current', { cache: 'no-store' })
+    const employeeRes = await fetch(`${BASE_PATH}/api/employee/get-current`, { cache: 'no-store' })
     if (employeeRes.ok) {
      const employeeData = await employeeRes.json()
      if (employeeData.tenantId) {
@@ -44,7 +45,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
     }
     
     // PRIORITY 3: JWT claim via /api/debug/me (if available)
-    const res = await fetch('/api/debug/me', { cache: 'no-store' })
+    const res = await fetch(`${BASE_PATH}/api/debug/me`, { cache: 'no-store' })
     if (res.ok) {
      const data = await res.json()
      if (data?.error && data.error !== 'Cookies not available') {

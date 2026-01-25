@@ -6,6 +6,7 @@ import supabase from '@/utils/supabase/supabaseClient'
 import FrostLogo from '@/components/FrostLogo'
 import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
+import { BASE_PATH } from '@/utils/url'
 
 export default function OnboardingPage() {
  const router = useRouter()
@@ -333,7 +334,7 @@ export default function OnboardingPage() {
    // Wait a moment for toasts to show, then redirect
    setTimeout(() => {
     // Force full page reload to ensure cookies/metadata are available
-    window.location.href = '/dashboard'
+    window.location.href = `${BASE_PATH}/dashboard`
    }, 3000)
   } catch (err: any) {
    console.error('Error in handleStep3:', err)

@@ -136,7 +136,7 @@ export async function POST(req: NextRequest) {
           tenant_id: tenantId,
           plan_id: planId,
         },
-        trial_period_days: 14, // 14-day trial
+        trial_period_days: 30, // 30-day trial (synced with app trial period)
       },
       billing_address_collection: 'required',
       tax_id_collection: { enabled: true },

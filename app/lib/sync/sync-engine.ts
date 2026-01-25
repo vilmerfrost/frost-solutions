@@ -3,6 +3,7 @@
 import { db, getPendingSyncItems, markAsSynced, LocalWorkOrder, SyncQueueItem } from '@/lib/db/indexeddb';
 import { RetryStrategy } from '@/lib/sync/retry';
 import { resolveLWW, makeConflictLog, type ConflictLog } from '@/lib/sync/conflict-resolution';
+import { BASE_PATH } from '@/utils/url';
 
 export type SyncResult = {
  success: boolean;
@@ -55,7 +56,7 @@ export async function syncToServer(tenantId: string): Promise<SyncResult> {
 
  try {
   resp = await retry.execute(async () => {
-   const r = await fetch('/api/sync/work-orders', {
+   const r = await fetch(`${BASE_PATH}/api/sync/work-orders`, {
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
@@ -183,7 +184,7 @@ export async function syncFromServer(
  params.set('limit', '100');
 
  const response = await retry.execute(async () => {
-  const res = await fetch(`/api/sync/work-orders?${params.toString()}`, {
+  const res = await fetch(`${BASE_PATH}/api/sync/work-orders?${params.toString()}`, {
    credentials: 'include'
   });
 
