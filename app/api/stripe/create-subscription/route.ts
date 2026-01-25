@@ -111,7 +111,14 @@ export async function POST(req: NextRequest) {
     // Get the client secret from the payment intent
     // Handle both expanded and non-expanded cases
     let invoice: Stripe.Invoice & { payment_intent?: string | Stripe.PaymentIntent | null };
-    let paymentIntent: Stripe.PaymentIntent;
+    let paymentIntent: Stripe.PaymentIntent | null = null;
+
+    console.log('[create-subscription] Subscription created:', {
+      subscriptionId: subscription.id,
+      status: subscription.status,
+      latestInvoiceType: typeof subscription.latest_invoice,
+      latestInvoiceId: typeof subscription.latest_invoice === 'string' ? subscription.latest_invoice : subscription.latest_invoice?.id,
+    });
 
     // Check if latest_invoice is a string ID (not expanded)
     if (typeof subscription.latest_invoice === 'string') {
@@ -123,6 +130,14 @@ export async function POST(req: NextRequest) {
       invoice = subscription.latest_invoice as Stripe.Invoice & { payment_intent?: string | Stripe.PaymentIntent | null };
     }
 
+    console.log('[create-subscription] Invoice retrieved:', {
+      invoiceId: invoice.id,
+      invoiceStatus: invoice.status,
+      paymentIntentType: typeof invoice.payment_intent,
+      paymentIntentId: typeof invoice.payment_intent === 'string' ? invoice.payment_intent : invoice.payment_intent?.id,
+      hasPaymentIntent: !!invoice.payment_intent,
+    });
+
     // Check if payment_intent is a string ID (not expanded)
     if (typeof invoice.payment_intent === 'string') {
       // Fetch payment intent separately
@@ -130,17 +145,66 @@ export async function POST(req: NextRequest) {
     } else if (invoice.payment_intent && typeof invoice.payment_intent === 'object') {
       paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
     } else {
-      throw new Error('Kunde inte hämta betalningsinformation från Stripe');
+      // Log detailed error information
+      console.error('[create-subscription] No payment_intent found:', {
+        invoiceId: invoice.id,
+        invoiceStatus: invoice.status,
+        subscriptionId: subscription.id,
+        subscriptionStatus: subscription.status,
+        invoiceKeys: Object.keys(invoice),
+        latestInvoiceType: typeof subscription.latest_invoice,
+      });
+      
+      // Try to get the payment intent from the subscription's pending_setup_intent
+      // Sometimes Stripe creates a setup intent instead for subscriptions
+      if (subscription.pending_setup_intent) {
+        console.log('[create-subscription] Found pending_setup_intent, trying to use it');
+        const setupIntentId = typeof subscription.pending_setup_intent === 'string' 
+          ? subscription.pending_setup_intent 
+          : subscription.pending_setup_intent.id;
+        
+        const setupIntent = await stripe.setupIntents.retrieve(setupIntentId);
+        if (setupIntent.client_secret) {
+          return NextResponse.json({
+            subscriptionId: subscription.id,
+            clientSecret: setupIntent.client_secret,
+            isSetupIntent: true,
+          });
+        }
+      }
+      
+      // If invoice exists but no payment_intent, try to finalize and pay the invoice
+      // This creates a payment_intent
+      if (invoice.status === 'draft') {
+        console.log('[create-subscription] Invoice is draft, attempting to finalize');
+        const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id, {
+          expand: ['payment_intent'],
+        });
+        
+        if (finalizedInvoice.payment_intent) {
+          const piId = typeof finalizedInvoice.payment_intent === 'string'
+            ? finalizedInvoice.payment_intent
+            : finalizedInvoice.payment_intent.id;
+          
+          paymentIntent = await stripe.paymentIntents.retrieve(piId);
+        }
+      }
+      
+      if (!paymentIntent || !paymentIntent.client_secret) {
+        throw new Error('Kunde inte hämta betalningsinformation från Stripe - ingen payment_intent hittades');
+      }
     }
 
     if (!paymentIntent || !paymentIntent.client_secret) {
-      console.error('[create-subscription] PaymentIntent structure:', {
+      console.error('[create-subscription] PaymentIntent missing client_secret:', {
         hasPaymentIntent: !!paymentIntent,
         hasClientSecret: !!paymentIntent?.client_secret,
+        paymentIntentId: paymentIntent?.id,
+        paymentIntentStatus: paymentIntent?.status,
         invoiceId: invoice.id,
         subscriptionId: subscription.id,
       });
-      throw new Error('Kunde inte hämta betalningsinformation från Stripe');
+      throw new Error('Kunde inte hämta betalningsinformation från Stripe - client_secret saknas');
     }
 
     // Update profile with subscription info (status will be updated by webhook)
