@@ -27,7 +27,7 @@ interface PaymentFormProps {
   userId: string;
 }
 
-function PaymentFormInner({ price, currency, period, userEmail, userId }: PaymentFormProps) {
+function PaymentFormInner({ price, currency, period }: { price: number; currency: string; period: string }) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -45,43 +45,16 @@ function PaymentFormInner({ price, currency, period, userEmail, userId }: Paymen
     setError(null);
 
     try {
-      // 1. Submit elements for validation
-      const { error: submitError } = await elements.submit();
-      
-      if (submitError) {
-        throw new Error(submitError.message || 'Validering misslyckades');
-      }
-
-      // 2. Create subscription on server
-      const response = await fetch('/api/stripe/create-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          userId,
-          userEmail,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Okänt fel' }));
-        throw new Error(errorData.error || `Serverfel: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (!data.clientSecret) {
-        throw new Error('Ingen client secret returnerades från servern');
-      }
-
-      // 3. Confirm payment with Stripe
+      // Confirm the payment - the clientSecret is already in Elements context
       const { error: confirmError } = await stripe.confirmPayment({
         elements,
-        clientSecret: data.clientSecret,
         confirmParams: {
           return_url: `${window.location.origin}/dashboard?payment_success=true`,
         },
       });
 
+      // This will only be reached if there's an immediate error
+      // (card declined, etc.) - otherwise Stripe redirects to return_url
       if (confirmError) {
         throw new Error(confirmError.message || 'Betalningen misslyckades');
       }
@@ -154,9 +127,10 @@ export default function PaymentForm({ price, currency, period, userEmail, userId
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function createSetupIntent() {
+    async function createSubscription() {
       try {
-        const response = await fetch('/api/stripe/create-setup-intent', {
+        // Create subscription directly - this returns a PaymentIntent clientSecret
+        const response = await fetch('/api/stripe/create-subscription', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ userId, userEmail }),
@@ -164,7 +138,7 @@ export default function PaymentForm({ price, currency, period, userEmail, userId
 
         if (!response.ok) {
           const errorData = await response.json().catch(() => ({ error: 'Okänt fel' }));
-          throw new Error(errorData.error || 'Kunde inte skapa betalningsmetod');
+          throw new Error(errorData.error || 'Kunde inte skapa prenumeration');
         }
 
         const data = await response.json();
@@ -182,7 +156,7 @@ export default function PaymentForm({ price, currency, period, userEmail, userId
       }
     }
 
-    createSetupIntent();
+    createSubscription();
   }, [userId, userEmail]);
 
   if (setupError) {
@@ -286,8 +260,6 @@ export default function PaymentForm({ price, currency, period, userEmail, userId
         price={price} 
         currency={currency} 
         period={period}
-        userEmail={userEmail}
-        userId={userId}
       />
     </Elements>
   );
