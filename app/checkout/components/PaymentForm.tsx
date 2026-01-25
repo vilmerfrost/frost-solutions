@@ -8,23 +8,26 @@ import {
   useStripe,
   useElements,
 } from '@stripe/react-stripe-js';
-import { Loader2, CreditCard, AlertCircle } from 'lucide-react';
+import { CreditCard, Loader2, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 // Validate Stripe key at module level
 const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 if (!stripeKey) {
-  console.error('[CheckoutForm] Missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY');
+  console.error('[PaymentForm] Missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY');
 }
 
 const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
-interface CheckoutFormProps {
+interface PaymentFormProps {
+  price: number;
+  currency: string;
+  period: string;
   userEmail: string;
   userId: string;
 }
 
-function CheckoutFormInner({ userEmail, userId }: { userEmail: string; userId: string }) {
+function PaymentFormInner({ price, currency, period, userEmail, userId }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
   const [loading, setLoading] = useState(false);
@@ -83,71 +86,74 @@ function CheckoutFormInner({ userEmail, userId }: { userEmail: string; userId: s
         throw new Error(confirmError.message || 'Betalningen misslyckades');
       }
       
-      // If no error, Stripe redirects automatically
-      
     } catch (err: any) {
-      console.error('[CheckoutForm] Payment error:', err);
+      console.error('[PaymentForm] Payment error:', err);
       setError(err.message || 'Ett oväntat fel inträffade. Försök igen.');
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
-        <PaymentElement 
-          options={{
-            layout: 'tabs',
-          }}
-        />
-      </div>
+    <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+      <h3 className="mb-6 text-lg font-semibold text-gray-900">Payment details</h3>
 
-      {error && (
-        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
-          <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-700">{error}</p>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
+          <PaymentElement 
+            options={{
+              layout: 'tabs',
+            }}
+          />
         </div>
-      )}
 
-      <button
-        type="submit"
-        disabled={!stripe || loading}
-        className="w-full py-4 px-6 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2 text-lg"
-      >
-        {loading ? (
-          <>
-            <Loader2 className="w-5 h-5 animate-spin" />
-            Behandlar...
-          </>
-        ) : (
-          <>
-            <CreditCard className="w-5 h-5" />
-            Betala 499 kr/månad
-          </>
+        {error && (
+          <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
+            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+            <p className="text-sm text-red-700">{error}</p>
+          </div>
         )}
-      </button>
 
-      <p className="text-center text-xs text-gray-600">
-        Genom att slutföra köpet accepterar du våra{' '}
-        <Link href="/terms" target="_blank" className="text-blue-600 hover:text-blue-700 underline">
-          användarvillkor
-        </Link>
-      </p>
+        {/* Submit Button */}
+        <button
+          type="submit"
+          disabled={!stripe || loading}
+          className="mt-2 h-12 w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg transition-all hover:opacity-90 hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? (
+            <>
+              <Loader2 className="h-4 w-4 animate-spin" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <CreditCard className="h-4 w-4" />
+              Pay {price} {currency}/{period}
+            </>
+          )}
+        </button>
 
-      <p className="text-center text-sm text-gray-500">
-        Du kan avsluta prenumerationen när som helst
-      </p>
-    </form>
+        {/* Terms */}
+        <p className="text-center text-xs text-gray-500">
+          By completing this purchase you accept our{' '}
+          <Link href="/terms" className="text-blue-600 underline-offset-4 hover:underline">
+            terms of service
+          </Link>
+        </p>
+
+        <p className="text-center text-xs text-gray-500">
+          Cancel anytime • No commitment
+        </p>
+      </form>
+    </div>
   );
 }
 
-export default function CheckoutForm({ userEmail, userId }: CheckoutFormProps) {
+export default function PaymentForm({ price, currency, period, userEmail, userId }: PaymentFormProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [setupError, setSetupError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Create SetupIntent on mount
     async function createSetupIntent() {
       try {
         const response = await fetch('/api/stripe/create-setup-intent', {
@@ -169,7 +175,7 @@ export default function CheckoutForm({ userEmail, userId }: CheckoutFormProps) {
 
         setClientSecret(data.clientSecret);
       } catch (err: any) {
-        console.error('[CheckoutForm] Setup error:', err);
+        console.error('[PaymentForm] Setup error:', err);
         setSetupError(err.message || 'Kunde inte ladda betalningsformulär. Försök igen.');
       } finally {
         setIsLoading(false);
@@ -181,43 +187,52 @@ export default function CheckoutForm({ userEmail, userId }: CheckoutFormProps) {
 
   if (setupError) {
     return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-xl">
-        <h3 className="text-lg font-semibold text-red-900 mb-2">
-          Ett fel uppstod
-        </h3>
-        <p className="text-sm text-red-800 mb-4">
-          {setupError}
-        </p>
-        <button
-          onClick={() => window.location.reload()}
-          className="text-sm text-blue-600 hover:text-blue-700 underline"
-        >
-          Försök igen
-        </button>
+      <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">Payment details</h3>
+        <div className="p-6 bg-red-50 border border-red-200 rounded-xl">
+          <h4 className="text-lg font-semibold text-red-900 mb-2">
+            Ett fel uppstod
+          </h4>
+          <p className="text-sm text-red-800 mb-4">
+            {setupError}
+          </p>
+          <button
+            onClick={() => window.location.reload()}
+            className="text-sm text-blue-600 hover:text-blue-700 underline"
+          >
+            Försök igen
+          </button>
+        </div>
       </div>
     );
   }
 
   if (isLoading || !clientSecret) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 space-y-4">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        <p className="text-sm text-gray-500">
-          Laddar betalningsformulär...
-        </p>
+      <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">Payment details</h3>
+        <div className="flex flex-col items-center justify-center py-12 space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          <p className="text-sm text-gray-500">
+            Loading payment form...
+          </p>
+        </div>
       </div>
     );
   }
 
   if (!stripePromise) {
     return (
-      <div className="p-6 bg-red-50 border border-red-200 rounded-xl">
-        <h3 className="text-lg font-semibold text-red-900 mb-2">
-          Stripe är inte konfigurerat
-        </h3>
-        <p className="text-sm text-red-800">
-          Betalningar är tillfälligt otillgängliga. Kontakta support.
-        </p>
+      <div className="rounded-xl bg-white p-6 shadow-lg border border-gray-100">
+        <h3 className="mb-6 text-lg font-semibold text-gray-900">Payment details</h3>
+        <div className="p-6 bg-red-50 border border-red-200 rounded-xl">
+          <h4 className="text-lg font-semibold text-red-900 mb-2">
+            Stripe is not configured
+          </h4>
+          <p className="text-sm text-red-800">
+            Payments are temporarily unavailable. Please contact support.
+          </p>
+        </div>
       </div>
     );
   }
@@ -231,27 +246,28 @@ export default function CheckoutForm({ userEmail, userId }: CheckoutFormProps) {
           theme: 'stripe',
           variables: {
             colorPrimary: '#2563eb',
-            colorBackground: '#ffffff',
+            colorBackground: '#f9fafb',
             colorText: '#1f2937',
             colorDanger: '#ef4444',
-            fontFamily: 'system-ui, sans-serif',
+            fontFamily: 'Inter, system-ui, sans-serif',
             spacingUnit: '4px',
             borderRadius: '8px',
           },
           rules: {
             '.Input': {
-              backgroundColor: '#f9fafb',
+              backgroundColor: '#ffffff',
               border: '1px solid #e5e7eb',
               boxShadow: 'none',
               padding: '12px',
             },
             '.Input:focus': {
               border: '2px solid #2563eb',
-              boxShadow: '0 0 0 1px #2563eb',
+              boxShadow: '0 0 0 2px rgba(37, 99, 235, 0.1)',
             },
             '.Label': {
               fontWeight: '500',
               marginBottom: '8px',
+              color: '#374151',
             },
             '.Tab': {
               border: '1px solid #e5e7eb',
@@ -263,10 +279,16 @@ export default function CheckoutForm({ userEmail, userId }: CheckoutFormProps) {
             },
           },
         },
-        locale: 'sv',
+        locale: 'en',
       }}
     >
-      <CheckoutFormInner userEmail={userEmail} userId={userId} />
+      <PaymentFormInner 
+        price={price} 
+        currency={currency} 
+        period={period}
+        userEmail={userEmail}
+        userId={userId}
+      />
     </Elements>
   );
 }
