@@ -109,10 +109,11 @@ export async function POST(req: NextRequest) {
     });
 
     // Get the client secret from the payment intent
-    const invoice = subscription.latest_invoice as Stripe.Invoice;
-    const paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+    // Note: payment_intent is only available when expanded, so we use any to bypass type check
+    const invoice = subscription.latest_invoice as Stripe.Invoice & { payment_intent?: Stripe.PaymentIntent };
+    const paymentIntent = invoice?.payment_intent;
 
-    if (!paymentIntent?.client_secret) {
+    if (!paymentIntent || typeof paymentIntent === 'string' || !paymentIntent.client_secret) {
       throw new Error('Kunde inte hämta betalningsinformation');
     }
 
