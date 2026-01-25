@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import FrostLogo from '@/components/FrostLogo'
@@ -8,7 +8,7 @@ import { toast } from '@/lib/toast'
 import supabase from '@/utils/supabase/supabaseClient'
 import AISummary from '@/components/AISummary'
 
-export default function FeedbackPage() {
+function FeedbackContent() {
  const router = useRouter()
  const searchParams = useSearchParams()
  const [mounted, setMounted] = useState(false)
@@ -264,3 +264,29 @@ export default function FeedbackPage() {
  )
 }
 
+function FeedbackLoading() {
+ return (
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row">
+   <Sidebar />
+   <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
+    <div className="p-4 sm:p-6 lg:p-10 max-w-4xl mx-auto w-full">
+     <div className="mb-8 flex flex-col items-center">
+      <FrostLogo size={48} />
+      <h1 className="text-4xl sm:text-5xl font-semibold mt-4 mb-2 text-gray-900 dark:text-white">
+       Feedback & Support
+      </h1>
+      <p className="text-gray-600 dark:text-gray-400 text-center">Laddar...</p>
+     </div>
+    </div>
+   </main>
+  </div>
+ )
+}
+
+export default function FeedbackPage() {
+ return (
+  <Suspense fallback={<FeedbackLoading />}>
+   <FeedbackContent />
+  </Suspense>
+ )
+}
