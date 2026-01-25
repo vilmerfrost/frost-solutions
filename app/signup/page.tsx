@@ -105,22 +105,22 @@ export default function SignupPage() {
  }
  
  return (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-   <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-gray-200 p-8 sm:p-10">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center p-4">
+   <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 sm:p-10">
     {/* Header */}
     <div className="flex flex-col items-center mb-6">
      <FrostLogo size={56} />
-     <h1 className="font-semibold text-2xl sm:text-3xl mt-4 mb-2 text-gray-900">
+     <h1 className="font-semibold text-2xl sm:text-3xl mt-4 mb-2 text-gray-900 dark:text-white">
       Kom igång med Frost
      </h1>
-     <p className="text-gray-500 text-sm text-center">
+     <p className="text-gray-500 dark:text-gray-400 text-sm text-center">
       30 dagars gratis provperiod. Inget betalkort krävs.
      </p>
     </div>
     
     {/* Error Message */}
     {error && (
-     <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm">
+     <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-700 dark:text-red-300 text-sm">
       {error}
      </div>
     )}
@@ -128,7 +128,7 @@ export default function SignupPage() {
     {/* Signup Form */}
     <form onSubmit={handleSignup} className="space-y-4">
      <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
        Fullständigt namn *
       </label>
       <input
@@ -136,13 +136,13 @@ export default function SignupPage() {
        value={fullName}
        onChange={(e) => setFullName(e.target.value)}
        required
-       className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+       className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
        placeholder="Anna Andersson"
       />
      </div>
      
      <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
        E-postadress *
       </label>
       <input
@@ -150,13 +150,13 @@ export default function SignupPage() {
        value={email}
        onChange={(e) => setEmail(e.target.value)}
        required
-       className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+       className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
        placeholder="anna@foretag.se"
       />
      </div>
      
      <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
        Lösenord *
       </label>
       <input
@@ -165,13 +165,13 @@ export default function SignupPage() {
        onChange={(e) => setPassword(e.target.value)}
        required
        minLength={8}
-       className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+       className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
        placeholder="Minst 8 tecken"
       />
      </div>
 
      <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
        Företagsnamn *
       </label>
       <input
@@ -179,20 +179,20 @@ export default function SignupPage() {
        value={companyName}
        onChange={(e) => setCompanyName(e.target.value)}
        required
-       className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+       className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
        placeholder="Bygg AB"
       />
      </div>
 
      <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-       Organisationsnummer <span className="text-gray-400 font-normal">(valfritt)</span>
+      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+       Organisationsnummer <span className="text-gray-400 dark:text-gray-500 font-normal">(valfritt)</span>
       </label>
       <input
        type="text"
        value={orgNumber}
        onChange={(e) => setOrgNumber(e.target.value)}
-       className="w-full px-4 py-3 border border-gray-200 rounded-lg bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+       className="w-full px-4 py-3 border border-gray-200 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
        placeholder="556123-4567"
       />
      </div>
@@ -207,16 +207,16 @@ export default function SignupPage() {
     </form>
     
     {/* Login Link */}
-    <p className="mt-6 text-center text-sm text-gray-600">
+    <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
      Har du redan ett konto?{' '}
-     <a href="/login" className="text-primary-500 hover:text-primary-600 font-medium transition-colors">
+     <a href="/login" className="text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition-colors">
       Logga in
      </a>
     </p>
     
     {/* Trial Benefits */}
-    <div className="mt-6 pt-6 border-t border-gray-100">
-     <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-gray-500">
+    <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700">
+     <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs text-gray-500 dark:text-gray-400">
       <span className="flex items-center gap-1">
        <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
@@ -239,7 +239,7 @@ export default function SignupPage() {
     </div>
 
     {/* Footer */}
-    <div className="mt-6 text-center text-xs text-gray-400">
+    <div className="mt-6 text-center text-xs text-gray-400 dark:text-gray-500">
      © 2026 Frost Apps
     </div>
    </div>

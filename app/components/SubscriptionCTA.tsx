@@ -11,10 +11,9 @@ interface SubscriptionCTAProps {
 }
 
 export function SubscriptionCTA({ variant = 'default', showFeatures = false }: SubscriptionCTAProps) {
-  const paymentLink = 'https://buy.stripe.com/cNi4gr9um8mq6TeesMdQQ00';
-
   const handleUpgrade = () => {
-    window.location.href = paymentLink;
+    // Route to custom checkout page
+    window.location.href = '/checkout';
   };
 
   if (variant === 'banner') {

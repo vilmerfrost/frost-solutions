@@ -46,15 +46,15 @@ function LoginContent() {
  }
 
  return (
-  <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-   <div className="w-full max-w-md bg-white rounded-xl shadow-lg border border-gray-200 p-8 sm:p-10">
+  <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 p-4">
+   <div className="w-full max-w-md bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 p-8 sm:p-10">
     {/* Header */}
     <div className="flex flex-col items-center mb-8">
      <FrostLogo size={56} />
-     <h1 className="font-semibold text-2xl sm:text-3xl mt-4 mb-2 text-gray-900">
+     <h1 className="font-semibold text-2xl sm:text-3xl mt-4 mb-2 text-gray-900 dark:text-white">
       Frost Solutions
      </h1>
-     <p className="text-gray-500 text-sm">Logga in för att fortsätta</p>
+     <p className="text-gray-500 dark:text-gray-400 text-sm">Logga in för att fortsätta</p>
     </div>
 
     {/* OAuth Buttons */}
@@ -62,7 +62,7 @@ function LoginContent() {
      <button
       onClick={() => handleOAuthLogin('google')}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 rounded-lg py-3 px-4 font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+      className="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg py-3 px-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
      >
       <svg className="w-5 h-5" viewBox="0 0 24 24">
        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
@@ -76,7 +76,7 @@ function LoginContent() {
      <button
       onClick={() => handleOAuthLogin('azure')}
       disabled={loading}
-      className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 rounded-lg py-3 px-4 font-medium text-gray-700 hover:bg-gray-50 hover:border-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+      className="w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-lg py-3 px-4 font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600 hover:border-gray-300 dark:hover:border-gray-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
      >
       <svg className="w-5 h-5" viewBox="0 0 23 23" fill="none">
        <path fill="#00A4EF" d="M0 0h11.377v11.372H0z"/>
@@ -91,21 +91,21 @@ function LoginContent() {
     {/* Divider */}
     <div className="relative mb-6">
      <div className="absolute inset-0 flex items-center">
-      <div className="w-full border-t border-gray-200"></div>
+      <div className="w-full border-t border-gray-200 dark:border-gray-700"></div>
      </div>
      <div className="relative flex justify-center text-sm">
-      <span className="px-3 bg-white text-gray-500">eller</span>
+      <span className="px-3 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">eller</span>
      </div>
     </div>
 
     {/* Email Form */}
     <form onSubmit={handleSubmit} className="w-full">
-     <label className="block text-sm font-medium text-gray-700 mb-2">E-post</label>
+     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">E-post</label>
      <input 
       name="email" 
       type="email" 
       required 
-      className="w-full px-4 py-3 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent mb-4 transition-all" 
+      className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent mb-4 transition-all" 
       placeholder="din@epost.se"
      />
      <button
@@ -121,23 +121,23 @@ function LoginContent() {
     {status && (
      <div className={`mt-4 p-3 rounded-lg text-sm ${
       status.includes('skickad') 
-       ? 'bg-green-50 text-green-700 border border-green-200' 
-       : 'bg-red-50 text-red-700 border border-red-200'
+       ? 'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800' 
+       : 'bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800'
      }`}>
       {status}
      </div>
     )}
 
     {/* Sign Up Link */}
-    <p className="mt-6 text-center text-sm text-gray-600">
+    <p className="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
      Ny användare?{' '}
-     <a href="/signup" className="text-primary-500 hover:text-primary-600 font-medium transition-colors">
+     <a href="/signup" className="text-primary-500 hover:text-primary-600 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition-colors">
       Skapa konto gratis
      </a>
     </p>
 
     {/* Footer */}
-    <div className="mt-6 pt-6 border-t border-gray-100 text-center text-xs text-gray-400">
+    <div className="mt-6 pt-6 border-t border-gray-100 dark:border-gray-700 text-center text-xs text-gray-400 dark:text-gray-500">
      © 2026 Frost Apps
     </div>
    </div>
@@ -148,8 +148,8 @@ function LoginContent() {
 export default function LoginPage() {
  return (
   <Suspense fallback={
-   <div className="min-h-screen flex items-center justify-center bg-gray-50">
-    <div className="text-gray-500">Laddar...</div>
+   <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
+    <div className="text-gray-500 dark:text-gray-400">Laddar...</div>
    </div>
   }>
    <LoginContent />
