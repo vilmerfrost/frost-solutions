@@ -3,20 +3,7 @@
     "baseUrl": ".",
     "paths": {
       "@/*": [
-        "app/*",
-        "./*"
-      ],
-      "@/components/*": [
-        "components/*",
-        "app/components/*"
-      ],
-      "@/hooks/*": [
-        "hooks/*",
-        "app/hooks/*"
-      ],
-      "@/lib/*": [
-        "lib/*",
-        "app/lib/*"
+        "app/*"
       ]
     },
     "target": "ES2022",
@@ -48,14 +35,11 @@
   "include": [
     "next-env.d.ts",
     "app/**/*",
-    "components/**/*",
-    "hooks/**/*",
-    "lib/**/*",
     "middleware.ts",
     "src/**/*",
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts"
-  ],
+, "app/utils", "app/components/ui/page.tsx", "app/components"  ],
   "exclude": [
     "node_modules"
   ]
