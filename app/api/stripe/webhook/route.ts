@@ -126,17 +126,21 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       })
       .eq('tenant_id', tenant_id);
 
-    // Log event
-    await admin.from('subscription_events').insert({
-      tenant_id,
-      event_type: 'checkout_completed',
-      stripe_event_id: session.id,
-      data: {
-        plan_name,
-        billing_cycle,
-        subscription_id: session.subscription,
-      },
-    }).catch(() => {}); // Ignore if table doesn't exist
+    // Log event (ignore if table doesn't exist)
+    try {
+      await admin.from('subscription_events').insert({
+        tenant_id,
+        event_type: 'checkout_completed',
+        stripe_event_id: session.id,
+        data: {
+          plan_name,
+          billing_cycle,
+          subscription_id: session.subscription,
+        },
+      });
+    } catch {
+      // Table may not exist
+    }
   }
 
   console.log('[Stripe Webhook] Subscription activated for tenant:', tenant_id);
@@ -230,15 +234,19 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       .eq('stripe_subscription_id', subscription.id);
 
     // Log event
-    await admin.from('subscription_events').insert({
-      tenant_id,
-      event_type: 'subscription_updated',
-      stripe_event_id: subscription.id,
-      data: {
-        status: subscription.status,
-        cancel_at_period_end: subscription.cancel_at_period_end,
-      },
-    }).catch(() => {});
+    try {
+      await admin.from('subscription_events').insert({
+        tenant_id,
+        event_type: 'subscription_updated',
+        stripe_event_id: subscription.id,
+        data: {
+          status: subscription.status,
+          cancel_at_period_end: subscription.cancel_at_period_end,
+        },
+      });
+    } catch {
+      // Table may not exist
+    }
   }
 
   // Update profiles table (if user_id exists)
@@ -312,12 +320,16 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
   }
 
   if (tenant_id) {
-    await admin.from('subscription_events').insert({
-      tenant_id,
-      event_type: 'subscription_canceled',
-      stripe_event_id: subscription.id,
-      data: { canceled_at: new Date().toISOString() },
-    }).catch(() => {});
+    try {
+      await admin.from('subscription_events').insert({
+        tenant_id,
+        event_type: 'subscription_canceled',
+        stripe_event_id: subscription.id,
+        data: { canceled_at: new Date().toISOString() },
+      });
+    } catch {
+      // Table may not exist
+    }
   }
 }
 
@@ -369,26 +381,30 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
       .eq('stripe_subscription_id', inv.subscription as string);
 
     // Record invoice
-    await admin.from('subscription_invoices').upsert({
-      tenant_id: sub.tenant_id,
-      stripe_invoice_id: invoice.id,
-      stripe_payment_intent_id: inv.payment_intent as string,
-      amount_due: invoice.amount_due / 100,
-      amount_paid: invoice.amount_paid / 100,
-      currency: invoice.currency.toUpperCase(),
-      status: 'paid',
-      invoice_pdf_url: inv.invoice_pdf || null,
-      hosted_invoice_url: inv.hosted_invoice_url || null,
-      period_start: inv.period_start 
-        ? new Date(inv.period_start * 1000).toISOString() 
-        : null,
-      period_end: inv.period_end 
-        ? new Date(inv.period_end * 1000).toISOString() 
-        : null,
-      paid_at: new Date().toISOString(),
-    }, {
-      onConflict: 'stripe_invoice_id',
-    }).catch(() => {});
+    try {
+      await admin.from('subscription_invoices').upsert({
+        tenant_id: sub.tenant_id,
+        stripe_invoice_id: invoice.id,
+        stripe_payment_intent_id: inv.payment_intent as string,
+        amount_due: invoice.amount_due / 100,
+        amount_paid: invoice.amount_paid / 100,
+        currency: invoice.currency.toUpperCase(),
+        status: 'paid',
+        invoice_pdf_url: inv.invoice_pdf || null,
+        hosted_invoice_url: inv.hosted_invoice_url || null,
+        period_start: inv.period_start 
+          ? new Date(inv.period_start * 1000).toISOString() 
+          : null,
+        period_end: inv.period_end 
+          ? new Date(inv.period_end * 1000).toISOString() 
+          : null,
+        paid_at: new Date().toISOString(),
+      }, {
+        onConflict: 'stripe_invoice_id',
+      });
+    } catch {
+      // Table may not exist
+    }
   }
 }
 
@@ -433,15 +449,19 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
     .maybeSingle();
 
   if (sub?.tenant_id) {
-    await admin.from('subscription_events').insert({
-      tenant_id: sub.tenant_id,
-      event_type: 'payment_failed',
-      stripe_event_id: invoice.id,
-      data: {
-        amount_due: invoice.amount_due / 100,
-        attempt_count: inv.attempt_count,
-      },
-    }).catch(() => {});
+    try {
+      await admin.from('subscription_events').insert({
+        tenant_id: sub.tenant_id,
+        event_type: 'payment_failed',
+        stripe_event_id: invoice.id,
+        data: {
+          amount_due: invoice.amount_due / 100,
+          attempt_count: inv.attempt_count,
+        },
+      });
+    } catch {
+      // Table may not exist
+    }
   }
 }
 
