@@ -345,8 +345,8 @@ export default function OnboardingPage() {
  }
 
  return (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 dark:from-gray-900 dark: dark:to-gray-900 flex items-center justify-center p-4">
-   <div className="w-full max-w-2xl bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-2xl border border-gray-100 dark:border-gray-700 p-6 sm:p-8 lg:p-10">
+  <div className="min-h-screen bg-gray-100 dark:bg-gray-950 flex items-center justify-center p-4">
+   <div className="w-full max-w-2xl bg-white dark:bg-gray-900 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8 lg:p-10">
     <div className="flex flex-col items-center mb-8">
      <FrostLogo size={64} />
      <h1 className="font-semibold text-4xl mt-4 mb-2 text-gray-900 dark:text-white dark:bg-clip-text dark:text-white">
@@ -431,7 +431,7 @@ export default function OnboardingPage() {
         type="text"
         value={companyName}
         onChange={(e) => setCompanyName(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="Frost Solutions AB"
        />
       </div>
@@ -443,7 +443,7 @@ export default function OnboardingPage() {
         type="text"
         value={orgNumber}
         onChange={(e) => setOrgNumber(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="556677-8899"
        />
       </div>
@@ -468,7 +468,7 @@ export default function OnboardingPage() {
         type="text"
         value={adminName}
         onChange={(e) => setAdminName(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="Anna Andersson"
        />
       </div>
@@ -480,7 +480,7 @@ export default function OnboardingPage() {
         type="email"
         value={adminEmail}
         onChange={(e) => setAdminEmail(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="anna@exempel.se"
        />
       </div>
@@ -492,7 +492,7 @@ export default function OnboardingPage() {
         type="number"
         value={adminBaseRate}
         onChange={(e) => setAdminBaseRate(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="360"
        />
       </div>
@@ -525,7 +525,7 @@ export default function OnboardingPage() {
         type="text"
         value={customerName}
         onChange={(e) => setCustomerName(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="Kundens företag"
        />
       </div>
@@ -537,7 +537,7 @@ export default function OnboardingPage() {
         type="email"
         value={customerEmail}
         onChange={(e) => setCustomerEmail(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="kund@exempel.se"
        />
       </div>
@@ -549,7 +549,7 @@ export default function OnboardingPage() {
         type="text"
         value={customerAddress}
         onChange={(e) => setCustomerAddress(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="Gatuadress 1, 123 45 Stad"
        />
       </div>
@@ -561,7 +561,7 @@ export default function OnboardingPage() {
         type="text"
         value={customerOrgNumber}
         onChange={(e) => setCustomerOrgNumber(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="556677-8899 (lämna tomt för privatkund)"
        />
        <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">
@@ -597,7 +597,7 @@ export default function OnboardingPage() {
         type="text"
         value={projectName}
         onChange={(e) => setProjectName(e.target.value)}
-        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
         placeholder="Altanbygge, Köksrenovering..."
        />
       </div>
@@ -610,7 +610,7 @@ export default function OnboardingPage() {
          type="number"
          value={projectBudget}
          onChange={(e) => setProjectBudget(e.target.value)}
-         className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+         className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
          placeholder="100"
         />
        </div>

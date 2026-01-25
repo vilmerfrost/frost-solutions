@@ -61,7 +61,7 @@ export function SearchBar() {
       type="text"
       value=""
       placeholder="Sök projekt, kunder, fakturor..."
-      className="w-full pl-12 pr-24 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400"
+      className="w-full pl-10 pr-4 py-2.5 rounded-[8px] border border-white/20 bg-white/10 text-white placeholder:text-gray-400 text-sm"
       disabled
       readOnly
      />
@@ -74,35 +74,27 @@ export function SearchBar() {
   <div className="relative w-full max-w-2xl mx-auto">
    {/* Search Input */}
    <div className="relative">
-    <div className="absolute left-4 top-1/2 transform -translate-y-1/2 pointer-events-none">
-     <Search className="w-5 h-5 text-gray-400" />
+    <div className="absolute left-3 top-1/2 transform -translate-y-1/2 pointer-events-none">
+     <Search className="w-4 h-4 text-gray-400" />
     </div>
     <input
      ref={searchInputRef}
      type="text"
      value={query}
      onChange={(e) => setQuery(e.target.value)}
-     placeholder="Sök projekt, kunder, fakturor... (Tryck / för att söka)"
-     className="w-full pl-12 pr-24 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all"
+     placeholder="Sök projekt, kunder, fak..."
+     className="w-full pl-10 pr-8 py-2.5 rounded-[8px] border border-white/20 bg-white/10 text-white placeholder:text-gray-400 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500/50 transition-all"
     />
     {query && (
      <button
       onClick={() => setQuery('')}
-      className="absolute right-12 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+      className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-white transition-colors"
       aria-label="Rensa sökning"
       type="button"
      >
-      <X className="w-5 h-5" />
+      <X className="w-4 h-4" />
      </button>
     )}
-    <button
-     onClick={() => setShowFilters(!showFilters)}
-     className="absolute right-4 top-1/2 transform -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
-     aria-label="Visa filter"
-     type="button"
-    >
-     <Filter className="w-5 h-5" />
-    </button>
    </div>
    
    {/* TODO: Implement Filter UI when showFilters is true */}
