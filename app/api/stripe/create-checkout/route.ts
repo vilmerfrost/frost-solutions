@@ -59,6 +59,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // SECURITY: Check if user has already used a free trial (prevent trial abuse)
+    const admin = createAdminClient();
+    const { data: existingSubscription } = await admin
+      .from('subscriptions')
+      .select('id, trial_end, status')
+      .eq('user_id', user.id)
+      .not('trial_end', 'is', null)
+      .maybeSingle();
+
+    // If user already had a trial (even if expired/canceled), don't allow another
+    const hasUsedTrial = existingSubscription !== null;
+
     // Get or create Stripe customer
     const admin = createAdminClient();
     
@@ -90,11 +102,18 @@ export async function POST(req: NextRequest) {
     }
 
     // Determine URLs (NEXT_PUBLIC_SITE_URL includes /app basePath)
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000/app';
+    let baseUrl = process.env.NEXT_PUBLIC_SITE_URL;
+    if (!baseUrl) {
+      // PRODUCTION WARNING: This should never happen in production
+      if (process.env.NODE_ENV === 'production') {
+        console.error('[Stripe Checkout] CRITICAL: NEXT_PUBLIC_SITE_URL is not set in production!');
+      }
+      baseUrl = 'http://localhost:3000/app';
+    }
     const finalSuccessUrl = successUrl || `${baseUrl}/settings/subscription?success=true`;
     const finalCancelUrl = cancelUrl || `${baseUrl}/settings/subscription?canceled=true`;
 
-    // Create checkout session with 30-day trial
+    // Create checkout session with 30-day trial (only if user hasn't used trial before)
     const sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: stripeCustomerId,
       mode: 'subscription',
@@ -105,9 +124,11 @@ export async function POST(req: NextRequest) {
         },
       ],
       subscription_data: {
-        trial_period_days: 30,
+        // SECURITY: Only grant trial if user hasn't used one before
+        ...(hasUsedTrial ? {} : { trial_period_days: 30 }),
         metadata: {
           user_id: user.id,
+          had_previous_trial: hasUsedTrial ? 'true' : 'false',
         },
       },
       success_url: finalSuccessUrl,

@@ -12,8 +12,8 @@ FORTNOX_CLIENT_SECRET=ditt_fortnox_client_secret_här
 
 3. **Ersätt med dina riktiga värden:**
 ```env
-FORTNOX_CLIENT_ID=UFg21BcGXfMs
-FORTNOX_CLIENT_SECRET=ditt_fortnox_client_secret_här
+FORTNOX_CLIENT_ID=your_fortnox_client_id_here
+FORTNOX_CLIENT_SECRET=your_fortnox_client_secret_here
 ```
 
 4. **Lägg till ditt Fortnox Client Secret** (hämta från https://apps.fortnox.se/oauth-v1)
@@ -24,8 +24,8 @@ FORTNOX_CLIENT_SECRET=ditt_fortnox_client_secret_här
 
 ## Dina nuvarande värden
 
-- **Fortnox Client ID:** `UFg21BcGXfMs` ✅
-- **Fortnox Client Secret:** ❓ (behöver du lägga till)
+- **Fortnox Client ID:** Hämta från Fortnox Developer Portal
+- **Fortnox Client Secret:** Hämta från Fortnox Developer Portal
 
 ## Vart hittar jag Client Secret?
 

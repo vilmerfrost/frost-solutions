@@ -660,7 +660,11 @@ export default function ReportsPage() {
         </div>
        ) : (
       <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
-       <div className="overflow-x-auto -mx-4 sm:mx-0">
+       {/* Mobile scroll hint */}
+       <div className="sm:hidden p-2 text-center text-xs text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+        Svep för att se alla kolumner →
+       </div>
+       <div className="overflow-x-auto -mx-4 sm:mx-0 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
         <table className="w-full text-xs sm:text-sm min-w-[640px]">
          <thead className="bg-gray-50">
           <tr>

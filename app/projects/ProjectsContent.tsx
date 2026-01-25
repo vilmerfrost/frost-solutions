@@ -237,39 +237,33 @@ export default function ProjectsContent() {
 
   async function fetchProjectHours() {
    try {
-    console.log('📊 Projects list: Fetching hours for', projects.length, 'projects')
-    // Fetch hours for all projects via API route
+    console.log('📊 Projects list: Fetching hours for', projects.length, 'projects in batch')
+    // PERFORMANCE FIX: Fetch all project hours in a single batch request instead of N+1 queries
     const projectIds = projects.map(p => p.id)
     
-    const hoursPromises = projectIds.map(async (projectId) => {
-     try {
-      const response = await fetch(`/api/projects/${projectId}/hours?projectId=${projectId}&_t=${Date.now()}`, {
-       cache: 'no-store',
-       headers: {
-        'Cache-Control': 'no-cache',
-       }
-      })
-      
-      if (response.ok) {
-       const data = await response.json()
-       console.log(`✅ Project ${projectId}: ${data.hours}h`)
-       return { projectId, hours: data.hours || 0 }
-      } else {
-       const errorText = await response.text()
-       console.warn(`❌ Failed to fetch hours for project ${projectId}:`, errorText)
-      }
-     } catch (err) {
-      console.warn(`Failed to fetch hours for project ${projectId}:`, err)
-     }
-     return { projectId, hours: 0 }
+    const response = await fetch('/api/projects/hours', {
+     method: 'POST',
+     headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'no-cache',
+     },
+     body: JSON.stringify({ projectIds }),
+     cache: 'no-store',
     })
-
-    const hoursResults = await Promise.all(hoursPromises)
+    
     const hoursMap = new Map<string, number>()
     
-    hoursResults.forEach(({ projectId, hours }) => {
-     hoursMap.set(projectId, hours)
-    })
+    if (response.ok) {
+     const data = await response.json()
+     if (data.success && data.totals) {
+      Object.entries(data.totals).forEach(([projectId, hours]) => {
+       hoursMap.set(projectId, hours as number)
+      })
+     }
+     console.log('✅ Projects list: Batch hours fetch successful:', hoursMap.size, 'projects')
+    } else {
+     console.warn('❌ Failed to fetch batch hours:', await response.text())
+    }
     
     console.log('✅ Projects list: Hours map updated:', Array.from(hoursMap.entries()))
     setProjectHours(hoursMap)

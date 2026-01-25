@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
 import bcrypt from 'bcryptjs'
+import { checkRateLimit, getClientIP } from '@/lib/security'
 
 /**
  * GET /api/public/[token]
@@ -11,6 +12,19 @@ export async function GET(
  { params }: { params: Promise<{ token: string }> }
 ) {
  try {
+  // Rate limit: 20 requests per minute per IP to prevent brute-force token guessing
+  const clientIP = getClientIP(req)
+  const rateLimitResult = checkRateLimit(`public-token:${clientIP}`, 20, 60 * 1000)
+  if (!rateLimitResult.allowed) {
+   return NextResponse.json(
+    { error: 'Too many requests. Please try again later.' },
+    { 
+     status: 429,
+     headers: { 'Retry-After': String(rateLimitResult.retryAfter || 60) }
+    }
+   )
+  }
+
   const { token } = await params
   const { searchParams } = new URL(req.url)
   const password = searchParams.get('password')

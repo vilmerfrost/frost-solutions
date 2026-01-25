@@ -50,9 +50,11 @@ const LogRow = ({ log }: { log: SyncLog }) => {
 
 export function SyncHistory({ integrationId }: { integrationId: string }) {
  const [filter, setFilter] = useState<SyncLog['level'] | 'all'>('all');
- // TODO: Implement useSyncLogs hook
+ // Sync logging feature is planned for a future release
+ // For now, display a placeholder message
  const logs: SyncLog[] = [];
  const isLoading = false;
+ const featureNotReady = true; // Flag to show "coming soon" message
 
  const filteredLogs = logs
   ?.filter(log => filter === 'all' || log.level === filter)
@@ -91,7 +93,16 @@ export function SyncHistory({ integrationId }: { integrationId: string }) {
    <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-96 overflow-y-auto">
     {isLoading && <div className="p-4 text-center"><Loader2 className="w-6 h-6 animate-spin inline-block" /></div>}
     
-    {!isLoading && filteredLogs.length === 0 && (
+    {featureNotReady && (
+     <div className="p-6 text-center">
+      <p className="text-gray-600 dark:text-gray-400 font-medium">Synkloggning kommer snart</p>
+      <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+       Historik över synkroniseringar mellan system implementeras i en kommande version.
+      </p>
+     </div>
+    )}
+    
+    {!isLoading && !featureNotReady && filteredLogs.length === 0 && (
      <p className="p-6 text-center text-gray-500 dark:text-gray-400">Inga loggar att visa.</p>
     )}
     

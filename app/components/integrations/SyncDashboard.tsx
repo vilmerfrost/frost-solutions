@@ -32,9 +32,10 @@ const JobStatusBadge = ({ status }: { status: JobStatus }) => {
 
 export function SyncDashboard({ integrationId }: { integrationId: string }) {
  const [filter, setFilter] = useState<JobStatus | 'all'>('all');
- // TODO: Implement useSyncJobs hook
+ // Sync jobs feature is planned for a future release
  const jobs: SyncJob[] = [];
  const isLoading = false;
+ const featureNotReady = true; // Flag to show "coming soon" message
 
  const filteredJobs = jobs?.filter(job => filter === 'all' || job.status === filter) || [];
 
@@ -71,7 +72,16 @@ export function SyncDashboard({ integrationId }: { integrationId: string }) {
    <div className="divide-y divide-gray-200 dark:divide-gray-700 max-h-96 overflow-y-auto">
     {isLoading && <div className="p-4 text-center"><Loader2 className="w-6 h-6 animate-spin inline-block" /></div>}
     
-    {!isLoading && filteredJobs.length === 0 && (
+    {featureNotReady && (
+     <div className="p-6 text-center">
+      <p className="text-gray-600 dark:text-gray-400 font-medium">Synkroniseringskö kommer snart</p>
+      <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">
+       Hantering av synkroniseringsjobb implementeras i en kommande version.
+      </p>
+     </div>
+    )}
+    
+    {!isLoading && !featureNotReady && filteredJobs.length === 0 && (
      <p className="p-6 text-center text-gray-500 dark:text-gray-400">Inga synkjobb att visa.</p>
     )}
 

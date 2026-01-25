@@ -1,5 +1,6 @@
 // app/lib/domain/rot/validation.ts
 import { InvalidPersonnummerError } from './errors';
+import { encryptPnr, decryptPnr } from '@/lib/crypto/pnr';
 
 /**
  * Validate Swedish personnummer (YYYYMMDD-XXXX)
@@ -39,13 +40,11 @@ export function validatePersonnummer(personnummer: string): boolean {
 
 /**
  * Encrypt personnummer for storage (GDPR compliance)
- * Uses pgcrypto encryption via Supabase RPC
+ * Uses pgcrypto encryption via Supabase RPC with AES-256
  */
 export async function encryptPersonnummer(personnummer: string): Promise<string> {
- // TODO: Implement actual encryption using crypto library or Supabase RPC
- // For now, return base64 encoded (NOT SECURE - just placeholder)
- // In production, use pgcrypto.encrypt() via RPC with encryption key from env
- return Buffer.from(personnummer).toString('base64');
+ // SECURITY: Use proper AES-256 encryption from crypto module
+ return encryptPnr(personnummer);
 }
 
 /**
@@ -53,9 +52,8 @@ export async function encryptPersonnummer(personnummer: string): Promise<string>
  * Uses pgcrypto decryption via Supabase RPC
  */
 export async function decryptPersonnummer(encrypted: string): Promise<string> {
- // TODO: Implement actual decryption
- // In production, use pgcrypto.decrypt() via RPC
- return Buffer.from(encrypted, 'base64').toString('utf-8');
+ // SECURITY: Use proper AES-256 decryption from crypto module
+ return decryptPnr(encrypted);
 }
 
 /**

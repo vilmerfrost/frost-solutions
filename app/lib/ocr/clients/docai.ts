@@ -21,6 +21,10 @@ export async function runGoogleDocAI(
  fileBytes: Uint8Array,
  mimeType: string
 ): Promise<DocAIResult> {
+ // PRODUCTION NOTE: OCR uses mock data by default until Google Document AI is configured
+ // To enable real OCR:
+ // 1. Set OCR_USE_MOCK=false in .env.local
+ // 2. Configure GOOGLE_DOC_AI_PROCESSOR_NAME, GOOGLE_PROJECT_ID, and GOOGLE_LOCATION
  const useMock = (process.env.OCR_USE_MOCK ?? 'true').toLowerCase() !== 'false';
 
  const mockResult: DocAIResult = {
@@ -41,6 +45,9 @@ export async function runGoogleDocAI(
  };
 
  if (useMock) {
+  if (process.env.NODE_ENV === 'development') {
+   console.log('[OCR] Google Document AI using mock data (OCR_USE_MOCK=true)');
+  }
   return mockResult;
  }
 

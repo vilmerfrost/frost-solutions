@@ -5,6 +5,7 @@ import { getTenantId } from '@/lib/serverTenant'
 import { buildPrompt } from '@/lib/ai/prompt'
 import { makeCacheKey, getCached, setCached } from '@/lib/ai/cache'
 import { aiLogger as logger } from '@/lib/logger'
+import { assertRateLimit } from '@/lib/rateLimit'
 
 const BodySchema = z.object({
  conversationId: z.string().uuid().optional(),
@@ -182,6 +183,22 @@ export async function POST(req: NextRequest) {
  const tenantId = await getTenantId()
  if (!tenantId) {
   return new Response('Unauthorized', { status: 401 })
+ }
+
+ // Rate limit: 5 requests per minute per tenant for AI chat
+ try {
+  await assertRateLimit(tenantId, '/api/ai/chat', 5)
+ } catch (error: any) {
+  if (error.name === 'RateLimitError') {
+   return new Response(JSON.stringify({ error: 'För många förfrågningar. Försök igen om en minut.' }), {
+    status: 429,
+    headers: { 
+     'Content-Type': 'application/json',
+     'Retry-After': String(error.retryAfter || 60)
+    },
+   })
+  }
+  throw error
  }
 
  let body

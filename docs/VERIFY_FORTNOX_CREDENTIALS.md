@@ -12,8 +12,8 @@ Filens plats: `frost-demo/.env.local`
 ### 2. Kontrollera att dessa rader finns EXAKT så här:
 
 ```env
-FORTNOX_CLIENT_ID=UFg21BcGXfMs
-FORTNOX_CLIENT_SECRET=9r7SqU8WDT
+FORTNOX_CLIENT_ID=your_fortnox_client_id_here
+FORTNOX_CLIENT_SECRET=your_fortnox_client_secret_here
 FORTNOX_REDIRECT_URI=http://localhost:3000/api/integrations/fortnox/callback
 ```
 
@@ -21,28 +21,28 @@ FORTNOX_REDIRECT_URI=http://localhost:3000/api/integrations/fortnox/callback
 - ✅ **INGA mellanslag** före eller efter `=`
 - ✅ **INGA citattecken** runt värdena
 - ✅ **INGA extra rader** eller kommentarer på samma rad
-- ✅ **Exakt** `UFg21BcGXfMs` (stora bokstäver och små bokstäver som vist)
+- ✅ **Exakt** samma format som ditt Client ID från Fortnox Developer Portal
 
 ### 4. Exempel på FEL format (gör INTE så här):
 ```env
 # ❌ FEL - mellanslag före =
-FORTNOX_CLIENT_ID = UFg21BcGXfMs
+FORTNOX_CLIENT_ID = ABC123xyz
 
 # ❌ FEL - citattecken
-FORTNOX_CLIENT_ID="UFg21BcGXfMs"
+FORTNOX_CLIENT_ID="ABC123xyz"
 
 # ❌ FEL - kommentar på samma rad
-FORTNOX_CLIENT_ID=UFg21BcGXfMs # mitt client id
+FORTNOX_CLIENT_ID=ABC123xyz # mitt client id
 
 # ❌ FEL - mellanslag efter =
-FORTNOX_CLIENT_ID= UFg21BcGXfMs
+FORTNOX_CLIENT_ID= ABC123xyz
 ```
 
 ### 5. Exempel på RÄTT format:
 ```env
 # ✅ RÄTT
-FORTNOX_CLIENT_ID=UFg21BcGXfMs
-FORTNOX_CLIENT_SECRET=9r7SqU8WDT
+FORTNOX_CLIENT_ID=your_fortnox_client_id_here
+FORTNOX_CLIENT_SECRET=your_fortnox_client_secret_here
 FORTNOX_REDIRECT_URI=http://localhost:3000/api/integrations/fortnox/callback
 ```
 

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { encryptPnr } from '@/lib/crypto/pnr'
 
 /**
  * API route för att skapa ROT-ansökningar med service role
@@ -46,6 +47,7 @@ export async function POST(req: Request) {
    .single()
 
   if (tenantError || !tenantData) {
+   // SECURITY: Log details server-side only, don't expose to client
    console.error('❌ Tenant verification failed:', {
     tenant_id,
     error: tenantError,
@@ -53,25 +55,9 @@ export async function POST(req: Request) {
     errorMessage: tenantError?.message
    })
    
-   // Try to list available tenants for debugging
-   const { data: allTenants, error: listError } = await adminSupabase
-    .from('tenants')
-    .select('id, name, created_at')
-    .order('created_at', { ascending: false })
-    .limit(10)
-   
-   console.error('Available tenants in database:', allTenants || [])
-   
+   // SECURITY: Generic error message - don't expose tenant existence or other tenant IDs
    return NextResponse.json(
-    { 
-     error: 'Tenant ID not found in database',
-     details: tenantError?.message || 'Tenant does not exist',
-     searchedTenantId: tenant_id,
-     availableTenants: allTenants || [],
-     suggestion: allTenants && allTenants.length > 0 
-      ? `Please use one of the available tenant IDs: ${allTenants.map(t => t.id).join(', ')}`
-      : 'No tenants found in database. Please complete onboarding first.',
-    },
+    { error: 'Tenant validation failed. Please ensure you are properly authenticated and try again.' },
     { status: 400 }
    )
   }
@@ -191,12 +177,33 @@ export async function POST(req: Request) {
   
   console.log('✅ Final tenant check passed, using tenant_id:', verifiedTenantId)
 
+  // SECURITY: Encrypt personnummer (GDPR compliance)
+  let encryptedPnr = ''
+  if (customer_person_number) {
+   try {
+    encryptedPnr = await encryptPnr(customer_person_number)
+   } catch (encryptError: any) {
+    console.error('Failed to encrypt personnummer:', encryptError)
+    // If PNR_ENCRYPTION_KEY is not set, return a clear error
+    if (encryptError.message?.includes('PNR_ENCRYPTION_KEY')) {
+     return NextResponse.json(
+      { error: 'Kryptering av personnummer misslyckades. Kontakta administratören.' },
+      { status: 500 }
+     )
+    }
+    return NextResponse.json(
+     { error: 'Kunde inte kryptera personnummer. Kontrollera formatet (YYYYMMDD-XXXX).' },
+     { status: 400 }
+    )
+   }
+  }
+
   // Create ROT application - USE VERIFIED TENANT ID FROM DATABASE
   const insertPayload: any = {
    tenant_id: verifiedTenantId, // Use verified tenant ID from database
    project_id: project_id || null,
    client_id: client_id || null,
-   customer_person_number: customer_person_number?.replace(/[-\s]/g, '') || '',
+   customer_person_number: encryptedPnr, // SECURITY: Store encrypted personnummer
    property_designation: property_designation || '',
    work_type: work_type || '',
    work_cost_sek: work_cost_sek || 0,

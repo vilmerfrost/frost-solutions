@@ -558,10 +558,10 @@ function InvoiceContent() {
 
  if (loading) {
   return (
-   <div className="min-h-screen bg-white flex">
+   <div className="min-h-screen bg-white dark:bg-gray-900 flex">
     <Sidebar />
     <main className="flex-1 p-10 flex items-center justify-center">
-     <div className="text-gray-500">Laddar...</div>
+     <div className="text-gray-500 dark:text-gray-400">Laddar...</div>
     </main>
    </div>
   )
@@ -569,7 +569,7 @@ function InvoiceContent() {
 
  if (!invoice) {
   return (
-   <div className="min-h-screen bg-white flex">
+   <div className="min-h-screen bg-white dark:bg-gray-900 flex">
     <Sidebar />
     <main className="flex-1 p-10 flex items-center justify-center">
      <div className="text-red-500">Faktura hittades inte</div>
@@ -585,12 +585,12 @@ function InvoiceContent() {
  const toPay = total - rot
 
  return (
-  <div className="min-h-screen bg-white flex">
+  <div className="min-h-screen bg-white dark:bg-gray-900 flex">
    <Sidebar />
    <main className="flex-1 lg:ml-0 overflow-x-hidden">
     <div className="p-6 lg:p-10 max-w-5xl mx-auto">
      <div className="mb-8">
-      <h1 className="text-4xl font-semibold text-gray-900 mb-2">
+      <h1 className="text-4xl font-semibold text-gray-900 dark:text-white mb-2">
        Invoice {invoice.number || invoiceId.slice(0, 8)}
       </h1>
       <p className="text-gray-500">Fakturainformation</p>
@@ -602,7 +602,7 @@ function InvoiceContent() {
       </div>
      )}
 
-     <div className="bg-white rounded-[8px] shadow-md border border-gray-100 overflow-hidden">
+     <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
       {/* Header */}
       <div className="p-8 border-b border-gray-200 bg-primary-500 hover:bg-primary-600">
        <div className="flex justify-between items-start">
@@ -912,7 +912,7 @@ function InvoiceContent() {
 
 function InvoiceLoading() {
  return (
-  <div className="min-h-screen bg-white flex">
+  <div className="min-h-screen bg-white dark:bg-gray-900 flex">
    <Sidebar />
    <main className="flex-1 p-10 flex items-center justify-center">
     <Loader2 className="h-8 w-8 animate-spin text-primary-500" />

@@ -53,25 +53,9 @@ export async function POST(req: Request) {
     errorMessage: tenantError?.message
    })
    
-   // Try to list available tenants for debugging
-   const { data: allTenants, error: listError } = await adminSupabase
-    .from('tenants')
-    .select('id, name, created_at')
-    .order('created_at', { ascending: false })
-    .limit(10)
-   
-   console.error('Available tenants in database:', allTenants || [])
-   
+   // SECURITY: Generic error message - don't expose tenant existence or other tenant IDs
    return NextResponse.json(
-    { 
-     error: 'Tenant ID not found in database',
-     details: tenantError?.message || 'Tenant does not exist',
-     searchedTenantId: tenant_id,
-     availableTenants: allTenants || [],
-     suggestion: allTenants && allTenants.length > 0 
-      ? `Please use one of the available tenant IDs: ${allTenants.map(t => t.id).join(', ')}`
-      : 'No tenants found in database. Please complete onboarding first.',
-    },
+    { error: 'Tenant validation failed. Please ensure you are properly authenticated and try again.' },
     { status: 400 }
    )
   }

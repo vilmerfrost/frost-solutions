@@ -1,12 +1,67 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { checkRateLimit, getClientIP, isValidUUID } from '@/lib/security'
+
+// Magic bytes for file type validation (first few bytes of file content)
+const MAGIC_BYTES: Record<string, number[][]> = {
+  'image/jpeg': [[0xFF, 0xD8, 0xFF]],
+  'image/png': [[0x89, 0x50, 0x4E, 0x47]],
+  'image/gif': [[0x47, 0x49, 0x46, 0x38]],
+  'application/pdf': [[0x25, 0x50, 0x44, 0x46]], // %PDF
+}
+
+/**
+ * Validate file content by checking magic bytes
+ * Returns true if file content matches expected type
+ */
+async function validateFileMagicBytes(file: File): Promise<boolean> {
+  const magicSignatures = MAGIC_BYTES[file.type]
+  
+  // For text/plain, we can't validate magic bytes - just check it's valid UTF-8
+  if (file.type === 'text/plain') {
+    try {
+      const text = await file.text()
+      // Check for null bytes which indicate binary content
+      return !text.includes('\x00')
+    } catch {
+      return false
+    }
+  }
+  
+  // If no magic bytes defined for this type, allow it
+  if (!magicSignatures) {
+    return true
+  }
+  
+  // Read the first few bytes of the file
+  const buffer = await file.slice(0, 8).arrayBuffer()
+  const bytes = new Uint8Array(buffer)
+  
+  // Check if any magic signature matches
+  return magicSignatures.some(signature => 
+    signature.every((byte, index) => bytes[index] === byte)
+  )
+}
 
 /**
  * API route för att ladda upp filer till Supabase Storage
  */
 export async function POST(req: Request) {
  try {
+  // Rate limit: 10 uploads per hour per IP
+  const clientIP = getClientIP(req)
+  const rateLimitResult = checkRateLimit(`file-upload:${clientIP}`, 10, 60 * 60 * 1000)
+  if (!rateLimitResult.allowed) {
+   return NextResponse.json(
+    { error: 'För många uppladdningar. Försök igen senare.' },
+    { 
+     status: 429,
+     headers: { 'Retry-After': String(rateLimitResult.retryAfter || 3600) }
+    }
+   )
+  }
+
   const supabase = createClient()
   const { data: { user }, error: userError } = await supabase.auth.getUser()
 
@@ -28,6 +83,17 @@ export async function POST(req: Request) {
    return NextResponse.json({ error: 'entityType and entityId required' }, { status: 400 })
   }
 
+  // SECURITY: Validate entityType to prevent path traversal
+  const allowedEntityTypes = ['project', 'invoice', 'employee', 'quote', 'supplier-invoice']
+  if (!allowedEntityTypes.includes(entityType)) {
+   return NextResponse.json({ error: 'Invalid entity type' }, { status: 400 })
+  }
+
+  // SECURITY: Validate entityId is a valid UUID to prevent path traversal
+  if (!isValidUUID(entityId)) {
+   return NextResponse.json({ error: 'Invalid entity ID format' }, { status: 400 })
+  }
+
   // Validate file type and size
   const maxSize = 10 * 1024 * 1024 // 10MB
   if (file.size > maxSize) {
@@ -37,6 +103,14 @@ export async function POST(req: Request) {
   const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'application/pdf', 'text/plain']
   if (!allowedTypes.includes(file.type)) {
    return NextResponse.json({ error: 'File type not allowed' }, { status: 400 })
+  }
+
+  // SECURITY: Validate file content matches claimed MIME type (magic bytes check)
+  const isValidContent = await validateFileMagicBytes(file)
+  if (!isValidContent) {
+   return NextResponse.json({ 
+    error: 'File content does not match declared type. Possible malicious file.' 
+   }, { status: 400 })
   }
 
   const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL

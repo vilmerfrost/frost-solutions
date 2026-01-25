@@ -6,6 +6,7 @@ import { getTenantId } from '@/lib/serverTenant';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { createClient } from '@/utils/supabase/server';
 import { extractErrorMessage } from '@/lib/errorUtils';
+import { assertRateLimit } from '@/lib/rateLimit';
 
 // Initialize Stripe lazily to avoid build-time errors
 function getStripe() {
@@ -20,13 +21,16 @@ function getStripe() {
 
 export const runtime = 'nodejs';
 
-// Default amounts in SEK (öre)
+// Default amounts in SEK (öre) - ONLY these amounts are allowed
 const TOPUP_OPTIONS = [
   { amount: 2000, label: '20 kr (10 skanningar)', scans: 10 },
   { amount: 5000, label: '50 kr (25 skanningar)', scans: 25 },
   { amount: 10000, label: '100 kr (50 skanningar)', scans: 50 },
   { amount: 20000, label: '200 kr (100 skanningar)', scans: 100 },
 ];
+
+// Extract allowed amounts for server-side validation
+const ALLOWED_AMOUNTS = TOPUP_OPTIONS.map(opt => opt.amount);
 
 export async function POST(req: NextRequest) {
   try {
@@ -48,6 +52,22 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Rate limit: 5 payment attempts per minute per tenant
+    try {
+      await assertRateLimit(tenantId, '/api/stripe/create-payment-intent', 5);
+    } catch (error: any) {
+      if (error.name === 'RateLimitError') {
+        return NextResponse.json(
+          { success: false, error: 'För många betalningsförsök. Försök igen om en minut.' },
+          { 
+            status: 429,
+            headers: { 'Retry-After': String(error.retryAfter || 60) }
+          }
+        );
+      }
+      throw error;
+    }
+
     // Get user
     const supabase = createClient();
     const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -62,10 +82,10 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { amount } = body; // Amount in öre (e.g., 2000 = 20 SEK)
 
-    // Validate amount
-    if (!amount || typeof amount !== 'number' || amount < 200) {
+    // SECURITY: Validate amount against allowed options only (prevent amount manipulation)
+    if (!amount || typeof amount !== 'number' || !ALLOWED_AMOUNTS.includes(amount)) {
       return NextResponse.json(
-        { success: false, error: 'Ogiltigt belopp (minst 2 kr)' },
+        { success: false, error: 'Ogiltigt belopp. Välj ett av de tillgängliga alternativen.' },
         { status: 400 }
       );
     }

@@ -254,13 +254,6 @@ export default function SidebarClient() {
          <span>Live Karta</span>
         </button>
         <button
-         onClick={() => router.push('/admin/debug')}
-         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-all duration-200"
-        >
-         <SearchIcon className="w-5 h-5" />
-         <span>Admin Debug</span>
-        </button>
-        <button
          onClick={() => router.push('/admin/aeta')}
          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-all duration-200"
         >

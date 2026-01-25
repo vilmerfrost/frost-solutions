@@ -219,16 +219,11 @@ export async function POST(req: Request) {
      .select('id, name')
      .limit(100)
     
-    console.error('❌ Cannot proceed - no valid tenant found. Available tenants:', allTenants)
+    console.error('❌ Cannot proceed - no valid tenant found.')
     
+    // SECURITY: Generic error message - don't expose tenant information
     return NextResponse.json(
-     { 
-      error: `Tenant ID ${tenantId || 'unknown'} not found in database. This is a data integrity issue.`,
-      tenantId,
-      tenantError: tenantError?.message,
-      suggestion: 'Please contact administrator. Your employee record may need to be updated with a valid tenant.',
-      availableTenants: allTenants?.map(t => ({ id: t.id, name: t.name }))
-     },
+     { error: 'Tenant validation failed. Please contact administrator.' },
      { status: 400 }
     )
    }
@@ -452,39 +447,12 @@ export async function POST(req: Request) {
     })
     
     // Re-verify tenant exists and get all details
-    const { data: recheckTenant, error: recheckError } = await adminSupabase
-     .from('tenants')
-     .select('id, name, created_at')
-     .eq('id', tenantId)
-     .single()
-
-    // Also check if there are ANY tenants in the database
-    const { data: anyTenants } = await adminSupabase
-     .from('tenants')
-     .select('id, name')
-     .limit(5)
-
+    // SECURITY: Log details server-side, return generic error to client
+    console.error('Foreign key constraint violation:', { tenantId, error: error.message })
+    
     return NextResponse.json(
      { 
-      error: 'Foreign key constraint violation when creating time entry',
-      diagnosticInfo: {
-       tenantId,
-       tenantIdType: typeof tenantId,
-       tenantVerified: !!recheckTenant,
-       tenantFound: recheckTenant ? { id: recheckTenant.id, name: recheckTenant.name } : null,
-       tenantError: recheckError?.message,
-       anyTenantsInDb: anyTenants?.length || 0,
-       availableTenants: anyTenants?.map(t => ({ id: t.id, name: t.name })),
-       originalError: {
-        code: error.code,
-        message: error.message,
-        hint: error.hint,
-        details: error.details,
-       },
-      },
-      suggestion: recheckTenant 
-       ? 'Tenant exists but foreign key constraint still fails. This indicates a database schema issue. Run SUPABASE_FIX_TIME_ENTRIES_FK.sql to fix the constraint, or contact support.'
-       : `Tenant ${tenantId} not found in database. Please log out and log back in, or run SUPABASE_VERIFY_TENANT.sql to diagnose.`,
+      error: 'Database constraint error. Please try logging out and back in. Contact support if the issue persists.',
      },
      { status: 400 }
     )

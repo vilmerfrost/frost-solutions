@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { checkRateLimit, getClientIP } from '@/lib/security'
 
 /**
  * API route för att skapa tenant under onboarding
@@ -7,6 +8,19 @@ import { createClient } from '@supabase/supabase-js'
  */
 export async function POST(req: Request) {
  try {
+  // Rate limit: 3 tenant creations per hour per IP (strict to prevent abuse)
+  const clientIP = getClientIP(req)
+  const rateLimitResult = checkRateLimit(`create-tenant:${clientIP}`, 3, 60 * 60 * 1000)
+  if (!rateLimitResult.allowed) {
+   return NextResponse.json(
+    { error: 'För många försök. Försök igen senare.' },
+    { 
+     status: 429,
+     headers: { 'Retry-After': String(rateLimitResult.retryAfter || 3600) }
+    }
+   )
+  }
+
   const { name, orgNumber, userId } = await req.json()
 
   if (!name || !userId) {

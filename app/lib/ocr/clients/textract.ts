@@ -49,17 +49,22 @@ export async function runTextract(
   modelConfidence: 92,
  };
 
+ // PRODUCTION NOTE: OCR uses mock data by default until AWS Textract is configured
+ // To enable real OCR:
+ // 1. Set OCR_USE_MOCK=false in .env.local
+ // 2. Configure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_REGION
  const useMock = (process.env.OCR_USE_MOCK ?? 'true').toLowerCase() !== 'false';
- if (useMock) {
-  return mockResult;
- }
-
+ 
  const hasAwsConfig =
   Boolean(process.env.AWS_ACCESS_KEY_ID) &&
   Boolean(process.env.AWS_SECRET_ACCESS_KEY) &&
   Boolean(process.env.AWS_REGION);
 
- if (!hasAwsConfig) {
+ if (useMock || !hasAwsConfig) {
+  // Log for debugging - this is expected in development/demo mode
+  if (process.env.NODE_ENV === 'development') {
+   console.log('[OCR] Using mock data (OCR_USE_MOCK=true or AWS not configured)');
+  }
   return mockResult;
  }
 

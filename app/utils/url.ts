@@ -33,11 +33,18 @@ export function getBaseUrl(): string {
 
  // On the server, use environment variable as fallback
  // These should already include /app suffix
- return (
-  process.env.NEXT_PUBLIC_SITE_URL ||
-  process.env.NEXT_PUBLIC_APP_URL ||
-  `http://localhost:3000${BASE_PATH}`
- );
+ const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_APP_URL;
+ 
+ if (siteUrl) {
+  return siteUrl;
+ }
+ 
+ // PRODUCTION WARNING: Fallback to localhost should never happen in production
+ if (process.env.NODE_ENV === 'production') {
+  console.error('[URL] CRITICAL: NEXT_PUBLIC_SITE_URL is not set in production! Using localhost fallback.');
+ }
+ 
+ return `http://localhost:3000${BASE_PATH}`;
 }
 
 /**
