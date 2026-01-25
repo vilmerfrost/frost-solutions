@@ -72,7 +72,7 @@ export async function POST(req: NextRequest) {
     const hasUsedTrial = existingSubscription !== null;
 
     // Get or create Stripe customer
-    const admin = createAdminClient();
+    // (reusing admin client from above)
     
     // Check if user already has a Stripe customer ID
     const { data: profile } = await admin
