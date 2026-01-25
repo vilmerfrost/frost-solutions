@@ -1,8 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -11,20 +9,24 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import { Loader2, CreditCard, AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 
-// Load Stripe outside of component to avoid recreating on each render
-const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
+// Validate Stripe key at module level
+const stripeKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+if (!stripeKey) {
+  console.error('[CheckoutForm] Missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY');
+}
+
+const stripePromise = stripeKey ? loadStripe(stripeKey) : null;
 
 interface CheckoutFormProps {
   userEmail: string;
   userId: string;
-  userName: string;
 }
 
-function PaymentForm({ userEmail, userId }: { userEmail: string; userId: string }) {
+function CheckoutFormInner({ userEmail, userId }: { userEmail: string; userId: string }) {
   const stripe = useStripe();
   const elements = useElements();
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,6 +34,7 @@ function PaymentForm({ userEmail, userId }: { userEmail: string; userId: string 
     e.preventDefault();
 
     if (!stripe || !elements) {
+      setError('Stripe har inte laddats ännu. Vänligen försök igen.');
       return;
     }
 
@@ -39,75 +42,59 @@ function PaymentForm({ userEmail, userId }: { userEmail: string; userId: string 
     setError(null);
 
     try {
-      // Validate the form
+      // 1. Submit elements for validation
       const { error: submitError } = await elements.submit();
+      
       if (submitError) {
-        setError(submitError.message || 'Formulärvalidering misslyckades');
-        setLoading(false);
-        return;
+        throw new Error(submitError.message || 'Validering misslyckades');
       }
 
-      // Create subscription on the server
+      // 2. Create subscription on server
       const response = await fetch('/api/stripe/create-subscription', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, userEmail }),
+        body: JSON.stringify({
+          userId,
+          userEmail,
+        }),
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ error: 'Okänt fel' }));
+        throw new Error(errorData.error || `Serverfel: ${response.status}`);
+      }
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || 'Kunde inte skapa prenumeration');
+      if (!data.clientSecret) {
+        throw new Error('Ingen client secret returnerades från servern');
       }
 
-      const { clientSecret, subscriptionId } = data;
-
-      if (!clientSecret) {
-        throw new Error('Ingen client secret returnerades');
-      }
-
-      // Confirm the payment
+      // 3. Confirm payment with Stripe
       const { error: confirmError } = await stripe.confirmPayment({
         elements,
-        clientSecret,
+        clientSecret: data.clientSecret,
         confirmParams: {
-          return_url: `${window.location.origin}/dashboard?payment_success=true&subscription_id=${subscriptionId}`,
+          return_url: `${window.location.origin}/dashboard?payment_success=true`,
         },
       });
 
       if (confirmError) {
-        // This will only happen if there's an immediate error
-        // Otherwise, the user will be redirected
-        setError(confirmError.message || 'Betalningen misslyckades');
-        setLoading(false);
-        return;
+        throw new Error(confirmError.message || 'Betalningen misslyckades');
       }
-
-      // Log acceptance of terms at checkout
-      try {
-        await fetch('/api/legal/accept', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            documentType: 'terms',
-            documentVersion: 'v1.0',
-            acceptanceMethod: 'checkout',
-          }),
-        });
-      } catch (acceptError) {
-        // Logging acceptance is not critical - payment already succeeded
-        console.warn('Could not log legal acceptance:', acceptError);
-      }
+      
+      // If no error, Stripe redirects automatically
+      
     } catch (err: any) {
-      console.error('Payment error:', err);
-      setError(err.message || 'Ett fel uppstod. Försök igen.');
+      console.error('[CheckoutForm] Payment error:', err);
+      setError(err.message || 'Ett oväntat fel inträffade. Försök igen.');
       setLoading(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
+      <div className="bg-gray-50 rounded-xl p-4 border border-gray-200">
         <PaymentElement 
           options={{
             layout: 'tabs',
@@ -116,9 +103,9 @@ function PaymentForm({ userEmail, userId }: { userEmail: string; userId: string 
       </div>
 
       {error && (
-        <div className="flex items-start gap-3 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
+        <div className="flex items-start gap-3 p-4 bg-red-50 border border-red-200 rounded-xl">
           <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
@@ -140,40 +127,28 @@ function PaymentForm({ userEmail, userId }: { userEmail: string; userId: string 
         )}
       </button>
 
-      <p className="text-center text-xs text-gray-600 dark:text-gray-400 mt-4">
+      <p className="text-center text-xs text-gray-600">
         Genom att slutföra köpet accepterar du våra{' '}
-        <Link 
-          href="/terms" 
-          target="_blank"
-          className="text-blue-600 hover:text-blue-700 underline dark:text-blue-400 dark:hover:text-blue-500"
-        >
+        <Link href="/terms" target="_blank" className="text-blue-600 hover:text-blue-700 underline">
           användarvillkor
-        </Link>
-        {' '}och{' '}
-        <Link 
-          href="/privacy" 
-          target="_blank"
-          className="text-blue-600 hover:text-blue-700 underline dark:text-blue-400 dark:hover:text-blue-500"
-        >
-          integritetspolicy
         </Link>
       </p>
 
-      <p className="text-center text-sm text-gray-500 dark:text-gray-400">
+      <p className="text-center text-sm text-gray-500">
         Du kan avsluta prenumerationen när som helst
       </p>
     </form>
   );
 }
 
-export default function CheckoutForm({ userEmail, userId, userName }: CheckoutFormProps) {
+export default function CheckoutForm({ userEmail, userId }: CheckoutFormProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [setupError, setSetupError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Create SetupIntent when component mounts
-    const createSetupIntent = async () => {
+    // Create SetupIntent on mount
+    async function createSetupIntent() {
       try {
         const response = await fetch('/api/stripe/create-setup-intent', {
           method: 'POST',
@@ -181,61 +156,67 @@ export default function CheckoutForm({ userEmail, userId, userName }: CheckoutFo
           body: JSON.stringify({ userId, userEmail }),
         });
 
-        const data = await response.json();
-
         if (!response.ok) {
-          throw new Error(data.error || 'Kunde inte initiera betalning');
+          const errorData = await response.json().catch(() => ({ error: 'Okänt fel' }));
+          throw new Error(errorData.error || 'Kunde inte skapa betalningsmetod');
+        }
+
+        const data = await response.json();
+        
+        if (!data.clientSecret) {
+          throw new Error('Ingen client secret returnerades');
         }
 
         setClientSecret(data.clientSecret);
       } catch (err: any) {
-        console.error('Setup intent error:', err);
-        setError(err.message || 'Kunde inte ladda betalningsformuläret');
+        console.error('[CheckoutForm] Setup error:', err);
+        setSetupError(err.message || 'Kunde inte ladda betalningsformulär. Försök igen.');
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
-    };
+    }
 
     createSetupIntent();
   }, [userId, userEmail]);
 
-  if (loading) {
+  if (setupError) {
+    return (
+      <div className="p-6 bg-red-50 border border-red-200 rounded-xl">
+        <h3 className="text-lg font-semibold text-red-900 mb-2">
+          Ett fel uppstod
+        </h3>
+        <p className="text-sm text-red-800 mb-4">
+          {setupError}
+        </p>
+        <button
+          onClick={() => window.location.reload()}
+          className="text-sm text-blue-600 hover:text-blue-700 underline"
+        >
+          Försök igen
+        </button>
+      </div>
+    );
+  }
+
+  if (isLoading || !clientSecret) {
     return (
       <div className="flex flex-col items-center justify-center py-12 space-y-4">
         <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
-        <p className="text-sm text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-500">
           Laddar betalningsformulär...
         </p>
       </div>
     );
   }
 
-  if (error) {
+  if (!stripePromise) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 space-y-4">
-        <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
-            <div>
-              <p className="text-sm text-red-700 dark:text-red-300">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-2 text-sm text-red-600 dark:text-red-400 underline hover:no-underline"
-              >
-                Försök igen
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (!clientSecret) {
-    return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <p className="text-sm text-gray-500 dark:text-gray-400">
-          Kunde inte initiera betalning
+      <div className="p-6 bg-red-50 border border-red-200 rounded-xl">
+        <h3 className="text-lg font-semibold text-red-900 mb-2">
+          Stripe är inte konfigurerat
+        </h3>
+        <p className="text-sm text-red-800">
+          Betalningar är tillfälligt otillgängliga. Kontakta support.
         </p>
       </div>
     );
@@ -285,7 +266,7 @@ export default function CheckoutForm({ userEmail, userId, userName }: CheckoutFo
         locale: 'sv',
       }}
     >
-      <PaymentForm userEmail={userEmail} userId={userId} />
+      <CheckoutFormInner userEmail={userEmail} userId={userId} />
     </Elements>
   );
 }

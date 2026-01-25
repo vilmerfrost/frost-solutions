@@ -1,48 +1,64 @@
 // app/checkout/page.tsx
 import { redirect } from 'next/navigation';
 import { createClient } from '@/utils/supabase/server';
-import { createAdminClient } from '@/utils/supabase/admin';
 import CheckoutForm from './CheckoutForm';
-import { CheckCircle2, Shield, Zap, Clock, FileText, Users } from 'lucide-react';
+import { CheckCircle2, Shield } from 'lucide-react';
 import FrostLogo from '@/components/FrostLogo';
 
 export default async function CheckoutPage() {
-  const supabase = createClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  // CRITICAL: Validate environment variables
+  if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+    console.error('[Checkout] Missing NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY');
+    redirect('/dashboard?error=checkout_unavailable');
+  }
 
-  // Redirect to login if not authenticated
-  if (!user) {
+  if (!process.env.NEXT_PUBLIC_STRIPE_PRICE_ID) {
+    console.error('[Checkout] Missing NEXT_PUBLIC_STRIPE_PRICE_ID');
+    redirect('/dashboard?error=checkout_unavailable');
+  }
+
+  const supabase = await createClient();
+  
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError || !session) {
     redirect('/login?redirect=/checkout');
   }
 
-  // Check if user already has active subscription
-  const admin = createAdminClient();
-  const { data: profile } = await admin
+  // Get user profile
+  const { data: profile, error: profileError } = await supabase
     .from('profiles')
     .select('subscription_status, stripe_subscription_id, full_name')
-    .eq('id', user.id)
+    .eq('id', session.user.id)
     .single();
 
+  if (profileError) {
+    console.error('[Checkout] Error fetching profile:', profileError);
+    // Continue anyway - profile might not exist yet
+  }
+
+  // Check if already subscribed
   if (profile?.subscription_status === 'active') {
     redirect('/dashboard?already_subscribed=true');
   }
 
   const features = [
-    { icon: Clock, text: 'Obegränsad tidrapportering' },
-    { icon: FileText, text: 'AI-faktura & följesedelsläsning' },
-    { icon: Zap, text: 'Fortnox & Visma integration' },
-    { icon: Users, text: 'Obegränsat antal användare' },
+    'Obegränsad tidrapportering',
+    'AI-faktura & följesedelsläsning',
+    'Fortnox & Visma integration',
+    'Obegränsat antal användare',
+    'Prioriterad support',
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-100 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-100">
       {/* Header */}
       <header className="p-4 sm:p-6">
         <div className="max-w-4xl mx-auto flex items-center justify-between">
           <FrostLogo size={36} />
           <a 
             href="/dashboard" 
-            className="text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200 transition-colors"
+            className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
           >
             Tillbaka till dashboard
           </a>
@@ -53,10 +69,10 @@ export default async function CheckoutPage() {
         <div className="max-w-4xl mx-auto">
           {/* Hero Section */}
           <div className="text-center mb-8 sm:mb-12">
-            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
               Uppgradera till <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Pro</span>
             </h1>
-            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-xl mx-auto">
+            <p className="text-lg text-gray-600 max-w-xl mx-auto">
               Få tillgång till alla funktioner och ta ditt byggföretag till nästa nivå.
             </p>
           </div>
@@ -65,7 +81,7 @@ export default async function CheckoutPage() {
             {/* Left Column - Features & Pricing */}
             <div className="space-y-6">
               {/* Pricing Card */}
-              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+              <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-600 to-indigo-600 p-6 text-white">
                   <div className="flex items-center justify-between">
                     <div>
@@ -80,27 +96,27 @@ export default async function CheckoutPage() {
                 </div>
 
                 <div className="p-6">
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                  <p className="text-sm text-gray-600 mb-6">
                     Allt du behöver för att hantera ditt byggföretag effektivt.
                   </p>
 
                   <ul className="space-y-4">
                     {features.map((feature, index) => (
                       <li key={index} className="flex items-center gap-3">
-                        <div className="flex-shrink-0 w-8 h-8 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
-                          <feature.icon className="w-4 h-4 text-green-600 dark:text-green-400" />
+                        <div className="flex-shrink-0 w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
+                          <CheckCircle2 className="w-4 h-4 text-green-600" />
                         </div>
-                        <span className="text-gray-700 dark:text-gray-300">{feature.text}</span>
+                        <span className="text-gray-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
 
-                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                  <div className="mt-6 pt-6 border-t border-gray-200">
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
                       <CheckCircle2 className="w-4 h-4 text-green-500" />
                       <span>Ingen bindningstid</span>
                     </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mt-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-500 mt-2">
                       <CheckCircle2 className="w-4 h-4 text-green-500" />
                       <span>Avsluta när som helst</span>
                     </div>
@@ -109,8 +125,8 @@ export default async function CheckoutPage() {
               </div>
 
               {/* Trust Badges - Desktop Only */}
-              <div className="hidden lg:block bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-                <div className="flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+              <div className="hidden lg:block bg-white rounded-xl p-4 border border-gray-200">
+                <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
                   <div className="flex items-center gap-2">
                     <Shield className="w-5 h-5 text-green-500" />
                     <span>Säker betalning</span>
@@ -127,22 +143,21 @@ export default async function CheckoutPage() {
             </div>
 
             {/* Right Column - Payment Form */}
-            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl border border-gray-200 dark:border-gray-700 p-6 sm:p-8">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6 sm:p-8">
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">
                 Betalningsuppgifter
               </h3>
               
               <CheckoutForm 
-                userEmail={user.email || ''} 
-                userId={user.id}
-                userName={profile?.full_name || user.email?.split('@')[0] || 'Användare'}
+                userEmail={session.user.email || ''} 
+                userId={session.user.id}
               />
             </div>
           </div>
 
           {/* Mobile Trust Badges */}
-          <div className="lg:hidden mt-6 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700">
-            <div className="flex items-center justify-center gap-6 text-sm text-gray-500 dark:text-gray-400">
+          <div className="lg:hidden mt-6 bg-white rounded-xl p-4 border border-gray-200">
+            <div className="flex items-center justify-center gap-6 text-sm text-gray-500">
               <div className="flex items-center gap-2">
                 <Shield className="w-5 h-5 text-green-500" />
                 <span>Säker betalning</span>
@@ -158,13 +173,13 @@ export default async function CheckoutPage() {
           </div>
 
           {/* Footer */}
-          <p className="text-center text-xs text-gray-500 dark:text-gray-400 mt-8">
+          <p className="text-center text-xs text-gray-500 mt-8">
             Genom att fortsätta godkänner du våra{' '}
-            <a href="/terms" className="underline hover:text-gray-700 dark:hover:text-gray-300">
+            <a href="/terms" className="underline hover:text-gray-700">
               Användarvillkor
             </a>{' '}
             och{' '}
-            <a href="/privacy" className="underline hover:text-gray-700 dark:hover:text-gray-300">
+            <a href="/privacy" className="underline hover:text-gray-700">
               Integritetspolicy
             </a>
           </p>

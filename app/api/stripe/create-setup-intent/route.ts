@@ -17,24 +17,34 @@ export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
   try {
+    // Validate Stripe config
     if (!process.env.STRIPE_SECRET_KEY) {
+      console.error('[create-setup-intent] Missing STRIPE_SECRET_KEY');
       return NextResponse.json(
-        { error: 'Stripe är inte konfigurerat' },
+        { error: 'Stripe är inte konfigurerat korrekt' },
         { status: 503 }
       );
     }
 
-    const stripe = getStripe();
-    const body = await req.json();
-    const { userId, userEmail } = body;
-
-    if (!userId || !userEmail) {
+    const body = await req.json().catch(() => null);
+    
+    if (!body) {
       return NextResponse.json(
-        { error: 'Användar-ID och e-post krävs' },
+        { error: 'Ogiltig request body' },
         { status: 400 }
       );
     }
 
+    const { userId, userEmail } = body;
+
+    if (!userId || !userEmail) {
+      return NextResponse.json(
+        { error: 'userId och userEmail krävs' },
+        { status: 400 }
+      );
+    }
+
+    const stripe = getStripe();
     const admin = createAdminClient();
 
     // Check if user already has a Stripe customer
@@ -85,6 +95,10 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    if (!setupIntent.client_secret) {
+      throw new Error('No client secret returned from Stripe');
+    }
+
     console.log('[SetupIntent] Created:', {
       setupIntentId: setupIntent.id,
       customerId,
@@ -96,9 +110,15 @@ export async function POST(req: NextRequest) {
       customerId,
     });
   } catch (error: any) {
-    console.error('[SetupIntent] Error:', error);
+    console.error('[create-setup-intent] Error:', error);
+    
+    // Return user-friendly error
+    const userMessage = error.type === 'StripeInvalidRequestError'
+      ? 'Ogiltig betalningsinformation'
+      : error.message || 'Ett fel uppstod vid betalningskonfiguration';
+    
     return NextResponse.json(
-      { error: error.message || 'Kunde inte initiera betalning' },
+      { error: userMessage },
       { status: 500 }
     );
   }
