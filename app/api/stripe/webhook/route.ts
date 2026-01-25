@@ -103,46 +103,81 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   const { tenant_id, plan_id, plan_name, billing_cycle } = session.metadata || {};
   
-  if (!tenant_id || !session.subscription) {
+  if (!session.subscription) {
     console.log('[Stripe Webhook] Not a subscription checkout, skipping');
     return;
   }
 
   const admin = createAdminClient();
 
-  // Update subscription record
-  const { error } = await admin
-    .from('subscriptions')
-    .update({
-      status: 'active',
-      stripe_subscription_id: session.subscription as string,
-      stripe_customer_id: session.customer as string,
-      billing_cycle: billing_cycle || 'monthly',
-      current_period_start: new Date().toISOString(),
-      current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      trial_end: null, // Trial ended when payment made
-      updated_at: new Date().toISOString(),
-    })
-    .eq('tenant_id', tenant_id);
+  // Update subscription record (if subscriptions table exists)
+  if (tenant_id) {
+    await admin
+      .from('subscriptions')
+      .update({
+        status: 'active',
+        stripe_subscription_id: session.subscription as string,
+        stripe_customer_id: session.customer as string,
+        billing_cycle: billing_cycle || 'monthly',
+        current_period_start: new Date().toISOString(),
+        current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+        trial_end: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('tenant_id', tenant_id);
 
-  if (error) {
-    console.error('[Stripe Webhook] Failed to update subscription:', error);
-    throw error;
+    // Log event
+    await admin.from('subscription_events').insert({
+      tenant_id,
+      event_type: 'checkout_completed',
+      stripe_event_id: session.id,
+      data: {
+        plan_name,
+        billing_cycle,
+        subscription_id: session.subscription,
+      },
+    }).catch(() => {}); // Ignore if table doesn't exist
   }
 
-  // Log event
-  await admin.from('subscription_events').insert({
-    tenant_id,
-    event_type: 'checkout_completed',
-    stripe_event_id: session.id,
-    data: {
-      plan_name,
-      billing_cycle,
-      subscription_id: session.subscription,
-    },
+  console.log('[Stripe Webhook] Subscription activated for tenant:', tenant_id);
+}
+
+// Handle subscription created (new from embedded checkout)
+async function handleSubscriptionCreated(subscription: Stripe.Subscription) {
+  console.log('[Stripe Webhook] Subscription created:', {
+    id: subscription.id,
+    status: subscription.status,
+    customer: subscription.customer,
+    metadata: subscription.metadata,
   });
 
-  console.log('[Stripe Webhook] Subscription activated for tenant:', tenant_id);
+  const { user_id, tenant_id } = subscription.metadata || {};
+  
+  if (!user_id) {
+    console.log('[Stripe Webhook] No user_id in metadata, skipping');
+    return;
+  }
+
+  const admin = createAdminClient();
+  const sub = subscription as any;
+
+  // Update profiles table with subscription status
+  const { error } = await admin
+    .from('profiles')
+    .update({
+      stripe_subscription_id: subscription.id,
+      subscription_status: subscription.status === 'active' ? 'active' : 
+                          subscription.status === 'trialing' ? 'trialing' : 
+                          subscription.status,
+      trial_ends_at: subscription.status === 'active' ? null : undefined, // Clear trial if active
+    })
+    .eq('id', user_id);
+
+  if (error) {
+    console.error('[Stripe Webhook] Failed to update profile:', error);
+  }
+
+  console.log('[Stripe Webhook] Profile updated for user:', user_id);
 }
 
 async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
@@ -152,12 +187,7 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     metadata: subscription.metadata,
   });
 
-  const { tenant_id } = subscription.metadata || {};
-  if (!tenant_id) {
-    console.log('[Stripe Webhook] No tenant_id in metadata, skipping');
-    return;
-  }
-
+  const { tenant_id, user_id } = subscription.metadata || {};
   const admin = createAdminClient();
 
   // Map Stripe status to our status
@@ -168,44 +198,76 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     canceled: 'canceled',
     unpaid: 'unpaid',
     paused: 'paused',
+    incomplete: 'incomplete',
+    incomplete_expired: 'canceled',
   };
+
+  const mappedStatus = statusMap[subscription.status] || subscription.status;
 
   // Cast to any to handle Stripe API version differences
   const sub = subscription as any;
-  const { error } = await admin
-    .from('subscriptions')
-    .update({
-      status: statusMap[subscription.status] || subscription.status,
-      current_period_start: sub.current_period_start 
-        ? new Date(sub.current_period_start * 1000).toISOString() 
-        : null,
-      current_period_end: sub.current_period_end 
-        ? new Date(sub.current_period_end * 1000).toISOString() 
-        : null,
-      cancel_at: sub.cancel_at 
-        ? new Date(sub.cancel_at * 1000).toISOString() 
-        : null,
-      canceled_at: sub.canceled_at 
-        ? new Date(sub.canceled_at * 1000).toISOString() 
-        : null,
-      updated_at: new Date().toISOString(),
-    })
-    .eq('stripe_subscription_id', subscription.id);
 
-  if (error) {
-    console.error('[Stripe Webhook] Failed to update subscription:', error);
+  // Update subscriptions table (if tenant_id exists)
+  if (tenant_id) {
+    await admin
+      .from('subscriptions')
+      .update({
+        status: mappedStatus,
+        current_period_start: sub.current_period_start 
+          ? new Date(sub.current_period_start * 1000).toISOString() 
+          : null,
+        current_period_end: sub.current_period_end 
+          ? new Date(sub.current_period_end * 1000).toISOString() 
+          : null,
+        cancel_at: sub.cancel_at 
+          ? new Date(sub.cancel_at * 1000).toISOString() 
+          : null,
+        canceled_at: sub.canceled_at 
+          ? new Date(sub.canceled_at * 1000).toISOString() 
+          : null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('stripe_subscription_id', subscription.id);
+
+    // Log event
+    await admin.from('subscription_events').insert({
+      tenant_id,
+      event_type: 'subscription_updated',
+      stripe_event_id: subscription.id,
+      data: {
+        status: subscription.status,
+        cancel_at_period_end: subscription.cancel_at_period_end,
+      },
+    }).catch(() => {});
   }
 
-  // Log event
-  await admin.from('subscription_events').insert({
-    tenant_id,
-    event_type: 'subscription_updated',
-    stripe_event_id: subscription.id,
-    data: {
-      status: subscription.status,
-      cancel_at_period_end: subscription.cancel_at_period_end,
-    },
-  });
+  // Update profiles table (if user_id exists)
+  if (user_id) {
+    await admin
+      .from('profiles')
+      .update({
+        subscription_status: mappedStatus,
+        trial_ends_at: mappedStatus === 'active' ? null : undefined,
+      })
+      .eq('id', user_id);
+  }
+
+  // Also try to find user by stripe_subscription_id
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('stripe_subscription_id', subscription.id)
+    .maybeSingle();
+
+  if (profile) {
+    await admin
+      .from('profiles')
+      .update({
+        subscription_status: mappedStatus,
+        trial_ends_at: mappedStatus === 'active' ? null : undefined,
+      })
+      .eq('id', profile.id);
+  }
 }
 
 async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
@@ -214,11 +276,10 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     metadata: subscription.metadata,
   });
 
-  const { tenant_id } = subscription.metadata || {};
-  if (!tenant_id) return;
-
+  const { tenant_id, user_id } = subscription.metadata || {};
   const admin = createAdminClient();
 
+  // Update subscriptions table
   await admin
     .from('subscriptions')
     .update({
@@ -228,12 +289,36 @@ async function handleSubscriptionDeleted(subscription: Stripe.Subscription) {
     })
     .eq('stripe_subscription_id', subscription.id);
 
-  await admin.from('subscription_events').insert({
-    tenant_id,
-    event_type: 'subscription_canceled',
-    stripe_event_id: subscription.id,
-    data: { canceled_at: new Date().toISOString() },
-  });
+  // Update profiles table (by user_id from metadata)
+  if (user_id) {
+    await admin
+      .from('profiles')
+      .update({ subscription_status: 'canceled' })
+      .eq('id', user_id);
+  }
+
+  // Also try to find user by stripe_subscription_id
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('stripe_subscription_id', subscription.id)
+    .maybeSingle();
+
+  if (profile) {
+    await admin
+      .from('profiles')
+      .update({ subscription_status: 'canceled' })
+      .eq('id', profile.id);
+  }
+
+  if (tenant_id) {
+    await admin.from('subscription_events').insert({
+      tenant_id,
+      event_type: 'subscription_canceled',
+      stripe_event_id: subscription.id,
+      data: { canceled_at: new Date().toISOString() },
+    }).catch(() => {});
+  }
 }
 
 async function handleInvoicePaid(invoice: Stripe.Invoice) {
@@ -248,6 +333,23 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
 
   const admin = createAdminClient();
 
+  // Update profiles - find by stripe_subscription_id
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('stripe_subscription_id', inv.subscription as string)
+    .maybeSingle();
+
+  if (profile) {
+    await admin
+      .from('profiles')
+      .update({
+        subscription_status: 'active',
+        trial_ends_at: null, // Clear trial when payment succeeds
+      })
+      .eq('id', profile.id);
+  }
+
   // Get tenant from subscription
   const { data: sub } = await admin
     .from('subscriptions')
@@ -255,29 +357,39 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
     .eq('stripe_subscription_id', inv.subscription as string)
     .maybeSingle();
 
-  if (!sub?.tenant_id) return;
+  // Update subscriptions table
+  if (sub?.tenant_id) {
+    await admin
+      .from('subscriptions')
+      .update({
+        status: 'active',
+        trial_end: null,
+        updated_at: new Date().toISOString(),
+      })
+      .eq('stripe_subscription_id', inv.subscription as string);
 
-  // Record invoice
-  await admin.from('subscription_invoices').upsert({
-    tenant_id: sub.tenant_id,
-    stripe_invoice_id: invoice.id,
-    stripe_payment_intent_id: inv.payment_intent as string,
-    amount_due: invoice.amount_due / 100,
-    amount_paid: invoice.amount_paid / 100,
-    currency: invoice.currency.toUpperCase(),
-    status: 'paid',
-    invoice_pdf_url: inv.invoice_pdf || null,
-    hosted_invoice_url: inv.hosted_invoice_url || null,
-    period_start: inv.period_start 
-      ? new Date(inv.period_start * 1000).toISOString() 
-      : null,
-    period_end: inv.period_end 
-      ? new Date(inv.period_end * 1000).toISOString() 
-      : null,
-    paid_at: new Date().toISOString(),
-  }, {
-    onConflict: 'stripe_invoice_id',
-  });
+    // Record invoice
+    await admin.from('subscription_invoices').upsert({
+      tenant_id: sub.tenant_id,
+      stripe_invoice_id: invoice.id,
+      stripe_payment_intent_id: inv.payment_intent as string,
+      amount_due: invoice.amount_due / 100,
+      amount_paid: invoice.amount_paid / 100,
+      currency: invoice.currency.toUpperCase(),
+      status: 'paid',
+      invoice_pdf_url: inv.invoice_pdf || null,
+      hosted_invoice_url: inv.hosted_invoice_url || null,
+      period_start: inv.period_start 
+        ? new Date(inv.period_start * 1000).toISOString() 
+        : null,
+      period_end: inv.period_end 
+        ? new Date(inv.period_end * 1000).toISOString() 
+        : null,
+      paid_at: new Date().toISOString(),
+    }, {
+      onConflict: 'stripe_invoice_id',
+    }).catch(() => {});
+  }
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
@@ -291,23 +403,46 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
 
   const admin = createAdminClient();
 
+  // Update profiles - find by stripe_subscription_id
+  const { data: profile } = await admin
+    .from('profiles')
+    .select('id')
+    .eq('stripe_subscription_id', inv.subscription as string)
+    .maybeSingle();
+
+  if (profile) {
+    await admin
+      .from('profiles')
+      .update({ subscription_status: 'past_due' })
+      .eq('id', profile.id);
+  }
+
+  // Update subscriptions table
+  await admin
+    .from('subscriptions')
+    .update({
+      status: 'past_due',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('stripe_subscription_id', inv.subscription as string);
+
   const { data: sub } = await admin
     .from('subscriptions')
     .select('tenant_id')
     .eq('stripe_subscription_id', inv.subscription as string)
     .maybeSingle();
 
-  if (!sub?.tenant_id) return;
-
-  await admin.from('subscription_events').insert({
-    tenant_id: sub.tenant_id,
-    event_type: 'payment_failed',
-    stripe_event_id: invoice.id,
-    data: {
-      amount_due: invoice.amount_due / 100,
-      attempt_count: inv.attempt_count,
-    },
-  });
+  if (sub?.tenant_id) {
+    await admin.from('subscription_events').insert({
+      tenant_id: sub.tenant_id,
+      event_type: 'payment_failed',
+      stripe_event_id: invoice.id,
+      data: {
+        amount_due: invoice.amount_due / 100,
+        attempt_count: inv.attempt_count,
+      },
+    }).catch(() => {});
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -370,6 +505,10 @@ export async function POST(req: NextRequest) {
         break;
 
       // Subscriptions - Lifecycle
+      case 'customer.subscription.created':
+        await handleSubscriptionCreated(event.data.object as Stripe.Subscription);
+        break;
+
       case 'customer.subscription.updated':
         await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
         break;

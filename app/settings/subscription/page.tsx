@@ -64,9 +64,8 @@ function SubscriptionPageContent() {
   };
 
   const handleUpgrade = () => {
-    // Use direct Stripe payment link
-    const paymentLink = 'https://buy.stripe.com/cNi4gr9um8mq6TeesMdQQ00';
-    window.location.href = paymentLink;
+    // Route to custom checkout page
+    router.push('/checkout');
   };
 
   return (
