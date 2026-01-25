@@ -109,12 +109,36 @@ export async function POST(req: NextRequest) {
     });
 
     // Get the client secret from the payment intent
-    // Note: payment_intent is only available when expanded, so we use any to bypass type check
-    const invoice = subscription.latest_invoice as Stripe.Invoice & { payment_intent?: Stripe.PaymentIntent };
-    const paymentIntent = invoice?.payment_intent;
+    // Handle both expanded and non-expanded cases
+    let invoice: Stripe.Invoice;
+    let paymentIntent: Stripe.PaymentIntent;
 
-    if (!paymentIntent || typeof paymentIntent === 'string' || !paymentIntent.client_secret) {
-      throw new Error('Kunde inte hämta betalningsinformation');
+    // Check if latest_invoice is a string ID (not expanded)
+    if (typeof subscription.latest_invoice === 'string') {
+      // Fetch invoice with payment_intent expanded
+      invoice = await stripe.invoices.retrieve(subscription.latest_invoice, {
+        expand: ['payment_intent'],
+      });
+    } else {
+      invoice = subscription.latest_invoice as Stripe.Invoice;
+    }
+
+    // Check if payment_intent is a string ID (not expanded)
+    if (typeof invoice.payment_intent === 'string') {
+      // Fetch payment intent separately
+      paymentIntent = await stripe.paymentIntents.retrieve(invoice.payment_intent);
+    } else {
+      paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+    }
+
+    if (!paymentIntent || !paymentIntent.client_secret) {
+      console.error('[create-subscription] PaymentIntent structure:', {
+        hasPaymentIntent: !!paymentIntent,
+        hasClientSecret: !!paymentIntent?.client_secret,
+        invoiceId: invoice.id,
+        subscriptionId: subscription.id,
+      });
+      throw new Error('Kunde inte hämta betalningsinformation från Stripe');
     }
 
     // Update profile with subscription info (status will be updated by webhook)
