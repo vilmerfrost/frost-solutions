@@ -3,6 +3,11 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createAdminClient } from '@/utils/supabase/admin';
 
+// Define expanded invoice type (payment_intent is added via expand)
+interface ExpandedInvoice extends Stripe.Invoice {
+  payment_intent?: string | Stripe.PaymentIntent | null;
+}
+
 function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) {
@@ -99,7 +104,7 @@ export async function POST(req: NextRequest) {
 
     // Get the client secret from the payment intent
     // Since we expanded 'latest_invoice.payment_intent', payment_intent is an object
-    const invoice = subscription.latest_invoice as Stripe.Invoice;
+    const invoice = subscription.latest_invoice as ExpandedInvoice;
     
     // Handle expanded payment_intent (when using expand) or string ID
     let paymentIntent: Stripe.PaymentIntent | null = null;
