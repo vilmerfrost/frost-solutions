@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import { useAdmin } from '@/hooks/useAdmin'
-import { Edit2, Trash2, FileText } from 'lucide-react'
+import { Edit2, Trash2, FileText, Loader2 } from 'lucide-react'
 import Sidebar from '@/components/Sidebar'
 import { sendInvoiceEmail } from './actions'
 import { toast } from '@/lib/toast'
@@ -35,7 +35,7 @@ interface InvoiceLine {
  amount_sek: number
 }
 
-export default function InvoicePage() {
+function InvoiceContent() {
  const router = useRouter()
  const params = useParams()
  const searchParams = useSearchParams()
@@ -907,5 +907,24 @@ export default function InvoicePage() {
     </div>
    </main>
   </div>
+ )
+}
+
+function InvoiceLoading() {
+ return (
+  <div className="min-h-screen bg-white flex">
+   <Sidebar />
+   <main className="flex-1 p-10 flex items-center justify-center">
+    <Loader2 className="h-8 w-8 animate-spin text-primary-500" />
+   </main>
+  </div>
+ )
+}
+
+export default function InvoicePage() {
+ return (
+  <Suspense fallback={<InvoiceLoading />}>
+   <InvoiceContent />
+  </Suspense>
  )
 }

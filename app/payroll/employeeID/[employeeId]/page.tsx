@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
@@ -23,7 +23,7 @@ function monthRange(isoMonth?: string) {
  return { start: start.toISOString(), end: end.toISOString(), label }
 }
 
-export default function PayslipPage() {
+function PayslipContent() {
  const router = useRouter()
  const params = useParams()
  const searchParams = useSearchParams()
@@ -446,3 +446,21 @@ export default function PayslipPage() {
  )
 }
 
+function PayslipLoading() {
+ return (
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row">
+   <Sidebar />
+   <main className="flex-1 p-10 flex items-center justify-center">
+    <div className="text-gray-500 dark:text-gray-400">Laddar...</div>
+   </main>
+  </div>
+ )
+}
+
+export default function PayslipPage() {
+ return (
+  <Suspense fallback={<PayslipLoading />}>
+   <PayslipContent />
+  </Suspense>
+ )
+}
