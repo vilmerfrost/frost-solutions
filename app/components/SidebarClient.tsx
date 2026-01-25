@@ -5,7 +5,6 @@ import { useState, useEffect } from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import { useAdmin } from '@/hooks/useAdmin'
 import { SafeOnlineStatusIndicator } from '@/components/SafeSyncComponents'
-import { SearchBar } from '@/components/search/SearchBar'
 import { MobileBottomNav } from './MobileBottomNav'
 import { 
  LayoutDashboard, 
@@ -35,7 +34,6 @@ import {
  Sun,
  MapPin,
  Map,
- Search as SearchIcon,
  Bug,
  Menu,
  X,
@@ -138,14 +136,10 @@ export default function SidebarClient() {
     <div className="h-full flex flex-col">
      {/* Logo */}
      <div className="p-6 border-b border-white/10">
-      <div className="flex items-center justify-center mb-4">
+      <div className="flex items-center justify-center">
        <h1 className="text-xl font-semibold text-white">
         Frost Solutions
        </h1>
-      </div>
-      {/* Global Search Bar */}
-      <div className="mt-4">
-       <SearchBar />
       </div>
      </div>
 

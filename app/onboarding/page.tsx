@@ -7,6 +7,8 @@ import FrostLogo from '@/components/FrostLogo'
 import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
 import { BASE_PATH } from '@/utils/url'
+import { CSVUploader } from '@/components/import/CSVUploader'
+import { Upload, ArrowRight } from 'lucide-react'
 
 export default function OnboardingPage() {
  const router = useRouter()
@@ -324,24 +326,25 @@ export default function OnboardingPage() {
     throw new Error(errorData.error || 'Kunde inte skapa projekt')
    }
 
-   // CRITICAL: Ensure tenant is set before redirect
-   // Wait a bit to ensure cookie is set, then do full page reload
-   await new Promise(resolve => setTimeout(resolve, 1000))
-   
-   toast.success('Onboarding klar!')
-   toast.info('💡 Viktigt: Logga ut och in igen för att se tidsrapporter och stämpelklockan.')
-   
-   // Wait a moment for toasts to show, then redirect
-   setTimeout(() => {
-    // Force full page reload to ensure cookies/metadata are available
-    window.location.href = `${BASE_PATH}/dashboard`
-   }, 3000)
+   // Move to optional import step
+   setStep(5)
+   toast.success('Projekt skapat!')
   } catch (err: any) {
-   console.error('Error in handleStep3:', err)
+   console.error('Error in handleStep4:', err)
    toast.error('Fel: ' + err.message)
   } finally {
    setLoading(false)
   }
+ }
+
+ function finishOnboarding() {
+  toast.success('Onboarding klar!')
+  toast.info('💡 Viktigt: Logga ut och in igen för att se tidsrapporter och stämpelklockan.')
+  
+  // Wait a moment for toasts to show, then redirect
+  setTimeout(() => {
+   window.location.href = `${BASE_PATH}/dashboard`
+  }, 2000)
  }
 
  return (
@@ -358,11 +361,11 @@ export default function OnboardingPage() {
     {/* Progress */}
     <div className="mb-8">
      <div className="flex justify-between mb-2">
-      {[1, 2, 3, 4].map((s) => (
+      {[1, 2, 3, 4, 5].map((s) => (
        <div
         key={s}
-        className={`w-1/4 h-2 rounded-full mx-1 ${
-         s <= step ? 'bg-primary-500 hover:bg-primary-600' : 'bg-gray-200'
+        className={`flex-1 h-2 rounded-full mx-0.5 ${
+         s <= step ? 'bg-primary-500' : 'bg-gray-200'
         }`}
        />
       ))}
@@ -372,6 +375,7 @@ export default function OnboardingPage() {
       <span>Admin</span>
       <span>Kund</span>
       <span>Projekt</span>
+      <span>Import</span>
      </div>
     </div>
 
@@ -639,9 +643,61 @@ export default function OnboardingPage() {
         disabled={loading}
         className="flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50"
        >
-        {loading ? 'Sparar...' : 'Slutför 🎉'}
+        {loading ? 'Sparar...' : 'Fortsätt →'}
        </button>
       </div>
+     </div>
+    )}
+
+    {/* Step 5: Optional Import from Bygglet */}
+    {step === 5 && (
+     <div className="space-y-6">
+      <div className="text-center mb-6">
+       <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-100 dark:bg-primary-900/30 mb-4">
+        <Upload className="w-8 h-8 text-primary-500" />
+       </div>
+       <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+        Importera från Bygglet (valfritt)
+       </h2>
+       <p className="text-gray-600 dark:text-gray-400">
+        Har du data från Bygglet eller liknande system? Importera det här för att komma igång snabbare.
+       </p>
+      </div>
+
+      <div className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 mb-4">
+       <h3 className="font-medium text-gray-900 dark:text-white mb-2">💡 Tips för import</h3>
+       <ul className="text-sm text-gray-600 dark:text-gray-400 space-y-1">
+        <li>• Importera i ordning: Kunder → Anställda → Projekt → Tidsrapporter</li>
+        <li>• CSV-filer ska vara i UTF-8 format</li>
+        <li>• Du kan importera mer data senare under Inställningar → Import</li>
+       </ul>
+      </div>
+
+      <CSVUploader onImportComplete={(result) => {
+       if (result.success) {
+        toast.success(`${result.imported} poster importerades!`)
+       }
+      }} />
+
+      <div className="flex gap-4 mt-8">
+       <button
+        onClick={() => setStep(4)}
+        className="flex-1 px-6 py-4 rounded-[8px] border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+       >
+        ← Tillbaka
+       </button>
+       <button
+        onClick={finishOnboarding}
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all flex items-center justify-center gap-2"
+       >
+        Slutför & Gå till Dashboard
+        <ArrowRight className="w-5 h-5" />
+       </button>
+      </div>
+
+      <p className="text-center text-sm text-gray-500 dark:text-gray-400 mt-4">
+       Du kan alltid importera mer data senare via Inställningar → Import
+      </p>
      </div>
     )}
    </div>
