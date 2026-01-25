@@ -89,8 +89,8 @@ export async function POST(req: NextRequest) {
         .eq('id', user.id);
     }
 
-    // Determine URLs
-    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+    // Determine URLs (NEXT_PUBLIC_SITE_URL includes /app basePath)
+    const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000/app';
     const finalSuccessUrl = successUrl || `${baseUrl}/settings/subscription?success=true`;
     const finalCancelUrl = cancelUrl || `${baseUrl}/settings/subscription?canceled=true`;
 

@@ -9,6 +9,9 @@ import type { AccountingProvider, ProviderConfig } from '@/types/integrations';
  * 
  * Note: For OAuth integrations (Fortnox/Visma), the redirect URI must be pre-registered
  * in their developer portals. If using ngrok, you'll need to register the ngrok URL there too.
+ * 
+ * Note: App runs under basePath '/app', so full URLs must include this prefix.
+ * NEXT_PUBLIC_APP_URL should already include /app (e.g., https://frostsolutions.se/app)
  */
 function getBaseUrl(overrideBaseUrl?: string): string {
  // Allow override for dynamic base URLs (e.g., from request headers)
@@ -16,9 +19,12 @@ function getBaseUrl(overrideBaseUrl?: string): string {
   return overrideBaseUrl.replace(/\/$/, '');
  }
  
+ // Prefer environment variables that already include the basePath
  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 
   process.env.NEXT_PUBLIC_SITE_URL || 
-  (typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3000');
+  (typeof window !== 'undefined' 
+    ? `${window.location.origin}/app`  // Add basePath when using origin
+    : 'http://localhost:3000/app');
  
  // Remove trailing slash if present
  return baseUrl.replace(/\/$/, '');
@@ -30,7 +36,7 @@ function getBaseUrl(overrideBaseUrl?: string): string {
  * 
  * @param provider - 'fortnox' or 'visma'
  * @param overrideBaseUrl - Optional base URL override (e.g., from request headers for ngrok support)
- * @returns Full redirect URI (e.g., http://localhost:3000/api/integrations/callback/fortnox)
+ * @returns Full redirect URI (e.g., http://localhost:3000/app/api/integrations/callback/fortnox)
  */
 export function buildRedirectUri(provider: AccountingProvider, overrideBaseUrl?: string): string {
  const baseUrl = getBaseUrl(overrideBaseUrl);

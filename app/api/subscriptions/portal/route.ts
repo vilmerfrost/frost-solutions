@@ -56,7 +56,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const baseUrl = req.nextUrl.origin;
+    // Note: req.nextUrl.origin doesn't include basePath, so we need to add /app
+    const baseUrl = `${req.nextUrl.origin}/app`;
 
     // Create portal session
     const session = await stripe.billingPortal.sessions.create({

@@ -117,7 +117,8 @@ export async function POST(req: NextRequest) {
       : plan.stripe_price_id_monthly;
 
     // If no Stripe price configured, create dynamic checkout
-    const baseUrl = req.nextUrl.origin;
+    // Note: req.nextUrl.origin doesn't include basePath, so we need to add /app
+    const baseUrl = `${req.nextUrl.origin}/app`;
     
     let sessionParams: Stripe.Checkout.SessionCreateParams = {
       customer: customerId,

@@ -309,3 +309,19 @@ function SubscriptionPageContent() {
   );
 }
 
+export default function SubscriptionPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row">
+        <Sidebar />
+        <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+          </div>
+        </main>
+      </div>
+    }>
+      <SubscriptionPageContent />
+    </Suspense>
+  );
+}

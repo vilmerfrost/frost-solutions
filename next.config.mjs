@@ -6,6 +6,8 @@ const __dirname = path.dirname(__filename);
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // App is served from frostsolutions.se/app (root domain has marketing site)
+  basePath: '/app',
   turbopack: {
     root: path.resolve(__dirname),
   },

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { exchangeCodeForToken } from '@/lib/integrations/fortnox/oauth';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { extractErrorMessage } from '@/lib/errorUtils';
+import { BASE_PATH } from '@/utils/url';
 
 export async function GET(req: NextRequest) {
  try {
@@ -16,7 +17,8 @@ export async function GET(req: NextRequest) {
   if (error) {
    console.error('❌ Fortnox OAuth error:', { error, errorDescription, state });
    
-   const baseUrl = req.nextUrl.origin;
+   // Note: req.nextUrl.origin doesn't include basePath, so we add it
+   const baseUrl = `${req.nextUrl.origin}${BASE_PATH}`;
    
    // Create user-friendly error messages based on error type
    let errorMessage = errorDescription || `OAuth-fel: ${error}`;
@@ -65,7 +67,7 @@ export async function GET(req: NextRequest) {
   // Handle missing code/state
   if (!code || !state) {
    console.error('❌ Missing code or state in callback');
-   const baseUrl = req.nextUrl.origin;
+   const baseUrl = `${req.nextUrl.origin}${BASE_PATH}`;
    return NextResponse.redirect(
     new URL(`/settings/integrations?error=${encodeURIComponent('Saknar code eller state i OAuth callback.')}`, baseUrl)
    );
@@ -75,7 +77,7 @@ export async function GET(req: NextRequest) {
   const [integrationId] = state.split(':');
   if (!integrationId) {
    console.error('❌ Invalid state format:', state);
-   const baseUrl = req.nextUrl.origin;
+   const baseUrl = `${req.nextUrl.origin}${BASE_PATH}`;
    return NextResponse.redirect(
     new URL(`/settings/integrations?error=${encodeURIComponent('Ogiltigt state-format.')}`, baseUrl)
    );
@@ -92,11 +94,11 @@ export async function GET(req: NextRequest) {
   }).eq('id', integrationId);
 
   // Redirect to UI with success
-  const baseUrl = req.nextUrl.origin;
+  const baseUrl = `${req.nextUrl.origin}${BASE_PATH}`;
   return NextResponse.redirect(new URL(`/settings/integrations?connected=fortnox`, baseUrl));
  } catch (e: any) {
   console.error('💥 Exception in Fortnox callback:', e);
-  const baseUrl = req.nextUrl.origin;
+  const baseUrl = `${req.nextUrl.origin}${BASE_PATH}`;
   const errorMessage = extractErrorMessage(e);
   return NextResponse.redirect(
    new URL(`/settings/integrations?error=${encodeURIComponent(errorMessage)}`, baseUrl)

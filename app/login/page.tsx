@@ -5,6 +5,7 @@ import { useState, Suspense } from 'react'
 import supabase from '@/utils/supabase/supabaseClient'
 import FrostLogo from '../components/FrostLogo'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { BASE_PATH } from '@/utils/url'
 
 function LoginContent() {
  const [status, setStatus] = useState<string | null>(null)
@@ -32,10 +33,11 @@ function LoginContent() {
   setLoading(true)
   setStatus(null)
   try {
+   // Include basePath since app runs under /app
    const { error } = await supabase.auth.signInWithOAuth({
     provider,
     options: {
-     redirectTo: `${window.location.origin}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`,
+     redirectTo: `${window.location.origin}${BASE_PATH}/auth/callback?redirect=${encodeURIComponent(redirectTo)}`,
     }
    })
    if (error) throw error

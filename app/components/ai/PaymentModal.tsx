@@ -12,6 +12,7 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { X, CreditCard, Check, Loader } from 'lucide-react';
 import { toast } from 'sonner';
+import { BASE_PATH } from '@/utils/url';
 
 // Initialize Stripe
 const stripePromise = loadStripe(
@@ -63,10 +64,11 @@ function PaymentForm({
     setErrorMessage(null);
 
     try {
+      // Include basePath since app runs under /app
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/settings/integrations?payment=success`,
+          return_url: `${window.location.origin}${BASE_PATH}/settings/integrations?payment=success`,
         },
         redirect: 'if_required',
       });
