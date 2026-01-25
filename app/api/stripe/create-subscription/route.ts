@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
         console.log('[create-subscription] Invoice is draft, attempting to finalize');
         const finalizedInvoice = await stripe.invoices.finalizeInvoice(invoice.id, {
           expand: ['payment_intent'],
-        });
+        }) as Stripe.Invoice & { payment_intent?: string | Stripe.PaymentIntent | null };
         
         if (finalizedInvoice.payment_intent) {
           const piId = typeof finalizedInvoice.payment_intent === 'string'
