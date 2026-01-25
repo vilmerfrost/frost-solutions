@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 
     // Get the client secret from the payment intent
     // Handle both expanded and non-expanded cases
-    let invoice: Stripe.Invoice;
+    let invoice: Stripe.Invoice & { payment_intent?: string | Stripe.PaymentIntent | null };
     let paymentIntent: Stripe.PaymentIntent;
 
     // Check if latest_invoice is a string ID (not expanded)
@@ -118,17 +118,19 @@ export async function POST(req: NextRequest) {
       // Fetch invoice with payment_intent expanded
       invoice = await stripe.invoices.retrieve(subscription.latest_invoice, {
         expand: ['payment_intent'],
-      });
+      }) as Stripe.Invoice & { payment_intent?: string | Stripe.PaymentIntent | null };
     } else {
-      invoice = subscription.latest_invoice as Stripe.Invoice;
+      invoice = subscription.latest_invoice as Stripe.Invoice & { payment_intent?: string | Stripe.PaymentIntent | null };
     }
 
     // Check if payment_intent is a string ID (not expanded)
     if (typeof invoice.payment_intent === 'string') {
       // Fetch payment intent separately
       paymentIntent = await stripe.paymentIntents.retrieve(invoice.payment_intent);
-    } else {
+    } else if (invoice.payment_intent && typeof invoice.payment_intent === 'object') {
       paymentIntent = invoice.payment_intent as Stripe.PaymentIntent;
+    } else {
+      throw new Error('Kunde inte hämta betalningsinformation från Stripe');
     }
 
     if (!paymentIntent || !paymentIntent.client_secret) {
