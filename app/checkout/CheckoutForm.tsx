@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { loadStripe } from '@stripe/stripe-js';
 import {
   Elements,
@@ -79,6 +80,23 @@ function PaymentForm({ userEmail, userId }: { userEmail: string; userId: string 
         // Otherwise, the user will be redirected
         setError(confirmError.message || 'Betalningen misslyckades');
         setLoading(false);
+        return;
+      }
+
+      // Log acceptance of terms at checkout
+      try {
+        await fetch('/api/legal/accept', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            documentType: 'terms',
+            documentVersion: 'v1.0',
+            acceptanceMethod: 'checkout',
+          }),
+        });
+      } catch (acceptError) {
+        // Logging acceptance is not critical - payment already succeeded
+        console.warn('Could not log legal acceptance:', acceptError);
       }
     } catch (err: any) {
       console.error('Payment error:', err);
@@ -121,6 +139,25 @@ function PaymentForm({ userEmail, userId }: { userEmail: string; userId: string 
           </>
         )}
       </button>
+
+      <p className="text-center text-xs text-gray-600 dark:text-gray-400 mt-4">
+        Genom att slutföra köpet accepterar du våra{' '}
+        <Link 
+          href="/terms" 
+          target="_blank"
+          className="text-blue-600 hover:text-blue-700 underline dark:text-blue-400 dark:hover:text-blue-500"
+        >
+          användarvillkor
+        </Link>
+        {' '}och{' '}
+        <Link 
+          href="/privacy" 
+          target="_blank"
+          className="text-blue-600 hover:text-blue-700 underline dark:text-blue-400 dark:hover:text-blue-500"
+        >
+          integritetspolicy
+        </Link>
+      </p>
 
       <p className="text-center text-sm text-gray-500 dark:text-gray-400">
         Du kan avsluta prenumerationen när som helst

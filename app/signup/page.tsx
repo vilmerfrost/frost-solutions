@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import FrostLogo from '../components/FrostLogo'
+import { TermsCheckbox } from '@/components/legal/TermsCheckbox'
 
 export default function SignupPage() {
  const [email, setEmail] = useState('')
@@ -11,6 +12,7 @@ export default function SignupPage() {
  const [fullName, setFullName] = useState('')
  const [companyName, setCompanyName] = useState('')
  const [orgNumber, setOrgNumber] = useState('')
+ const [acceptedTerms, setAcceptedTerms] = useState(false)
  const [loading, setLoading] = useState(false)
  const [error, setError] = useState('')
  
@@ -31,6 +33,13 @@ export default function SignupPage() {
   // Validate company name
   if (!companyName.trim()) {
    setError('Företagsnamn krävs.')
+   setLoading(false)
+   return
+  }
+
+  // Validate terms acceptance
+  if (!acceptedTerms) {
+   setError('Du måste acceptera användarvillkoren för att fortsätta')
    setLoading(false)
    return
   }
@@ -87,7 +96,35 @@ export default function SignupPage() {
     console.warn('Could not create profile, continuing to onboarding')
    }
    
-   // 4. Redirect to onboarding
+   // 4. Log acceptance of terms and privacy policy
+   try {
+    // Log acceptance of terms
+    await fetch('/api/legal/accept', {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({
+      documentType: 'terms',
+      documentVersion: 'v1.0',
+      acceptanceMethod: 'signup',
+     }),
+    })
+
+    // Log acceptance of privacy policy
+    await fetch('/api/legal/accept', {
+     method: 'POST',
+     headers: { 'Content-Type': 'application/json' },
+     body: JSON.stringify({
+      documentType: 'privacy',
+      documentVersion: 'v1.0',
+      acceptanceMethod: 'signup',
+     }),
+    })
+   } catch (acceptError) {
+    // Logging acceptance is not critical - user can still proceed
+    console.warn('Could not log legal acceptance:', acceptError)
+   }
+   
+   // 5. Redirect to onboarding
    router.push('/onboarding')
    
   } catch (err: any) {
@@ -196,6 +233,13 @@ export default function SignupPage() {
        placeholder="556123-4567"
       />
      </div>
+
+     <TermsCheckbox 
+      checked={acceptedTerms}
+      onChange={setAcceptedTerms}
+      required
+      variant="signup"
+     />
      
      <button
       type="submit"

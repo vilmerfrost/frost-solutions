@@ -70,6 +70,10 @@ export async function middleware(request: NextRequest) {
     '/login',
     '/auth/callback',
     '/api/stripe/webhook',
+    '/terms',
+    '/privacy',
+    '/dpa',
+    '/sla',
   ]
 
   // Protected routes (require auth)
