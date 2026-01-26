@@ -426,28 +426,37 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   // Verify quote exists and belongs to tenant
   const { data: existingQuote, error: fetchError } = await admin
    .from('quotes')
-   .select('id, status')
+   .select('id, status, quote_number')
    .eq('id', quoteId)
    .eq('tenant_id', tenantId)
    .maybeSingle()
 
-  if (fetchError || !existingQuote) {
-   logError('DELETE /api/quotes/[id]', 'Quote not found or unauthorized', {
+  if (fetchError) {
+   logError('DELETE /api/quotes/[id]', 'Database error while fetching quote', {
     quoteId,
     tenantId,
     error: fetchError,
    })
-   return createErrorResponse('Quote not found', 404)
+   return createErrorResponse('Ett databasfel uppstod', 500)
   }
 
-  // Optional: Prevent deletion of accepted quotes
+  if (!existingQuote) {
+   // Quote might already be deleted - return success to avoid confusing the user
+   console.warn(`[API] Quote ${quoteId} not found - may already be deleted`)
+   return NextResponse.json({ 
+    success: true, 
+    message: 'Offerten kunde inte hittas (kanske redan raderad)'
+   }, { status: 200 })
+  }
+
+  // Prevent deletion of accepted quotes
   if (existingQuote.status === 'accepted') {
    logError('DELETE /api/quotes/[id]', 'Cannot delete accepted quote', {
     quoteId,
     status: existingQuote.status,
    })
    return createErrorResponse(
-    'Cannot delete accepted quotes',
+    'Kan inte radera godkända offerter. Arkivera istället.',
     400,
     { status: existingQuote.status }
    )
@@ -463,25 +472,32 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   if (deleteError) {
    logError('DELETE /api/quotes/[id]', deleteError, { quoteId, tenantId })
    return createErrorResponse(
-    'Failed to delete quote',
+    'Kunde inte radera offerten',
     500,
     { originalError: deleteError.message }
    )
   }
 
-  // Get user for history
-  const { createClient } = await import('@/utils/supabase/server')
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  await logQuoteChange(tenantId, quoteId, 'updated', { deleted: true }, user?.id)
+  // Get user for history (don't fail if this errors)
+  try {
+   const { createClient } = await import('@/utils/supabase/server')
+   const supabase = createClient()
+   const { data: { user } } = await supabase.auth.getUser()
+   await logQuoteChange(tenantId, quoteId, 'updated', { deleted: true }, user?.id)
+  } catch (historyError) {
+   console.warn('Could not log quote deletion to history:', historyError)
+  }
 
   const duration = Date.now() - startTime
   console.log(`[API] DELETE /api/quotes/${quoteId} completed`, {
    duration: `${duration}ms`,
+   quoteNumber: existingQuote.quote_number,
   })
 
-  return NextResponse.json({ success: true }, { status: 204 })
+  return NextResponse.json({ 
+   success: true, 
+   message: `Offert ${existingQuote.quote_number || quoteId} raderad`
+  }, { status: 200 })
  } catch (error: any) {
   const duration = Date.now() - startTime
   logError('DELETE /api/quotes/[id] - Unexpected error', error, {
@@ -490,7 +506,7 @@ export async function DELETE(_: NextRequest, { params }: { params: Promise<{ id:
   })
 
   return createErrorResponse(
-   'An unexpected error occurred',
+   'Ett oväntat fel uppstod',
    500,
    { message: error?.message }
   )

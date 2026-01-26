@@ -49,27 +49,11 @@ export function WorkflowNotifications() {
    });
  }, [notifications, shownToasts, markAsRead]);
 
+ // Don't show connection indicator - it's distracting and often shows "disconnected" incorrectly
+ // The sync status in the sidebar is sufficient for connection feedback
  return (
   <>
    <Toaster position="top-right" richColors />
-   {/* Global anslutningsindikator */}
-   <div className="fixed bottom-4 right-4 z-50">
-    {connection === 'connected' && (
-     <span className="flex items-center text-xs text-green-600 bg-green-100 dark:bg-green-900/30 px-3 py-2 rounded-full shadow-sm">
-      <Wifi className="h-4 w-4 mr-1" /> Ansluten
-     </span>
-    )}
-    {connection === 'disconnected' && (
-     <span className="flex items-center text-xs text-red-600 bg-red-100 dark:bg-red-900/30 px-3 py-2 rounded-full shadow-sm">
-      <WifiOff className="h-4 w-4 mr-1" /> Frånkopplad
-     </span>
-    )}
-    {connection === 'reconnecting' && (
-     <span className="flex items-center text-xs text-yellow-600 bg-yellow-100 dark:bg-yellow-900/30 px-3 py-2 rounded-full shadow-sm animate-pulse">
-      <WifiOff className="h-4 w-4 mr-1" /> Återansluter...
-     </span>
-    )}
-   </div>
   </>
  );
 }

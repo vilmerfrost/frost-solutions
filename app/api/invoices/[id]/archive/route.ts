@@ -88,7 +88,9 @@ export async function PATCH(
    return NextResponse.json({ error: 'No tenant found' }, { status: 400 })
   }
 
-  // Try to archive - use archived boolean first, then status column
+  // Try to archive - use archived boolean first
+  // Note: invoices table only allows status values: 'draft', 'sent', 'paid'
+  // So we use the archived boolean column for soft-delete instead
   let updateResult
   
   // Try with archived column first
@@ -100,15 +102,16 @@ export async function PATCH(
    .select()
    .single()
 
-  // If archived column doesn't exist, try status column
+  // If archived column doesn't exist, keep status as-is and add a note
+  // We cannot use status='archived' due to check constraint
   if (updateResult.error && (updateResult.error.code === '42703' || updateResult.error.message?.includes('archived'))) {
-   updateResult = await adminSupabase
-    .from('invoices')
-    .update({ status: action === 'archive' ? 'archived' : 'draft' })
-    .eq('id', invoiceId)
-    .eq('tenant_id', tenantId)
-    .select()
-    .single()
+   // The archived column doesn't exist, so we cannot archive
+   // Return a helpful error instead of breaking the constraint
+   console.error('Archive column not found and status constraint prevents archiving')
+   return NextResponse.json(
+    { error: 'Arkivering stöds inte för denna fakturatyp. Markera fakturan som betald istället.' },
+    { status: 400 }
+   )
   }
 
   if (updateResult.error) {

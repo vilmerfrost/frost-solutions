@@ -167,7 +167,12 @@ export default function ClientsPage() {
 
    if (error) {
     console.error('Error deleting client:', error)
-    toast.error('Kunde inte radera kund: ' + error.message)
+    // Better error message for foreign key constraints
+    if (error.message?.includes('foreign key') || error.code === '23503') {
+     toast.error('Kan inte radera kunden eftersom det finns projekt, fakturor eller offerter kopplade till denna kund. Ta bort eller flytta dessa först.')
+    } else {
+     toast.error('Kunde inte radera kund: ' + error.message)
+    }
     return
    }
 

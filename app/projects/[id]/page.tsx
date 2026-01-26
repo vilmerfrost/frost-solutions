@@ -802,38 +802,36 @@ export default function ProjectDetailPage() {
      {/* Action Buttons - Only show for admins - Collapsible */}
      {isAdmin && (
       <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8 overflow-hidden">
-       <details className="group">
-        <summary className="cursor-pointer p-4 sm:p-6 lg:p-8 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+       <details className="group" open>
+        <summary className="cursor-pointer p-4 sm:p-6 lg:p-8 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors list-none">
          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Fakturering</h2>
-         <span className="text-gray-400 group-open:rotate-180 transition-transform">▼</span>
+         <svg className="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
         </summary>
-        <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8">
-         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+        <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8 border-t border-gray-200 dark:border-gray-700 pt-4">
+         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+          Skapa faktura från projektets ofakturerade timmar eller ladda ner som PDF.
+         </p>
+         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
           <button
            onClick={() => router.push(`/invoices/new?projectId=${projectId}`)}
-           className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 sm:py-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
+           className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 sm:py-4 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2"
           >
-           📝 Skapa faktura
+           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+           Skapa faktura
           </button>
-          {/* AI Invoice Suggestion - Show inline when creating invoice */}
-          {projectId && (
-           <div className="sm:col-span-2 lg:col-span-2">
-            <div className="text-xs text-gray-500 dark:text-gray-400 mb-2">
-             💡 AI-stöd: Använd AI-förslag när du skapar fakturan
-            </div>
-           </div>
-          )}
           <button
            onClick={handleSendInvoice}
-           className="bg-success-500 hover:bg-success-600 text-white px-6 py-3 sm:py-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
+           className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 sm:py-4 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2"
           >
-           ✉️ Skapa & skicka
+           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+           Skapa & skicka
           </button>
           <button
            onClick={handleDownloadPDF}
-           className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 sm:py-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
+           className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 sm:py-4 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2"
           >
-           📄 Ladda ner PDF
+           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+           Ladda ner PDF
           </button>
          </div>
         </div>

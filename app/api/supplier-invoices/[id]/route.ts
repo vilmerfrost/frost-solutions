@@ -21,7 +21,8 @@ export async function GET(
   const { id } = await params
   const admin = createAdminClient()
 
-  const { data, error } = await admin
+  // Try with full relations first
+  let { data, error } = await admin
    .from('supplier_invoices')
    .select(
     '*, supplier:suppliers(*), project:projects(id, name), payments:supplier_invoice_payments(*), items:supplier_invoice_items(*)'
@@ -30,7 +31,44 @@ export async function GET(
    .eq('id', id)
    .maybeSingle()
 
-  if (error) throw error
+  // If relationship error, try without supplier join
+  if (error && (error.message?.includes('relationship') || error.code === 'PGRST200')) {
+   console.warn('⚠️ Supplier relationship not found, fetching without join')
+   const fallback = await admin
+    .from('supplier_invoices')
+    .select(
+     '*, project:projects(id, name), payments:supplier_invoice_payments(*), items:supplier_invoice_items(*)'
+    )
+    .eq('tenant_id', tenantId)
+    .eq('id', id)
+    .maybeSingle()
+
+   if (!fallback.error) {
+    data = fallback.data
+    error = null
+   } else {
+    error = fallback.error
+   }
+  }
+
+  // If still failing, try minimal query
+  if (error) {
+   console.warn('⚠️ Extended query failed, trying minimal query')
+   const minimal = await admin
+    .from('supplier_invoices')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .eq('id', id)
+    .maybeSingle()
+
+   if (!minimal.error && minimal.data) {
+    data = minimal.data
+    error = null
+   } else {
+    throw minimal.error || error
+   }
+  }
+
   if (!data) {
    return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 })
   }
