@@ -6,6 +6,9 @@ import { MobileVerificationCard, type VerificationField } from './MobileVerifica
 import { GloveFriendlyButton } from '../GloveFriendlyButton';
 import { MobileCard } from '../MobileCard';
 
+// Re-export VerificationField type for convenience
+export type { VerificationField };
+
 interface MobileVerificationFlowProps {
   fields: VerificationField[];
   onComplete: (verifiedFields: VerificationField[]) => void;
