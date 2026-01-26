@@ -52,11 +52,11 @@ export function AIRotSummaryButton({
     }),
    });
 
-   if (!data.success) {
-    throw new Error(data.error || 'Failed to generate summary');
-   }
+  if (!data.success || !data.data) {
+   throw new Error(data.error || 'Failed to generate summary');
+  }
 
-   const generatedSummary = data.data.summary;
+  const generatedSummary = data.data.summary;
    setSummary(generatedSummary);
    
    if (onSummaryGenerated) {

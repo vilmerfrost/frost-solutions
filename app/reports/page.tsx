@@ -157,34 +157,34 @@ export default function ReportsPage() {
     throw new Error(data?.error || 'Kunde inte godkänna tidsrapporter')
    }
 
-   const updatedCount = Number(data?.updated ?? data?.count ?? 0)
+  const updatedCount = Number(data?.updated ?? data?.count ?? 0)
 
-   if (updatedCount > 0) {
-    // CRITICAL: Update local state with data from server response
-    if (data.data && Array.isArray(data.data)) {
-     const approvedIds = new Set(data.data.map((e: any) => e.id))
-     
-     console.log('[Frontend] 📝 Updating local state for', approvedIds.size, 'entries')
-     
-     setEntries(prev => prev.map(entry => {
-      if (approvedIds.has(entry.id)) {
-       const serverEntry = data.data.find((e: any) => e.id === entry.id)
-       const updated = {
-        ...entry,
-        status: 'approved',
-        approval_status: serverEntry?.approval_status || 'approved',
-        approved_at: serverEntry?.approved_at || new Date().toISOString(),
-       }
-       console.log('[Frontend] Updated entry:', {
-        id: entry.id,
-        approval_status: updated.approval_status,
-        approved_at: updated.approved_at,
-       })
-       return updated
+  if (updatedCount > 0) {
+   // CRITICAL: Update local state with data from server response
+   if (data.data && Array.isArray(data.data)) {
+    const approvedIds = new Set(data.data.map((e: any) => e.id))
+    
+    console.log('[Frontend] 📝 Updating local state for', approvedIds.size, 'entries')
+    
+    setEntries(prev => prev.map(entry => {
+     if (approvedIds.has(entry.id)) {
+      const serverEntry = data.data?.find((e: any) => e.id === entry.id)
+      const updated = {
+       ...entry,
+       status: 'approved',
+       approval_status: serverEntry?.approval_status || 'approved',
+       approved_at: serverEntry?.approved_at || new Date().toISOString(),
       }
-      return entry
-     }))
-    }
+      console.log('[Frontend] Updated entry:', {
+       id: entry.id,
+       approval_status: updated.approval_status,
+       approved_at: updated.approved_at,
+      })
+      return updated
+     }
+     return entry
+    }))
+   }
 
     toast.success(data?.message || `Godkände ${updatedCount} tidsrapporter`)
 

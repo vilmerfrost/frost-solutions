@@ -60,12 +60,12 @@ export function ROTAISummary({ rotData, onSummaryGenerated, className = '' }: RO
     body: JSON.stringify(apiData),
    });
 
-   if (!data.success) {
-    throw new Error(data.error || 'Failed to generate summary');
-   }
+  if (!data.success || !data.data) {
+   throw new Error(data.error || 'Failed to generate summary');
+  }
 
-   const generatedSummary = data.data.summary;
-   const keyPoints = data.data.keyPoints || [];
+  const generatedSummary = data.data.summary;
+  const keyPoints = data.data.keyPoints || [];
    setSummary(generatedSummary);
    
    if (onSummaryGenerated) {

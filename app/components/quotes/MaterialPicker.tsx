@@ -15,7 +15,9 @@ interface MaterialPickerProps {
 
 export function MaterialPicker({ onSelect, onClose }: MaterialPickerProps) {
  const [search, setSearch] = useState('')
- const { data: materials, isLoading } = useMaterials({ search })
+ const { data: materialsResponse, isLoading } = useMaterials({ search })
+ 
+ const materials = materialsResponse?.data || []
 
  return (
   <div className="space-y-4 bg-gray-50 dark:bg-gray-900 dark:bg-blue-900/20 rounded-[8px] border-2 border-blue-200 dark:border-blue-700 p-6 shadow-md">

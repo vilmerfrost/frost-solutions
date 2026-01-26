@@ -9,7 +9,8 @@ import { toast } from '@/lib/toast'
 import type {
  SupplierInvoice,
  SupplierInvoiceItem,
- SupplierInvoicePayment
+ SupplierInvoicePayment,
+ SupplierInvoiceHistory,
 } from '@/types/supplierInvoices'
 
 export interface SupplierInvoiceFilters {
@@ -88,7 +89,7 @@ export function useCreateSupplierInvoice() {
    }>
    notes?: string
   }) => {
-   return apiFetch('/api/supplier-invoices', {
+   return apiFetch<{ success: boolean; data: { id: string } }>('/api/supplier-invoices', {
     method: 'POST',
     body: JSON.stringify(payload)
    })
@@ -297,7 +298,7 @@ export function useSupplierInvoiceHistory(id: string | null) {
   queryFn: async () => {
    if (!id) throw new Error('Invoice ID is required')
 
-   const json = await apiFetch<{ data: unknown }>(`/api/supplier-invoices/${id}/history`)
+   const json = await apiFetch<{ data: SupplierInvoiceHistory[] }>(`/api/supplier-invoices/${id}/history`)
    return json.data
   },
   enabled: !!id && !!tenantId

@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import type {
  PayrollPeriodFilters,
  CreatePayrollPeriodPayload,
+ PayrollValidationIssue,
+ PayrollPeriod,
 } from '@/types/payroll';
 
 /**
@@ -79,7 +81,7 @@ export function useCreatePayrollPeriod() {
    console.log('[useCreatePayrollPeriod] 🚀 Mutation starting');
    console.log('[useCreatePayrollPeriod] Payload:', payload);
    
-   const result = await apiFetch<{ success?: boolean; data?: unknown; error?: string; details?: unknown }>(
+   const result = await apiFetch<{ success?: boolean; data?: PayrollPeriod; error?: string; details?: unknown }>(
     '/api/payroll/periods',
     {
      method: 'POST',
@@ -88,7 +90,7 @@ export function useCreatePayrollPeriod() {
     }
    );
 
-   if (result?.success === false) {
+   if (result?.success === false || !result?.data) {
     console.error('[useCreatePayrollPeriod] ❌ Request failed:', {
      error: result.error,
      details: result.details,
@@ -168,8 +170,8 @@ export function useExportPayrollPeriod(id: string) {
    
    const result = await apiFetch<{
     success?: boolean;
-    data?: { exportId?: string; signedUrl?: string; warnings?: string[] };
-    warnings?: string[];
+    data?: { exportId?: string; signedUrl?: string; warnings?: PayrollValidationIssue[] };
+    warnings?: PayrollValidationIssue[];
     error?: string;
    }>(`/api/payroll/periods/${id}/export`, {
     method: 'POST',

@@ -19,7 +19,7 @@ export function useMaterials(filters?: MaterialFilters) {
    if (filters?.page) params.set('page', String(filters.page))
    if (filters?.limit) params.set('limit', String(filters.limit))
 
-   return apiFetch(`/api/materials?${params}`)
+   return apiFetch<{ success: boolean; data: Material[]; meta?: { page: number; limit: number; count: number } }>(`/api/materials?${params}`)
   },
   enabled: !!tenantId,
   staleTime: 1000 * 60 * 5,
@@ -45,7 +45,7 @@ export function useCreateMaterial() {
 
  return useMutation({
   mutationFn: async (data: Partial<Material>) => {
-   return apiFetch('/api/materials', {
+   return apiFetch<{ success: boolean; data: Material }>('/api/materials', {
     method: 'POST',
     body: JSON.stringify(data),
    })
@@ -65,7 +65,7 @@ export function useUpdateMaterial(id: string) {
 
  return useMutation({
   mutationFn: async (data: Partial<Material>) => {
-   return apiFetch(`/api/materials/${id}`, {
+   return apiFetch<{ success: boolean; data: Material }>(`/api/materials/${id}`, {
     method: 'PUT',
     body: JSON.stringify(data),
    })
