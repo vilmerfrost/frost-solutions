@@ -6,6 +6,7 @@ import { useTheme } from '@/context/ThemeContext'
 import { useAdmin } from '@/hooks/useAdmin'
 import { SafeOnlineStatusIndicator } from '@/components/SafeSyncComponents'
 import { MobileBottomNav } from './MobileBottomNav'
+import { MobileBottomTabBar } from './mobile/MobileBottomTabBar'
 import { 
  LayoutDashboard, 
  Users, 
@@ -96,18 +97,24 @@ export default function SidebarClient() {
 
  return (
   <>
-   {/* Mobile menu button */}
+   {/* Menu button - hidden on mobile (< md) where MobileBottomTabBar handles navigation */}
+   {/* Shown on tablet (md-lg) to access full sidebar */}
    <button
     onClick={() => setIsOpen(!isOpen)}
-    className="lg:hidden fixed top-4 left-4 z-50 bg-white dark:bg-gray-800 rounded-lg p-2.5 shadow-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+    className="hidden md:block lg:hidden fixed top-4 left-4 z-50 bg-white dark:bg-gray-800 rounded-lg p-2.5 shadow-md border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
     aria-label={isOpen ? 'Stäng meny' : 'Öppna meny'}
     aria-expanded={isOpen}
    >
     {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
    </button>
 
-   {/* Mobile Bottom Navigation */}
-   <MobileBottomNav onMenuClick={() => setIsOpen(true)} />
+   {/* Field-First Mobile Bottom Tab Bar (mobile only, < md) */}
+   <MobileBottomTabBar />
+
+   {/* Tablet Bottom Navigation (md to lg) */}
+   <div className="hidden md:block lg:hidden">
+    <MobileBottomNav onMenuClick={() => setIsOpen(true)} />
+   </div>
 
    {/* Mobile overlay */}
    {isOpen && (
