@@ -165,10 +165,16 @@ export default function EditMaterialPage() {
           type="number"
           step="0.01"
           min="0"
-          value={formData.price}
+          placeholder="0"
+          value={formData.price === 0 ? '' : formData.price}
           onChange={(e) => {
-           setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })
+           const val = e.target.value
+           setFormData({ ...formData, price: val === '' ? 0 : parseFloat(val) || 0 })
            if (errors.price) setErrors({ ...errors, price: '' })
+          }}
+          onFocus={(e) => {
+           // Select all text on focus to allow easy replacement
+           e.target.select()
           }}
           error={errors.price}
          />

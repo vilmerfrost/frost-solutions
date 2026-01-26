@@ -144,11 +144,6 @@ export default function EmployeesPage() {
       </div>
      ) : (
       <>
-       <div className="mb-4 text-right">
-        <p className="text-xs text-gray-400 dark:text-gray-500">
-         Totalt: {employees.length} anställda • {employees.length * 89} kr/månad
-        </p>
-       </div>
        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
         {employees.map((emp) => (
          <div

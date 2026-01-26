@@ -19,7 +19,9 @@ export function SyncProgress() {
   ? 50 // Indeterminate progress
   : 0
 
- if (!isSyncing && pendingCount === 0) {
+ // Only show when actively syncing with pending changes, not on initial page loads
+ // This prevents the bar from showing briefly on every navigation
+ if (!isSyncing || pendingCount === 0) {
   return null
  }
 

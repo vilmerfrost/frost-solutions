@@ -38,13 +38,24 @@ export function OnlineStatusIndicator() {
  const { isOnline } = useOnlineStatus()
  
  // useSyncStatus is now robust and won't throw errors
- const { isSyncing } = useSyncStatus()
+ const { isSyncing, pendingCount } = useSyncStatus()
+
+ // Only show indicator when offline or when actively syncing with pending changes
+ // Don't show when online and idle to reduce visual clutter
+ if (isOnline && !isSyncing) {
+  return null
+ }
 
  let status: SyncStatus = 'online'
  if (!isOnline) {
   status = 'offline'
- } else if (isSyncing) {
+ } else if (isSyncing && pendingCount > 0) {
   status = 'syncing'
+ }
+
+ // If online with no pending sync, hide indicator
+ if (status === 'online') {
+  return null
  }
 
  const config = statusConfig[status]

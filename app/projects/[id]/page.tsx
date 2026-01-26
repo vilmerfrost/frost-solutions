@@ -587,10 +587,10 @@ export default function ProjectDetailPage() {
        </div>
        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
         <div
-         className={`h-full ${
+         className={`h-full bg-gradient-to-r ${
           progress >= 90 ? 'from-red-500 to-red-600' :
           progress >= 70 ? 'from-orange-500 to-orange-600' :
-          ' '
+          'from-primary-400 to-primary-500'
          } rounded-full transition-all duration-500`}
          style={{ width: `${Math.min(progress, 100)}%` }}
         />
@@ -598,17 +598,17 @@ export default function ProjectDetailPage() {
       </div>
      )}
 
-     {/* AI-stöd Export-knapp */}
-     {project && (
-      <div className="mb-6 sm:mb-8">
-       <div className="bg-primary-500 hover:bg-primary-600 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-[8px] p-4 sm:p-6">
+      {/* AI-stöd Export-knapp */}
+      {project && (
+       <div className="mb-6 sm:mb-8">
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 dark:from-blue-900/40 dark:to-blue-800/40 border border-blue-200 dark:border-blue-800 rounded-[8px] p-4 sm:p-6">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
          <div>
-          <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1 flex items-center gap-2">
-           <Sparkles className="w-5 h-5 text-blue-500" />
+          <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+           <Sparkles className="w-5 h-5 text-white" />
            Vill du exportera detta projekt?
           </h3>
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-white/80">
            Exportera projektdata till Fortnox eller Visma för enkel fakturering och bokföring.
           </p>
          </div>

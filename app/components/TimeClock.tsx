@@ -20,6 +20,7 @@ import {
  WorkSite
 } from '@/lib/gpsUtils'
 import { BASE_PATH } from '@/utils/url'
+import { Clock, Play, Pause, Square, CheckCircle, MapPin, Wrench, AlertCircle } from 'lucide-react'
 
 interface TimeClockProps {
  employeeId: string | null
@@ -1148,8 +1149,9 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
  return (
   <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8" style={{ display: 'block', visibility: 'visible' }}>
    <div className="flex justify-between items-center mb-4 sm:mb-6">
-    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-     ⏰ Stämpelklocka
+    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+     <Clock className="w-6 h-6 text-primary-500" />
+     Stämpelklocka
     </h2>
     {/* GPS Status */}
     <div className="flex items-center gap-2">
@@ -1202,32 +1204,34 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
    {/* Show appropriate message based on state */}
    {!employeeId ? (
     <div className="bg-yellow-50 dark:bg-yellow-900/20 rounded-[8px] p-4 sm:p-6 border border-yellow-200 dark:border-yellow-800">
-     <p className="text-gray-600 dark:text-gray-400 mb-4 font-semibold">
-      ⚠️ Du behöver vara registrerad som anställd för att använda stämpelklockan.
+     <p className="text-gray-600 dark:text-gray-400 mb-4 font-semibold flex items-center gap-2">
+      <AlertCircle className="w-5 h-5 text-yellow-600" />
+      Du behöver vara registrerad som anställd för att använda stämpelklockan.
      </p>
      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
       <p><strong>Snabb-fix:</strong></p>
-      <button
-       onClick={async () => {
-        if (confirm('Detta kommer att försöka skapa en employee-record för dig. Fortsätt?')) {
-         try {
-          const res = await fetch(`${BASE_PATH}/api/admin/fix-role`, { method: 'POST' })
-          const data = await res.json()
-          if (res.ok) {
-           alert('✅ Employee-record skapad/uppdaterad! Ladda om sidan.')
-           window.location.reload()
-          } else {
-           alert('❌ Fel: ' + data.error)
+       <button
+        onClick={async () => {
+         if (confirm('Detta kommer att försöka skapa en employee-record för dig. Fortsätt?')) {
+          try {
+           const res = await fetch(`${BASE_PATH}/api/admin/fix-role`, { method: 'POST' })
+           const data = await res.json()
+           if (res.ok) {
+            alert('Employee-record skapad/uppdaterad! Ladda om sidan.')
+            window.location.reload()
+           } else {
+            alert('Fel: ' + data.error)
+           }
+          } catch (err: any) {
+           alert('Fel: ' + err.message)
           }
-         } catch (err: any) {
-          alert('❌ Fel: ' + err.message)
          }
-        }
-       }}
-       className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors"
-      >
-       🔧 Fixa min employee-record automatiskt
-      </button>
+        }}
+        className="mt-2 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold transition-colors flex items-center gap-2"
+       >
+        <Wrench className="w-4 h-4" />
+        Fixa min employee-record automatiskt
+       </button>
       <div className="mt-3 space-y-1">
        <p className="font-semibold">Alternativ:</p>
        <ul className="list-disc list-inside space-y-1 ml-2">
@@ -1273,9 +1277,10 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
      <button
       onClick={handleCheckIn}
       disabled={loading || !selectedProject}
-      className="w-full bg-success-500 hover:bg-success-600 text-white py-4 px-6 rounded-[8px] font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+      className="w-full bg-success-500 hover:bg-success-600 text-white py-4 px-6 rounded-[8px] font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
      >
-      {loading ? 'Stämplar in...' : '✅ Stämpla in'}
+      <CheckCircle className="w-5 h-5" />
+      {loading ? 'Stämplar in...' : 'Stämpla in'}
      </button>
 
      <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
@@ -1286,12 +1291,17 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
     <div className="space-y-4">
      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-[8px] p-6 border border-blue-200 dark:border-blue-800">
       <div className="text-center">
-       <div className="text-3xl font-semibold text-gray-900 dark:text-white mb-2">
+       <div className="text-3xl font-semibold text-gray-900 dark:text-white mb-2 flex items-center justify-center gap-2">
         {formatElapsedTime(elapsedTime)}
-        {isPaused && <span className="text-lg text-yellow-600 dark:text-yellow-400 ml-2">⏸️</span>}
+        {isPaused && <Pause className="w-5 h-5 text-yellow-600 dark:text-yellow-400" />}
        </div>
-       <p className="text-sm text-gray-600 dark:text-gray-400">
-        {isPaused ? '⏸️ Pausad' : `Incheckad sedan ${activeTimeEntry?.start_time}`}
+       <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center gap-1">
+        {isPaused ? (
+         <>
+          <Pause className="w-4 h-4" />
+          Pausad
+         </>
+        ) : `Incheckad sedan ${activeTimeEntry?.start_time}`}
        </p>
        {activeTimeEntry?.project_id && (
         <p className="text-xs text-gray-500 dark:text-gray-500 mt-1">
@@ -1311,25 +1321,28 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
        <button
         onClick={handlePause}
         disabled={loading}
-        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
        >
-        ⏸️ Pausa
+        <Pause className="w-5 h-5" />
+        Pausa
        </button>
       ) : (
        <button
         onClick={handleResume}
         disabled={loading}
-        className="flex-1 bg-success-500 hover:bg-success-600 text-white py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className="flex-1 bg-success-500 hover:bg-success-600 text-white py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
        >
-        ▶️ Återuppta
+        <Play className="w-5 h-5" />
+        Återuppta
        </button>
       )}
       <button
        onClick={handleCheckOut}
        disabled={loading}
-       className="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+       className="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
       >
-       {loading ? 'Stämplar ut...' : '⏹️ Stämpla ut'}
+       <Square className="w-5 h-5" />
+       {loading ? 'Stämplar ut...' : 'Stämpla ut'}
       </button>
      </div>
 

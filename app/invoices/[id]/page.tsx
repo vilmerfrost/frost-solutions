@@ -595,17 +595,17 @@ function InvoiceContent() {
 
      <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-md border border-gray-100 dark:border-gray-700 overflow-hidden">
       {/* Header */}
-      <div className="p-8 border-b border-gray-200 bg-primary-500 hover:bg-primary-600">
+      <div className="p-8 border-b border-gray-200 bg-gradient-to-r from-primary-500 to-primary-600">
        <div className="flex justify-between items-start">
         <div>
-         <h2 className="text-3xl font-semibold text-gray-900 mb-2">FAKTURA</h2>
-         <div className="text-sm text-gray-600">
-          <div>Fakturanr: <span className="font-semibold">{invoice.number || invoiceId.slice(0, 8)}</span></div>
+         <h2 className="text-3xl font-semibold text-white mb-2">FAKTURA</h2>
+         <div className="text-sm text-white/80">
+          <div>Fakturanr: <span className="font-semibold text-white">{invoice.number || invoiceId.slice(0, 8)}</span></div>
           {invoice.issue_date && (
-           <div>Datum: <span className="font-semibold">{new Date(invoice.issue_date).toLocaleDateString('sv-SE')}</span></div>
+           <div>Datum: <span className="font-semibold text-white">{new Date(invoice.issue_date).toLocaleDateString('sv-SE')}</span></div>
           )}
           {invoice.due_date && (
-           <div>Förfallodatum: <span className="font-semibold">{new Date(invoice.due_date).toLocaleDateString('sv-SE')}</span></div>
+           <div>Förfallodatum: <span className="font-semibold text-white">{new Date(invoice.due_date).toLocaleDateString('sv-SE')}</span></div>
           )}
          </div>
         </div>
@@ -615,12 +615,12 @@ function InvoiceContent() {
            invoice.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
            invoice.status === 'sent' ? 'bg-blue-100 text-blue-800' :
            invoice.status === 'paid' ? 'bg-green-100 text-green-800' :
-           'bg-gray-100 text-gray-800'
+           'bg-white/20 text-white'
           }`}>
            {invoice.status || 'draft'}
           </span>
          </div>
-         <div className="text-lg font-bold text-gray-900">
+         <div className="text-lg font-bold text-white">
           Totalt: {total.toLocaleString('sv-SE')} kr
          </div>
         </div>
@@ -782,9 +782,10 @@ function InvoiceContent() {
        <button
         onClick={handleDownloadPDF}
         disabled={downloading}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2"
        >
-        {downloading ? 'Laddar...' : '<FileText className="w-4 h-4 inline mr-2" />Ladda ner PDF'}
+        <FileText className="w-4 h-4" />
+        {downloading ? 'Laddar...' : 'Ladda ner PDF'}
        </button>
        <button
         onClick={handleSendEmail}
@@ -860,9 +861,10 @@ function InvoiceContent() {
           <button
            onClick={handleDelete}
            disabled={deleting}
-           className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+           className="bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2"
           >
-           {deleting ? 'Tar bort...' : '<Trash2 className="w-4 h-4" /> Ta bort'}
+           <Trash2 className="w-4 h-4" />
+           {deleting ? 'Tar bort...' : 'Ta bort'}
           </button>
          )}
         </>

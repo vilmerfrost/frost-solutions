@@ -59,13 +59,14 @@ export async function POST(req: NextRequest) {
   const supabase = createClient()
   const { data: { user } } = await supabase.auth.getUser()
 
+  // Ensure empty strings are converted to null for UUID fields
   const payload = {
    tenant_id: tenantId,
    quote_number: quoteNumber,
    title: body.title,
-   customer_id: body.customer_id,
-   project_id: body.project_id ?? null,
-   valid_until: body.valid_until ?? null,
+   customer_id: body.customer_id || null, // Convert empty string to null
+   project_id: body.project_id || null, // Convert empty string to null
+   valid_until: body.valid_until || null,
    kma_enabled: !!body.kma_enabled,
    created_by: user?.id || body.created_by || null,
    status: 'draft'

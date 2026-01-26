@@ -19,28 +19,52 @@ export async function GET(request: NextRequest) {
 
   const adminClient = createAdminClient();
 
-  // Get all integrations for tenant
-  const { data: integrations, error: integrationsError } = await adminClient
-   .from('accounting_integrations')
-   .select('*')
-   .eq('tenant_id', tenantId);
+  // Get all integrations for tenant (gracefully handle missing table)
+  let integrations: any[] = [];
+  let recentLogs: any[] = [];
+  
+  try {
+   const { data, error: integrationsError } = await adminClient
+    .from('accounting_integrations')
+    .select('*')
+    .eq('tenant_id', tenantId);
 
-  if (integrationsError) {
-   throw integrationsError;
+   if (integrationsError) {
+    // If table doesn't exist, return empty array
+    if (integrationsError.code === '42P01' || integrationsError.message?.includes('does not exist')) {
+     console.warn('[Integration Status API] Table accounting_integrations not found, returning empty');
+    } else {
+     console.warn('[Integration Status API] Error fetching integrations:', integrationsError.message);
+    }
+   } else {
+    integrations = data || [];
+   }
+  } catch (err) {
+   console.warn('[Integration Status API] Failed to fetch integrations:', err);
   }
 
   console.log('[Integration Status API] Integrations found:', integrations?.length);
 
-  // Get recent sync logs
-  const { data: recentLogs, error: logsError } = await adminClient
-   .from('sync_logs')
-   .select('*')
-   .eq('tenant_id', tenantId)
-   .order('created_at', { ascending: false })
-   .limit(50);
+  // Get recent sync logs (gracefully handle missing table)
+  try {
+   const { data, error: logsError } = await adminClient
+    .from('sync_logs')
+    .select('*')
+    .eq('tenant_id', tenantId)
+    .order('created_at', { ascending: false })
+    .limit(50);
 
-  if (logsError) {
-   throw logsError;
+   if (logsError) {
+    if (logsError.code === '42P01' || logsError.message?.includes('does not exist')) {
+     console.warn('[Integration Status API] Table sync_logs not found, returning empty');
+    } else {
+     console.warn('[Integration Status API] Error fetching logs:', logsError.message);
+    }
+   } else {
+    recentLogs = data || [];
+   }
+  } catch (err) {
+   console.warn('[Integration Status API] Failed to fetch logs:', err);
   }
 
   console.log('[Integration Status API] Recent logs:', recentLogs?.length);

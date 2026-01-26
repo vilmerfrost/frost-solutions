@@ -10,6 +10,7 @@ import FilterSortBar from '@/components/FilterSortBar'
 import { toast } from '@/lib/toast'
 import { Badge } from '@/components/ui/badge'
 import { apiFetch } from '@/lib/http/fetcher'
+import { Trash2 } from 'lucide-react'
 
 interface TimeEntry {
  id: string
@@ -718,7 +719,7 @@ export default function ReportsPage() {
                {deletingId === entry.id ? (
                 <span className="text-xs">Raderar...</span>
                ) : (
-                <span className="text-sm font-bold">🗑️</span>
+                <Trash2 className="w-4 h-4" />
                )}
               </button>
              </div>

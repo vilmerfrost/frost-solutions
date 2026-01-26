@@ -34,7 +34,6 @@ import {
  Sun,
  MapPin,
  Map,
- Bug,
  Menu,
  X,
  CreditCard
@@ -74,9 +73,7 @@ const navItems: NavItem[] = [
  { name: 'Arbetsflöden', href: '/workflows', icon: <SettingsIcon className="w-5 h-5" /> },
 ]
 
-const adminNavItems: NavItem[] = [
- { name: 'Bug Fixes', href: '/bug-fixes', icon: <Bug className="w-5 h-5" /> },
-]
+const adminNavItems: NavItem[] = []
 
 export default function SidebarClient() {
  const pathname = usePathname()

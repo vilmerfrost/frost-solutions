@@ -35,7 +35,8 @@ export default function InvoiceList({ tenantId }: InvoiceListProps) {
     // Fetch initial data
     async function fetchInvoices() {
       try {
-        const { data, error } = await supabase
+        // First try with supplier relation
+        let { data, error } = await supabase
           .from('supplier_invoices')
           .select(`
             id,
@@ -50,6 +51,32 @@ export default function InvoiceList({ tenantId }: InvoiceListProps) {
           .eq('tenant_id', tenantId)
           .order('created_at', { ascending: false })
           .limit(50)
+
+        // If relation fails, try without it
+        if (error && (error.message?.includes('relationship') || error.code === '400')) {
+          console.warn('⚠️ InvoiceList: Supplier relation not found, fetching without join')
+          const fallback = await supabase
+            .from('supplier_invoices')
+            .select(`
+              id,
+              supplier_id,
+              invoice_number,
+              invoice_date,
+              status,
+              created_at,
+              file_path
+            `)
+            .eq('tenant_id', tenantId)
+            .order('created_at', { ascending: false })
+            .limit(50)
+
+          if (!fallback.error) {
+            data = fallback.data
+            error = null
+          } else {
+            error = fallback.error
+          }
+        }
 
         if (error) {
           console.error('❌ InvoiceList: Error fetching invoices:', error)
