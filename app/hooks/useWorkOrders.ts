@@ -4,6 +4,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTenant } from '@/context/TenantContext';
+import { apiFetch } from '@/lib/http/fetcher';
+import { BASE_PATH } from '@/utils/url';
 import { extractErrorMessage } from '@/lib/errorUtils';
 import { toast } from '@/lib/toast';
 import type { 
@@ -28,31 +30,16 @@ const getWorkOrderPhotosQueryKey = (tenantId: string | null, workOrderId: string
 
 // Helper to fetch with error handling
 async function fetchWorkOrders(url: string): Promise<WorkOrder[]> {
- const response = await fetch(url, { cache: 'no-store' });
- if (!response.ok) {
-  const error = await response.json().catch(() => ({ error: 'Kunde inte hämta arbetsordrar' }));
-  throw new Error(extractErrorMessage(error));
- }
- const data = await response.json();
+ const data = await apiFetch<WorkOrder[] | { data: WorkOrder[] }>(url, { cache: 'no-store' });
  return Array.isArray(data) ? data : [];
 }
 
 async function fetchWorkOrder(url: string): Promise<WorkOrder> {
- const response = await fetch(url, { cache: 'no-store' });
- if (!response.ok) {
-  const error = await response.json().catch(() => ({ error: 'Kunde inte hämta arbetsorder' }));
-  throw new Error(extractErrorMessage(error));
- }
- return response.json();
+ return apiFetch<WorkOrder>(url, { cache: 'no-store' });
 }
 
 async function fetchWorkOrderPhotos(url: string): Promise<WorkOrderPhoto[]> {
- const response = await fetch(url, { cache: 'no-store' });
- if (!response.ok) {
-  const error = await response.json().catch(() => ({ error: 'Kunde inte hämta foton' }));
-  throw new Error(extractErrorMessage(error));
- }
- const data = await response.json();
+ const data = await apiFetch<WorkOrderPhoto[] | { data: WorkOrderPhoto[] }>(url, { cache: 'no-store' });
  return Array.isArray(data) ? data : [];
 }
 
@@ -117,18 +104,10 @@ export function useCreateWorkOrder() {
   mutationFn: async (newWorkOrder) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch('/api/work-orders', {
+   return apiFetch<WorkOrder>('/api/work-orders', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(newWorkOrder),
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte skapa arbetsorder' }));
-    throw new Error(extractErrorMessage(error));
-   }
-
-   return response.json();
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['workOrders'] });
@@ -151,18 +130,10 @@ export function useUpdateWorkOrder() {
   mutationFn: async ({ id, ...updatedData }) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch(`/api/work-orders/${id}`, {
+   return apiFetch<WorkOrder>(`/api/work-orders/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatedData),
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte uppdatera arbetsorder' }));
-    throw new Error(extractErrorMessage(error));
-   }
-
-   return response.json();
   },
   onSuccess: (data) => {
    queryClient.invalidateQueries({ queryKey: ['workOrders'] });
@@ -186,14 +157,7 @@ export function useDeleteWorkOrder() {
   mutationFn: async (id) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch(`/api/work-orders/${id}`, {
-    method: 'DELETE',
-   });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte ta bort arbetsorder' }));
-    throw new Error(extractErrorMessage(error));
-   }
+   await apiFetch(`/api/work-orders/${id}`, { method: 'DELETE' });
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['workOrders'] });
@@ -216,18 +180,10 @@ export function useWorkOrderStatusTransition() {
   mutationFn: async ({ id, to_status, reason }) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch(`/api/work-orders/${id}/status`, {
+   return apiFetch<WorkOrder>(`/api/work-orders/${id}/status`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ to_status, reason }),
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte ändra status' }));
-    throw new Error(extractErrorMessage(error));
-   }
-
-   return response.json();
   },
   onSuccess: (data) => {
    queryClient.invalidateQueries({ queryKey: ['workOrders'] });
@@ -272,7 +228,8 @@ export function useUploadWorkOrderPhoto(workOrderId: string) {
    const formData = new FormData();
    formData.append('file', file);
 
-   const response = await fetch(`/api/work-orders/${workOrderId}/photos`, {
+   // Use fetch with BASE_PATH for FormData (apiFetch sets Content-Type: application/json)
+   const response = await fetch(`${BASE_PATH}/api/work-orders/${workOrderId}/photos`, {
     method: 'POST',
     body: formData,
    });
@@ -307,14 +264,7 @@ export function useDeleteWorkOrderPhoto(workOrderId: string) {
   mutationFn: async (photoId) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch(`/api/work-orders/${workOrderId}/photos/${photoId}`, {
-    method: 'DELETE',
-   });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte ta bort foto' }));
-    throw new Error(extractErrorMessage(error));
-   }
+   await apiFetch(`/api/work-orders/${workOrderId}/photos/${photoId}`, { method: 'DELETE' });
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ 

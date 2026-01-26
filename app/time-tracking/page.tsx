@@ -4,6 +4,7 @@
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
+import { apiFetch } from '@/lib/http/fetcher'
 import { DatePicker } from '@/components/ui/date-picker'
 import { OBTypeSelector, type OBType } from '@/components/time/OBTypeSelector'
 import { TimeRangePicker } from '@/components/forms/TimeRangePicker'
@@ -63,20 +64,13 @@ export default function TimeTrackingPage() {
  useEffect(() => {
   const fetchData = async () => {
    try {
-    const [projectsRes, employeesRes] = await Promise.all([
-     fetch('/api/projects/list'),
-     fetch('/api/employees')
+    const [projectsData, employeesData] = await Promise.all([
+     apiFetch<{ projects?: any[] }>('/api/projects/list').catch(() => ({ projects: [] })),
+     apiFetch<{ employees?: any[] }>('/api/employees').catch(() => ({ employees: [] }))
     ])
     
-    if (projectsRes.ok) {
-     const projectsData = await projectsRes.json()
-     setProjects(projectsData.projects || [])
-    }
-    
-    if (employeesRes.ok) {
-     const employeesData = await employeesRes.json()
-     setEmployees(employeesData.employees || [])
-    }
+    setProjects(projectsData.projects || [])
+    setEmployees(employeesData.employees || [])
    } catch (error) {
     console.error('Error fetching data:', error)
    }
@@ -90,9 +84,8 @@ export default function TimeTrackingPage() {
   setLoading(true)
 
   try {
-   const response = await fetch('/api/time-entries', {
+   await apiFetch('/api/time-entries', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
      date,
      obType,
@@ -106,16 +99,11 @@ export default function TimeTrackingPage() {
      obHours,
     }),
    })
-
-   if (response.ok) {
-    // Success - redirect to dashboard
-    router.push('/dashboard')
-   } else {
-    alert('Kunde inte spara tidrapporten. Försök igen.')
-   }
+   // Success - redirect to dashboard
+   router.push('/dashboard')
   } catch (error) {
    console.error('Error saving time entry:', error)
-   alert('Ett fel uppstod. Försök igen.')
+   alert('Kunde inte spara tidrapporten. Försök igen.')
   } finally {
    setLoading(false)
   }

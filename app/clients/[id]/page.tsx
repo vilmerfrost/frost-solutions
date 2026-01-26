@@ -9,6 +9,7 @@ import { toast } from '@/lib/toast'
 import { useAdmin } from '@/hooks/useAdmin'
 import { Edit2, Archive, RotateCcw, Trash2, FileText } from 'lucide-react'
 import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface Client {
  id: string
@@ -235,17 +236,12 @@ export default function ClientDetailPage() {
          onClick={async () => {
           if (confirm(`Vill du arkivera kunden "${client.name}"?`)) {
            try {
-            const res = await fetch(`/api/clients/${clientId}/archive`, {
+            await apiFetch(`/api/clients/${clientId}/archive`, {
              method: 'PATCH',
-             headers: { 'Content-Type': 'application/json' },
              body: JSON.stringify({ action: 'archive' }),
             })
-            if (res.ok) {
-             toast.success('Kund arkiverad')
-             router.push('/clients')
-            } else {
-             throw new Error('Kunde inte arkivera')
-            }
+            toast.success('Kund arkiverad')
+            router.push('/clients')
            } catch (err: any) {
             toast.error('Fel: ' + err.message)
            }

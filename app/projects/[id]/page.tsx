@@ -20,6 +20,7 @@ import { MaterialAIIdentifier } from '@/components/ai/MaterialAIIdentifier'
 import { ProjectAIPlanning } from '@/components/ai/ProjectAIPlanning'
 import { ProjectAnalytics } from '@/components/analytics/ProjectAnalytics'
 import { ProjectEmployeeManager } from '@/components/projects/ProjectEmployeeManager'
+import { apiFetch } from '@/lib/http/fetcher'
 
 type ProjectRecord = {
  id: string
@@ -94,20 +95,10 @@ export default function ProjectDetailPage() {
     let projectError = null
     
     try {
-     const projectResponse = await fetch(`/api/projects/${projectId}?_t=${Date.now()}`, {
+     const result = await apiFetch<{ project?: any }>(`/api/projects/${projectId}?_t=${Date.now()}`, {
       cache: 'no-store',
-      headers: {
-       'Cache-Control': 'no-cache',
-      }
      })
-     
-     if (projectResponse.ok) {
-      const result = await projectResponse.json()
-      projectData = result.project
-     } else {
-      const errorData = await projectResponse.json().catch(() => ({}))
-      projectError = { message: errorData.error || 'Could not fetch project' }
-     }
+     projectData = result.project
     } catch (fetchErr: any) {
      projectError = { message: fetchErr.message || 'Network error' }
     }
@@ -143,24 +134,12 @@ export default function ProjectDetailPage() {
      // Hämta ofakturerade timmar och time entries för AI summary via API route
     try {
      console.log('📊 Project page: Fetching project hours from API...')
-     const hoursResponse = await fetch(`/api/projects/${projectId}/hours?projectId=${projectId}&_t=${Date.now()}`, {
+     const hoursData = await apiFetch<{ hours?: number; entries?: any[] }>(`/api/projects/${projectId}/hours?projectId=${projectId}&_t=${Date.now()}`, {
       cache: 'no-store',
-      headers: {
-       'Cache-Control': 'no-cache',
-      }
      })
-     
-     if (hoursResponse.ok) {
-      const hoursData = await hoursResponse.json()
-      console.log('✅ Project page: Hours fetched:', hoursData)
-      setHours(hoursData.hours || 0)
-      setTimeEntries(hoursData.entries || [])
-     } else {
-      const errorText = await hoursResponse.text()
-      console.warn('❌ Failed to fetch project hours from API:', errorText)
-      setHours(0)
-      setTimeEntries([])
-     }
+     console.log('✅ Project page: Hours fetched:', hoursData)
+     setHours(hoursData.hours || 0)
+     setTimeEntries(hoursData.entries || [])
     } catch (hoursErr) {
      console.warn('Error fetching project hours:', hoursErr)
      setHours(0)
@@ -333,27 +312,29 @@ export default function ProjectDetailPage() {
    console.log('📝 Invoice creation - Client info:', { clientId, clientName, projectId })
    
    // Create invoice via API route (invoice lines will be created automatically from time entries)
-   const response = await fetch('/api/invoices/create', {
-    method: 'POST',
-    headers: {
-     'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-     tenant_id: tenantId,
-     project_id: projectId, // This triggers automatic invoice line creation
-     client_id: clientId,
-     customer_name: clientName,
-     amount, // Initial amount, will be recalculated from invoice lines
-     desc: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
-     description: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
-     status: 'sent',
-     issue_date: new Date().toISOString().split('T')[0],
-    }),
-   })
+   let result: any
+   try {
+    result = await apiFetch<{ data?: { id?: string }; error?: string; details?: string; availableTenants?: any[]; suggestion?: string; diagnostics?: any; warning?: string }>('/api/invoices/create', {
+     method: 'POST',
+     body: JSON.stringify({
+      tenant_id: tenantId,
+      project_id: projectId, // This triggers automatic invoice line creation
+      client_id: clientId,
+      customer_name: clientName,
+      amount, // Initial amount, will be recalculated from invoice lines
+      desc: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
+      description: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
+      status: 'sent',
+      issue_date: new Date().toISOString().split('T')[0],
+     }),
+    })
+   } catch (apiErr: any) {
+    console.error('❌ Error creating invoice:', apiErr)
+    toast.error('Kunde inte skapa faktura: ' + (apiErr.message || 'Okänt fel'))
+    return
+   }
 
-   const result = await response.json()
-
-   if (!response.ok || result.error) {
+   if (result.error) {
     console.error('❌ Error creating invoice:', result)
     
     // Show detailed error message
@@ -463,27 +444,29 @@ export default function ProjectDetailPage() {
    console.log('📝 PDF Invoice creation - Client info:', { clientId, clientName, projectId })
    
    // Create invoice via API route (invoice lines will be created automatically from time entries)
-   const response = await fetch('/api/invoices/create', {
-    method: 'POST',
-    headers: {
-     'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-     tenant_id: tenantId,
-     project_id: projectId, // This triggers automatic invoice line creation
-     client_id: clientId,
-     customer_name: clientName,
-     amount, // Initial amount, will be recalculated from invoice lines
-     desc: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
-     description: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
-     status: 'draft',
-     issue_date: new Date().toISOString().split('T')[0],
-    }),
-   })
+   let result: any
+   try {
+    result = await apiFetch<{ data?: { id?: string }; error?: string; details?: string; availableTenants?: any[]; suggestion?: string; diagnostics?: any }>('/api/invoices/create', {
+     method: 'POST',
+     body: JSON.stringify({
+      tenant_id: tenantId,
+      project_id: projectId, // This triggers automatic invoice line creation
+      client_id: clientId,
+      customer_name: clientName,
+      amount, // Initial amount, will be recalculated from invoice lines
+      desc: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
+      description: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
+      status: 'draft',
+      issue_date: new Date().toISOString().split('T')[0],
+     }),
+    })
+   } catch (apiErr: any) {
+    console.error('Error creating invoice:', apiErr)
+    toast.error('Kunde inte skapa faktura: ' + (apiErr.message || 'Okänt fel'))
+    return
+   }
 
-   const result = await response.json()
-
-   if (!response.ok || result.error) {
+   if (result.error) {
     console.error('Error creating invoice:', result)
     
     // Show detailed error message
@@ -677,11 +660,8 @@ export default function ProjectDetailPage() {
          if (!showEmployeeHours && employeeHours.length === 0) {
           setLoadingEmployeeHours(true)
           try {
-           const response = await fetch(`/api/projects/${projectId}/employee-hours?projectId=${projectId}`)
-           if (response.ok) {
-            const data = await response.json()
-            setEmployeeHours(data.employees || [])
-           }
+           const data = await apiFetch<{ employees?: any[] }>(`/api/projects/${projectId}/employee-hours?projectId=${projectId}`)
+           setEmployeeHours(data.employees || [])
           } catch (err) {
            console.error('Error fetching employee hours:', err)
           } finally {

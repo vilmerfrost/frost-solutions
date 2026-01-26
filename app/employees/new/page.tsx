@@ -7,6 +7,7 @@ import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import { useAdmin } from '@/hooks/useAdmin'
+import { apiFetch } from '@/lib/http/fetcher'
 
 export default function NewEmployeePage() {
  const router = useRouter()
@@ -60,18 +61,10 @@ export default function NewEmployeePage() {
     payload.email = email.trim()
    }
 
-   const res = await fetch('/api/employees/create', {
+   const result = await apiFetch<{ error?: string; data?: any }>('/api/employees/create', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Kunde inte skapa anställd')
-   }
-
-   const result = await res.json()
    
    if (result.error) {
     throw new Error(result.error)

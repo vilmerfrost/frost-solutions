@@ -65,8 +65,16 @@ async function processJob(job: any) {
  }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
  try {
+  // 🚨 SÄKERHETSKONTROLL: Verifiera cron secret
+  const authHeader = req.headers.get('authorization')
+  const cronSecret = process.env.CRON_SECRET
+
+  if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
+   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const admin = createAdminClient();
   const { data: jobs, error } = await admin
    .from('integration_jobs')
@@ -74,7 +82,7 @@ export async function GET() {
    .in('status', ['queued','retry'])
    .lte('scheduled_at', new Date().toISOString())
    .order('scheduled_at', { ascending: true })
-   .limit(10);
+   .limit(5); // Optimerad från 10 till 5 för att undvika timeout (körs var 5:e min = 60 jobb/timme)
 
   if (error) return NextResponse.json({ error: extractErrorMessage(error) }, { status: 500 });
 

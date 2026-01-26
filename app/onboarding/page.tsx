@@ -7,6 +7,7 @@ import FrostLogo from '@/components/FrostLogo'
 import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
 import { BASE_PATH } from '@/utils/url'
+import { apiFetch } from '@/lib/http/fetcher'
 import { CSVUploader } from '@/components/import/CSVUploader'
 import { Upload, ArrowRight } from 'lucide-react'
 
@@ -60,9 +61,8 @@ export default function OnboardingPage() {
    
    if (!currentTenantId) {
     // Create new tenant via API route (bypasses RLS)
-    const createTenantRes = await fetch('/api/onboarding/create-tenant', {
+    const resultData = await apiFetch<{ tenantId?: string; tenant_id?: string; employeeId?: string; error?: string }>('/api/onboarding/create-tenant', {
      method: 'POST',
-     headers: { 'content-type': 'application/json' },
      body: JSON.stringify({
       name: companyName,
       orgNumber: orgNumber || null,
@@ -70,12 +70,6 @@ export default function OnboardingPage() {
      }),
     })
 
-    if (!createTenantRes.ok) {
-     const errorData = await createTenantRes.json().catch(() => ({}))
-     throw new Error(errorData.error || 'Kunde inte skapa tenant')
-    }
-
-    const resultData = await createTenantRes.json()
     const newTenantId = resultData.tenantId || resultData.tenant_id
     
     if (!newTenantId) {
@@ -97,20 +91,13 @@ export default function OnboardingPage() {
 
     // CRITICAL: Set tenant in user metadata and cookie immediately
     try {
-     const setTenantRes = await fetch('/api/auth/set-tenant', {
+     await apiFetch('/api/auth/set-tenant', {
       method: 'POST',
-      headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ 
        tenantId: currentTenantId,
        userId: userId
       }),
      })
-     
-     if (!setTenantRes.ok) {
-      const errorData = await setTenantRes.json().catch(() => ({}))
-      console.error('Failed to set tenant:', errorData)
-      throw new Error('Kunde inte sätta tenant: ' + (errorData.error || 'Okänt fel'))
-     }
      
      // Update TenantContext immediately
      setTenantId(currentTenantId)
@@ -191,9 +178,8 @@ export default function OnboardingPage() {
    }
 
    // Update admin employee record via API route (bypasses RLS)
-   const updateAdminRes = await fetch('/api/onboarding/update-admin', {
+   const adminResult = await apiFetch<{ employeeId?: string; error?: string }>('/api/onboarding/update-admin', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
      tenantId: currentTenantId,
      userId: userId,
@@ -202,14 +188,6 @@ export default function OnboardingPage() {
      baseRate: Number(adminBaseRate) || 360,
     }),
    })
-
-   if (!updateAdminRes.ok) {
-    const errorData = await updateAdminRes.json().catch(() => ({}))
-    console.error('Update admin error:', errorData)
-    throw new Error(errorData.error || 'Kunde inte uppdatera admin-användare')
-   }
-
-   const adminResult = await updateAdminRes.json()
    console.log('Admin employee updated/created:', adminResult)
 
    setStep(3)
@@ -243,9 +221,8 @@ export default function OnboardingPage() {
    console.log('tenantId from context:', tenantId)
 
    // Create customer via API route (bypasses RLS)
-   const createClientRes = await fetch('/api/onboarding/create-client', {
+   const clientResult = await apiFetch<{ clientId?: string; error?: string }>('/api/onboarding/create-client', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
      tenantId: currentTenantId, // Use the tenant ID from step 1
      name: customerName,
@@ -256,13 +233,6 @@ export default function OnboardingPage() {
     }),
    })
 
-   if (!createClientRes.ok) {
-    const errorData = await createClientRes.json().catch(() => ({}))
-    console.error('Create client error:', errorData)
-    throw new Error(errorData.error || 'Kunde inte skapa kund')
-   }
-
-   const clientResult = await createClientRes.json()
    if (clientResult.clientId) {
     setClientId(clientResult.clientId)
     console.log('Client created with ID:', clientResult.clientId)
@@ -308,9 +278,8 @@ export default function OnboardingPage() {
    await new Promise(resolve => setTimeout(resolve, 1000))
 
    // Create project via API route (bypasses RLS)
-   const createProjectRes = await fetch('/api/onboarding/create-project', {
+   await apiFetch('/api/onboarding/create-project', {
     method: 'POST',
-    headers: { 'content-type': 'application/json' },
     body: JSON.stringify({
      tenantId: currentTenantId,
      name: projectName,
@@ -319,12 +288,6 @@ export default function OnboardingPage() {
      budgetedHours: projectBudget ? Number(projectBudget) : null,
     }),
    })
-
-   if (!createProjectRes.ok) {
-    const errorData = await createProjectRes.json().catch(() => ({}))
-    console.error('Create project error:', errorData)
-    throw new Error(errorData.error || 'Kunde inte skapa projekt')
-   }
 
    // Move to optional import step
    setStep(5)

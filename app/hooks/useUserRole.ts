@@ -4,6 +4,7 @@
 
 import { useState, useEffect } from 'react';
 import { useTenant } from '@/context/TenantContext';
+import { apiFetch } from '@/lib/http/fetcher';
 import type { Role } from '@/lib/work-order-state-machine';
 
 /**
@@ -24,18 +25,13 @@ export function useUserRole() {
    }
 
    try {
-    const res = await fetch('/api/admin/check', { cache: 'no-store' });
-    if (res.ok) {
-     const data = await res.json();
-     const role = data.role as string | undefined;
-     
-     if (role === 'admin' || role === 'Admin') {
-      setUserRole('admin');
-     } else if (role === 'manager' || role === 'Manager') {
-      setUserRole('manager');
-     } else {
-      setUserRole('employee');
-     }
+    const data = await apiFetch<{ role?: string }>('/api/admin/check', { cache: 'no-store' });
+    const role = data.role;
+    
+    if (role === 'admin' || role === 'Admin') {
+     setUserRole('admin');
+    } else if (role === 'manager' || role === 'Manager') {
+     setUserRole('manager');
     } else {
      setUserRole('employee');
     }

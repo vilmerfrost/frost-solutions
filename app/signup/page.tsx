@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import { Check, Loader2 } from 'lucide-react'
 import { BASE_PATH } from '@/utils/url'
+import { apiFetch } from '@/lib/http/fetcher'
 
 function SignupContent() {
  const [email, setEmail] = useState('')
@@ -88,24 +89,23 @@ function SignupContent() {
    const trialEnds = new Date()
    trialEnds.setDate(trialEnds.getDate() + 30) // 30 days trial
    
-   const profileRes = await fetch('/api/auth/create-profile', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-     userId: authData.user.id,
-     fullName: fullName,
-     email: email,
-     companyName: companyName,
-     orgNumber: orgNumber || null,
-     trialStartedAt: new Date().toISOString(),
-     trialEndsAt: trialEnds.toISOString(),
-     subscriptionStatus: 'trial'
+   try {
+    await apiFetch('/api/auth/create-profile', {
+     method: 'POST',
+     body: JSON.stringify({
+      userId: authData.user.id,
+      fullName: fullName,
+      email: email,
+      companyName: companyName,
+      orgNumber: orgNumber || null,
+      trialStartedAt: new Date().toISOString(),
+      trialEndsAt: trialEnds.toISOString(),
+      subscriptionStatus: 'trial'
+     })
     })
-   })
-
-   if (!profileRes.ok) {
+   } catch (profileErr) {
     // Profile creation is optional - user can still proceed
-    console.warn('Could not create profile, continuing to onboarding')
+    console.warn('Could not create profile, continuing to onboarding', profileErr)
    }
    
    // 4. Redirect to onboarding

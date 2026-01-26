@@ -3,6 +3,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTenant } from '@/context/TenantContext';
 import { useEffect } from 'react';
+import { BASE_PATH } from '@/utils/url';
 
 interface DashboardAnalytics {
  summary: {
@@ -67,7 +68,7 @@ export function useDashboardAnalytics(period: 'week' | 'month' | 'year' = 'month
    }
 
    const timestamp = Date.now();
-   const response = await fetch(`/api/analytics/dashboard?period=${period}&_t=${timestamp}`, {
+   const response = await fetch(`${BASE_PATH}/api/analytics/dashboard?period=${period}&_t=${timestamp}`, {
     cache: 'no-store', // Analytics ska alltid vara färsk
     headers: {
      'Cache-Control': 'no-cache, no-store, must-revalidate',

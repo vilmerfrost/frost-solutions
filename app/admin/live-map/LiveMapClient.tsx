@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Sidebar from '@/components/Sidebar'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface EmployeeOnSite {
  id: string
@@ -52,13 +53,7 @@ export default function LiveMapClient({ tenantId }: LiveMapClientProps) {
 
  async function fetchLiveData() {
   try {
-   const res = await fetch('/api/admin/live-map')
-   if (!res.ok) {
-    const data = await res.json().catch(() => ({}))
-    throw new Error(data.error || 'Kunde inte hämta live-data')
-   }
-
-   const data = await res.json()
+   const data = await apiFetch<{ employees?: EmployeeOnSite[]; workSites?: WorkSite[] }>('/api/admin/live-map')
    setEmployees(data.employees || [])
    setWorkSites(data.workSites || [])
    setError(null)

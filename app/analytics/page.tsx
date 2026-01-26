@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import AISummary from '@/components/AISummary'
+import { BASE_PATH } from '@/utils/url'
 
 interface AnalyticsData {
  totalHours: number
@@ -30,7 +31,7 @@ export default function AnalyticsPage() {
   async function fetchAnalytics() {
    try {
     // Use API route instead of direct Supabase calls (avoids RLS issues)
-    const response = await fetch(`/api/analytics?period=${period}&_t=${Date.now()}`, {
+    const response = await fetch(`${BASE_PATH}/api/analytics?period=${period}&_t=${Date.now()}`, {
      cache: 'no-store',
      headers: {
       'Cache-Control': 'no-cache, no-store, must-revalidate',

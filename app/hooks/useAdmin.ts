@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTenant } from '@/context/TenantContext'
+import { apiFetch } from '@/lib/http/fetcher'
 
 // Simple in-memory cache for admin status (per tenant)
 const adminCache = new Map<string, { isAdmin: boolean; employeeId: string | null; timestamp: number }>()
@@ -43,26 +44,19 @@ export function useAdmin() {
    setLoading(true)
    
    try {
-    const res = await fetch('/api/admin/check', { cache: 'no-store' })
-    if (res.ok) {
-     const data = await res.json()
-     const adminStatus = data.isAdmin || false
-     const empId = data.employeeId || null
-     
-     setIsAdmin(adminStatus)
-     setEmployeeId(empId)
-     
-     // Cache the result
-     adminCache.set(tenantId, {
-      isAdmin: adminStatus,
-      employeeId: empId,
-      timestamp: Date.now()
-     })
-    } else {
-     setIsAdmin(false)
-     setEmployeeId(null)
-     console.error('Admin check failed:', await res.text())
-    }
+    const data = await apiFetch<{ isAdmin?: boolean; employeeId?: string | null }>('/api/admin/check', { cache: 'no-store' })
+    const adminStatus = data.isAdmin || false
+    const empId = data.employeeId || null
+    
+    setIsAdmin(adminStatus)
+    setEmployeeId(empId)
+    
+    // Cache the result
+    adminCache.set(tenantId, {
+     isAdmin: adminStatus,
+     employeeId: empId,
+     timestamp: Date.now()
+    })
    } catch (err) {
     console.error('Error checking admin:', err)
     setIsAdmin(false)

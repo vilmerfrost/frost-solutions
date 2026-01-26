@@ -5,6 +5,7 @@
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import type { InvoiceOCRResult } from '@/lib/ai/frost-bygg-ai-integration';
+import { BASE_PATH } from '@/utils/url';
 
 interface InvoiceOCRUploadProps {
  onInvoiceExtracted?: (data: InvoiceOCRResult) => void;
@@ -51,7 +52,7 @@ export function InvoiceOCRUpload({
    const formData = new FormData();
    formData.append('file', selectedFile);
 
-   const response = await fetch('/api/ai/invoice-ocr', {
+   const response = await fetch(`${BASE_PATH}/api/ai/invoice-ocr`, {
     method: 'POST',
     body: formData,
    });

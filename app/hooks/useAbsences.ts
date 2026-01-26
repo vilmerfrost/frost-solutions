@@ -2,6 +2,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiFetch } from '@/lib/http/fetcher';
 import { toast } from '@/lib/toast';
 import { useTenant } from '@/context/TenantContext';
 import { extractErrorMessage } from '@/lib/errorUtils';
@@ -52,16 +53,9 @@ export const useAbsences = (filters?: AbsenceFilters) => {
    if (filters?.start_date) params.append('start_date', filters.start_date);
    if (filters?.end_date) params.append('end_date', filters.end_date);
 
-   const response = await fetch(`/api/absences?${params.toString()}`, {
+   return apiFetch<Absence[]>(`/api/absences?${params.toString()}`, {
     cache: 'no-store',
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte hämta frånvaro' }));
-    throw new Error(error.error || 'Kunde inte hämta frånvaro');
-   }
-
-   return await response.json() as Absence[];
   },
   enabled: !!tenantId,
  });
@@ -78,18 +72,10 @@ export const useCreateAbsence = () => {
   mutationFn: async (newAbsence) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch('/api/absences', {
+   return apiFetch<Absence>('/api/absences', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(newAbsence),
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte skapa frånvaro' }));
-    throw new Error(error.error || 'Kunde inte skapa frånvaro');
-   }
-
-   return await response.json() as Absence;
   },
   onSuccess: () => {
    toast.success('Frånvaro sparad');
@@ -114,18 +100,10 @@ export const useUpdateAbsence = () => {
 
    const { id, ...updateData } = updatedAbsence;
 
-   const response = await fetch(`/api/absences/${id}`, {
+   return apiFetch<Absence>(`/api/absences/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updateData),
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte uppdatera frånvaro' }));
-    throw new Error(error.error || 'Kunde inte uppdatera frånvaro');
-   }
-
-   return await response.json() as Absence;
   },
   onSuccess: () => {
    toast.success('Frånvaro uppdaterad');
@@ -148,14 +126,7 @@ export const useDeleteAbsence = () => {
   mutationFn: async (absenceId) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch(`/api/absences/${absenceId}`, {
-    method: 'DELETE',
-   });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte ta bort frånvaro' }));
-    throw new Error(error.error || 'Kunde inte ta bort frånvaro');
-   }
+   await apiFetch(`/api/absences/${absenceId}`, { method: 'DELETE' });
   },
   onSuccess: () => {
    toast.success('Frånvaro borttagen');

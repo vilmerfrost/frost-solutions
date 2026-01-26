@@ -7,6 +7,7 @@ import { useTenant } from '@/context/TenantContext';
 import { useAdmin } from '@/hooks/useAdmin';
 import { toast } from '@/lib/toast';
 import { BASE_PATH } from '@/utils/url';
+import { apiFetch } from '@/lib/http/fetcher';
 import type { ScheduleSlot } from '@/types/scheduling';
 
 interface ScheduleReminder {
@@ -34,15 +35,15 @@ export function useScheduleReminders() {
    const startOfDay = new Date(today.setHours(0, 0, 0, 0));
    const endOfDay = new Date(today.setHours(23, 59, 59, 999));
 
-   const response = await fetch(
-    `/api/schedules?start_date=${startOfDay.toISOString().split('T')[0]}&end_date=${endOfDay.toISOString().split('T')[0]}`,
-    { cache: 'no-store' }
-   );
-
-   if (!response.ok) return [];
-
-   const schedulesData = await response.json() as ScheduleSlot[];
-   return schedulesData.filter(s => s.status === 'scheduled' || s.status === 'confirmed');
+   try {
+    const schedulesData = await apiFetch<ScheduleSlot[]>(
+     `/api/schedules?start_date=${startOfDay.toISOString().split('T')[0]}&end_date=${endOfDay.toISOString().split('T')[0]}`,
+     { cache: 'no-store' }
+    );
+    return (schedulesData || []).filter(s => s.status === 'scheduled' || s.status === 'confirmed');
+   } catch {
+    return [];
+   }
   },
   enabled: !!tenantId,
   refetchInterval: 60000, // Kolla varje minut
@@ -55,12 +56,12 @@ export function useScheduleReminders() {
    if (!tenantId) return [];
 
    const today = new Date().toISOString().split('T')[0];
-   const response = await fetch(`/api/time-entries/list?date=${today}`, { cache: 'no-store' });
-
-   if (!response.ok) return [];
-
-   const data = await response.json();
-   return data.timeEntries || data.entries || data || [];
+   try {
+    const data = await apiFetch<any>(`/api/time-entries/list?date=${today}`, { cache: 'no-store' });
+    return data.timeEntries || data.entries || data || [];
+   } catch {
+    return [];
+   }
   },
   enabled: !!tenantId,
   refetchInterval: 60000, // Kolla varje minut

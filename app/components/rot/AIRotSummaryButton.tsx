@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { apiFetch } from '@/lib/http/fetcher';
 
 interface AIRotSummaryButtonProps {
  rotApplicationId: string;
@@ -38,9 +39,8 @@ export function AIRotSummaryButton({
   setSummary(null);
 
   try {
-   const response = await fetch('/api/ai/rot-rut-summary', {
+   const data = await apiFetch<{ success?: boolean; error?: string; data?: { summary: string } }>('/api/ai/rot-rut-summary', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
      customerName,
      projectDescription,
@@ -51,8 +51,6 @@ export function AIRotSummaryButton({
      rutAmount,
     }),
    });
-
-   const data = await response.json();
 
    if (!data.success) {
     throw new Error(data.error || 'Failed to generate summary');

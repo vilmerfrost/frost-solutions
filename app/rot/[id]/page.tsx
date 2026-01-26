@@ -8,6 +8,8 @@ import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import { RotCalculator } from '@/components/rot/RotCalculator'
 import { ROTAISummary } from '@/components/rot/ROTAISummary'
+import { apiFetch } from '@/lib/http/fetcher'
+import { BASE_PATH } from '@/utils/url'
 
 interface RotApplication {
  id: string
@@ -134,16 +136,9 @@ export default function RotApplicationDetailPage() {
   setSubmitting(true)
 
   try {
-   const response = await fetch(`/api/rot/${applicationId}/submit`, {
+   await apiFetch(`/api/rot/${applicationId}/submit`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
    })
-
-   const data = await response.json()
-
-   if (!response.ok) {
-    throw new Error(data.error || 'Kunde inte skicka ansökan')
-   }
 
    toast.success('Ansökan skickad till Skatteverket!')
    await loadData() // Reload to get updated status
@@ -165,15 +160,9 @@ export default function RotApplicationDetailPage() {
   setCheckingStatus(true)
 
   try {
-   const response = await fetch(`/api/rot/${applicationId}/status`, {
+   await apiFetch(`/api/rot/${applicationId}/status`, {
     method: 'POST',
    })
-
-   const data = await response.json()
-
-   if (!response.ok) {
-    throw new Error(data.error || 'Kunde inte kontrollera status')
-   }
 
    toast.success('Status uppdaterad!')
    await loadData()
@@ -354,7 +343,7 @@ export default function RotApplicationDetailPage() {
          <button
           onClick={async () => {
            if (confirm('Exportera ROT-data för GDPR?')) {
-            const response = await fetch(`/api/rot/export/${tenantId}`)
+            const response = await fetch(`${BASE_PATH}/api/rot/export/${tenantId}`)
             const blob = await response.blob()
             const url = window.URL.createObjectURL(blob)
             const a = document.createElement('a')

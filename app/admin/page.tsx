@@ -8,6 +8,7 @@ import Sidebar from '@/components/Sidebar'
 import { DashboardAnalytics } from '@/components/analytics/DashboardAnalytics'
 import AISummary from '@/components/AISummary'
 import { toast } from '@/lib/toast'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface Employee {
  id: string
@@ -43,15 +44,9 @@ export default function AdminPage() {
  async function handleApproveAll() {
   setApprovingAll(true)
   try {
-   const res = await fetch('/api/time-entries/approve-all', {
+   const data = await apiFetch<{ updated?: number; error?: string }>('/api/time-entries/approve-all', {
     method: 'POST'
    })
-
-   const data = await res.json()
-
-   if (!res.ok) {
-    throw new Error(data.error || 'Kunde inte godkänna tidsrapporter')
-   }
 
    toast.success(
     data.updated
@@ -97,32 +92,18 @@ export default function AdminPage() {
 
     // Projects - Use API route for consistency and better error handling
     try {
-     const projectsRes = await fetch(`/api/projects/list?tenantId=${currentTenantId}`, { cache: 'no-store' })
+     const projectsData = await apiFetch<{ projects?: any[] }>(`/api/projects/list?tenantId=${currentTenantId}`, { cache: 'no-store' })
      if (cancelled) return
      
-     if (projectsRes.ok) {
-      const projectsData = await projectsRes.json()
-      if (cancelled) return
-      
-      if (projectsData.projects) {
-       console.log('✅ Admin: Fetched', projectsData.projects.length, 'projects')
-       setProjects(projectsData.projects)
-      } else {
-       setProjects([])
-      }
+     if (projectsData.projects) {
+      console.log('✅ Admin: Fetched', projectsData.projects.length, 'projects')
+      setProjects(projectsData.projects)
      } else {
-      // Fallback: Direct query
-      const { data: projData } = await supabase
-       .from('projects')
-       .select('id, name, status')
-       .eq('tenant_id', currentTenantId)
-      
-      if (cancelled) return
-      setProjects(projData || [])
+      setProjects([])
      }
-    } catch (projErr) {
+    } catch (apiError) {
      if (cancelled) return
-     console.error('Error fetching projects:', projErr)
+     console.error('Error fetching projects:', apiError)
      // Fallback: Direct query
      const { data: projData } = await supabase
       .from('projects')

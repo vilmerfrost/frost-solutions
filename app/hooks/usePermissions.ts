@@ -3,6 +3,7 @@
 import { useQuery } from '@tanstack/react-query';
 import supabase from '@/utils/supabase/supabaseClient';
 import { useTenant } from '@/context/TenantContext';
+import { apiFetch } from '@/lib/http/fetcher';
 
 export type Role = 'super_admin' | 'admin' | 'manager' | 'employee' | 'client';
 export type Resource = 'projects' | 'invoices' | 'employees' | 'time_entries' | 'clients' | '*';
@@ -27,16 +28,7 @@ export function usePermissions() {
     return { role: 'employee' as Role, permissions: [] as Permission[] };
    }
 
-   const response = await fetch(`/api/rbac/permissions?tenantId=${encodeURIComponent(tenantId)}`, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-   });
-
-   if (!response.ok) {
-    throw new Error('Failed to fetch permissions');
-   }
-
-   const result = await response.json();
+   const result = await apiFetch<{ role: Role; permissions: Permission[] }>(`/api/rbac/permissions?tenantId=${encodeURIComponent(tenantId)}`);
    return {
     role: result.role as Role,
     permissions: result.permissions as Permission[],

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { getNotifications, markNotificationAsRead, markAllNotificationsAsRead } from '@/lib/notifications'
 import { useAdmin } from '@/hooks/useAdmin'
 import CreateNotificationModal from './CreateNotificationModal'
+import { BASE_PATH } from '@/utils/url'
 
 interface Notification {
  id: string
@@ -65,7 +66,7 @@ export default function NotificationCenter({ className = '' }: NotificationCente
    
    // Load from API (database)
    try {
-    const response = await fetch('/api/notifications/list', { cache: 'no-store' })
+    const response = await fetch(`${BASE_PATH}/api/notifications/list`, { cache: 'no-store' })
     if (response.ok) {
      const data = await response.json()
      const dbNotifications: Notification[] = (data.notifications || []).map((n: any) => ({
@@ -109,7 +110,7 @@ export default function NotificationCenter({ className = '' }: NotificationCente
  async function markAsRead(id: string) {
   // Try API first (for database notifications)
   try {
-   const response = await fetch(`/api/notifications/${id}/read`, {
+   const response = await fetch(`${BASE_PATH}/api/notifications/${id}/read`, {
     method: 'PATCH',
    })
    if (response.ok) {

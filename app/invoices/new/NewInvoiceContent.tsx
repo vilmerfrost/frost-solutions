@@ -10,6 +10,7 @@ import { InvoiceAISuggestion } from '@/components/ai/InvoiceAISuggestion'
 import { PillTabs } from '@/components/ui/pill-tabs'
 import { FileText, Folder, Sparkles } from 'lucide-react'
 import { BASE_PATH } from '@/utils/url'
+import { apiFetch } from '@/lib/http/fetcher'
 
 export default function NewInvoiceContent() {
  const router = useRouter()
@@ -91,11 +92,8 @@ export default function NewInvoiceContent() {
 
    setLoadingProjects(true)
    try {
-    const response = await fetch(`/api/projects/list?tenantId=${tenantId}`)
-    if (response.ok) {
-     const data = await response.json()
-     setProjects(data.projects || [])
-    }
+    const data = await apiFetch<{ projects?: any[] }>(`/api/projects/list?tenantId=${tenantId}`)
+    setProjects(data.projects || [])
    } catch (err) {
     console.error('Error fetching projects:', err)
    } finally {
@@ -154,11 +152,10 @@ export default function NewInvoiceContent() {
 
      // Fetch unbilled time entries via API route (avoids RLS issues)
      try {
-      const response = await fetch(`/api/projects/${projectId}/unbilled-hours`)
-      const result = await response.json()
+      const result = await apiFetch<{ success?: boolean; data?: { unbilledHours: number; totalAmount: number; timeEntries?: any[] } }>(`/api/projects/${projectId}/unbilled-hours`)
 
       if (result.success && result.data) {
-       const { unbilledHours, totalAmount, timeEntries } = result.data
+       const { unbilledHours, totalAmount } = result.data
        const rate = Number(projectData.base_rate_sek) || 360
        setAmount(totalAmount || (unbilledHours * rate))
        setDesc(`${unbilledHours.toFixed(1)} timmar @ ${rate} kr/tim = ${(totalAmount || unbilledHours * rate).toLocaleString('sv-SE')} kr`)
@@ -209,28 +206,31 @@ export default function NewInvoiceContent() {
 
   try {
    // Use API route instead of direct Supabase call for proper tenant verification
-   const response = await fetch('/api/invoices/create', {
-    method: 'POST',
-    headers: {
-     'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-     tenant_id: tenantId,
-     project_id: projectId || rotApplication?.project_id || null,
-     client_id: customer_id || null,
-     customer_name: customer_name || null,
-     amount: amount ? Number(amount) : 0,
-     desc: desc || null,
-     description: desc || null,
-     status: 'draft',
-     issue_date: new Date().toISOString().split('T')[0],
-     rot_application_id: rotApplicationId || null,
-    }),
-   })
+   let result: any
+   try {
+    result = await apiFetch<{ data?: { id?: string }; error?: string; details?: string; availableTenants?: any[]; suggestion?: string; diagnostics?: any }>('/api/invoices/create', {
+     method: 'POST',
+     body: JSON.stringify({
+      tenant_id: tenantId,
+      project_id: projectId || rotApplication?.project_id || null,
+      client_id: customer_id || null,
+      customer_name: customer_name || null,
+      amount: amount ? Number(amount) : 0,
+      desc: desc || null,
+      description: desc || null,
+      status: 'draft',
+      issue_date: new Date().toISOString().split('T')[0],
+      rot_application_id: rotApplicationId || null,
+     }),
+    })
+   } catch (apiErr: any) {
+    console.error('Error creating invoice:', apiErr)
+    toast.error('Kunde inte skapa faktura: ' + (apiErr.message || 'Okänt fel'))
+    setLoading(false)
+    return
+   }
 
-   const result = await response.json()
-
-   if (!response.ok || result.error) {
+   if (result.error) {
     console.error('Error creating invoice:', result)
     
     // Show detailed error message
@@ -441,10 +441,9 @@ export default function NewInvoiceContent() {
             setLoadingProject(true)
             try {
              // Fetch project details
-             const projectResponse = await fetch(`/api/projects/${selectedProjectId}`)
-             if (projectResponse.ok) {
-              const { project } = await projectResponse.json()
-              
+             const { project } = await apiFetch<{ project?: any }>(`/api/projects/${selectedProjectId}`)
+             
+             if (project) {
               // Set customer info from project
               if (project.clients?.id) {
                setCustomerId(project.clients.id)
@@ -462,9 +461,8 @@ export default function NewInvoiceContent() {
               }
               
               // Fetch unbilled hours
-              const hoursResponse = await fetch(`/api/projects/${selectedProjectId}/unbilled-hours`)
-              if (hoursResponse.ok) {
-               const result = await hoursResponse.json()
+              try {
+               const result = await apiFetch<{ success?: boolean; data?: { unbilledHours: number; totalAmount: number } }>(`/api/projects/${selectedProjectId}/unbilled-hours`)
                if (result.success && result.data) {
                 const { unbilledHours, totalAmount } = result.data
                 const rate = Number(project.base_rate_sek) || 360
@@ -474,6 +472,10 @@ export default function NewInvoiceContent() {
                 setAmount(0)
                 setDesc('Inga ofakturerade timmar för detta projekt')
                }
+              } catch (hoursErr) {
+               console.warn('Error fetching unbilled hours:', hoursErr)
+               setAmount(0)
+               setDesc('Inga ofakturerade timmar för detta projekt')
               }
              }
             } catch (err) {

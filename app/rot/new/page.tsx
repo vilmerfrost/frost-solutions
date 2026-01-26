@@ -7,6 +7,7 @@ import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import { useAdmin } from '@/hooks/useAdmin'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface Project {
  id: string
@@ -159,27 +160,30 @@ export default function NewRotApplicationPage() {
    }
 
    // Create ROT application via API route
-   const response = await fetch('/api/rot/create', {
-    method: 'POST',
-    headers: {
-     'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-     tenant_id: tenantId,
-     project_id: projectId || null,
-     client_id: clientId || null,
-     customer_person_number: customerPersonNumber,
-     property_designation: propertyDesignation,
-     work_type: workType,
-     work_cost_sek: work,
-     material_cost_sek: material,
-     total_cost_sek: totalCost,
-    }),
-   })
+   let result: any
+   try {
+    result = await apiFetch<{ error?: string; details?: string; availableTenants?: any[]; suggestion?: string; diagnostics?: any; data?: any }>('/api/rot/create', {
+     method: 'POST',
+     body: JSON.stringify({
+      tenant_id: tenantId,
+      project_id: projectId || null,
+      client_id: clientId || null,
+      customer_person_number: customerPersonNumber,
+      property_designation: propertyDesignation,
+      work_type: workType,
+      work_cost_sek: work,
+      material_cost_sek: material,
+      total_cost_sek: totalCost,
+     }),
+    })
+   } catch (apiErr: any) {
+    console.error('Error creating ROT application:', apiErr)
+    toast.error('Kunde inte skapa ROT-ansökan: ' + (apiErr.message || 'Okänt fel'))
+    setLoading(false)
+    return
+   }
 
-   const result = await response.json()
-
-   if (!response.ok || result.error) {
+   if (result.error) {
     console.error('Error creating ROT application:', result)
     
     // Show detailed error message

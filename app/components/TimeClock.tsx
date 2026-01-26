@@ -19,6 +19,7 @@ import {
  GPSLocation,
  WorkSite
 } from '@/lib/gpsUtils'
+import { BASE_PATH } from '@/utils/url'
 
 interface TimeClockProps {
  employeeId: string | null
@@ -155,7 +156,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
 
     let data: any = null
     if (isOnline !== false) {
-     const response = await fetch(`/api/time-entries/active?employeeId=${employeeId}`, { cache: 'no-store' })
+     const response = await fetch(`${BASE_PATH}/api/time-entries/active?employeeId=${employeeId}`, { cache: 'no-store' })
      if (response.ok) {
       const result = await response.json()
       data = result?.data ?? null
@@ -575,7 +576,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
    // 🔍 DUBBLETT-KONTROLL: Kontrollera om det redan finns en aktiv stämpling eller överlappning
    let existingEntries: any[] = []
    try {
-    const duplicateResponse = await fetch(`/api/time-entries/list?date=${date}`, {
+    const duplicateResponse = await fetch(`${BASE_PATH}/api/time-entries/list?date=${date}`, {
      cache: 'no-store',
     })
     if (duplicateResponse.ok) {
@@ -621,7 +622,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
    }
 
    // Create time entry via API route to ensure tenant_id is valid
-   const response = await fetch('/api/time-entries/create', {
+   const response = await fetch(`${BASE_PATH}/api/time-entries/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
@@ -698,7 +699,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
    if (!startTime && activeTimeEntry.id) {
     console.warn('⚠️ start_time missing in state, fetching from API...')
     try {
-     const detailResponse = await fetch(`/api/time-entries/get?id=${activeTimeEntry.id}`, {
+     const detailResponse = await fetch(`${BASE_PATH}/api/time-entries/get?id=${activeTimeEntry.id}`, {
       cache: 'no-store',
      })
      if (!detailResponse.ok) {
@@ -913,7 +914,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
    }
 
    // Update the time entry via API route to ensure tenant_id is valid
-   const updateResponse = await fetch(`/api/time-entries/${activeTimeEntry.id}/update`, {
+   const updateResponse = await fetch(`${BASE_PATH}/api/time-entries/${activeTimeEntry.id}/update`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatePayload),
@@ -987,7 +988,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
      }
 
      // Delete the original entry and create separate ones
-     const deleteResponse = await fetch(`/api/time-entries/delete?id=${activeTimeEntry.id}`, {
+     const deleteResponse = await fetch(`${BASE_PATH}/api/time-entries/delete?id=${activeTimeEntry.id}`, {
       method: 'DELETE',
      })
 
@@ -1000,7 +1001,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
 
      // Create multiple entries via API route
      const createPromises = entriesToCreate.map(entry => 
-      fetch('/api/time-entries/create', {
+      fetch(`${BASE_PATH}/api/time-entries/create`, {
        method: 'POST',
        headers: { 'Content-Type': 'application/json' },
        body: JSON.stringify(entry),
@@ -1210,7 +1211,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
        onClick={async () => {
         if (confirm('Detta kommer att försöka skapa en employee-record för dig. Fortsätt?')) {
          try {
-          const res = await fetch('/api/admin/fix-role', { method: 'POST' })
+          const res = await fetch(`${BASE_PATH}/api/admin/fix-role`, { method: 'POST' })
           const data = await res.json()
           if (res.ok) {
            alert('✅ Employee-record skapad/uppdaterad! Ladda om sidan.')

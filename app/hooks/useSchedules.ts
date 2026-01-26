@@ -2,6 +2,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiFetch } from '@/lib/http/fetcher';
 import { toast } from '@/lib/toast';
 import { useTenant } from '@/context/TenantContext';
 import { extractErrorMessage } from '@/lib/errorUtils';
@@ -39,16 +40,9 @@ export const useSchedules = (filters: ScheduleFilters) => {
    params.append('start_date', filters.start_date);
    params.append('end_date', filters.end_date);
 
-   const response = await fetch(`/api/schedules?${params.toString()}`, {
+   const schedules = await apiFetch<ScheduleSlot[]>(`/api/schedules?${params.toString()}`, {
     cache: 'no-store',
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte hämta scheman' }));
-    throw new Error(error.error || 'Kunde inte hämta scheman');
-   }
-
-   const schedules = await response.json() as ScheduleSlot[];
    
    // Return schedules as-is - enrichment happens in components using useEmployees() and useProjects()
    return schedules || [];
@@ -69,18 +63,10 @@ export const useCreateSchedule = (filters: ScheduleFilters) => {
   mutationFn: async (newSchedule) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch('/api/schedules', {
+   return apiFetch<ScheduleSlot>('/api/schedules', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(newSchedule),
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte skapa schema' }));
-    throw new Error(error.error || 'Kunde inte skapa schema');
-   }
-
-   return await response.json() as ScheduleSlot;
   },
   onSuccess: () => {
    toast.success('Schema sparat');
@@ -109,18 +95,10 @@ export const useUpdateSchedule = (filters: ScheduleFilters) => {
   mutationFn: async (updatedSchedule) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch(`/api/schedules/${updatedSchedule.id}`, {
+   return apiFetch<ScheduleSlot>(`/api/schedules/${updatedSchedule.id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(updatedSchedule),
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte uppdatera schema' }));
-    throw new Error(error.error || 'Kunde inte uppdatera schema');
-   }
-
-   return await response.json() as ScheduleSlot;
   },
   onMutate: async (updatedSchedule) => {
    await queryClient.cancelQueries({ queryKey });
@@ -161,14 +139,7 @@ export const useDeleteSchedule = (filters: ScheduleFilters) => {
   mutationFn: async (scheduleId) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch(`/api/schedules/${scheduleId}`, {
-    method: 'DELETE',
-   });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte ta bort schema' }));
-    throw new Error(error.error || 'Kunde inte ta bort schema');
-   }
+   await apiFetch(`/api/schedules/${scheduleId}`, { method: 'DELETE' });
   },
   onMutate: async (scheduleId) => {
    await queryClient.cancelQueries({ queryKey });
@@ -207,16 +178,9 @@ export const useCompleteSchedule = (filters: ScheduleFilters) => {
   mutationFn: async (scheduleId) => {
    if (!tenantId) throw new Error('Tenant ID saknas');
 
-   const response = await fetch(`/api/schedules/${scheduleId}/complete`, {
+   return apiFetch<{ schedule: ScheduleSlot; timeEntry: unknown }>(`/api/schedules/${scheduleId}/complete`, {
     method: 'POST',
    });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte slutföra schema' }));
-    throw new Error(error.error || 'Kunde inte slutföra schema');
-   }
-
-   return await response.json();
   },
   onSuccess: () => {
    toast.success('Pass slutfört och tid rapporterad');
@@ -253,16 +217,7 @@ export const useScheduleConflicts = () => {
     params.append('exclude_id', checkData.exclude_id);
    }
 
-   const response = await fetch(`/api/schedules/conflicts?${params.toString()}`, {
-    method: 'GET',
-   });
-
-   if (!response.ok) {
-    const error = await response.json().catch(() => ({ error: 'Kunde inte kontrollera konflikter' }));
-    throw new Error(error.error || 'Kunde inte kontrollera konflikter');
-   }
-
-   return await response.json() as ConflictCheckResponse;
+   return apiFetch<ConflictCheckResponse>(`/api/schedules/conflicts?${params.toString()}`);
   },
   // No automatic toasts - called in real-time during drag
  });

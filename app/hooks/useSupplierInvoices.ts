@@ -3,6 +3,8 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTenant } from '@/context/TenantContext'
+import { apiFetch } from '@/lib/http/fetcher'
+import { BASE_PATH } from '@/utils/url'
 import { toast } from '@/lib/toast'
 import type {
  SupplierInvoice,
@@ -34,18 +36,11 @@ export function useSupplierInvoices(filters?: SupplierInvoiceFilters) {
     if (v != null) params.set(k, String(v))
    })
 
-   const res = await fetch(`/api/supplier-invoices?${params.toString()}`, {
-    cache: 'no-store'
-   })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Kunde inte hämta leverantörsfakturor')
-   }
-
-   const json = await res.json()
    // API returnerar { success: true, data: [...], meta: {...} }
-   return json as { data: SupplierInvoice[]; meta?: { page: number; limit: number; count: number } }
+   return apiFetch<{ data: SupplierInvoice[]; meta?: { page: number; limit: number; count: number } }>(
+    `/api/supplier-invoices?${params.toString()}`,
+    { cache: 'no-store' }
+   )
   },
   enabled: !!tenantId,
   refetchOnReconnect: true,
@@ -62,14 +57,7 @@ export function useSupplierInvoice(id: string | null) {
   queryFn: async () => {
    if (!id) throw new Error('Invoice ID is required')
 
-   const res = await fetch(`/api/supplier-invoices/${id}`)
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Kunde inte hämta leverantörsfaktura')
-   }
-
-   const json = await res.json()
+   const json = await apiFetch<{ data: SupplierInvoice }>(`/api/supplier-invoices/${id}`)
    return json.data as SupplierInvoice
   },
   enabled: !!id && !!tenantId
@@ -100,18 +88,10 @@ export function useCreateSupplierInvoice() {
    }>
    notes?: string
   }) => {
-   const res = await fetch('/api/supplier-invoices', {
+   return apiFetch('/api/supplier-invoices', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Misslyckades skapa leverantörsfaktura')
-   }
-
-   return res.json()
   },
   onSuccess: () => {
    toast.success('Leverantörsfaktura skapad')
@@ -128,7 +108,8 @@ export function useUploadSupplierInvoice() {
 
  return useMutation({
   mutationFn: async (form: FormData) => {
-   const res = await fetch('/api/supplier-invoices/upload', {
+   // Use fetch with BASE_PATH for FormData (apiFetch sets Content-Type: application/json)
+   const res = await fetch(`${BASE_PATH}/api/supplier-invoices/upload`, {
     method: 'POST',
     body: form
    })
@@ -163,18 +144,10 @@ export function useUpdateSupplierInvoice(id: string) {
    markup_override?: number
    notes?: string
   }) => {
-   const res = await fetch(`/api/supplier-invoices/${id}`, {
+   return apiFetch(`/api/supplier-invoices/${id}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(patch)
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Uppdatering misslyckades')
-   }
-
-   return res.json()
   },
   onSuccess: () => {
    toast.success('Uppdaterad')
@@ -197,18 +170,10 @@ export function useRecordSupplierPayment(id: string) {
    method?: string
    notes?: string
   }) => {
-   const res = await fetch(`/api/supplier-invoices/${id}/payments`, {
+   return apiFetch(`/api/supplier-invoices/${id}/payments`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Betalning misslyckades')
-   }
-
-   return res.json()
   },
   onSuccess: () => {
    toast.success('Betalning registrerad')
@@ -226,16 +191,10 @@ export function useConvertSupplierInvoice(id: string) {
 
  return useMutation({
   mutationFn: async () => {
-   const res = await fetch(`/api/supplier-invoices/${id}/to-customer-invoice`, {
-    method: 'POST'
-   })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Konvertering misslyckades')
-   }
-
-   return res.json() as Promise<{ success: boolean; data: { customerInvoiceId: string } }>
+   return apiFetch<{ success: boolean; data: { customerInvoiceId: string } }>(
+    `/api/supplier-invoices/${id}/to-customer-invoice`,
+    { method: 'POST' }
+   )
   },
   onSuccess: () => {
    toast.success('Kundfaktura skapad')
@@ -252,18 +211,10 @@ export function useApproveSupplierInvoice() {
 
  return useMutation({
   mutationFn: async (invoiceId: string) => {
-   const res = await fetch(`/api/supplier-invoices/${invoiceId}`, {
+   return apiFetch(`/api/supplier-invoices/${invoiceId}`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ status: 'approved' })
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Godkännande misslyckades')
-   }
-
-   return res.json()
   },
   onSuccess: () => {
    toast.success('Faktura godkänd')
@@ -280,16 +231,7 @@ export function useArchiveSupplierInvoice() {
 
  return useMutation({
   mutationFn: async (invoiceId: string) => {
-   const res = await fetch(`/api/supplier-invoices/${invoiceId}`, {
-    method: 'DELETE'
-   })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Arkivering misslyckades')
-   }
-
-   return res.json()
+   return apiFetch(`/api/supplier-invoices/${invoiceId}`, { method: 'DELETE' })
   },
   onSuccess: () => {
    toast.success('Faktura arkiverad')
@@ -311,18 +253,10 @@ export function useRegisterPayment(id: string) {
    method?: string
    notes?: string
   }) => {
-   const res = await fetch(`/api/supplier-invoices/${id}/payments`, {
+   return apiFetch(`/api/supplier-invoices/${id}/payments`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Betalning misslyckades')
-   }
-
-   return res.json()
   },
   onSuccess: () => {
    toast.success('Betalning registrerad')
@@ -340,16 +274,10 @@ export function useConvertToCustomerInvoice() {
 
  return useMutation({
   mutationFn: async (invoiceId: string) => {
-   const res = await fetch(`/api/supplier-invoices/${invoiceId}/to-customer-invoice`, {
-    method: 'POST'
-   })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Konvertering misslyckades')
-   }
-
-   return res.json() as Promise<{ success: boolean; data: { customerInvoiceId: string } }>
+   return apiFetch<{ success: boolean; data: { customerInvoiceId: string } }>(
+    `/api/supplier-invoices/${invoiceId}/to-customer-invoice`,
+    { method: 'POST' }
+   )
   },
   onSuccess: () => {
    toast.success('Kundfaktura skapad')
@@ -369,14 +297,7 @@ export function useSupplierInvoiceHistory(id: string | null) {
   queryFn: async () => {
    if (!id) throw new Error('Invoice ID is required')
 
-   const res = await fetch(`/api/supplier-invoices/${id}/history`)
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Kunde inte hämta historik')
-   }
-
-   const json = await res.json()
+   const json = await apiFetch<{ data: unknown }>(`/api/supplier-invoices/${id}/history`)
    return json.data
   },
   enabled: !!id && !!tenantId

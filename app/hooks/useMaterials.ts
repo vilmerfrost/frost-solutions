@@ -3,6 +3,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTenant } from '@/context/TenantContext'
+import { apiFetch } from '@/lib/http/fetcher'
 import { toast } from '@/lib/toast'
 import type { Material, MaterialFilters } from '@/types/materials'
 
@@ -18,9 +19,7 @@ export function useMaterials(filters?: MaterialFilters) {
    if (filters?.page) params.set('page', String(filters.page))
    if (filters?.limit) params.set('limit', String(filters.limit))
 
-   const res = await fetch(`/api/materials?${params}`)
-   if (!res.ok) throw new Error('Failed to fetch materials')
-   return res.json()
+   return apiFetch(`/api/materials?${params}`)
   },
   enabled: !!tenantId,
   staleTime: 1000 * 60 * 5,
@@ -34,9 +33,7 @@ export function useMaterial(id: string | null) {
   queryKey: ['materials', id],
   queryFn: async () => {
    if (!id) throw new Error('Material ID is required')
-   const res = await fetch(`/api/materials/${id}`)
-   if (!res.ok) throw new Error('Failed to fetch material')
-   const result = await res.json()
+   const result = await apiFetch<{ data: Material }>(`/api/materials/${id}`)
    return result.data
   },
   enabled: !!id && !!tenantId,
@@ -48,16 +45,10 @@ export function useCreateMaterial() {
 
  return useMutation({
   mutationFn: async (data: Partial<Material>) => {
-   const res = await fetch('/api/materials', {
+   return apiFetch('/api/materials', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
    })
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Failed to create material')
-   }
-   return res.json()
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['materials'] })
@@ -74,16 +65,10 @@ export function useUpdateMaterial(id: string) {
 
  return useMutation({
   mutationFn: async (data: Partial<Material>) => {
-   const res = await fetch(`/api/materials/${id}`, {
+   return apiFetch(`/api/materials/${id}`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
    })
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Failed to update material')
-   }
-   return res.json()
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['materials', id] })
@@ -101,11 +86,7 @@ export function useDeleteMaterial() {
 
  return useMutation({
   mutationFn: async (id: string) => {
-   const res = await fetch(`/api/materials/${id}`, { method: 'DELETE' })
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Failed to delete material')
-   }
+   await apiFetch(`/api/materials/${id}`, { method: 'DELETE' })
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['materials'] })

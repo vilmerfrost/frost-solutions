@@ -7,6 +7,7 @@ import FrostLogo from '@/components/FrostLogo'
 import { toast } from '@/lib/toast'
 import supabase from '@/utils/supabase/supabaseClient'
 import AISummary from '@/components/AISummary'
+import { apiFetch } from '@/lib/http/fetcher'
 
 function FeedbackContent() {
  const router = useRouter()
@@ -58,9 +59,8 @@ function FeedbackContent() {
    const userName = user?.user_metadata?.full_name || user?.email?.split('@')[0] || 'Användare'
 
    // Send feedback via API route
-   const res = await fetch('/api/feedback', {
+   await apiFetch('/api/feedback', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
      type: feedbackType,
      subject: subject.trim(),
@@ -71,11 +71,6 @@ function FeedbackContent() {
      url: window.location.href,
     }),
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Kunde inte skicka feedback')
-   }
 
    toast.success('Feedback skickad! Tack för din input. 🎉')
    

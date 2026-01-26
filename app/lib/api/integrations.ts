@@ -1,5 +1,6 @@
 // app/lib/api/integrations.ts
 
+import { apiFetch } from '@/lib/http/fetcher';
 import { extractErrorMessage } from '@/lib/errorUtils';
 import { BASE_PATH } from '@/utils/url';
 import type {
@@ -84,16 +85,10 @@ export class IntegrationAPI {
  static async getStatus(): Promise<IntegrationStatusResponse> {
   console.log('[IntegrationAPI] 📊 Fetching status...');
   try {
-   const response = await fetch('/api/integrations/status', {
+   const result = await apiFetch<IntegrationStatusResponse>('/api/integrations/status', {
     credentials: 'include',
    });
 
-   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP ${response.status}`);
-   }
-
-   const result = await response.json();
    console.log('[IntegrationAPI] ✅ Status fetched:', {
     integrations: result.integrations?.length,
     logs: result.recentLogs?.length,
@@ -126,17 +121,11 @@ export class IntegrationAPI {
    provider,
   });
   try {
-   const response = await fetch('/api/integrations/sync-invoice', {
+   const result = await apiFetch<SyncInvoiceResponse>('/api/integrations/sync-invoice', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: JSON.stringify({ invoiceId, provider }),
    });
-
-   const result = await response.json();
-   if (!response.ok) {
-    throw new Error(result.error || `HTTP ${response.status}`);
-   }
 
    console.log('[IntegrationAPI] ✅ Invoice synced:', result.externalId);
    return result;
@@ -158,17 +147,11 @@ export class IntegrationAPI {
    provider,
   });
   try {
-   const response = await fetch('/api/integrations/sync-customer', {
+   const result = await apiFetch<SyncCustomerResponse>('/api/integrations/sync-customer', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
     body: JSON.stringify({ clientId, provider }),
    });
-
-   const result = await response.json();
-   if (!response.ok) {
-    throw new Error(result.error || `HTTP ${response.status}`);
-   }
 
    console.log('[IntegrationAPI] ✅ Customer synced:', result.externalId);
    return result;
@@ -184,15 +167,10 @@ export class IntegrationAPI {
  static async disconnect(provider: AccountingProvider): Promise<void> {
   console.log('[IntegrationAPI] 🔌 Disconnecting:', provider);
   try {
-   const response = await fetch(`/api/integrations/disconnect/${provider}`, {
+   await apiFetch(`/api/integrations/disconnect/${provider}`, {
     method: 'POST',
     credentials: 'include',
    });
-
-   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP ${response.status}`);
-   }
 
    console.log('[IntegrationAPI] ✅ Disconnected');
   } catch (error: any) {
@@ -207,16 +185,10 @@ export class IntegrationAPI {
  static async getAnalytics(days: number = 30): Promise<AnalyticsResponse> {
   console.log('[IntegrationAPI] 📊 Fetching analytics...');
   try {
-   const response = await fetch(`/api/integrations/analytics?days=${days}`, {
+   const result = await apiFetch<AnalyticsResponse>(`/api/integrations/analytics?days=${days}`, {
     credentials: 'include',
    });
 
-   if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || `HTTP ${response.status}`);
-   }
-
-   const result = await response.json();
    console.log('[IntegrationAPI] ✅ Analytics fetched:', {
     timeline: result.timeline?.length,
     operations: result.operationBreakdown?.length,

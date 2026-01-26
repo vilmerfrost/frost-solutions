@@ -4,6 +4,7 @@
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { apiFetch } from '@/lib/http/fetcher';
 
 interface ROTData {
  projectName?: string;
@@ -54,13 +55,10 @@ export function ROTAISummary({ rotData, onSummaryGenerated, className = '' }: RO
     rutAmount: rotData.rutAmount,
    };
 
-   const response = await fetch('/api/ai/rot-summary', {
+   const data = await apiFetch<{ success?: boolean; error?: string; data?: { summary: string; keyPoints?: string[] } }>('/api/ai/rot-summary', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(apiData),
    });
-
-   const data = await response.json();
 
    if (!data.success) {
     throw new Error(data.error || 'Failed to generate summary');

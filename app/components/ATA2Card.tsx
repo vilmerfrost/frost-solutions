@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from '@/lib/toast'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface ATA2CardProps {
  projectId: string
@@ -36,9 +37,7 @@ export default function ATA2Card({ projectId, tenantId }: ATA2CardProps) {
 
  const fetchATAs = async () => {
   try {
-   const response = await fetch(`/api/rot?project_id=${projectId}`)
-   if (!response.ok) throw new Error('Failed to fetch ÄTAs')
-   const data = await response.json()
+   const data = await apiFetch<ATA[]>(`/api/rot?project_id=${projectId}`)
    setAtas(data || [])
   } catch (error: any) {
    console.error('Error fetching ÄTAs:', error)
@@ -51,20 +50,14 @@ export default function ATA2Card({ projectId, tenantId }: ATA2CardProps) {
  const handleCreate = async (e: React.FormEvent) => {
   e.preventDefault()
   try {
-   const response = await fetch('/api/ata/create', {
+   await apiFetch('/api/ata/create', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
      project_id: projectId,
      ...formData,
      cost_frame: formData.cost_frame ? parseFloat(formData.cost_frame) : null,
     }),
    })
-
-   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.error || 'Failed to create ÄTA')
-   }
 
    toast.success('ÄTA skapad')
    setShowCreateForm(false)
@@ -78,13 +71,10 @@ export default function ATA2Card({ projectId, tenantId }: ATA2CardProps) {
 
  const handleApprove = async (ataId: string) => {
   try {
-   const response = await fetch(`/api/ata/${ataId}/approve`, {
+   await apiFetch(`/api/ata/${ataId}/approve`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({}),
    })
-
-   if (!response.ok) throw new Error('Failed to approve ÄTA')
 
    toast.success('ÄTA godkänd')
    fetchATAs()

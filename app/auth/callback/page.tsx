@@ -3,6 +3,7 @@ import { useEffect, Suspense } from 'react';
 import { supabase } from '@/utils/supabase/supabaseClient';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { BASE_PATH } from '@/utils/url';
+import { apiFetch } from '@/lib/http/fetcher';
 
 function CallbackContent() {
  const searchParams = useSearchParams();
@@ -168,18 +169,17 @@ function CallbackContent() {
     console.log('Session found, setting cookies...');
 
     // Step 3: Set cookies on server
-    const setSessionResponse = await fetch('/api/auth/set-session', {
-     method: 'POST',
-     headers: { 'Content-Type': 'application/json' },
-     credentials: 'include',
-     body: JSON.stringify({
-      access_token: session.access_token,
-      refresh_token: session.refresh_token,
-     }),
-    });
-
-    if (!setSessionResponse.ok) {
-     console.error('Failed to set session cookies');
+    try {
+     await apiFetch('/api/auth/set-session', {
+      method: 'POST',
+      credentials: 'include',
+      body: JSON.stringify({
+       access_token: session.access_token,
+       refresh_token: session.refresh_token,
+      }),
+     });
+    } catch (setSessionErr) {
+     console.error('Failed to set session cookies:', setSessionErr);
      if (mounted) {
       router.replace('/login?error=session_failed');
      }
@@ -229,20 +229,15 @@ function CallbackContent() {
     // Step 6: Link employee record to auth_user_id if needed (based on email)
     // This handles the case where employee was created before user logged in
     try {
-     const linkResponse = await fetch('/api/auth/link-employee', {
+     const linkData = await apiFetch('/api/auth/link-employee', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
       credentials: 'include',
       body: JSON.stringify({
        userId: user.id,
        email: user.email,
       }),
      });
-     
-     if (linkResponse.ok) {
-      const linkData = await linkResponse.json();
-      console.log('Employee linking result:', linkData);
-     }
+     console.log('Employee linking result:', linkData);
     } catch (linkErr) {
      console.warn('Failed to link employee:', linkErr);
      // Continue anyway
@@ -250,41 +245,34 @@ function CallbackContent() {
 
     // Step 7: Try to get tenant
     try {
-     const tenantResponse = await fetch('/api/tenant/get-current', {
+     const tenantData = await apiFetch<{ tenantId?: string }>('/api/tenant/get-current', {
       credentials: 'include',
       cache: 'no-store',
      });
 
-     if (tenantResponse.ok) {
-      const tenantData = await tenantResponse.json();
-      if (tenantData?.tenantId) {
-       console.log('Found tenant:', tenantData.tenantId);
-       // Set tenant in metadata
-       await fetch('/api/auth/set-tenant', {
+     if (tenantData?.tenantId) {
+      console.log('Found tenant:', tenantData.tenantId);
+      // Set tenant in metadata
+      try {
+       await apiFetch('/api/auth/set-tenant', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({
          tenantId: tenantData.tenantId,
          userId: user.id,
         }),
        });
-       
-       // Update redirect to dashboard if tenant found and redirect was onboarding
-       if (redirectTo === `${BASE_PATH}/onboarding` || rawRedirect === '/onboarding') {
-        redirectTo = `${BASE_PATH}/dashboard`;
-       }
-      } else {
-       console.log('No tenant found for user');
-       // If no tenant, redirect to onboarding
-       if (mounted) {
-        window.location.href = `${BASE_PATH}/onboarding`;
-        return;
-       }
+      } catch (setTenantErr) {
+       console.warn('Failed to set tenant:', setTenantErr);
+      }
+      
+      // Update redirect to dashboard if tenant found and redirect was onboarding
+      if (redirectTo === `${BASE_PATH}/onboarding` || rawRedirect === '/onboarding') {
+       redirectTo = `${BASE_PATH}/dashboard`;
       }
      } else {
-      // API call failed - redirect to onboarding
-      console.log('Tenant API call failed, redirecting to onboarding');
+      console.log('No tenant found for user');
+      // If no tenant, redirect to onboarding
       if (mounted) {
        window.location.href = `${BASE_PATH}/onboarding`;
        return;

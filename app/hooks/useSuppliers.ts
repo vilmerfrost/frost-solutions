@@ -3,6 +3,7 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { useTenant } from '@/context/TenantContext'
+import { apiFetch } from '@/lib/http/fetcher'
 import { toast } from '@/lib/toast'
 import type { Supplier } from '@/types/supplierInvoices'
 
@@ -15,10 +16,7 @@ export function useSuppliers(search?: string) {
    const params = new URLSearchParams()
    if (search) params.set('search', search)
 
-   const res = await fetch(`/api/suppliers?${params}`)
-   if (!res.ok) throw new Error('Failed to fetch suppliers')
-
-   const result = await res.json()
+   const result = await apiFetch<{ data: Supplier[] }>(`/api/suppliers?${params}`)
    return result.data as Supplier[]
   },
   enabled: !!tenantId,
@@ -31,18 +29,10 @@ export function useCreateSupplier() {
 
  return useMutation({
   mutationFn: async (data: Partial<Supplier>) => {
-   const res = await fetch('/api/suppliers', {
+   return apiFetch('/api/suppliers', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Failed to create supplier')
-   }
-
-   return res.json()
   },
   onSuccess: () => {
    queryClient.invalidateQueries({ queryKey: ['suppliers'] })

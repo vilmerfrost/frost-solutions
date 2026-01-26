@@ -1,6 +1,8 @@
 // app/lib/offline/timeEntriesQueue.ts
 // Simple offline queue for time entries using localStorage
 
+import { BASE_PATH } from '@/utils/url'
+
 const STORAGE_KEY = 'frost:offline_time_entries'
 
 export interface OfflineTimeEntry {
@@ -163,7 +165,8 @@ export async function syncPendingTimeEntries(tenantId: string | null | undefined
     hadApprovalStatus: !!approval_status,
    })
 
-   const response = await fetch('/api/time-entries/create', {
+   // Use fetch with BASE_PATH for offline sync
+   const response = await fetch(`${BASE_PATH}/api/time-entries/create`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),

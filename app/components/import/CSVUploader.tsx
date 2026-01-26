@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from '@/lib/toast';
 import { detectDataType, ImportDataType } from '@/lib/import/bygglet-parser';
 import Papa from 'papaparse';
+import { apiFetch } from '@/lib/http/fetcher';
 
 interface CSVUploaderProps {
   onImportComplete?: (result: ImportResult) => void;
@@ -106,28 +107,13 @@ export function CSVUploader({ onImportComplete }: CSVUploaderProps) {
     setResult(null);
 
     try {
-      const response = await fetch('/api/import/bygglet', {
+      const data = await apiFetch<ImportResult & { error?: string; errors?: string[]; warnings?: string[] }>('/api/import/bygglet', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           csvContent: preview.csvContent,
           dataType: selectedType,
         }),
       });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        toast.error('Importfel', { description: data.error });
-        setResult({
-          success: false,
-          imported: 0,
-          total: preview.rows.length,
-          errors: data.errors || [data.error],
-          warnings: data.warnings || [],
-        });
-        return;
-      }
 
       setResult(data);
       

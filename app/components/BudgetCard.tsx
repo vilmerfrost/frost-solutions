@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { toast } from '@/lib/toast'
+import { BASE_PATH } from '@/utils/url'
 
 interface BudgetCardProps {
  projectId: string
@@ -55,7 +56,7 @@ export default function BudgetCard({ projectId, tenantId }: BudgetCardProps) {
  const fetchBudgetData = async () => {
   try {
    // Fetch budget
-   const budgetRes = await fetch(`/api/projects/${projectId}/budget`)
+   const budgetRes = await fetch(`${BASE_PATH}/api/projects/${projectId}/budget`)
    if (budgetRes.ok) {
     const budgetData = await budgetRes.json()
     setBudget(budgetData)
@@ -66,14 +67,14 @@ export default function BudgetCard({ projectId, tenantId }: BudgetCardProps) {
    }
 
    // Fetch usage
-   const usageRes = await fetch(`/api/projects/${projectId}/budget-usage`)
+   const usageRes = await fetch(`${BASE_PATH}/api/projects/${projectId}/budget-usage`)
    if (usageRes.ok) {
     const usageData = await usageRes.json()
     setUsage(usageData)
    }
 
    // Fetch alerts
-   const alertsRes = await fetch(`/api/projects/${projectId}/budget-alerts`)
+   const alertsRes = await fetch(`${BASE_PATH}/api/projects/${projectId}/budget-alerts`)
    if (alertsRes.ok) {
     const alertsData = await alertsRes.json()
     setAlerts(alertsData.alerts || [])
@@ -89,7 +90,7 @@ export default function BudgetCard({ projectId, tenantId }: BudgetCardProps) {
  const handleSetBudget = async (e: React.FormEvent) => {
   e.preventDefault()
   try {
-   const response = await fetch(`/api/projects/${projectId}/budget`, {
+   const response = await fetch(`${BASE_PATH}/api/projects/${projectId}/budget`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -114,7 +115,7 @@ export default function BudgetCard({ projectId, tenantId }: BudgetCardProps) {
 
  const handleAcknowledgeAlert = async (alertId: string) => {
   try {
-   const response = await fetch(`/api/budget-alerts/${alertId}/acknowledge`, {
+   const response = await fetch(`${BASE_PATH}/api/budget-alerts/${alertId}/acknowledge`, {
     method: 'POST',
    })
 

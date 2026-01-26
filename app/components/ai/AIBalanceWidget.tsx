@@ -6,6 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useTenant } from '@/context/TenantContext';
 // @ts-ignore - icons exist but TS has issues resolving them
 import { Wallet, RefreshCw, Plus } from '@/lib/ui/icons';
+import { apiFetch } from '@/lib/http/fetcher';
 
 interface AIBalanceProps {
   onTopUp?: () => void;
@@ -23,9 +24,7 @@ export function AIBalanceWidget({
   const { data, isLoading, refetch, isRefetching } = useQuery({
     queryKey: ['ai-balance', tenantId],
     queryFn: async () => {
-      const response = await fetch('/api/ai/balance', { cache: 'no-store' });
-      if (!response.ok) throw new Error('Failed to fetch balance');
-      const json = await response.json();
+      const json = await apiFetch<{ data: any }>('/api/ai/balance', { cache: 'no-store' });
       return json.data;
     },
     enabled: !!tenantId,

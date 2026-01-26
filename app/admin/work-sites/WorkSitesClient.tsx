@@ -6,6 +6,7 @@ import Sidebar from '@/components/Sidebar'
 import supabase from '@/utils/supabase/supabaseClient'
 import { toast } from '@/lib/toast'
 import { MapPin, Edit2, Trash2, Plus, Navigation, Check, X, Info } from 'lucide-react'
+import { BASE_PATH } from '@/utils/url'
 
 interface WorkSite {
  id: string
@@ -51,7 +52,7 @@ export default function WorkSitesClient({ tenantId }: WorkSitesClientProps) {
   setLoading(true)
   try {
    // Try API route first (uses service role) - add cache busting
-   const res = await fetch(`/api/work-sites?_t=${Date.now()}`, {
+   const res = await fetch(`${BASE_PATH}/api/work-sites?_t=${Date.now()}`, {
     cache: 'no-store',
     headers: {
      'Cache-Control': 'no-cache',
@@ -205,7 +206,7 @@ export default function WorkSitesClient({ tenantId }: WorkSitesClientProps) {
 
   try {
    // Use API route (with service role)
-   const res = await fetch(`/api/work-sites/${id}`, {
+   const res = await fetch(`${BASE_PATH}/api/work-sites/${id}`, {
     method: 'DELETE',
    })
 

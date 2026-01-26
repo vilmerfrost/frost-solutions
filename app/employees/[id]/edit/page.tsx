@@ -7,6 +7,7 @@ import { useAdmin } from '@/hooks/useAdmin'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import supabase from '@/utils/supabase/supabaseClient'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface Employee {
  id: string
@@ -150,18 +151,10 @@ export default function EditEmployeePage() {
     payload.email = email.trim().toLowerCase()
    }
 
-   const res = await fetch(`/api/employees/${employeeId}/update`, {
+   const result = await apiFetch<{ error?: string; data?: any }>(`/api/employees/${employeeId}/update`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Kunde inte uppdatera anställd')
-   }
-
-   const result = await res.json()
    
    if (result.error) {
     throw new Error(result.error)

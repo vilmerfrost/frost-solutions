@@ -5,6 +5,7 @@ import { Users, X, Plus, Loader } from 'lucide-react'
 import { toast } from '@/lib/toast'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface Employee {
  id: string
@@ -36,8 +37,7 @@ export function ProjectEmployeeManager({ projectId }: ProjectEmployeeManagerProp
  // Fetch assigned employees
  const fetchAssignedEmployees = async () => {
   try {
-   const res = await fetch(`/api/projects/${projectId}/employees`)
-   const data = await res.json()
+   const data = await apiFetch<{ success?: boolean; data?: ProjectEmployee[]; error?: string }>(`/api/projects/${projectId}/employees`)
 
    if (data.success) {
     setAssignedEmployees(data.data || [])
@@ -90,13 +90,10 @@ export function ProjectEmployeeManager({ projectId }: ProjectEmployeeManagerProp
 
   setAssigning(true)
   try {
-   const res = await fetch(`/api/projects/${projectId}/employees`, {
+   const data = await apiFetch<{ success?: boolean; error?: string }>(`/api/projects/${projectId}/employees`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ employee_id: selectedEmployeeId }),
    })
-
-   const data = await res.json()
 
    if (data.success) {
     toast.success('Anställd tilldelad!')

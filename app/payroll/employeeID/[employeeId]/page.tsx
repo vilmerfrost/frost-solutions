@@ -6,6 +6,7 @@ import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import PayslipExport from '@/components/PayslipExport'
+import { BASE_PATH } from '@/utils/url'
 
 function sek(n: number) {
  try { return Number(n ?? 0).toLocaleString('sv-SE', { style: 'currency', currency: 'SEK' }) }
@@ -127,7 +128,7 @@ function PayslipContent() {
      
      // Try to fetch the requested employee via API to bypass RLS
      try {
-      const empResponse = await fetch(`/api/employees/${employeeId}`, {
+      const empResponse = await fetch(`${BASE_PATH}/api/employees/${employeeId}`, {
        cache: 'no-store',
       });
       
@@ -179,7 +180,7 @@ function PayslipContent() {
     }
 
     // Fetch employee via server API to avoid RLS issues
-    const employeeResponse = await fetch(`/api/employees/${employeeId}`, {
+    const employeeResponse = await fetch(`${BASE_PATH}/api/employees/${employeeId}`, {
      cache: 'no-store',
     })
 
@@ -218,7 +219,7 @@ function PayslipContent() {
     const { start, end } = monthRange(selectedMonth || undefined)
     
     // Fetch time entries via API route (server-side with admin client)
-    const response = await fetch(`/api/payroll/employee/${employeeId}?month=${selectedMonth || ''}`, {
+    const response = await fetch(`${BASE_PATH}/api/payroll/employee/${employeeId}?month=${selectedMonth || ''}`, {
      cache: 'no-store',
     })
 

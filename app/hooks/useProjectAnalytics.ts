@@ -1,6 +1,7 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query'
+import { apiFetch } from '@/lib/http/fetcher';
 
 interface ProjectAnalytics {
  project: {
@@ -32,15 +33,9 @@ export function useProjectAnalytics(projectId: string) {
  return useQuery({
   queryKey: ['project-analytics', projectId],
   queryFn: async (): Promise<ProjectAnalytics> => {
-   const response = await fetch(`/api/projects/${projectId}/analytics?_t=${Date.now()}`, {
+   const result = await apiFetch<{ data: ProjectAnalytics }>(`/api/projects/${projectId}/analytics?_t=${Date.now()}`, {
     cache: 'no-store',
    });
-
-   if (!response.ok) {
-    throw new Error('Failed to fetch project analytics');
-   }
-
-   const result = await response.json();
    return result.data as ProjectAnalytics;
   },
   enabled: !!projectId,

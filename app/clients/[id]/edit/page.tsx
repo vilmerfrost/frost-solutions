@@ -7,6 +7,7 @@ import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import { useAdmin } from '@/hooks/useAdmin'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface Client {
  id: string
@@ -130,9 +131,8 @@ export default function EditClientPage() {
 
   try {
    // Update client via API route
-   const updateRes = await fetch(`/api/clients/${clientId}/update`, {
+   await apiFetch(`/api/clients/${clientId}/update`, {
     method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
      tenantId,
      name,
@@ -142,11 +142,6 @@ export default function EditClientPage() {
      phone: phone || null,
     }),
    })
-
-   if (!updateRes.ok) {
-    const errorData = await updateRes.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Kunde inte uppdatera kund')
-   }
 
    toast.success('Kund uppdaterad!')
    router.push(`/clients/${clientId}`)

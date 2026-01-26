@@ -147,7 +147,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
   const createPaymentIntent = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('/api/stripe/create-payment-intent', {
+      const response = await fetch(`${BASE_PATH}/api/stripe/create-payment-intent`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: selectedAmount }),

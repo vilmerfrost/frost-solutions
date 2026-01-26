@@ -9,6 +9,7 @@ import SearchBar from '@/components/SearchBar'
 import FilterSortBar from '@/components/FilterSortBar'
 import { toast } from '@/lib/toast'
 import { Badge } from '@/components/ui/badge'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface TimeEntry {
  id: string
@@ -52,16 +53,9 @@ export default function ReportsPage() {
 
   setDeletingId(entryId)
   try {
-   const response = await fetch(`/api/time-entries/delete?id=${entryId}`, {
+   await apiFetch(`/api/time-entries/delete?id=${entryId}`, {
     method: 'DELETE',
    })
-
-   const result = await response.json()
-
-   if (!response.ok) {
-    toast.error('Kunde inte radera tidsrapport: ' + (result.error || 'Okänt fel'))
-    return
-   }
 
    toast.success('Tidsrapport raderad!')
    
@@ -94,13 +88,11 @@ export default function ReportsPage() {
 
   setApprovingId(entryId)
   try {
-   const res = await fetch(`/api/time-entries/${entryId}/approve`, {
+   const data = await apiFetch<{ success?: boolean; error?: string; message?: string; updated?: number; data?: any }>(`/api/time-entries/${entryId}/approve`, {
     method: 'POST'
    })
 
-   const data = await res.json()
-
-   if (!res.ok || !data?.success) {
+   if (!data?.success) {
     throw new Error(data?.error || 'Kunde inte godkänna tidsrapport')
    }
 
@@ -149,12 +141,9 @@ export default function ReportsPage() {
   try {
    console.log('[Frontend] 🚀 Starting approve all...')
    
-   const res = await fetch('/api/time-entries/approve-all', {
+   const data = await apiFetch<{ success?: boolean; error?: string; message?: string; updated?: number; count?: number; data?: any[]; _debug?: any }>('/api/time-entries/approve-all', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
    })
-
-   const data = await res.json()
    
    console.log('[Frontend] 📊 API Response:', {
     success: data.success,
@@ -164,7 +153,7 @@ export default function ReportsPage() {
     sampleData: data.data?.slice(0, 3),
    })
 
-   if (!res.ok || !data?.success) {
+   if (!data?.success) {
     throw new Error(data?.error || 'Kunde inte godkänna tidsrapporter')
    }
 
@@ -213,11 +202,9 @@ export default function ReportsPage() {
      console.log(`[Frontend] 🔍 Poll attempt ${tries + 1}/${maxTries}...`)
      
      try {
-      const checkRes = await fetch('/api/time-entries/list', { 
+      const checkData = await apiFetch<{ entries?: any[] }>('/api/time-entries/list', { 
        cache: 'no-store',
-       headers: { 'Cache-Control': 'no-cache' },
       })
-      const checkData = await checkRes.json()
       const entries = checkData.entries || []
       
       // Check if all entries that should be approved are actually approved
@@ -279,20 +266,19 @@ export default function ReportsPage() {
     // Use API route with service role to bypass RLS
     console.log('🔍 Reports: Fetching time entries via API', { tenantId })
     
-    const response = await fetch('/api/time-entries/list', {
-     cache: 'no-store'
-    })
-    
-    if (!response.ok) {
-     const errorData = await response.json().catch(() => ({}))
-     console.error('Error fetching time entries from API:', errorData)
+    let result: any
+    try {
+     result = await apiFetch<{ entries?: any[]; isAdmin?: boolean; employeeId?: string }>('/api/time-entries/list', {
+      cache: 'no-store'
+     })
+    } catch (apiErr) {
+     console.error('Error fetching time entries from API:', apiErr)
      setEntries([])
      setFilteredEntries([])
      setLoading(false)
      return
     }
     
-    const result = await response.json()
     const entries = (result.entries || []) as any[]
     
     // Update admin status from API response

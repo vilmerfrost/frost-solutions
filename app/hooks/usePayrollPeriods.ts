@@ -4,6 +4,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTenant } from '@/context/TenantContext';
 import { PayrollAPI } from '@/lib/api/payroll';
+import { apiFetch } from '@/lib/http/fetcher';
 import { toast } from 'sonner';
 import type {
  PayrollPeriodFilters,
@@ -78,31 +79,17 @@ export function useCreatePayrollPeriod() {
    console.log('[useCreatePayrollPeriod] 🚀 Mutation starting');
    console.log('[useCreatePayrollPeriod] Payload:', payload);
    
-   const response = await fetch('/api/payroll/periods', {
-    method: 'POST',
-    headers: { 
-     'Content-Type': 'application/json',
-    },
-    credentials: 'include',
-    body: JSON.stringify(payload),
-   });
+   const result = await apiFetch<{ success?: boolean; data?: unknown; error?: string; details?: unknown }>(
+    '/api/payroll/periods',
+    {
+     method: 'POST',
+     credentials: 'include',
+     body: JSON.stringify(payload),
+    }
+   );
 
-   console.log('[useCreatePayrollPeriod] Response status:', response.status);
-   
-   const responseText = await response.text();
-   console.log('[useCreatePayrollPeriod] Response body:', responseText);
-   
-   let result;
-   try {
-    result = JSON.parse(responseText);
-   } catch (parseError) {
-    console.error('[useCreatePayrollPeriod] ❌ Failed to parse response:', responseText);
-    throw new Error('Server returned invalid JSON');
-   }
-
-   if (!response.ok || result?.success === false) {
+   if (result?.success === false) {
     console.error('[useCreatePayrollPeriod] ❌ Request failed:', {
-     status: response.status,
      error: result.error,
      details: result.details,
     });
@@ -179,23 +166,15 @@ export function useExportPayrollPeriod(id: string) {
   mutationFn: async () => {
    console.log('[useExportPayrollPeriod] 🚀 Mutation starting', { periodId: id });
    
-   const response = await fetch(`/api/payroll/periods/${id}/export`, {
+   const result = await apiFetch<{
+    success?: boolean;
+    data?: { exportId?: string; signedUrl?: string; warnings?: string[] };
+    warnings?: string[];
+    error?: string;
+   }>(`/api/payroll/periods/${id}/export`, {
     method: 'POST',
     credentials: 'include',
    });
-
-   console.log('[useExportPayrollPeriod] Response status:', response.status);
-   
-   const responseText = await response.text();
-   console.log('[useExportPayrollPeriod] Response body:', responseText);
-   
-   let result;
-   try {
-    result = JSON.parse(responseText);
-   } catch (parseError) {
-    console.error('[useExportPayrollPeriod] ❌ Failed to parse response:', responseText);
-    throw new Error('Server returned invalid JSON');
-   }
 
    // Handle warnings as success (not errors)
    if (result.success && result.data) {
@@ -214,17 +193,7 @@ export function useExportPayrollPeriod(id: string) {
     return exportResult;
    }
 
-   // Only throw on actual errors (not warnings)
-   if (!response.ok) {
-    const errorData = result.error || `HTTP ${response.status}: ${response.statusText}`;
-    console.error('[useExportPayrollPeriod] ❌ Request failed:', {
-     status: response.status,
-     error: errorData,
-    });
-    throw new Error(errorData);
-   }
-
-   throw new Error('No export data returned');
+   throw new Error(result.error || 'No export data returned');
   },
   retry: false, // 🔒 Stop retry spam (GPT-4o recommendation)
   onSuccess: (result) => {

@@ -2,6 +2,7 @@
 'use client';
 
 import { useState, useCallback, useRef, useEffect } from 'react';
+import { BASE_PATH } from '@/utils/url';
 import type { AIMessage } from '@/types/ai';
 
 interface UseStreamingChatOptions {
@@ -41,7 +42,8 @@ export function useStreamingChat(options: UseStreamingChatOptions = {}) {
    setCurrentMessage(message);
 
    try {
-    const response = await fetch('/api/ai/chat', {
+    // Use fetch with BASE_PATH for streaming (apiFetch doesn't support streaming)
+    const response = await fetch(`${BASE_PATH}/api/ai/chat`, {
      method: 'POST',
      headers: { 'Content-Type': 'application/json' },
      body: JSON.stringify({ ...request, stream: true }),

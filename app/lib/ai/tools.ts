@@ -4,6 +4,7 @@
  */
 
 import { z } from 'zod';
+import { apiFetch } from '@/lib/http/fetcher';
 
 export interface ToolDefinition {
  name: string;
@@ -33,20 +34,14 @@ export const createInvoiceTool: ToolDefinition = {
   })).optional(),
  }),
  handler: async (params) => {
-  const response = await fetch('/api/invoices', {
+  return apiFetch('/api/invoices', {
    method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
    body: JSON.stringify({
     project_id: params.project_id,
     rows: params.rows,
     discounts: params.discounts,
    }),
   });
-  if (!response.ok) {
-   const error = await response.json().catch(() => ({ error: 'Kunde inte skapa faktura' }));
-   throw new Error(error.error || 'Kunde inte skapa faktura');
-  }
-  return await response.json();
  },
 };
 
@@ -60,16 +55,10 @@ export const suggestKMATool: ToolDefinition = {
   project_type: z.string().describe('Typ av projekt (t.ex. "elektriker", "rörmokare", "målare")'),
  }),
  handler: async (params) => {
-  const response = await fetch('/api/ai/suggest-kma-checklist', {
+  return apiFetch('/api/ai/suggest-kma-checklist', {
    method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
    body: JSON.stringify({ project_type: params.project_type }),
   });
-  if (!response.ok) {
-   const error = await response.json().catch(() => ({ error: 'Kunde inte generera KMA-checklista' }));
-   throw new Error(error.error || 'Kunde inte generera KMA-checklista');
-  }
-  return await response.json();
  },
 };
 
@@ -119,12 +108,7 @@ export const findTimeEntriesTool: ToolDefinition = {
    queryParams.append('end_date', params.date_range.end);
   }
   
-  const response = await fetch(`/api/time-entries/list?${queryParams.toString()}`);
-  if (!response.ok) {
-   const error = await response.json().catch(() => ({ error: 'Kunde inte hämta tidsrapporter' }));
-   throw new Error(error.error || 'Kunde inte hämta tidsrapporter');
-  }
-  return await response.json();
+  return apiFetch(`/api/time-entries/list?${queryParams.toString()}`);
  },
 };
 
@@ -138,16 +122,10 @@ export const predictBudgetTool: ToolDefinition = {
   project_id: z.string().uuid('Projekt-ID måste vara ett giltigt UUID'),
  }),
  handler: async (params) => {
-  const response = await fetch('/api/ai/predict-budget', {
+  return apiFetch('/api/ai/predict-budget', {
    method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
    body: JSON.stringify({ project_id: params.project_id }),
   });
-  if (!response.ok) {
-   const error = await response.json().catch(() => ({ error: 'Kunde inte generera budgetprognos' }));
-   throw new Error(error.error || 'Kunde inte generera budgetprognos');
-  }
-  return await response.json();
  },
 };
 
@@ -161,16 +139,10 @@ export const identifyMaterialTool: ToolDefinition = {
   image_base64: z.string().describe('Base64-encoded bild (utan data:image prefix)'),
  }),
  handler: async (params) => {
-  const response = await fetch('/api/ai/identify-material', {
+  return apiFetch('/api/ai/identify-material', {
    method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
    body: JSON.stringify({ image_base64: params.image_base64 }),
   });
-  if (!response.ok) {
-   const error = await response.json().catch(() => ({ error: 'Kunde inte identifiera material' }));
-   throw new Error(error.error || 'Kunde inte identifiera material');
-  }
-  return await response.json();
  },
 };
 

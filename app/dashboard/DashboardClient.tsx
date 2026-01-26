@@ -4,10 +4,12 @@ import { useEffect, useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
+import { apiFetch } from '@/lib/http/fetcher'
 import Sidebar from '@/components/Sidebar'
 import TimeClock from '@/components/TimeClock'
 import NotificationCenter from '@/components/NotificationCenter'
 import { WeeklySchedules } from '@/components/dashboard/WeeklySchedulesComponent'
+import InvoiceList from '@/components/invoice-list'
 
 interface ProjectType {
  id: string
@@ -55,19 +57,18 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
     console.log('TimeClock: Fetching employee for user', user.id)
 
     // Use API route that handles RLS and service role fallback
-    const employeeRes = await fetch('/api/employee/get-current')
     let foundEmployeeId: string | null = null
     
-    if (employeeRes.ok) {
-     const employeeData = await employeeRes.json()
+    try {
+     const employeeData = await apiFetch<{ employeeId?: string; error?: string; suggestion?: string }>('/api/employee/get-current')
      if (employeeData.employeeId) {
       console.log('TimeClock: Found employee ID via API:', employeeData.employeeId)
       foundEmployeeId = employeeData.employeeId
      } else {
       console.warn('TimeClock: No employee found via API:', employeeData.error || employeeData.suggestion)
      }
-    } else {
-     console.error('TimeClock: API error:', await employeeRes.text())
+    } catch (err) {
+     console.error('TimeClock: API error:', err)
     }
 
     // Fallback: Try direct query if API didn't find employee
@@ -106,13 +107,14 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
     // Always get tenantId from centralized API for consistency
     if (!projectsTenantId || !uuidRegex.test(projectsTenantId)) {
      console.warn('⚠️ Dashboard: Invalid or missing tenantId in context, fetching from centralized API...')
-     const tenantRes = await fetch('/api/tenant/get-tenant', { cache: 'no-store' })
-     if (tenantRes.ok) {
-      const tenantData = await tenantRes.json()
+     try {
+      const tenantData = await apiFetch<{ tenantId?: string }>('/api/tenant/get-tenant', { cache: 'no-store' })
       if (tenantData.tenantId && uuidRegex.test(tenantData.tenantId)) {
        projectsTenantId = tenantData.tenantId
        console.log('✅ Dashboard: Got tenantId from centralized API:', projectsTenantId)
       }
+     } catch (err) {
+      console.error('Dashboard: Failed to get tenant from API:', err)
      }
     } else {
      // Verify tenant exists (only if format is valid)
@@ -125,13 +127,14 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
       
       if (!tenantVerify) {
        console.warn('⚠️ Dashboard: Context tenantId not found in database, fetching from centralized API')
-       const tenantRes = await fetch('/api/tenant/get-tenant', { cache: 'no-store' })
-       if (tenantRes.ok) {
-        const tenantData = await tenantRes.json()
+       try {
+        const tenantData = await apiFetch<{ tenantId?: string }>('/api/tenant/get-tenant', { cache: 'no-store' })
         if (tenantData.tenantId && uuidRegex.test(tenantData.tenantId)) {
          projectsTenantId = tenantData.tenantId
          console.log('✅ Dashboard: Got tenantId from centralized API:', projectsTenantId)
         }
+       } catch (err) {
+        console.error('Dashboard: Failed to get tenant from API:', err)
        }
       } else {
        console.log('✅ Dashboard: Using tenantId from context (verified):', projectsTenantId)
@@ -139,13 +142,14 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
      } catch (verifyErr) {
       console.error('❌ Dashboard: Error verifying tenant:', verifyErr)
       // Fallback to centralized API
-      const tenantRes = await fetch('/api/tenant/get-tenant', { cache: 'no-store' })
-      if (tenantRes.ok) {
-       const tenantData = await tenantRes.json()
+      try {
+       const tenantData = await apiFetch<{ tenantId?: string }>('/api/tenant/get-tenant', { cache: 'no-store' })
        if (tenantData.tenantId && uuidRegex.test(tenantData.tenantId)) {
         projectsTenantId = tenantData.tenantId
         console.log('✅ Dashboard: Got tenantId from centralized API (after error):', projectsTenantId)
        }
+      } catch (err) {
+       console.error('Dashboard: Failed to get tenant from API:', err)
       }
      }
     }
@@ -162,17 +166,15 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
     
     // Fetch projects using API route (bypasses RLS)
     try {
-     const projectsRes = await fetch('/api/projects/for-timeclock', { cache: 'no-store' })
-     if (projectsRes.ok) {
-      const projectsData = await projectsRes.json()
-      if (projectsData.projects && projectsData.projects.length > 0) {
-       console.log('✅ TimeClock: Found projects via API', projectsData.projects.length, 'for tenant', projectsData.tenantId || projectsTenantId)
-       setAvailableProjects(projectsData.projects)
-      } else {
-       console.warn('⚠️ TimeClock: API returned no projects for tenant', projectsData.tenantId || projectsTenantId)
-       setAvailableProjects([])
-      }
+     const projectsData = await apiFetch<{ projects?: Array<{ id: string; name: string }>; tenantId?: string }>('/api/projects/for-timeclock', { cache: 'no-store' })
+     if (projectsData.projects && projectsData.projects.length > 0) {
+      console.log('✅ TimeClock: Found projects via API', projectsData.projects.length, 'for tenant', projectsData.tenantId || projectsTenantId)
+      setAvailableProjects(projectsData.projects)
      } else {
+      console.warn('⚠️ TimeClock: API returned no projects for tenant', projectsData.tenantId || projectsTenantId)
+      setAvailableProjects([])
+     }
+    } catch (apiError) {
       // Fallback: Try direct query
       console.warn('⚠️ Projects API failed, trying direct query...')
       let projectsData: any[] | null = null
@@ -217,10 +219,6 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
        }
        setAvailableProjects([])
       }
-     }
-    } catch (fetchErr) {
-     console.error('Error fetching projects:', fetchErr)
-     setAvailableProjects([])
     }
    } catch (err) {
     console.error('TimeClock: Error fetching time clock data:', err)
@@ -248,14 +246,8 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
     }
    }
 
-   const response = await fetch('/api/dashboard/stats', { cache: 'no-store' })
-   if (!response.ok) {
-    const text = await response.text()
-    console.error('Error fetching dashboard stats API:', response.status, text)
-    throw new Error(text || 'Failed to fetch dashboard stats')
-   }
-
-   const result = await response.json()
+   const result = await apiFetch<{ success?: boolean; data?: { totalHours?: number; activeProjects?: number; invoicesToSend?: number }; error?: string }>('/api/dashboard/stats', { cache: 'no-store' })
+   
    if (!result.success || !result.data) {
     throw new Error(result.error || 'Invalid dashboard stats response')
    }
@@ -296,14 +288,10 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
 
    try {
     // Fetch projects via API route
-    const projectsRes = await fetch(`/api/projects/list?tenantId=${tenantId}`, { cache: 'no-store' })
+    const projectsData = await apiFetch<{ projects?: any[] }>(`/api/projects/list?tenantId=${tenantId}`, { cache: 'no-store' })
     if (cancelled) return
-    
-     if (projectsRes.ok) {
-     const projectsData = await projectsRes.json()
-     if (cancelled) return
      
-     if (projectsData.projects) {
+    if (projectsData.projects) {
       // Fetch hours for each project
       const projectIds = projectsData.projects.map((p: any) => p.id)
       if (projectIds.length > 0) {
@@ -321,28 +309,28 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
           }
          }
         } else {
-         const hoursRes = await fetch('/api/projects/hours', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ projectIds }),
-          cache: 'no-store',
-         })
+         try {
+          const hoursData = await apiFetch<{ totals?: Record<string, number> }>('/api/projects/hours', {
+           method: 'POST',
+           body: JSON.stringify({ projectIds }),
+           cache: 'no-store',
+          })
 
-         if (!cancelled && hoursRes.ok) {
-          const hoursData = await hoursRes.json()
-          const totals = hoursData?.totals || {}
-          projectHoursMap = new Map(Object.entries(totals).map(([id, value]) => [id, Number(value ?? 0)]))
+          if (!cancelled) {
+           const totals = hoursData?.totals || {}
+           projectHoursMap = new Map(Object.entries(totals).map(([id, value]) => [id, Number(value ?? 0)]))
 
-          if (typeof window !== 'undefined') {
-           try {
-            const cacheKey = `project-hours:${tenantId}`
-            window.localStorage.setItem(cacheKey, JSON.stringify(totals))
-           } catch (cacheErr) {
-            console.warn('⚠️ Failed to cache project hours', cacheErr)
+           if (typeof window !== 'undefined') {
+            try {
+             const cacheKey = `project-hours:${tenantId}`
+             window.localStorage.setItem(cacheKey, JSON.stringify(totals))
+            } catch (cacheErr) {
+             console.warn('⚠️ Failed to cache project hours', cacheErr)
+            }
            }
           }
-         } else if (!cancelled && !hoursRes.ok) {
-          console.error('Error fetching project hours API:', await hoursRes.text())
+         } catch (hoursErr) {
+          console.error('Error fetching project hours API:', hoursErr)
          }
         }
 
@@ -384,7 +372,6 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
        await fetchDashboardStats(tenantId)
       }
      }
-    }
    } catch (err) {
     if (cancelled) return
     console.error('Error fetching dashboard projects:', err)
@@ -527,6 +514,14 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
        />
       )
      })()}
+
+     {/* Supplier Invoices - Realtime List */}
+     {tenantId && (
+      <div className="mb-6 sm:mb-8">
+       <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-4">Leverantörsfakturor</h2>
+       <InvoiceList tenantId={tenantId} />
+      </div>
+     )}
 
      {/* Stats Cards */}
      {!statsLoaded ? (

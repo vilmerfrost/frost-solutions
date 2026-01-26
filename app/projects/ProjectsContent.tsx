@@ -13,6 +13,7 @@ import FilterSortBar from '@/components/FilterSortBar'
 import { useAdmin } from '@/hooks/useAdmin'
 import { PermissionGuard } from '@/components/rbac/PermissionGuard'
 import { NewProjectModal } from '@/components/projects/NewProjectModal'
+import { apiFetch } from '@/lib/http/fetcher'
 
 function Notice({
  type = 'info',
@@ -102,15 +103,13 @@ export default function ProjectsContent() {
      if (!uuidRegex.test(tenantId)) {
       console.error('❌ ProjectsContent: Invalid tenantId format:', tenantId)
       // Get correct tenantId from centralized API
-      const tenantRes = await fetch('/api/tenant/get-tenant', { cache: 'no-store' })
-      if (tenantRes.ok) {
-       const tenantData = await tenantRes.json()
+      try {
+       const tenantData = await apiFetch<{ tenantId?: string }>('/api/tenant/get-tenant', { cache: 'no-store' })
        if (tenantData.tenantId && uuidRegex.test(tenantData.tenantId)) {
         console.log('✅ ProjectsContent: Got corrected tenantId from API:', tenantData.tenantId)
         // Retry with corrected tenantId
-        const correctedApiResponse = await fetch(`/api/projects/list?tenantId=${tenantData.tenantId}`, { cache: 'no-store' })
-        if (correctedApiResponse.ok) {
-         const correctedApiData = await correctedApiResponse.json()
+        try {
+         const correctedApiData = await apiFetch<{ projects?: any[] }>(`/api/projects/list?tenantId=${tenantData.tenantId}`, { cache: 'no-store' })
          console.log('📊 Projects fetched via API (corrected):', correctedApiData.projects?.length || 0, 'projects')
          if (correctedApiData.projects) {
           setProjects(correctedApiData.projects)
@@ -118,8 +117,12 @@ export default function ProjectsContent() {
           setLoading(false)
           return
          }
+        } catch (correctedErr) {
+         console.warn('Failed to fetch projects with corrected tenant:', correctedErr)
         }
        }
+      } catch (tenantErr) {
+       console.warn('Failed to fetch tenant:', tenantErr)
       }
       setProjects([])
       setFilteredProjects([])
@@ -127,9 +130,8 @@ export default function ProjectsContent() {
       return
      }
      
-     const apiResponse = await fetch(`/api/projects/list?tenantId=${tenantId}`, { cache: 'no-store' })
-     if (apiResponse.ok) {
-      const apiData = await apiResponse.json()
+     try {
+      const apiData = await apiFetch<{ projects?: any[] }>(`/api/projects/list?tenantId=${tenantId}`, { cache: 'no-store' })
       console.log('📊 Projects fetched via API:', apiData.projects?.length || 0, 'projects for tenantId:', tenantId)
       if (apiData.projects) {
        // Double-check that all projects belong to correct tenant
@@ -147,9 +149,8 @@ export default function ProjectsContent() {
        setLoading(false)
        return
       }
-     } else {
-      const errorText = await apiResponse.text()
-      console.error('❌ Projects API failed:', errorText)
+     } catch (apiErr) {
+      console.warn('API route failed, falling back to direct query:', apiErr)
      }
     } catch (apiErr) {
      console.warn('API route failed, falling back to direct query:', apiErr)
@@ -242,28 +243,23 @@ export default function ProjectsContent() {
     // PERFORMANCE FIX: Fetch all project hours in a single batch request instead of N+1 queries
     const projectIds = projects.map(p => p.id)
     
-    const response = await fetch('/api/projects/hours', {
-     method: 'POST',
-     headers: {
-      'Content-Type': 'application/json',
-      'Cache-Control': 'no-cache',
-     },
-     body: JSON.stringify({ projectIds }),
-     cache: 'no-store',
-    })
-    
     const hoursMap = new Map<string, number>()
     
-    if (response.ok) {
-     const data = await response.json()
+    try {
+     const data = await apiFetch<{ success?: boolean; totals?: Record<string, number> }>('/api/projects/hours', {
+      method: 'POST',
+      body: JSON.stringify({ projectIds }),
+      cache: 'no-store',
+     })
+     
      if (data.success && data.totals) {
       Object.entries(data.totals).forEach(([projectId, hours]) => {
        hoursMap.set(projectId, hours as number)
       })
      }
      console.log('✅ Projects list: Batch hours fetch successful:', hoursMap.size, 'projects')
-    } else {
-     console.warn('❌ Failed to fetch batch hours:', await response.text())
+    } catch (err) {
+     console.warn('❌ Failed to fetch batch hours:', err)
     }
     
     console.log('✅ Projects list: Hours map updated:', Array.from(hoursMap.entries()))

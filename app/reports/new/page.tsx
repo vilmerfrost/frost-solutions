@@ -16,6 +16,7 @@ import { useAdmin } from '@/hooks/useAdmin'
 import { ErrorBoundary } from '@/components/ErrorBoundary'
 import { addToOfflineQueue, getPendingTimeEntries, syncPendingTimeEntries } from '@/lib/offline/timeEntriesQueue'
 import supabase from '@/utils/supabase/supabaseClient'
+import { BASE_PATH } from '@/utils/url'
 
 export default function NewReportPage() {
  const router = useRouter()
@@ -224,7 +225,7 @@ export default function NewReportPage() {
    // Also try API route if online (as backup)
    if (isOnline !== false) {
     try {
-     const userRes = await fetch('/api/auth/user', { cache: 'no-store' })
+     const userRes = await fetch(`${BASE_PATH}/api/auth/user`, { cache: 'no-store' })
      if (userRes.ok) {
       const userData = await userRes.json()
       const userId = userData.userId || userData.id
@@ -262,7 +263,7 @@ export default function NewReportPage() {
    }
    
    try {
-    const res = await fetch('/api/employee/get-current', { cache: 'no-store' })
+    const res = await fetch(`${BASE_PATH}/api/employee/get-current`, { cache: 'no-store' })
     if (res.ok) {
      const data = await res.json()
      if (data.employeeId) {
@@ -371,7 +372,7 @@ export default function NewReportPage() {
   
   // Fetch projects via API route (same as TimeClock) for consistency
   try {
-   const projectsRes = await fetch('/api/projects/for-timeclock', { cache: 'no-store' })
+   const projectsRes = await fetch(`${BASE_PATH}/api/projects/for-timeclock`, { cache: 'no-store' })
    if (projectsRes.ok) {
     const projectsData = await projectsRes.json()
     if (projectsData.projects) {
@@ -436,7 +437,7 @@ export default function NewReportPage() {
   
   // Fetch employees via API route
   try {
-   const employeesRes = await fetch(`/api/employees/list?tenantId=${tenantId}`, { cache: 'no-store' })
+   const employeesRes = await fetch(`${BASE_PATH}/api/employees/list?tenantId=${tenantId}`, { cache: 'no-store' })
    if (employeesRes.ok) {
     const employeesData = await employeesRes.json()
     const employeesList = employeesData.employees || []
@@ -594,7 +595,7 @@ export default function NewReportPage() {
   // Strategy 3: Try API route (only if online and still no userId)
   if (!userId && isOnline !== false) {
    try {
-    const userRes = await fetch('/api/auth/user', { cache: 'no-store' })
+    const userRes = await fetch(`${BASE_PATH}/api/auth/user`, { cache: 'no-store' })
     if (userRes.ok) {
      const userData = await userRes.json()
      userId = userData.userId || userData.id
@@ -692,7 +693,7 @@ export default function NewReportPage() {
    // Hämta employee's base_rate via API route
    let baseRate = 360 // Default fallback
    try {
-    const rateRes = await fetch(`/api/employee/rate?employeeId=${employeeId}`, { cache: 'no-store' })
+    const rateRes = await fetch(`${BASE_PATH}/api/employee/rate?employeeId=${employeeId}`, { cache: 'no-store' })
     if (rateRes.ok) {
      const rateData = await rateRes.json()
      baseRate = Number(rateData.baseRate || rateData.defaultRate || 360)
@@ -748,7 +749,7 @@ export default function NewReportPage() {
   // 🔍 DUBBLETT-KONTROLL: Kontrollera om det redan finns en liknande tidsrapport via API (endast om online)
   if (isOnline !== false) {
    try {
-    const checkRes = await fetch(`/api/time-entries/list?tenantId=${tenantId}&employeeId=${employeeId}&date=${date}`, {
+    const checkRes = await fetch(`${BASE_PATH}/api/time-entries/list?tenantId=${tenantId}&employeeId=${employeeId}&date=${date}`, {
      cache: 'no-store',
     })
     
@@ -864,7 +865,7 @@ export default function NewReportPage() {
     if (shouldTryOnline) {
      try {
       console.log('🌐 Online: Attempting direct save')
-      const response = await fetch('/api/time-entries/create', {
+      const response = await fetch(`${BASE_PATH}/api/time-entries/create`, {
        method: 'POST',
        headers: { 'Content-Type': 'application/json' },
        body: JSON.stringify(entryPayload),
@@ -936,7 +937,7 @@ export default function NewReportPage() {
   if (shouldTryOnline) {
    try {
     console.log('🌐 Online: Attempting direct save for single entry')
-    const response = await fetch('/api/time-entries/create', {
+    const response = await fetch(`${BASE_PATH}/api/time-entries/create`, {
      method: 'POST',
      headers: { 'Content-Type': 'application/json' },
      body: JSON.stringify(basePayload),

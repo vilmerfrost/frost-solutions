@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface Employee {
  id: string
@@ -88,15 +89,12 @@ export default function CreateNotificationModal({ isOpen, onClose, onSuccess }: 
     payload.link = link.trim()
    }
 
-   const response = await fetch('/api/notifications/create', {
+   const result = await apiFetch<{ error?: string; message?: string }>('/api/notifications/create', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload),
    })
 
-   const result = await response.json()
-
-   if (!response.ok || result.error) {
+   if (result.error) {
     throw new Error(result.error || 'Kunde inte skapa notis')
    }
 

@@ -13,6 +13,8 @@ import FileUpload from '@/components/FileUpload'
 import FileList from '@/components/FileList'
 import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
 import { FactoringWidget } from '@/components/factoring/FactoringWidget'
+import { apiFetch } from '@/lib/http/fetcher'
+import { BASE_PATH } from '@/utils/url'
 
 interface Invoice {
  id: string
@@ -291,7 +293,8 @@ function InvoiceContent() {
  async function handleDownloadPDF() {
   setDownloading(true)
   try {
-   const response = await fetch(`/api/invoices/${invoiceId}`)
+   // Use fetch with BASE_PATH for PDF download (binary response, not JSON)
+   const response = await fetch(`${BASE_PATH}/api/invoices/${invoiceId}`)
    
    if (!response.ok) {
     throw new Error('Kunde inte generera PDF')
@@ -323,15 +326,9 @@ function InvoiceContent() {
   if (!confirm('Vill du godkänna denna faktura och markera alla time entries som fakturerade? Detta går inte att ångra.')) return
   
   try {
-   const response = await fetch(`/api/invoices/${invoiceId}/approve`, {
+   await apiFetch(`/api/invoices/${invoiceId}/approve`, {
     method: 'POST',
    })
-   
-   const result = await response.json()
-   
-   if (!response.ok || result.error) {
-    throw new Error(result.error || 'Kunde inte godkänna faktura')
-   }
    
    toast.success('Fakturan godkänd! Time entries markerade som fakturerade.')
    
@@ -362,7 +359,7 @@ function InvoiceContent() {
    // Mark time entries as billed before sending (if not already done)
    if (invoice?.project_id) {
     try {
-     await fetch(`/api/invoices/${invoiceId}/approve`, {
+     await apiFetch(`/api/invoices/${invoiceId}/approve`, {
       method: 'POST',
      })
     } catch (err) {
@@ -394,15 +391,9 @@ function InvoiceContent() {
   
   setDeleting(true)
   try {
-   const response = await fetch(`/api/invoices/${invoiceId}/delete`, {
+   await apiFetch(`/api/invoices/${invoiceId}/delete`, {
     method: 'DELETE',
    })
-   
-   const result = await response.json()
-   
-   if (!response.ok) {
-    throw new Error(result.error || 'Kunde inte ta bort faktura')
-   }
    
    toast.success('Faktura borttagen!')
    
@@ -848,8 +839,7 @@ function InvoiceContent() {
           onClick={async () => {
            // Double-check admin status before navigating
            try {
-            const adminCheck = await fetch('/api/admin/check')
-            const adminData = await adminCheck.json()
+            const adminData = await apiFetch<{ isAdmin?: boolean }>('/api/admin/check')
             
             if (adminData.isAdmin) {
              router.push(`/invoices/${invoiceId}/edit`)

@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { toast } from '@/lib/toast'
+import { BASE_PATH } from '@/utils/url'
 
 interface FileUploadProps {
  entityType: 'project' | 'invoice'
@@ -34,7 +35,7 @@ export default function FileUpload({ entityType, entityId, onUploadComplete, cla
    formData.append('entityType', entityType)
    formData.append('entityId', entityId)
 
-   const response = await fetch('/api/files/upload', {
+   const response = await fetch(`${BASE_PATH}/api/files/upload`, {
     method: 'POST',
     body: formData,
    })

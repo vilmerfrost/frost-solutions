@@ -8,6 +8,7 @@ import { AIBadge } from './ai/ui/AIBadge';
 import { CachedBadge } from './ai/ui/CachedBadge';
 import { AILoadingSpinner } from './ai/ui/AILoadingSpinner';
 import { AlertCircle, RefreshCw } from 'lucide-react';
+import { apiFetch } from '@/lib/http/fetcher';
 
 interface AISummaryProps {
  type: 'project' | 'invoice' | 'time-reports' | 'admin-dashboard';
@@ -26,9 +27,8 @@ export default function AISummary({ type, data, className = '' }: AISummaryProps
   setLoading(true);
   setError(null);
   try {
-   const res = await fetch('/api/ai/summarize', {
+   const result = await apiFetch<{ success?: boolean; error?: string; summary?: string; cached?: boolean }>('/api/ai/summarize', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
      resourceType: type === 'time-reports' ? 'time-reports' : type === 'admin-dashboard' ? 'admin-dashboard' : type,
      resourceId: type === 'time-reports' || type === 'admin-dashboard' ? 'summary' : data?.id || 'summary',
@@ -36,12 +36,6 @@ export default function AISummary({ type, data, className = '' }: AISummaryProps
     }),
    });
 
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({ error: 'Kunde inte generera sammanfattning' }));
-    throw new Error(errorData.error || 'Kunde inte generera sammanfattning');
-   }
-
-   const result = await res.json();
    if (!result.success) {
     throw new Error(result.error || 'Kunde inte generera sammanfattning');
    }

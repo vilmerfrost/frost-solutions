@@ -75,7 +75,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
    const selectedClient = clients.find((c) => c.id === clientId)
    const customerName = selectedClient?.name || ''
 
-   const res = await fetch('/api/create-project', {
+   const res = await fetch(`${BASE_PATH}/api/create-project`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

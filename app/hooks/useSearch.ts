@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
+import { apiFetch } from '@/lib/http/fetcher';
 import { toast } from '@/lib/toast';
 import { extractErrorMessage } from '@/lib/errorUtils';
 
@@ -24,9 +25,8 @@ export function useSearch() {
 
  const searchMutation = useMutation({
   mutationFn: async (searchQuery: string): Promise<SearchResults> => {
-   const response = await fetch('/api/search', {
+   const result = await apiFetch<{ data: SearchResults }>('/api/search', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
      query: searchQuery,
      filters: Object.fromEntries(
@@ -35,13 +35,6 @@ export function useSearch() {
     }),
    });
 
-   if (!response.ok) {
-    const error = await response.json();
-    console.error('Search API error:', error);
-    throw new Error(error.error || 'Search failed');
-   }
-
-   const result = await response.json();
    console.log('Search results:', result);
    return result.data as SearchResults;
   },

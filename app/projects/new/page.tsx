@@ -8,6 +8,7 @@ import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
 import supabase from '@/utils/supabase/supabaseClient'
 import { BASE_PATH } from '@/utils/url'
+import { apiFetch } from '@/lib/http/fetcher'
 
 export default function NewProjectPage() {
  const router = useRouter()
@@ -57,46 +58,51 @@ export default function NewProjectPage() {
   const selectedClient = clients.find(c => c.id === clientId)
   const customerName = selectedClient?.name || ''
 
-  // Use client helper that injects tenant into headers and JSON body
-  const res = await fetch('/api/create-project', {
-   method: 'POST',
-   headers: { 'Content-Type': 'application/json' },
-   body: JSON.stringify({
-    name: name,
-    tenant_id: tenantId,
-    client_id: clientId,
-    customer_name: customerName,
-    base_rate_sek: Number(baseRate) || 360,
-    budgeted_hours: budget,
-   }),
-  })
+  // Use apiFetch which automatically adds BASE_PATH
+  try {
+   const json = await apiFetch<{ id?: string; data?: { id?: string }; error?: string }>('/api/create-project', {
+    method: 'POST',
+    body: JSON.stringify({
+     name: name,
+     tenant_id: tenantId,
+     client_id: clientId,
+     customer_name: customerName,
+     base_rate_sek: Number(baseRate) || 360,
+     budgeted_hours: budget,
+    }),
+   })
 
-  const json = await res.json()
-  const error = json?.error
+   const error = json?.error
 
   setLoading(false)
 
-  if (error) {
-   console.error('Supabase insert error (project)', error)
-   toast.error('Kunde inte skapa projekt: ' + (error.message ?? JSON.stringify(error)))
-   return
-  }
-  
-  toast.success('Projekt skapat!')
+   if (error) {
+    console.error('Supabase insert error (project)', error)
+    toast.error('Kunde inte skapa projekt: ' + (typeof error === 'string' ? error : JSON.stringify(error)))
+    return
+   }
+   
+   toast.success('Projekt skapat!')
 
-  // Dispatch event so dashboard can refresh
-  const projectId = json.id || json.data?.id
-  if (projectId) {
-   window.dispatchEvent(new CustomEvent('projectCreated', { 
-    detail: { 
-     projectId: projectId,
-     timestamp: Date.now() 
-    } 
-   }))
-  }
+   // Dispatch event so dashboard can refresh
+   const projectId = json.id || json.data?.id
+   if (projectId) {
+    window.dispatchEvent(new CustomEvent('projectCreated', { 
+     detail: { 
+      projectId: projectId,
+      timestamp: Date.now() 
+     } 
+    }))
+   }
 
-  // Redirect to projects list so server-side list refreshes
-  router.replace('/projects')
+   // Redirect to projects list so server-side list refreshes
+   router.replace('/projects')
+  } catch (err: any) {
+   console.error('Error creating project:', err)
+   toast.error('Kunde inte skapa projekt: ' + (err.message || 'Okänt fel'))
+  } finally {
+   setLoading(false)
+  }
  }
  return (
   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row">

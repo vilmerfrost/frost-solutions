@@ -9,6 +9,7 @@ import { AIGenerateQuote } from '@/components/quotes/AIGenerateQuote'
 import Sidebar from '@/components/Sidebar'
 import type { Quote } from '@/types/quotes'
 import { toast } from 'sonner'
+import { apiFetch } from '@/lib/http/fetcher'
 
 export default function NewQuotePage() {
  const router = useRouter()
@@ -22,18 +23,10 @@ export default function NewQuotePage() {
 
  const handleAIGenerate = async (prompt: string, context: any) => {
   try {
-   const res = await fetch('/api/quotes/ai-generate', {
+   const result = await apiFetch<{ quote?: { id: string } }>('/api/quotes/ai-generate', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt, context }),
    })
-
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Failed to generate quote')
-   }
-
-   const result = await res.json()
    
    if (result.quote) {
     toast.success('AI-genererad offert skapad!')

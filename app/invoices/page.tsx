@@ -9,6 +9,7 @@ import FilterSortBar from '@/components/FilterSortBar'
 import { toast } from '@/lib/toast'
 import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
 import { PermissionGuard } from '@/components/rbac/PermissionGuard'
+import { apiFetch } from '@/lib/http/fetcher'
 
 type Invoice = {
  id: string,
@@ -275,17 +276,10 @@ export default function InvoicesPage() {
                  if (!confirm('Vill du arkivera denna faktura?')) return
                  
                  try {
-                  const response = await fetch(`/api/invoices/${inv.id}/archive`, {
+                  await apiFetch(`/api/invoices/${inv.id}/archive`, {
                    method: 'PATCH',
-                   headers: { 'Content-Type': 'application/json' },
                    body: JSON.stringify({ action: 'archive' }),
                   })
-                  
-                  const result = await response.json()
-                  
-                  if (!response.ok) {
-                   throw new Error(result.error || 'Kunde inte arkivera faktura')
-                  }
                   
                   toast.success('Faktura arkiverad!')
                   

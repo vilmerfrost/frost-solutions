@@ -137,7 +137,7 @@ export function AIChatbot() {
   setTypingMessage('')
 
   // Fetch time entries
-  fetch('/api/time-entries/list')
+  fetch(`${BASE_PATH}/api/time-entries/list`)
    .then(res => res.json())
    .then(data => {
     const entries = data.entries || []
@@ -193,7 +193,7 @@ export function AIChatbot() {
 
   // Try new AI chat API first, fallback to keyword-based
   try {
-   const response = await fetch('/api/ai/chat', {
+   const response = await fetch(`${BASE_PATH}/api/ai/chat`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -261,7 +261,7 @@ export function AIChatbot() {
      const startDate = startOfWeek.toISOString().split('T')[0]
      const endDate = endOfWeek.toISOString().split('T')[0]
 
-     const res = await fetch(`/api/schedules?start_date=${startDate}&end_date=${endDate}`)
+     const res = await fetch(`${BASE_PATH}/api/schedules?start_date=${startDate}&end_date=${endDate}`)
      if (res.ok) {
       const schedules = await res.json()
       if (schedules && schedules.length > 0) {
@@ -298,7 +298,7 @@ export function AIChatbot() {
      const startDate = startOfMonth.toISOString().split('T')[0]
      const endDate = endOfMonth.toISOString().split('T')[0]
 
-     const res = await fetch(`/api/time-entries/list?start_date=${startDate}&end_date=${endDate}`)
+     const res = await fetch(`${BASE_PATH}/api/time-entries/list?start_date=${startDate}&end_date=${endDate}`)
      if (res.ok) {
       const data = await res.json()
       const entries = data.timeEntries || data.entries || data || []
@@ -490,7 +490,7 @@ export function AIChatbot() {
            <button
             onClick={async (e) => {
              try {
-              await fetch('/api/ai/feedback', {
+              await fetch(`${BASE_PATH}/api/ai/feedback`, {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify({
@@ -515,7 +515,7 @@ export function AIChatbot() {
            <button
             onClick={async (e) => {
              try {
-              await fetch('/api/ai/feedback', {
+              await fetch(`${BASE_PATH}/api/ai/feedback`, {
                method: 'POST',
                headers: { 'Content-Type': 'application/json' },
                body: JSON.stringify({

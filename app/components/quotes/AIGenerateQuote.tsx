@@ -9,6 +9,7 @@ import { Select } from '@/components/ui/select'
 import { Sparkles, Loader2, X } from 'lucide-react'
 import { useClients } from '@/hooks/useClients'
 import { useProjects } from '@/hooks/useProjects'
+import { apiFetch } from '@/lib/http/fetcher'
 
 interface AIGenerateQuoteProps {
  onGenerate: (prompt: string, context: any) => Promise<void>
@@ -50,18 +51,11 @@ export function AIGenerateQuote({ onGenerate, isLoading = false, onClose }: AIGe
   }
 
   try {
-   const res = await fetch('/api/quotes/ai-generate', {
+   await apiFetch('/api/quotes/ai-generate', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ prompt, context }),
    })
 
-   if (!res.ok) {
-    const errorData = await res.json().catch(() => ({}))
-    throw new Error(errorData.error || 'Failed to generate quote')
-   }
-
-   const result = await res.json()
    await onGenerate(prompt, context)
    
    // Reset form

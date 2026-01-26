@@ -6,6 +6,7 @@ import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
+import { apiFetch } from '@/lib/http/fetcher'
 
 export default function NewClientPage() {
  const router = useRouter()
@@ -37,27 +38,26 @@ export default function NewClientPage() {
   }
 
   // Create client via API route (bypasses RLS)
-  const createClientRes = await fetch('/api/clients/create', {
-   method: 'POST',
-   headers: { 'content-type': 'application/json' },
-   body: JSON.stringify({
-    tenantId,
-    name,
-    email: email || null,
-    phone: phone || null,
-    address: address || null,
-    orgNumber: orgNumber || null,
-    clientType,
-   }),
-  })
-
-  setLoading(false)
-
-  if (!createClientRes.ok) {
-   const errorData = await createClientRes.json().catch(() => ({}))
-   toast.error('Kunde inte skapa kund: ' + (errorData.error || 'Okänt fel'))
+  try {
+   await apiFetch('/api/clients/create', {
+    method: 'POST',
+    body: JSON.stringify({
+     tenantId,
+     name,
+     email: email || null,
+     phone: phone || null,
+     address: address || null,
+     orgNumber: orgNumber || null,
+     clientType,
+    }),
+   })
+  } catch (err: any) {
+   setLoading(false)
+   toast.error('Kunde inte skapa kund: ' + (err.message || 'Okänt fel'))
    return
   }
+
+  setLoading(false)
 
   toast.success('Kund skapad!')
   router.replace('/clients')

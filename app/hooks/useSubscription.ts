@@ -1,5 +1,6 @@
 // app/hooks/useSubscription.ts
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiFetch } from '@/lib/http/fetcher';
 import { toast } from '@/lib/toast';
 
 interface SubscriptionPlan {
@@ -57,9 +58,7 @@ export function useSubscriptionPlans() {
   return useQuery<SubscriptionPlan[]>({
     queryKey: ['subscription-plans'],
     queryFn: async () => {
-      const res = await fetch('/api/subscriptions/plans');
-      if (!res.ok) throw new Error('Failed to fetch plans');
-      const data = await res.json();
+      const data = await apiFetch<{ data?: SubscriptionPlan[] }>('/api/subscriptions/plans');
       return data.data || [];
     },
   });
@@ -70,9 +69,7 @@ export function useCurrentSubscription() {
   return useQuery<CurrentSubscriptionData>({
     queryKey: ['current-subscription'],
     queryFn: async () => {
-      const res = await fetch('/api/subscriptions/current');
-      if (!res.ok) throw new Error('Failed to fetch subscription');
-      const data = await res.json();
+      const data = await apiFetch<{ data: CurrentSubscriptionData }>('/api/subscriptions/current');
       return data.data;
     },
   });
@@ -90,18 +87,10 @@ export function useCreateCheckout() {
       planId: string;
       billingCycle: 'monthly' | 'yearly';
     }) => {
-      const res = await fetch('/api/subscriptions/checkout', {
+      const data = await apiFetch<{ data: { url?: string } }>('/api/subscriptions/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planId, billingCycle }),
       });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Failed to create checkout');
-      }
-
-      const data = await res.json();
       return data.data;
     },
     onSuccess: (data) => {
@@ -120,16 +109,9 @@ export function useCreateCheckout() {
 export function useCustomerPortal() {
   return useMutation({
     mutationFn: async () => {
-      const res = await fetch('/api/subscriptions/portal', {
+      const data = await apiFetch<{ data: { url?: string } }>('/api/subscriptions/portal', {
         method: 'POST',
       });
-
-      if (!res.ok) {
-        const error = await res.json();
-        throw new Error(error.error || 'Failed to get portal URL');
-      }
-
-      const data = await res.json();
       return data.data;
     },
     onSuccess: (data) => {
