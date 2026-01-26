@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button'
 import { FormSection } from '@/components/forms/FormSection'
 import { CalculationBox } from '@/components/forms/CalculationBox'
 import { Clock } from 'lucide-react'
-import { MobileTimeWizard } from '@/components/mobile/time/MobileTimeWizard'
 
 export default function TimeTrackingPage() {
  const router = useRouter()
@@ -111,14 +110,7 @@ export default function TimeTrackingPage() {
  }
 
  return (
-  <>
-   {/* Mobile: Show wizard-based time tracking */}
-   <div className="md:hidden">
-    <MobileTimeWizard />
-   </div>
-
-   {/* Desktop: Show traditional form */}
-   <div className="hidden md:flex min-h-screen bg-gray-50 dark:bg-gray-900 flex-col lg:flex-row">
+  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row">
    <Sidebar />
    
    <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
@@ -256,7 +248,6 @@ export default function TimeTrackingPage() {
     </div>
    </main>
   </div>
-  </>
  )
 }
 
