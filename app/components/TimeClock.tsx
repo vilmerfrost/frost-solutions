@@ -1163,27 +1163,28 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
         setGpsAutoCheckinEnabled(newValue)
         const storageKey = `gpsAutoCheckin_${employeeId}_${tenantId}`
         localStorage.setItem(storageKey, String(newValue))
-        toast.info(newValue ? '📍 GPS auto-checkin aktiverad' : '📍 GPS auto-checkin inaktiverad')
+        toast.info(newValue ? 'GPS auto-checkin aktiverad' : 'GPS auto-checkin inaktiverad')
        }}
-       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+       className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
         gpsAutoCheckinEnabled
          ? 'bg-green-500 text-white hover:bg-green-600'
          : 'bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-400 dark:hover:bg-gray-500'
        }`}
        title={gpsAutoCheckinEnabled ? 'Klicka för att stänga av GPS auto-checkin' : 'Klicka för att aktivera GPS auto-checkin'}
       >
-       {gpsAutoCheckinEnabled ? '📍 Auto ON' : '📍 Auto OFF'}
+       <MapPin className="w-3.5 h-3.5" />
+       {gpsAutoCheckinEnabled ? 'Auto ON' : 'Auto OFF'}
       </button>
      )}
      {gpsPermissionGranted === true && (
       <div className="flex items-center gap-1 text-sm text-green-600 dark:text-green-400">
-       <span>📍</span>
+       <MapPin className="w-4 h-4" />
        <span className="hidden sm:inline">GPS aktiv</span>
       </div>
      )}
      {gpsPermissionGranted === false && (
       <div className="flex items-center gap-1 text-sm text-yellow-600 dark:text-yellow-400">
-       <span>📍</span>
+       <MapPin className="w-4 h-4" />
        <span className="hidden sm:inline">GPS nekat</span>
       </div>
      )}
@@ -1277,7 +1278,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
      <button
       onClick={handleCheckIn}
       disabled={loading || !selectedProject}
-      className="w-full bg-success-500 hover:bg-success-600 text-white py-4 px-6 rounded-[8px] font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+      className="w-full bg-green-600 hover:bg-green-700 text-white py-4 px-6 rounded-[8px] font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
      >
       <CheckCircle className="w-5 h-5" />
       {loading ? 'Stämplar in...' : 'Stämpla in'}

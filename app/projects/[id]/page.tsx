@@ -53,6 +53,7 @@ export default function ProjectDetailPage() {
  const [employeeHours, setEmployeeHours] = useState<any[]>([])
  const [showEmployeeHours, setShowEmployeeHours] = useState(false)
  const [loadingEmployeeHours, setLoadingEmployeeHours] = useState(false)
+ const [showAdvanced, setShowAdvanced] = useState(false)
  const { isAdmin, loading: adminLoading } = useAdmin()
 
  const projectId = params?.id as string | undefined
@@ -623,30 +624,55 @@ export default function ProjectDetailPage() {
       </div>
      )}
 
-     {/* ÄTA 2.0 Section */}
-     {project && (
-      <div className="mb-6 sm:mb-8">
-       <ATA2Card projectId={project.id} tenantId={project.tenant_id || tenantId || ''} />
-      </div>
-     )}
+     {/* Visa mer / Advanced Features Toggle */}
+     <div className="mb-6 sm:mb-8">
+      <button
+       onClick={() => setShowAdvanced(!showAdvanced)}
+       className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-4 rounded-[8px] font-semibold shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
+      >
+       {showAdvanced ? (
+        <>
+         <span>Dölj avancerade funktioner</span>
+         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
+        </>
+       ) : (
+        <>
+         <span>Visa mer (Schema, Budget, ÄTA, AI-verktyg)</span>
+         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+        </>
+       )}
+      </button>
+     </div>
 
-     {/* Budget & Alerts Section */}
-     {project && (
-      <div className="mb-6 sm:mb-8">
-       <BudgetCard projectId={project.id} tenantId={project.tenant_id || tenantId || ''} />
-      </div>
-     )}
+     {/* Advanced sections - only show when expanded */}
+     {showAdvanced && (
+      <>
+       {/* ÄTA 2.0 Section */}
+       {project && (
+        <div className="mb-6 sm:mb-8">
+         <ATA2Card projectId={project.id} tenantId={project.tenant_id || tenantId || ''} />
+        </div>
+       )}
 
-     {/* Schedule Calendar Section */}
-     {project && (
-      <div className="mb-6 sm:mb-8">
-       <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
-         Schema för projektet
-        </h2>
-        <ScheduleCalendar projectId={project.id} />
-       </div>
-      </div>
+       {/* Budget & Alerts Section */}
+       {project && (
+        <div className="mb-6 sm:mb-8">
+         <BudgetCard projectId={project.id} tenantId={project.tenant_id || tenantId || ''} />
+        </div>
+       )}
+
+       {/* Schedule Calendar Section */}
+       {project && (
+        <div className="mb-6 sm:mb-8">
+         <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
+           Schema för projektet
+          </h2>
+          <ScheduleCalendar projectId={project.id} />
+         </div>
+        </div>
+       )}
+      </>
      )}
 
      {/* Employee Hours Section */}
@@ -721,23 +747,28 @@ export default function ProjectDetailPage() {
       )}
      </div>
 
-     {/* AI Budget Prediction */}
-     {projectId && (
-      <div className="mb-6 sm:mb-8">
-       <BudgetAIPrediction projectId={projectId as string} />
-      </div>
-     )}
+     {/* AI Tools - only show when advanced is expanded */}
+     {showAdvanced && (
+      <>
+       {/* AI Budget Prediction */}
+       {projectId && (
+        <div className="mb-6 sm:mb-8">
+         <BudgetAIPrediction projectId={projectId as string} />
+        </div>
+       )}
 
-     {/* AI Material Identifier */}
-     <div className="mb-6 sm:mb-8">
-      <MaterialAIIdentifier />
-     </div>
+       {/* AI Material Identifier */}
+       <div className="mb-6 sm:mb-8">
+        <MaterialAIIdentifier />
+       </div>
 
-     {/* AI Project Planning */}
-     {projectId && (
-      <div className="mb-6 sm:mb-8">
-       <ProjectAIPlanning projectId={projectId as string} />
-      </div>
+       {/* AI Project Planning */}
+       {projectId && (
+        <div className="mb-6 sm:mb-8">
+         <ProjectAIPlanning projectId={projectId as string} />
+        </div>
+       )}
+      </>
      )}
 
      {/* Project Analytics */}

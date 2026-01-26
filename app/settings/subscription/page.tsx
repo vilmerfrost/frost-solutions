@@ -88,14 +88,14 @@ function SubscriptionPageContent() {
 
           {/* Trial Banner */}
           {isTrialing && (
-            <div className="bg-gradient-to-r from-purple-500 to-blue-500 rounded-lg p-6 text-white shadow-lg">
+            <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg p-6 text-white shadow-lg">
               <div className="flex items-start gap-4">
                 <div className="p-3 bg-white/20 rounded-lg">
-                  <Sparkles className="w-6 h-6" />
+                  <CreditCard className="w-6 h-6" />
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold mb-2">
-                    🎉 1 Månad Gratis!
+                    1 Månad Gratis!
                   </h2>
                   <p className="text-white/90 mb-3">
                     Du har {daysRemaining} dagar kvar av din gratisperiod. 

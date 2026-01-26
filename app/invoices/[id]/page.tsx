@@ -580,11 +580,19 @@ function InvoiceContent() {
    <Sidebar />
    <main className="flex-1 lg:ml-0 overflow-x-hidden">
     <div className="p-6 lg:p-10 max-w-5xl mx-auto">
-     <div className="mb-8">
-      <h1 className="text-4xl font-semibold text-gray-900 dark:text-white mb-2">
-       Invoice {invoice.number || invoiceId.slice(0, 8)}
-      </h1>
-      <p className="text-gray-500">Fakturainformation</p>
+     <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      <div>
+       <h1 className="text-4xl font-semibold text-gray-900 dark:text-white mb-2">
+        Invoice {invoice.number || invoiceId.slice(0, 8)}
+       </h1>
+       <p className="text-gray-500">Fakturainformation</p>
+      </div>
+      <button
+       onClick={() => router.push('/invoices/new')}
+       className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
+      >
+       + Ny faktura
+      </button>
      </div>
 
      {searchParams?.get('sent') === '1' && (

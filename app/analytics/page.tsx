@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
-import AISummary from '@/components/AISummary'
 import { BASE_PATH } from '@/utils/url'
 
 interface AnalyticsData {
@@ -136,28 +135,6 @@ export default function AnalyticsPage() {
       </div>
      </div>
 
-     {/* AI Insights */}
-     {data && (
-      <div className="mb-6 sm:mb-8">
-       <AISummary
-        type="admin-dashboard"
-        data={{
-         employees: data.employeesCount,
-         activeProjects: data.activeProjects,
-         unpaidInvoices: 0, // Not available in analytics
-         totalRevenue: data.totalRevenue,
-         projects: [],
-         invoices: [],
-         analytics: {
-          totalHours: data.totalHours,
-          revenueByMonth: data.revenueByMonth,
-          hoursByMonth: data.hoursByMonth,
-          projectStatus: data.projectStatus,
-         },
-        }}
-       />
-      </div>
-     )}
 
      {/* Stats Grid */}
      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
