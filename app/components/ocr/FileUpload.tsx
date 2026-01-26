@@ -22,6 +22,7 @@ import { Progress } from '@/components/ui/progress';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/lib/toast';
+import { BASE_PATH } from '@/utils/url';
 import type { DeliveryNoteOCRResult, InvoiceOCRResult } from '@/types/ocr';
 
 /**
@@ -233,7 +234,7 @@ export default function FileUpload({
     const xhr = new XMLHttpRequest();
     xhrRef.current = xhr;
 
-    xhr.open('POST', computedEndpoint, true);
+    xhr.open('POST', `${BASE_PATH}${computedEndpoint}`, true);
     xhr.setRequestHeader('Accept', 'application/json');
     xhr.setRequestHeader('Idempotency-Key', idempotencyKey || crypto.randomUUID());
 
