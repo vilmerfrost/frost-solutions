@@ -784,89 +784,31 @@ export default function ProjectsContent() {
            <button
             onClick={async (e) => {
              e.stopPropagation()
-             const projectId = p.id // Capture project ID in closure
-             const projectName = p.name // Capture project name in closure
+             const projectId = p.id
+             const projectName = p.name
              
              if (!confirm(`Är du säker på att du vill ta bort projektet "${projectName}"? Detta går inte att ångra.`)) return
              
-             if (!tenantId) {
-              toast.error('Saknar tenant ID')
-              return
-             }
-
              setDeletingId(projectId)
              try {
-              // First, check if there are any invoices linked to this project
-              const { data: invoices, error: invoiceCheckError } = await supabase
-               .from('invoices')
-               .select('id')
-               .eq('project_id', projectId)
-               .eq('tenant_id', tenantId)
-               .limit(1)
-
-              // Only log error if it's a real error (not just empty object or null)
-              if (invoiceCheckError && (invoiceCheckError.message || invoiceCheckError.code)) {
-               console.error('Error checking invoices:', invoiceCheckError)
-              }
-
-              if (invoices && invoices.length > 0) {
-               toast.error(`Kan inte ta bort projektet "${projectName}" eftersom det finns fakturor kopplade till projektet. Ta bort eller koppla bort fakturorna först.`)
-               setDeletingId(null)
-               return
-              }
-
-              // Check supplier invoices too
-              const { data: supplierInvoices, error: supplierCheckError } = await supabase
-               .from('supplier_invoices')
-               .select('id')
-               .eq('project_id', projectId)
-               .eq('tenant_id', tenantId)
-               .limit(1)
-
-              // Only log error if it's a real error (not just empty object or null)
-              if (supplierCheckError && (supplierCheckError.message || supplierCheckError.code)) {
-               console.error('Error checking supplier invoices:', supplierCheckError)
-              }
-
-              if (supplierInvoices && supplierInvoices.length > 0) {
-               toast.error(`Kan inte ta bort projektet "${projectName}" eftersom det finns leverantörsfakturor kopplade till projektet. Ta bort eller koppla bort fakturorna först.`)
-               setDeletingId(null)
-               return
-              }
-
-              // Now delete the project
-              const { error } = await supabase
-               .from('projects')
-               .delete()
-               .eq('id', projectId)
-               .eq('tenant_id', tenantId)
-
-              if (error) {
-               // Check if it's a foreign key constraint error
-               if (error.message?.includes('foreign key constraint') || error.code === '23503') {
-                toast.error(`Kan inte ta bort projektet "${projectName}" eftersom det finns relaterade data (fakturor, tidsregistreringar, etc.). Ta bort eller koppla bort dessa först.`)
-               } else {
-                throw error
-               }
+              const response = await fetch(`/api/projects/${projectId}`, {
+               method: 'DELETE',
+              })
+              const result = await response.json()
+              
+              if (!response.ok || !result.success) {
+               toast.error(result.error || 'Kunde inte ta bort projektet')
                return
               }
               
-              // Update state using the captured projectId
+              // Update state
               const updated = projects.filter(proj => proj.id !== projectId)
               setProjects(updated)
               setFilteredProjects(updated)
-              toast.success(`Projekt "${projectName}" borttaget!`)
+              toast.success(result.message || `Projekt "${projectName}" borttaget!`)
              } catch (err: any) {
-              // Only log if error has meaningful content
-              if (err && (err.message || err.code || typeof err === 'string')) {
-               console.error('Error deleting project:', err.message || err.code || err)
-              }
-              if (err.message?.includes('foreign key constraint') || err.code === '23503') {
-               toast.error(`Kan inte ta bort projektet "${projectName}" eftersom det finns relaterade data. Ta bort eller koppla bort dessa först.`)
-              } else {
-               const errorMsg = err?.message || (typeof err === 'string' ? err : 'Okänt fel')
-               toast.error('Kunde inte ta bort projekt: ' + errorMsg)
-              }
+              console.error('Error deleting project:', err)
+              toast.error('Kunde inte ta bort projekt: ' + (err?.message || 'Okänt fel'))
              } finally {
               setDeletingId(null)
              }

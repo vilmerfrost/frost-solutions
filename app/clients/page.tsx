@@ -163,20 +163,18 @@ export default function ClientsPage() {
 
   setDeletingId(clientId)
   try {
-   const { error } = await supabase.from('clients').delete().eq('id', clientId).eq('tenant_id', tenantId)
+   const response = await fetch(`/api/clients/${clientId}/delete`, {
+    method: 'DELETE',
+   })
+   const result = await response.json()
 
-   if (error) {
-    console.error('Error deleting client:', error)
-    // Better error message for foreign key constraints
-    if (error.message?.includes('foreign key') || error.code === '23503') {
-     toast.error('Kan inte radera kunden eftersom det finns projekt, fakturor eller offerter kopplade till denna kund. Ta bort eller flytta dessa först.')
-    } else {
-     toast.error('Kunde inte radera kund: ' + error.message)
-    }
+   if (!response.ok || result.error) {
+    console.error('Error deleting client:', result.error)
+    toast.error(result.message || result.error || 'Kunde inte radera kund')
     return
    }
 
-   toast.success('Kund raderad!')
+   toast.success(result.message || 'Kund raderad!')
    setClients((prev) => prev.filter((c) => c.id !== clientId))
   } catch (err: any) {
    toast.error('Fel vid radering: ' + err.message)
@@ -188,18 +186,16 @@ export default function ClientsPage() {
  async function handleToggleArchive(clientId: string, currentArchived: boolean) {
   if (!tenantId) return
   try {
-   const { error } = await (supabase as any)
-    .from('clients')
-    .update({
-     archived: !currentArchived,
-     status: !currentArchived ? 'archived' : 'active',
-    })
-    .eq('id', clientId)
-    .eq('tenant_id', tenantId)
+   const response = await fetch(`/api/clients/${clientId}/archive`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action: currentArchived ? 'restore' : 'archive' }),
+   })
+   const result = await response.json()
 
-   if (error) {
-    console.error('Error toggling archive:', error)
-    toast.error('Kunde inte ändra arkiveringsstatus: ' + error.message)
+   if (!response.ok || result.error) {
+    console.error('Error toggling archive:', result.error)
+    toast.error(result.error || 'Kunde inte ändra arkiveringsstatus')
     return
    }
 

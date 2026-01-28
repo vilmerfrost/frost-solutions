@@ -267,18 +267,17 @@ export default function EmployeesPage() {
               e.stopPropagation()
               if (confirm(`Är du säker på att du vill ta bort ${emp.name}? Detta kan inte ångras.`)) {
                try {
-                const { error } = await supabase
-                 .from('employees')
-                 .delete()
-                 .eq('id', emp.id)
-                 .eq('tenant_id', tenantId as string)
+                const response = await fetch(`/api/employees/${emp.id}`, {
+                 method: 'DELETE',
+                })
+                const result = await response.json()
                 
-                if (error) {
-                 console.error('Error deleting employee:', error)
-                 toast.error('Kunde inte ta bort anställd: ' + error.message)
+                if (!response.ok || !result.success) {
+                 console.error('Error deleting employee:', result.error)
+                 toast.error(result.error || 'Kunde inte ta bort anställd')
                 } else {
                  setEmployees(employees.filter(e => e.id !== emp.id))
-                 toast.success(`${emp.name} har tagits bort`)
+                 toast.success(result.message || `${emp.name} har tagits bort`)
                 }
                } catch (err: any) {
                 console.error('Unexpected error:', err)
