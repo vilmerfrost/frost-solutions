@@ -32,6 +32,9 @@ interface Subscription {
   canceled_at: string | null;
   created_at: string;
   updated_at: string;
+  // Added for grace period support
+  grace_period_end?: string | null;
+  past_due_since?: string | null;
 }
 
 interface SubscriptionInvoice {
@@ -50,7 +53,16 @@ interface CurrentSubscriptionData {
   invoices: SubscriptionInvoice[];
   isActive: boolean;
   isTrialing: boolean;
-  daysRemaining: number;
+  isPastDue?: boolean;
+  isCanceled?: boolean;
+  daysRemaining: number | null;
+  graceDaysRemaining?: number | null;
+  hasAccess?: boolean;
+  isLimitedAccess?: boolean;
+  isInGracePeriod?: boolean;
+  shouldShowTrialWarning?: boolean;
+  shouldShowPaymentWarning?: boolean;
+  shouldShowUpgradePrompt?: boolean;
 }
 
 // Fetch available plans

@@ -112,13 +112,13 @@ export function CancelSurveyModal({ isOpen, onClose, onProceedToCancel }: Cancel
                 Ja, aktivera rabatten!
               </Button>
               
-              <Button
-                onClick={handleSubmit}
-                variant="outline"
-                className="w-full"
-              >
-                Nej tack, fortsätt avsluta
-              </Button>
+            <Button
+              onClick={handleSubmit}
+              variant="secondary"
+              className="w-full"
+            >
+              Nej tack, fortsätt avsluta
+            </Button>
             </div>
           </div>
         </div>
@@ -192,7 +192,7 @@ export function CancelSurveyModal({ isOpen, onClose, onProceedToCancel }: Cancel
           <div className="flex gap-3">
             <Button
               onClick={onClose}
-              variant="outline"
+              variant="secondary"
               className="flex-1"
             >
               Behåll prenumeration
