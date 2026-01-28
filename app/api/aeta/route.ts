@@ -123,8 +123,9 @@ export async function POST(req: Request) {
  }
 
  // Add new fields if provided
+ // Note: description has NOT NULL constraint in database, so use title as fallback
  if (title) insertPayload.title = title
- if (description) insertPayload.description = description
+ insertPayload.description = description || title || 'Ändringsarbete' // Always required
  if (change_type) insertPayload.change_type = change_type
  if (photos && photos.length > 0) insertPayload.photos = photos
  if (estimated_hours_category) insertPayload.estimated_hours_category = estimated_hours_category

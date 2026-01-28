@@ -201,10 +201,11 @@ function AetaForm() {
    }
 
    // Build insert payload with new fields
+   // Note: description has NOT NULL constraint, so use title if description is empty
    const insertPayload: any = {
     project_id: selectedProject,
     title: title.trim(),
-    description: description.trim() || null,
+    description: description.trim() || title.trim(), // Use title as fallback for description
     change_type: changeType,
     photos: uploadedPhotoUrls,
     estimated_hours_category: hoursCategory,

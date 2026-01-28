@@ -12,6 +12,29 @@ import { FileText, Folder, Sparkles } from 'lucide-react'
 import { BASE_PATH } from '@/utils/url'
 import { apiFetch } from '@/lib/http/fetcher'
 
+type InvoiceType = 'STANDARD' | 'FINAL' | 'PARTIAL'
+type VatRate = 25 | 12 | 6
+type PaymentTerms = 'NETTO_14' | 'NETTO_30' | 'NETTO_45' | 'IMMEDIATE'
+
+const INVOICE_TYPES: { value: InvoiceType; label: string }[] = [
+ { value: 'STANDARD', label: 'Standardfaktura' },
+ { value: 'FINAL', label: 'Slutfaktura' },
+ { value: 'PARTIAL', label: 'Delfaktura' },
+]
+
+const VAT_RATES: { value: VatRate; label: string }[] = [
+ { value: 25, label: '25% (standard)' },
+ { value: 12, label: '12% (livsmedel/hotell)' },
+ { value: 6, label: '6% (böcker/kultur)' },
+]
+
+const PAYMENT_TERMS: { value: PaymentTerms; label: string; days: number }[] = [
+ { value: 'NETTO_14', label: 'Netto 14 dagar', days: 14 },
+ { value: 'NETTO_30', label: 'Netto 30 dagar', days: 30 },
+ { value: 'NETTO_45', label: 'Netto 45 dagar', days: 45 },
+ { value: 'IMMEDIATE', label: 'Omedelbar betalning', days: 0 },
+]
+
 export default function NewInvoiceContent() {
  const router = useRouter()
  const searchParams = useSearchParams()
@@ -41,6 +64,27 @@ export default function NewInvoiceContent() {
   price_model?: string
   markup_percent?: number
  } | null>(null)
+
+ // New enhanced fields
+ const [invoiceType, setInvoiceType] = useState<InvoiceType>('STANDARD')
+ const [periodFrom, setPeriodFrom] = useState('')
+ const [periodTo, setPeriodTo] = useState('')
+ const [vatRate, setVatRate] = useState<VatRate>(25)
+ const [paymentTerms, setPaymentTerms] = useState<PaymentTerms>('NETTO_30')
+ const [ocrNumber, setOcrNumber] = useState('')
+ const [notesToCustomer, setNotesToCustomer] = useState('')
+ const [sendByEmail, setSendByEmail] = useState(true)
+ const [sendByMail, setSendByMail] = useState(false)
+
+ // Calculate derived values
+ const vatAmount = amount * (vatRate / 100)
+ const totalIncludingVat = amount + vatAmount
+ const dueDate = (() => {
+  const days = PAYMENT_TERMS.find(t => t.value === paymentTerms)?.days || 30
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+  return date.toISOString().split('T')[0]
+ })()
 
  // Fetch clients on mount
  useEffect(() => {
@@ -241,6 +285,19 @@ export default function NewInvoiceContent() {
       status: 'draft',
       issue_date: new Date().toISOString().split('T')[0],
       rot_application_id: rotApplicationId || null,
+      // Enhanced fields
+      invoice_type: invoiceType,
+      period_from: periodFrom || null,
+      period_to: periodTo || null,
+      vat_rate: vatRate,
+      vat_amount: vatAmount,
+      total_including_vat: totalIncludingVat,
+      payment_terms: paymentTerms,
+      due_date: dueDate,
+      ocr_number: ocrNumber || null,
+      notes_to_customer: notesToCustomer || null,
+      send_by_email: sendByEmail,
+      send_by_mail: sendByMail,
      }),
     })
    } catch (apiErr: any) {
@@ -583,6 +640,30 @@ export default function NewInvoiceContent() {
       {/* Manual Tab Content - Form */}
       {activeTab === 'manual' && (
        <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Invoice Type */}
+        <div>
+         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Fakturatyp *
+         </label>
+         <div className="flex flex-wrap gap-2">
+          {INVOICE_TYPES.map((type) => (
+           <button
+            key={type.value}
+            type="button"
+            onClick={() => setInvoiceType(type.value)}
+            className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${
+             invoiceType === type.value
+              ? 'bg-primary-500 text-white border-primary-500'
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300'
+            }`}
+           >
+            {type.label}
+           </button>
+          ))}
+         </div>
+        </div>
+
+        {/* Customer */}
         <div>
          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
           Kund *
@@ -627,22 +708,85 @@ export default function NewInvoiceContent() {
          </div>
         )}
 
+        {/* Period */}
         <div>
          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
-          Belopp (SEK) *
+          Faktureringsperiod
          </label>
-         <input
-          type="number"
-          value={amount || ''}
-          onChange={(e) => setAmount(Number(e.target.value))}
-          className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
-          placeholder="0"
-          required
-          min="0"
-          step="0.01"
-         />
+         <div className="grid grid-cols-2 gap-3">
+          <div>
+           <label className="block text-xs text-gray-500 mb-1">Från</label>
+           <input
+            type="date"
+            value={periodFrom}
+            onChange={(e) => setPeriodFrom(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+           />
+          </div>
+          <div>
+           <label className="block text-xs text-gray-500 mb-1">Till</label>
+           <input
+            type="date"
+            value={periodTo}
+            onChange={(e) => setPeriodTo(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+           />
+          </div>
+         </div>
         </div>
 
+        {/* Amount and VAT */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <div>
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+           Belopp exkl. moms (SEK) *
+          </label>
+          <input
+           type="number"
+           value={amount || ''}
+           onChange={(e) => setAmount(Number(e.target.value))}
+           className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all"
+           placeholder="0"
+           required
+           min="0"
+           step="0.01"
+          />
+         </div>
+         <div>
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+           Momssats *
+          </label>
+          <select
+           value={vatRate}
+           onChange={(e) => setVatRate(Number(e.target.value) as VatRate)}
+           className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+          >
+           {VAT_RATES.map((rate) => (
+            <option key={rate.value} value={rate.value}>{rate.label}</option>
+           ))}
+          </select>
+         </div>
+        </div>
+
+        {/* Totals display */}
+        {amount > 0 && (
+         <div className="bg-gray-50 dark:bg-gray-900 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
+          <div className="flex justify-between text-sm mb-2">
+           <span className="text-gray-600 dark:text-gray-400">Belopp exkl. moms:</span>
+           <span className="font-medium text-gray-900 dark:text-white">{amount.toLocaleString('sv-SE')} kr</span>
+          </div>
+          <div className="flex justify-between text-sm mb-2">
+           <span className="text-gray-600 dark:text-gray-400">Moms ({vatRate}%):</span>
+           <span className="font-medium text-gray-900 dark:text-white">{vatAmount.toLocaleString('sv-SE')} kr</span>
+          </div>
+          <div className="flex justify-between text-lg font-bold pt-2 border-t border-gray-200 dark:border-gray-600">
+           <span className="text-gray-900 dark:text-white">TOTALT:</span>
+           <span className="text-primary-600 dark:text-primary-400">{totalIncludingVat.toLocaleString('sv-SE')} kr</span>
+          </div>
+         </div>
+        )}
+
+        {/* Description */}
         <div>
          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
           Beskrivning *
@@ -650,10 +794,93 @@ export default function NewInvoiceContent() {
          <textarea
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
-          className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-h-[120px] resize-none transition-all"
+          className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 min-h-[100px] resize-none transition-all"
           placeholder="Beskrivning av fakturerad tjänst"
           required
          />
+        </div>
+
+        {/* Payment Terms */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+         <div>
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+           Betalningsvillkor *
+          </label>
+          <select
+           value={paymentTerms}
+           onChange={(e) => setPaymentTerms(e.target.value as PaymentTerms)}
+           className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+          >
+           {PAYMENT_TERMS.map((term) => (
+            <option key={term.value} value={term.value}>{term.label}</option>
+           ))}
+          </select>
+         </div>
+         <div>
+          <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+           Förfallodatum
+          </label>
+          <input
+           type="text"
+           value={dueDate}
+           disabled
+           className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400"
+          />
+         </div>
+        </div>
+
+        {/* OCR Number */}
+        <div>
+         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          OCR-nummer
+         </label>
+         <input
+          type="text"
+          value={ocrNumber}
+          onChange={(e) => setOcrNumber(e.target.value)}
+          className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+          placeholder="Genereras automatiskt om tomt"
+         />
+        </div>
+
+        {/* Notes to Customer */}
+        <div>
+         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Anteckningar till kund
+         </label>
+         <textarea
+          value={notesToCustomer}
+          onChange={(e) => setNotesToCustomer(e.target.value)}
+          className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-200 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 min-h-[80px] resize-none"
+          placeholder="Visas på fakturan..."
+         />
+        </div>
+
+        {/* Send Method */}
+        <div>
+         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Skickningsmetod
+         </label>
+         <div className="flex gap-4">
+          <label className="flex items-center gap-2 cursor-pointer">
+           <input
+            type="checkbox"
+            checked={sendByEmail}
+            onChange={(e) => setSendByEmail(e.target.checked)}
+            className="w-5 h-5 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+           />
+           <span className="text-gray-700 dark:text-gray-300">E-post</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+           <input
+            type="checkbox"
+            checked={sendByMail}
+            onChange={(e) => setSendByMail(e.target.checked)}
+            className="w-5 h-5 rounded border-gray-300 text-primary-500 focus:ring-primary-500"
+           />
+           <span className="text-gray-700 dark:text-gray-300">Brev</span>
+          </label>
+         </div>
         </div>
 
         <div className="flex flex-col sm:flex-row gap-3 pt-4">

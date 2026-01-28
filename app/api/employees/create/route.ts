@@ -5,7 +5,7 @@ import { checkRateLimit, getClientIP, sanitizeString, isValidEmail, isValidUUID 
 
 /**
  * API route för att skapa employees med service role
- * Hanterar saknade kolumner progressivt
+ * Hanterar alla nya fält för enhanced employee system
  */
 export async function POST(req: Request) {
  try {
@@ -50,11 +50,9 @@ export async function POST(req: Request) {
    .eq('auth_user_id', user.id)
    .limit(10)
 
-  // Also try by email as fallback
   let isAdmin = false
   let adminEmployee = null
   
-  // Find admin employee
   if (employeeData && Array.isArray(employeeData)) {
    adminEmployee = employeeData.find((e: any) => 
     e.role === 'admin' || e.role === 'Admin' || e.role === 'ADMIN'
@@ -97,7 +95,34 @@ export async function POST(req: Request) {
    return NextResponse.json({ error: 'Admin access required' }, { status: 403 })
   }
 
-  const { tenant_id, name, full_name, email, role, base_rate_sek, default_rate_sek } = await req.json()
+  const body = await req.json()
+  const { 
+   tenant_id, 
+   name, 
+   full_name, 
+   first_name,
+   last_name,
+   email, 
+   role, 
+   base_rate_sek, 
+   default_rate_sek,
+   // New enhanced fields
+   phone,
+   personal_id,
+   employment_type,
+   job_role,
+   start_date,
+   has_drivers_license,
+   is_over_19,
+   has_safety_training,
+   has_rot_eligibility,
+   has_electrical_cert,
+   has_fall_protection,
+   monthly_salary_gross,
+   emergency_contact_name,
+   emergency_contact_phone,
+   notes,
+  } = body
 
   // Input validation
   if (!tenant_id || !isValidUUID(tenant_id)) {
@@ -125,11 +150,9 @@ export async function POST(req: Request) {
    )
   }
 
-  // Validate role - ensure it matches database constraint exactly
-  // Constraint accepts: 'employee', 'admin', 'Employee', 'Admin'
-  // We'll use lowercase to be consistent
+  // Validate role
   const validRoles = ['employee', 'admin']
-  let sanitizedRole = 'employee' // Default
+  let sanitizedRole = 'employee'
   
   if (role && typeof role === 'string') {
    const roleLower = role.toLowerCase()
@@ -142,89 +165,77 @@ export async function POST(req: Request) {
   const sanitizedBaseRate = base_rate_sek ? Math.max(0, Math.min(1000000, Number(base_rate_sek))) : 360
   const sanitizedDefaultRate = default_rate_sek ? Math.max(0, Math.min(1000000, Number(default_rate_sek))) : sanitizedBaseRate
 
-  // adminSupabase is already created above for admin check
-  // Reuse it here for employee creation
-
-  // Build payload progressively (using sanitized values)
+  // Build payload with all fields
   const payload: any = {
    tenant_id,
-   role: sanitizedRole, // Explicitly set to lowercase
+   role: sanitizedRole,
    name: sanitizedName,
+   full_name: sanitizedFullName,
+   base_rate_sek: sanitizedBaseRate,
   }
+
+  // Add optional fields
+  if (first_name) payload.first_name = sanitizeString(first_name.trim())
+  if (last_name) payload.last_name = sanitizeString(last_name.trim())
+  if (email) payload.email = email.trim().toLowerCase()
+  if (phone) payload.phone = phone.trim()
+  if (personal_id) payload.personal_id = personal_id.trim()
+  if (employment_type) payload.employment_type = employment_type
+  if (job_role) payload.job_role = job_role
+  if (start_date) payload.start_date = start_date
   
-  // Debug logging
-  console.log('[Employee Create] Payload role:', sanitizedRole, 'Original role:', role)
+  // Competencies (booleans)
+  if (has_drivers_license !== undefined) payload.has_drivers_license = !!has_drivers_license
+  if (is_over_19 !== undefined) payload.is_over_19 = !!is_over_19
+  if (has_safety_training !== undefined) payload.has_safety_training = !!has_safety_training
+  if (has_rot_eligibility !== undefined) payload.has_rot_eligibility = !!has_rot_eligibility
+  if (has_electrical_cert !== undefined) payload.has_electrical_cert = !!has_electrical_cert
+  if (has_fall_protection !== undefined) payload.has_fall_protection = !!has_fall_protection
+  
+  // Salary
+  if (monthly_salary_gross) payload.monthly_salary_gross = Number(monthly_salary_gross)
+  
+  // Emergency contact
+  if (emergency_contact_name) payload.emergency_contact_name = sanitizeString(emergency_contact_name.trim())
+  if (emergency_contact_phone) payload.emergency_contact_phone = emergency_contact_phone.trim()
+  
+  // Notes
+  if (notes) payload.notes = notes.trim()
 
-  // Add name or full_name (try both)
-  if (sanitizedFullName) {
-   payload.full_name = sanitizedFullName
-  }
-  if (email) {
-   payload.email = email.trim().toLowerCase()
-  }
-
-  // Add rates only if they exist in schema
-  // Try with both first
+  // Try insert with all fields first
   let insertResult = await adminSupabase
    .from('employees')
-   .insert([{
-    ...payload,
-    base_rate_sek: sanitizedBaseRate,
-    default_rate_sek: sanitizedDefaultRate,
-   }])
+   .insert([payload])
    .select('id')
    .single()
 
-  // Fallback: try without default_rate_sek
-  if (insertResult.error && (insertResult.error.code === '42703' || insertResult.error.message?.includes('default_rate_sek'))) {
-   insertResult = await adminSupabase
-    .from('employees')
-   .insert([{
-    ...payload,
+  // If new columns don't exist, try with basic fields only
+  if (insertResult.error && insertResult.error.code === '42703') {
+   console.warn('Some columns do not exist, falling back to basic insert')
+   
+   const basicPayload = {
+    tenant_id,
+    role: sanitizedRole,
+    name: sanitizedName,
+    full_name: sanitizedFullName,
     base_rate_sek: sanitizedBaseRate,
-   }])
-    .select('id')
-    .single()
-  }
-
-  // Fallback: try without base_rate_sek
-  if (insertResult.error && (insertResult.error.code === '42703' || insertResult.error.message?.includes('base_rate_sek'))) {
+    email: email ? email.trim().toLowerCase() : undefined,
+   }
+   
    insertResult = await adminSupabase
     .from('employees')
-    .insert([payload])
-    .select('id')
-    .single()
-  }
-
-  // Fallback: try without full_name
-  if (insertResult.error && (insertResult.error.code === '42703' || insertResult.error.message?.includes('full_name'))) {
-   const { full_name: _, ...payloadWithoutFullName } = payload
-   insertResult = await adminSupabase
-    .from('employees')
-    .insert([payloadWithoutFullName])
-    .select('id')
-    .single()
-  }
-
-  // Fallback: try without email
-  if (insertResult.error && (insertResult.error.code === '42703' || insertResult.error.message?.includes('email'))) {
-   const { email: _, ...payloadWithoutEmail } = payload
-   insertResult = await adminSupabase
-    .from('employees')
-    .insert([payloadWithoutEmail])
+    .insert([basicPayload])
     .select('id')
     .single()
   }
 
   if (insertResult.error) {
-   console.error('Error creating employee (all fallbacks failed):', insertResult.error)
+   console.error('Error creating employee:', insertResult.error)
    console.error('Payload that failed:', JSON.stringify(payload, null, 2))
-   console.error('Role value:', sanitizedRole, 'Type:', typeof sanitizedRole)
    
-   // Provide more helpful error message
    let errorMessage = insertResult.error.message || 'Failed to create employee'
    if (insertResult.error.message?.includes('employees_role_check')) {
-    errorMessage = `Ogiltig roll-värde: "${sanitizedRole}". Tillåtna värden: 'employee', 'admin', 'Employee', 'Admin'`
+    errorMessage = `Ogiltig roll-värde: "${sanitizedRole}". Tillåtna värden: 'employee', 'admin'`
    }
    
    return NextResponse.json(
@@ -242,4 +253,3 @@ export async function POST(req: Request) {
   )
  }
 }
-

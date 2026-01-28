@@ -30,7 +30,12 @@ export function QuoteForm({ quote, onSubmit, isLoading }: QuoteFormProps) {
   project_id: quote?.project_id || '',
   valid_until: quote?.valid_until ? quote.valid_until.split('T')[0] : '',
   currency: quote?.currency || 'SEK',
-  kma_enabled: quote?.kma_enabled || false
+  kma_enabled: quote?.kma_enabled || false,
+  // New KMA fields
+  kma_visible_to_customer: (quote as any)?.kma_visible_to_customer ?? true,
+  kma_content: (quote as any)?.kma_content || '',
+  // Markup
+  markup_percent: (quote as any)?.markup_percent ?? 15,
  })
 
  const [errors, setErrors] = useState<Record<string, string>>({})
@@ -44,7 +49,10 @@ export function QuoteForm({ quote, onSubmit, isLoading }: QuoteFormProps) {
     project_id: quote.project_id || '',
     valid_until: quote.valid_until ? quote.valid_until.split('T')[0] : '',
     currency: quote.currency || 'SEK',
-    kma_enabled: quote.kma_enabled || false
+    kma_enabled: quote.kma_enabled || false,
+    kma_visible_to_customer: (quote as any)?.kma_visible_to_customer ?? true,
+    kma_content: (quote as any)?.kma_content || '',
+    markup_percent: (quote as any)?.markup_percent ?? 15,
    })
   }
  }, [quote])
@@ -182,6 +190,92 @@ export function QuoteForm({ quote, onSubmit, isLoading }: QuoteFormProps) {
        <span className="text-emerald-600 dark:text-emerald-400 font-semibold">KMA</span>
        <span className="text-xs text-gray-500 dark:text-gray-400">(Kostnads- & Miljöanalys)</span>
       </label>
+     </div>
+    </div>
+
+    {/* KMA Section - shows when kma_enabled is true */}
+    {formData.kma_enabled && (
+     <div className="mt-6 p-4 rounded-lg border-2 border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20">
+      <h3 className="text-lg font-semibold text-emerald-800 dark:text-emerald-300 mb-4">
+       KMA-inställningar
+      </h3>
+      
+      <div className="mb-4">
+       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        Visa KMA för kund?
+       </label>
+       <div className="flex gap-4">
+        <label className="flex items-center gap-2 cursor-pointer">
+         <input
+          type="radio"
+          name="kma_visible_to_customer"
+          checked={formData.kma_visible_to_customer === true}
+          onChange={() => setFormData(prev => ({ ...prev, kma_visible_to_customer: true }))}
+          className="w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
+         />
+         <span className="text-gray-700 dark:text-gray-300">Ja, visa i offerten</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+         <input
+          type="radio"
+          name="kma_visible_to_customer"
+          checked={formData.kma_visible_to_customer === false}
+          onChange={() => setFormData(prev => ({ ...prev, kma_visible_to_customer: false }))}
+          className="w-4 h-4 text-emerald-600 border-gray-300 focus:ring-emerald-500"
+         />
+         <span className="text-gray-700 dark:text-gray-300">Nej, endast intern</span>
+        </label>
+       </div>
+      </div>
+
+      <div>
+       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        KMA-innehåll (Miljöanalys)
+       </label>
+       <textarea
+        name="kma_content"
+        value={formData.kma_content}
+        onChange={handleChange}
+        rows={4}
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-emerald-500 resize-none"
+        placeholder="Beskriv miljöpåverkan, hållbarhetsaspekter och eventuella miljöcertifieringar..."
+       />
+      </div>
+     </div>
+    )}
+
+    {/* Markup Section */}
+    <div className="mt-6 p-4 rounded-lg border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/50">
+     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      Prissättning
+     </h3>
+     
+     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+        Påslagsprocent (%)
+       </label>
+       <input
+        type="number"
+        name="markup_percent"
+        value={formData.markup_percent}
+        onChange={handleChange}
+        min="0"
+        max="100"
+        step="0.5"
+        className="w-full px-4 py-2.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
+       />
+       <p className="mt-1 text-xs text-gray-500">Standard: 15%</p>
+      </div>
+      
+      <div className="flex flex-col justify-end">
+       <div className="p-3 rounded-lg bg-gray-100 dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
+        <p className="text-xs text-gray-500 mb-1">Påslag tillämpas på alla poster</p>
+        <p className="text-sm font-medium text-gray-900 dark:text-white">
+         +{formData.markup_percent}% på materialkostnad
+        </p>
+       </div>
+      </div>
      </div>
     </div>
 
