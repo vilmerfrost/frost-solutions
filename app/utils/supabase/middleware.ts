@@ -41,6 +41,7 @@ export async function updateSession(request: NextRequest) {
   // Lista på publika rutter som inte kräver inloggning
   const isPublicPath = 
     path.startsWith('/login') || 
+    path.startsWith('/signup') || 
     path.startsWith('/auth') || 
     path.startsWith('/error')
 
@@ -53,6 +54,13 @@ export async function updateSession(request: NextRequest) {
 
   // B. Inloggad användare på Login-sidan -> Redirect till Dashboard
   if (user && path.startsWith('/login')) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/' // Detta blir /app/ (Dashboard)
+    return NextResponse.redirect(url)
+  }
+
+  // C. Inloggad användare på Signup-sidan -> Redirect till Dashboard
+  if (user && path.startsWith('/signup')) {
     const url = request.nextUrl.clone()
     url.pathname = '/' // Detta blir /app/ (Dashboard)
     return NextResponse.redirect(url)

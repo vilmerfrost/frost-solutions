@@ -227,10 +227,11 @@ function SignupContent() {
      {/* Form */}
      <form onSubmit={handleSignup} className="space-y-4">
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-2">
+       <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-2">
         Fullständigt namn <span className="text-red-500">*</span>
        </label>
        <input
+        id="fullName"
         type="text"
         value={fullName}
         onChange={(e) => setFullName(e.target.value)}
@@ -242,10 +243,11 @@ function SignupContent() {
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-2">
+       <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
         E-postadress <span className="text-red-500">*</span>
        </label>
        <input
+        id="email"
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
@@ -257,10 +259,11 @@ function SignupContent() {
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-2">
+       <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
         Lösenord <span className="text-red-500">*</span>
        </label>
        <input
+        id="password"
         type="password"
         value={password}
         onChange={(e) => setPassword(e.target.value)}
@@ -273,10 +276,11 @@ function SignupContent() {
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-2">
+       <label htmlFor="companyName" className="block text-sm font-medium text-gray-700 mb-2">
         Företagsnamn <span className="text-red-500">*</span>
        </label>
        <input
+        id="companyName"
         type="text"
         value={companyName}
         onChange={(e) => setCompanyName(e.target.value)}
@@ -288,11 +292,12 @@ function SignupContent() {
       </div>
 
       <div>
-       <label className="block text-sm font-medium text-gray-700 mb-2">
+       <label htmlFor="orgNumber" className="block text-sm font-medium text-gray-700 mb-2">
         Organisationsnummer{" "}
         <span className="text-gray-400 font-normal">(valfritt)</span>
        </label>
        <input
+        id="orgNumber"
         type="text"
         value={orgNumber}
         onChange={(e) => setOrgNumber(e.target.value)}

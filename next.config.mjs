@@ -9,9 +9,9 @@ const __dirname = path.dirname(__filename);
 const nextConfig = {
   // App is served from frostsolutions.se/app (root domain has marketing site)
   basePath: '/app',
-  turbopack: {
-    root: path.resolve(__dirname),
-  },
+  // Turbopack disabled due to Runtime ChunkLoadError with basePath in development
+  // Can be re-enabled when Next.js fixes the issue
+  // Removed turbopack config to use webpack instead
   // Optimize images
   images: {
     formats: ['image/avif', 'image/webp'],
