@@ -127,7 +127,7 @@ export default function SidebarClient() {
      ${isOpen ? 'translate-x-0' : '-translate-x-full'}
      lg:translate-x-0 lg:z-auto
      shadow-md lg:shadow-none
-     overflow-y-auto
+     overflow-hidden
     `}
     aria-label="Huvudnavigation"
    >

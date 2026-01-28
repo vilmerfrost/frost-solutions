@@ -40,22 +40,22 @@ export default function MaterialsPage() {
     <div className="container mx-auto px-4 py-8">
      {/* Header */}
      <div className="mb-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
        <div className="flex items-center gap-4">
-        <div className="p-3 bg-primary-500 hover:bg-primary-600 rounded-lg shadow-md">
-         <Package size={32} className="text-white" />
+        <div className="p-2 sm:p-3 bg-primary-500 hover:bg-primary-600 rounded-lg shadow-md">
+         <Package size={24} className="sm:w-8 sm:h-8 text-white" />
         </div>
         <div>
-         <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
           Materialdatabas
          </h1>
-         <p className="text-gray-600 dark:text-gray-400 mt-1">
+         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
           Hantera material och priser
          </p>
         </div>
        </div>
-       <Link href="/materials/new">
-        <Button size="lg" className="shadow-md bg-success-600 hover:bg-success-700">
+       <Link href="/materials/new" className="w-full sm:w-auto">
+        <Button size="default" className="w-full sm:w-auto shadow-md bg-success-600 hover:bg-success-700">
          <Plus size={20} className="mr-2" />
          Nytt Material
         </Button>

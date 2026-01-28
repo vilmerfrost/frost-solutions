@@ -27,24 +27,24 @@ export default function SupplierInvoicesPage() {
     <div className="container mx-auto px-4 py-8">
      {/* Header */}
      <div className="mb-8">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
        <div className="flex items-center gap-4">
-        <div className="p-3 bg-primary-500 hover:bg-primary-600 rounded-[8px] shadow-md">
-         <FileText size={32} className="text-white" />
+        <div className="p-2 sm:p-3 bg-primary-500 hover:bg-primary-600 rounded-[8px] shadow-md">
+         <FileText size={24} className="sm:w-8 sm:h-8 text-white" />
         </div>
         <div>
-         <h1 className="text-4xl font-bold text-gray-900 dark:text-white">
+         <h1 className="text-2xl sm:text-4xl font-bold text-gray-900 dark:text-white">
           Leverantörsfakturor
          </h1>
-         <p className="text-gray-600 dark:text-gray-400 mt-1">
+         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1">
           Hantera inkommande fakturor och påslag
          </p>
         </div>
        </div>
-       <Link href="/supplier-invoices/new">
+       <Link href="/supplier-invoices/new" className="w-full sm:w-auto">
         <Button
-         size="lg"
-         className="shadow-xl bg-primary-500 hover:bg-primary-600 hover: hover:"
+         size="default"
+         className="w-full sm:w-auto shadow-xl bg-primary-500 hover:bg-primary-600"
         >
          <Plus size={20} className="mr-2" />
          Ny Faktura

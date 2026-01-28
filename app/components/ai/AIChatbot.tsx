@@ -220,12 +220,10 @@ export function AIChatbot() {
    {/* Floating button - always visible when chat is closed */}
    {!isOpen && (
     <div 
-     className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[99999]" 
+     className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-[99999]" 
      style={{ 
       position: 'fixed', 
       zIndex: 99999,
-      bottom: '16px',
-      right: '16px',
       pointerEvents: 'auto'
      }}
     >
@@ -252,11 +250,10 @@ export function AIChatbot() {
    {/* Chat window - only visible when open */}
    {isOpen && (
     <div 
-     className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-full sm:max-w-md bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-[calc(100vh-8rem)] sm:h-[600px] max-h-[600px]"
+     className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 w-[calc(100vw-2rem)] sm:w-full sm:max-w-md bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-2xl border border-gray-200 dark:border-gray-700 flex flex-col h-[calc(100vh-10rem)] sm:h-[600px] max-h-[600px]"
      style={{ 
       position: 'fixed', 
       zIndex: 99999,
-      bottom: '16px',
       right: '16px',
       pointerEvents: 'auto',
       display: 'flex',
