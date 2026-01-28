@@ -1,4 +1,7 @@
+'use client'
+
 import { Clock, FileText, FolderPlus, AlertTriangle } from 'lucide-react'
+import { BASE_PATH } from '@/utils/url'
 
 type Action = { icon: React.ReactNode; label: string; href: string; color?: string }
 const actions: Action[] = [
@@ -7,13 +10,14 @@ const actions: Action[] = [
  { icon: <FolderPlus className="w-6 h-6" />, label: "Nytt projekt", href: "/projects/new" },
  { icon: <AlertTriangle className="w-6 h-6" />, label: "ÄTA-arbete", href: "/aeta", color: "yellow-500" },
 ]
+
 export default function QuickActions() {
  return (
   <div className="flex flex-wrap gap-4 mb-6">
    {actions.map(a =>
     <a
      key={a.label}
-     href={a.href}
+     href={`${BASE_PATH}${a.href}`}
      className={`flex flex-col items-center px-4 py-2 rounded-lg shadow bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors`}
     >
      <span className={`text-${a.color || 'blue-600'}`}>{a.icon}</span>

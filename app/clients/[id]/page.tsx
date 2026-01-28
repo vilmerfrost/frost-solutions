@@ -10,6 +10,7 @@ import { useAdmin } from '@/hooks/useAdmin'
 import { Edit2, Archive, RotateCcw, Trash2, FileText } from 'lucide-react'
 import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
 import { apiFetch } from '@/lib/http/fetcher'
+import { BASE_PATH } from '@/utils/url'
 
 interface Client {
  id: string
@@ -323,7 +324,7 @@ export default function ClientDetailPage() {
       <div className="flex items-center justify-between mb-4 sm:mb-6">
        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Projekt</h2>
        <button
-        onClick={() => router.push(`/projects/new?clientId=${clientId}`)}
+        onClick={() => router.push(`${BASE_PATH}/projects/new?clientId=${clientId}`)}
         className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold hover:shadow-md transition-all text-sm sm:text-base"
        >
         + Nytt projekt

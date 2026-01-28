@@ -1248,7 +1248,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
       Skapa ett projekt först för att använda stämpelklockan.
      </p>
      <button
-      onClick={() => router.push('/projects/new')}
+      onClick={() => router.push(`${BASE_PATH}/projects/new`)}
       className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
      >
       Skapa projekt

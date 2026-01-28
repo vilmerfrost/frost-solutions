@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import { apiFetch } from '@/lib/http/fetcher'
+import { BASE_PATH } from '@/utils/url'
 import Sidebar from '@/components/Sidebar'
 
 // Lazy load heavy components for better initial page load
@@ -579,7 +580,7 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
      <div className="bg-white dark:bg-gray-700 rounded-[8px] border border-gray-200 dark:border-gray-600 p-6 lg:p-8 mb-6 sm:mb-8">
       <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-4 sm:mb-6">Nytt projekt</h2>
       <button
-       onClick={() => router.push('/projects/new')}
+       onClick={() => router.push(`${BASE_PATH}/projects/new`)}
        className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-5 py-2.5 rounded-[6px] font-medium shadow-sm hover:shadow-md hover:-translate-y-[1px] transition-all text-sm sm:text-base"
       >
        + Skapa nytt projekt

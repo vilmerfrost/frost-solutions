@@ -12,7 +12,6 @@ import { BASE_PATH } from '@/utils/url'
 import FilterSortBar from '@/components/FilterSortBar'
 import { useAdmin } from '@/hooks/useAdmin'
 import { PermissionGuard } from '@/components/rbac/PermissionGuard'
-import { NewProjectModal } from '@/components/projects/NewProjectModal'
 import { apiFetch } from '@/lib/http/fetcher'
 
 function Notice({
@@ -54,7 +53,6 @@ export default function ProjectsContent() {
  const [deletingId, setDeletingId] = useState<string | null>(null)
  const [projectHours, setProjectHours] = useState<Map<string, number>>(new Map())
  const [refreshTrigger, setRefreshTrigger] = useState(0)
- const [isModalOpen, setIsModalOpen] = useState(false)
  const { isAdmin, loading: adminLoading } = useAdmin()
 
  // Fetch clients on mount
@@ -474,7 +472,7 @@ export default function ProjectsContent() {
        <p className="text-gray-500 dark:text-gray-400">Hantera dina projekt</p>
       </div>
       <button
-       onClick={() => setIsModalOpen(true)}
+       onClick={() => router.push(`${BASE_PATH}/projects/new`)}
        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all flex items-center gap-2 whitespace-nowrap"
       >
        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -483,15 +481,6 @@ export default function ProjectsContent() {
        Nytt projekt
       </button>
      </div>
-
-     <NewProjectModal
-      isOpen={isModalOpen}
-      onClose={() => setIsModalOpen(false)}
-      onSuccess={() => {
-       setRefreshTrigger(prev => prev + 1)
-       setIsModalOpen(false)
-      }}
-     />
 
      {searchParams?.get('created') === 'true' && (
       <div className="mb-6">
@@ -619,7 +608,7 @@ export default function ProjectsContent() {
       <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] shadow-md p-8 border border-gray-100 dark:border-gray-700 text-center">
        <p className="text-gray-500 dark:text-gray-400 mb-4">Inga projekt hittades</p>
        <button
-        onClick={() => router.push('/projects/new')}
+        onClick={() => router.push(`${BASE_PATH}/projects/new`)}
         className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold"
        >
         Skapa första projektet
