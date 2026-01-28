@@ -386,6 +386,12 @@ export async function POST(req: Request) {
   if (safePayload.end_location_lat) insertPayload.end_location_lat = safePayload.end_location_lat
   if (safePayload.end_location_lng) insertPayload.end_location_lng = safePayload.end_location_lng
   if (safePayload.work_site_id) insertPayload.work_site_id = safePayload.work_site_id
+  
+  // Enhanced fields (Phase 2)
+  if (safePayload.aeta_request_id) insertPayload.aeta_request_id = safePayload.aeta_request_id
+  if (safePayload.mileage_km) insertPayload.mileage_km = safePayload.mileage_km
+  if (safePayload.travel_cost_sek) insertPayload.travel_cost_sek = safePayload.travel_cost_sek
+  if (safePayload.photos && Array.isArray(safePayload.photos)) insertPayload.photos = safePayload.photos
 
   // Double-check tenant_id before insert
   console.log('Final insert payload:', {

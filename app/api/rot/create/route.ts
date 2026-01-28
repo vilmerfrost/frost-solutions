@@ -17,7 +17,13 @@ export async function POST(req: Request) {
   }
 
   const payload = await req.json()
-  const { tenant_id, project_id, client_id, customer_person_number, property_designation, work_type, work_cost_sek, material_cost_sek, total_cost_sek } = payload
+  const { 
+   tenant_id, project_id, client_id, customer_person_number, property_designation, work_type, 
+   work_cost_sek, material_cost_sek, total_cost_sek,
+   // SKV 5017 enhanced fields
+   property_type, apartment_number, brf_org_number, work_start_date, work_end_date,
+   work_details, customer_declarations, deductible_amount, deduction_percentage
+  } = payload
 
   if (!tenant_id) {
    return NextResponse.json(
@@ -212,6 +218,17 @@ export async function POST(req: Request) {
    status: 'draft',
    created_by: user.id,
   }
+
+  // Add SKV 5017 enhanced fields if provided
+  if (property_type) insertPayload.property_type = property_type
+  if (apartment_number) insertPayload.apartment_number = apartment_number
+  if (brf_org_number) insertPayload.brf_org_number = brf_org_number
+  if (work_start_date) insertPayload.work_start_date = work_start_date
+  if (work_end_date) insertPayload.work_end_date = work_end_date
+  if (work_details) insertPayload.work_details = work_details
+  if (customer_declarations) insertPayload.customer_declarations = customer_declarations
+  if (deductible_amount !== undefined) insertPayload.deductible_amount = deductible_amount
+  if (deduction_percentage !== undefined) insertPayload.deduction_percentage = deduction_percentage
 
   const { data, error } = await adminSupabase
    .from('rot_applications')

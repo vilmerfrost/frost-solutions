@@ -81,6 +81,14 @@ export default function NewReportPage() {
  const [isMounted, setIsMounted] = useState(false)
  const { isAdmin } = useAdmin()
  
+ // New enhanced fields
+ const [aetaRequestId, setAetaRequestId] = useState<string>('')
+ const [aetaRequests, setAetaRequests] = useState<Array<{ id: string; title: string; project_id: string }>>([])
+ const [mileageKm, setMileageKm] = useState<string>('')
+ const [photos, setPhotos] = useState<File[]>([])
+ const [photoUrls, setPhotoUrls] = useState<string[]>([])
+ const [uploadingPhotos, setUploadingPhotos] = useState(false)
+ 
  // Track pending offline entries
  const [pendingCount, setPendingCount] = useState(0)
  
@@ -513,6 +521,49 @@ export default function NewReportPage() {
   fetchData() 
  }, [tenantId, isOnline])
 
+ // Fetch ÄTA requests when project changes
+ useEffect(() => {
+  async function fetchAetaRequests() {
+   if (!project || !tenantId || !isOnline) {
+    setAetaRequests([])
+    return
+   }
+   
+   try {
+    const res = await fetch(`${BASE_PATH}/api/aeta?projectId=${project}&status=approved`, { cache: 'no-store' })
+    if (res.ok) {
+     const data = await res.json()
+     setAetaRequests(data.data || [])
+    }
+   } catch (err) {
+    console.warn('Could not fetch ÄTA requests:', err)
+   }
+  }
+  fetchAetaRequests()
+ }, [project, tenantId, isOnline])
+
+ // Handle photo selection
+ const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const files = e.target.files
+  if (!files) return
+  
+  const newPhotos = Array.from(files).slice(0, 5 - photos.length) // Max 5 photos
+  setPhotos(prev => [...prev, ...newPhotos])
+  
+  // Create preview URLs
+  const newUrls = newPhotos.map(file => URL.createObjectURL(file))
+  setPhotoUrls(prev => [...prev, ...newUrls])
+ }
+
+ const removePhoto = (index: number) => {
+  URL.revokeObjectURL(photoUrls[index])
+  setPhotos(prev => prev.filter((_, i) => i !== index))
+  setPhotoUrls(prev => prev.filter((_, i) => i !== index))
+ }
+
+ // Calculate travel cost (Swedish standard: 25 kr/10 km = 2.50 kr/km or 18.50 kr/mil)
+ const travelCostSek = mileageKm ? Number(mileageKm) * 2.50 : 0
+
  // Auto-fyll tider när typ ändras
  useEffect(() => {
   if (type === 'night') {
@@ -719,6 +770,36 @@ export default function NewReportPage() {
    amount_total = hours * baseRate * multiplier
   }
 
+  // Upload photos if any
+  let uploadedPhotoUrls: string[] = []
+  if (photos.length > 0 && isOnline !== false) {
+   setUploadingPhotos(true)
+   try {
+    for (const photo of photos) {
+     const fileExt = photo.name.split('.').pop() || 'jpg'
+     const fileName = `${tenantId}/${Date.now()}_${Math.random().toString(36).substring(7)}.${fileExt}`
+     const filePath = `time-entry-photos/${fileName}`
+     
+     const { error: uploadError } = await supabase.storage
+      .from('time-entry-photos')
+      .upload(filePath, photo, { cacheControl: '3600', upsert: false })
+     
+     if (!uploadError) {
+      const { data: { publicUrl } } = supabase.storage
+       .from('time-entry-photos')
+       .getPublicUrl(filePath)
+      uploadedPhotoUrls.push(publicUrl)
+     } else {
+      console.warn('Could not upload photo:', uploadError)
+     }
+    }
+   } catch (uploadErr) {
+    console.error('Error uploading photos:', uploadErr)
+   } finally {
+    setUploadingPhotos(false)
+   }
+  }
+
   // Build insert payload - try with description first, fallback without it
   const basePayload: any = {
    user_id: userId,
@@ -738,6 +819,18 @@ export default function NewReportPage() {
   // Add description if provided
   if (notes && notes.trim()) {
    basePayload.description = notes.trim()
+  }
+
+  // Add new enhanced fields
+  if (aetaRequestId) {
+   basePayload.aeta_request_id = aetaRequestId
+  }
+  if (mileageKm && Number(mileageKm) > 0) {
+   basePayload.mileage_km = Number(mileageKm)
+   basePayload.travel_cost_sek = travelCostSek
+  }
+  if (uploadedPhotoUrls.length > 0) {
+   basePayload.photos = uploadedPhotoUrls
   }
 
   if (!tenantId) {
@@ -1126,6 +1219,17 @@ export default function NewReportPage() {
            </button>
            <button
             type="button"
+            onClick={() => setBreakMinutes(breakMinutes === 45 ? 0 : 45)}
+            className={`px-4 py-2 rounded-lg font-medium transition-all ${
+             breakMinutes === 45
+              ? 'bg-blue-500 text-white shadow-md'
+              : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-500'
+            }`}
+           >
+            45 min
+           </button>
+           <button
+            type="button"
             onClick={() => setBreakMinutes(breakMinutes === 60 ? 0 : 60)}
             className={`px-4 py-2 rounded-lg font-medium transition-all ${
              breakMinutes === 60
@@ -1289,16 +1393,131 @@ export default function NewReportPage() {
        
        <CommentBox value={notes} onChange={setNotes} />
        
-       <div className="p-4 bg-primary-500 hover:bg-primary-600 dark:bg-blue-900/20 rounded-[8px] border border-blue-100 dark:border-blue-900/50">
+       {/* ÄTA Linking */}
+       {requiresTimeFields && project && aetaRequests.length > 0 && (
+        <div className="p-4 bg-amber-50 dark:bg-amber-900/20 rounded-[8px] border border-amber-200 dark:border-amber-800">
+         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Kopplad till ÄTA (valfritt)
+         </label>
+         <select
+          value={aetaRequestId}
+          onChange={(e) => setAetaRequestId(e.target.value)}
+          className="w-full px-4 py-2.5 rounded-lg border-2 border-amber-300 dark:border-amber-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500"
+         >
+          <option value="">Standard arbete (ingen ÄTA)</option>
+          {aetaRequests.map((ata) => (
+           <option key={ata.id} value={ata.id}>
+            {ata.title || 'ÄTA utan titel'}
+           </option>
+          ))}
+         </select>
+         <p className="mt-1 text-xs text-amber-700 dark:text-amber-400">
+          Välj om detta arbete är kopplat till ett ändrings- eller tilläggsarbete
+         </p>
+        </div>
+       )}
+       
+       {/* Mileage/Kilometer Tracking */}
+       {requiresTimeFields && (
+        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-[8px] border border-gray-200 dark:border-gray-600">
+         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Körersättning (valfritt)
+         </label>
+         <div className="flex gap-4 items-end">
+          <div className="flex-1">
+           <input
+            type="number"
+            min="0"
+            step="0.1"
+            placeholder="Antal km"
+            value={mileageKm}
+            onChange={(e) => setMileageKm(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg border-2 border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+           />
+          </div>
+          {mileageKm && Number(mileageKm) > 0 && (
+           <div className="text-sm text-green-600 dark:text-green-400 font-medium whitespace-nowrap">
+            ≈ {travelCostSek.toFixed(0)} kr
+           </div>
+          )}
+         </div>
+         <p className="mt-1 text-xs text-gray-500">
+          Ersättning beräknas med 2.50 kr/km (skattefri milersättning)
+         </p>
+        </div>
+       )}
+       
+       {/* Photo Documentation */}
+       {requiresTimeFields && (
+        <div className="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-[8px] border border-gray-200 dark:border-gray-600">
+         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+          Dokumentation (valfritt)
+         </label>
+         
+         <div className="flex gap-2 flex-wrap mb-3">
+          {photoUrls.map((url, idx) => (
+           <div key={idx} className="relative group">
+            <img
+             src={url}
+             alt={`Foto ${idx + 1}`}
+             className="w-20 h-20 object-cover rounded-lg border-2 border-gray-200 dark:border-gray-600"
+            />
+            <button
+             type="button"
+             onClick={() => removePhoto(idx)}
+             className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full text-xs font-bold opacity-0 group-hover:opacity-100 transition-opacity"
+            >
+             ×
+            </button>
+           </div>
+          ))}
+         </div>
+         
+         {photos.length < 5 && (
+          <label className="flex items-center justify-center gap-2 px-4 py-3 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+           <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+           </svg>
+           <span className="text-sm text-gray-600 dark:text-gray-400">Lägg till foto</span>
+           <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handlePhotoSelect}
+            className="hidden"
+           />
+          </label>
+         )}
+         <p className="mt-2 text-xs text-gray-500">
+          Max 5 foton för dokumentation av utfört arbete
+         </p>
+        </div>
+       )}
+       
+       {/* Hours Summary with Warning */}
+       <div className={`p-4 rounded-[8px] border ${
+        hours > 10 
+         ? 'bg-red-50 dark:bg-red-900/20 border-red-300 dark:border-red-800' 
+         : 'bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/50'
+       }`}>
         <div className="text-sm text-gray-600 dark:text-gray-400 mb-1">
          {multiProjectMode ? 'Totalt timmar (fördelat på projekt)' : 'Totalt rapporterade timmar'}
         </div>
-        <div className="text-3xl font-semibold text-gray-900 dark:text-white">
+        <div className={`text-3xl font-semibold ${hours > 10 ? 'text-red-600 dark:text-red-400' : 'text-gray-900 dark:text-white'}`}>
          {hours.toFixed(1)}h
         </div>
         {multiProjectMode && (
          <div className="mt-2 text-xs text-gray-500 dark:text-gray-400">
           Fördelat: {totalMultiProjectHours.toFixed(1)}h
+         </div>
+        )}
+        {hours > 10 && (
+         <div className="mt-3 flex items-center gap-2 text-sm text-red-700 dark:text-red-400 font-medium">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>Varning: Över 10 timmar/dag kan bryta mot arbetsmiljölagen</span>
          </div>
         )}
        </div>

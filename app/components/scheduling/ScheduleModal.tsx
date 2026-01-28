@@ -1,7 +1,7 @@
 // app/components/scheduling/ScheduleModal.tsx
 "use client";
 
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent, useMemo } from 'react';
 import type { ScheduleSlot, ScheduleFilters, CreateScheduleRequest, UpdateScheduleRequest, ShiftType } from '@/types/scheduling';
 import { useEmployees } from '@/hooks/useEmployees';
 import { useProjects } from '@/hooks/useProjects';
@@ -12,7 +12,7 @@ import {
 } from '@/hooks/useSchedules';
 import { toast } from '@/lib/toast';
 import { extractErrorMessage } from '@/lib/errorUtils';
-import { X, Clock, Plus, Trash2 } from 'lucide-react';
+import { X, Clock, Plus, Trash2, Calendar, Bell, AlertTriangle } from 'lucide-react';
 
 interface ScheduleModalProps {
  isOpen: boolean;
@@ -99,6 +99,28 @@ export function ScheduleModal({
  const [status, setStatus] = useState<ScheduleSlot['status']>('scheduled');
  const [notes, setNotes] = useState('');
  
+ // Enhanced pattern fields
+ type PatternType = 'single' | 'weekly' | 'recurring';
+ const [patternType, setPatternType] = useState<PatternType>('single');
+ const [patternStartDate, setPatternStartDate] = useState('');
+ const [patternEndDate, setPatternEndDate] = useState('');
+ const [workStartTime, setWorkStartTime] = useState('07:00');
+ const [workEndTime, setWorkEndTime] = useState('16:00');
+ const [breakMinutes, setBreakMinutes] = useState(45);
+ const [daysOfWeek, setDaysOfWeek] = useState<Set<number>>(new Set([1, 2, 3, 4, 5])); // Mon-Fri
+ 
+ // Notifications
+ const [notifyViaApp, setNotifyViaApp] = useState(true);
+ const [notifyViaSms, setNotifyViaSms] = useState(false);
+ const [notifyViaEmail, setNotifyViaEmail] = useState(true);
+ 
+ // Exceptions
+ const [exceptions, setExceptions] = useState<Array<{
+  date: string;
+  type: 'vacation' | 'sick' | 'leave' | 'training' | 'other';
+  reason?: string;
+ }>>([]);
+ 
  // Multiple projects for same day
  const [multipleProjects, setMultipleProjects] = useState(false);
  const [projectSlots, setProjectSlots] = useState<Array<{
@@ -120,6 +142,100 @@ export function ScheduleModal({
  const createSchedule = useCreateSchedule(filters);
  const updateSchedule = useUpdateSchedule(filters);
  const checkConflicts = useScheduleConflicts();
+
+ // Calculate hours per day
+ const dailyHours = useMemo(() => {
+  if (!workStartTime || !workEndTime) return 0;
+  const [sh, sm] = workStartTime.split(':').map(Number);
+  const [eh, em] = workEndTime.split(':').map(Number);
+  let hours = (eh + em / 60) - (sh + sm / 60);
+  if (hours <= 0) hours += 24; // Handle overnight
+  return Math.max(0, hours - breakMinutes / 60);
+ }, [workStartTime, workEndTime, breakMinutes]);
+
+ // Calculate total scheduled hours for pattern
+ const patternSummary = useMemo(() => {
+  if (patternType === 'single' || !patternStartDate || !patternEndDate) {
+   return { daysPerWeek: 0, hoursPerWeek: 0, totalHours: 0, totalDays: 0 };
+  }
+  
+  const start = new Date(patternStartDate);
+  const end = new Date(patternEndDate);
+  const dayCount = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
+  
+  // Count working days in range
+  let workingDays = 0;
+  for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+   // ISO weekday: Mon=1, Sun=7
+   const isoDay = d.getDay() === 0 ? 7 : d.getDay();
+   if (daysOfWeek.has(isoDay)) {
+    workingDays++;
+   }
+  }
+  
+  // Subtract exceptions
+  const exceptionDays = exceptions.filter(e => {
+   const exDate = new Date(e.date);
+   return exDate >= start && exDate <= end;
+  }).length;
+  
+  workingDays = Math.max(0, workingDays - exceptionDays);
+  
+  return {
+   daysPerWeek: daysOfWeek.size,
+   hoursPerWeek: daysOfWeek.size * dailyHours,
+   totalHours: workingDays * dailyHours,
+   totalDays: workingDays,
+  };
+ }, [patternType, patternStartDate, patternEndDate, daysOfWeek, dailyHours, exceptions]);
+
+ // Toggle day of week
+ const toggleDay = (day: number) => {
+  setDaysOfWeek(prev => {
+   const next = new Set(prev);
+   if (next.has(day)) {
+    next.delete(day);
+   } else {
+    next.add(day);
+   }
+   return next;
+  });
+ };
+
+ // Add exception
+ const addException = () => {
+  setExceptions([...exceptions, { date: '', type: 'vacation' }]);
+ };
+
+ // Remove exception
+ const removeException = (index: number) => {
+  setExceptions(exceptions.filter((_, i) => i !== index));
+ };
+
+ // Update exception
+ const updateException = (index: number, field: string, value: any) => {
+  const updated = [...exceptions];
+  updated[index] = { ...updated[index], [field]: value };
+  setExceptions(updated);
+ };
+
+ const DAY_NAMES = [
+  { num: 1, short: 'Mån', full: 'Måndag' },
+  { num: 2, short: 'Tis', full: 'Tisdag' },
+  { num: 3, short: 'Ons', full: 'Onsdag' },
+  { num: 4, short: 'Tor', full: 'Torsdag' },
+  { num: 5, short: 'Fre', full: 'Fredag' },
+  { num: 6, short: 'Lör', full: 'Lördag' },
+  { num: 7, short: 'Sön', full: 'Söndag' },
+ ];
+
+ const EXCEPTION_TYPES = [
+  { value: 'vacation', label: 'Semester' },
+  { value: 'sick', label: 'Sjukdom' },
+  { value: 'leave', label: 'Ledighet' },
+  { value: 'training', label: 'Utbildning' },
+  { value: 'other', label: 'Annat' },
+ ];
 
  // Effekt för att fylla formuläret vid redigering eller med standardvärden
  useEffect(() => {
@@ -444,8 +560,241 @@ export function ScheduleModal({
        </select>
       </div>
 
-      {/* Checkbox för flera projekt */}
+      {/* Pattern Type Selection */}
       {!schedule && (
+       <div className="space-y-3">
+        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+         Typ av pass
+        </label>
+        <div className="flex gap-2">
+         {[
+          { value: 'single', label: 'Engångs' },
+          { value: 'weekly', label: 'Veckopass' },
+          { value: 'recurring', label: 'Återkommande' },
+         ].map((type) => (
+          <button
+           key={type.value}
+           type="button"
+           onClick={() => setPatternType(type.value as PatternType)}
+           className={`flex-1 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+            patternType === type.value
+             ? 'bg-blue-500 text-white'
+             : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
+           }`}
+          >
+           {type.label}
+          </button>
+         ))}
+        </div>
+       </div>
+      )}
+
+      {/* Weekly/Recurring Pattern Options */}
+      {!schedule && patternType !== 'single' && (
+       <div className="space-y-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
+        {/* Date Range */}
+        <div className="grid grid-cols-2 gap-3">
+         <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+           Startdatum
+          </label>
+          <input
+           type="date"
+           value={patternStartDate}
+           onChange={(e) => setPatternStartDate(e.target.value)}
+           className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+           required
+          />
+         </div>
+         <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+           Slutdatum
+          </label>
+          <input
+           type="date"
+           value={patternEndDate}
+           onChange={(e) => setPatternEndDate(e.target.value)}
+           className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+          />
+         </div>
+        </div>
+
+        {/* Work Times */}
+        <div className="grid grid-cols-2 gap-3">
+         <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+           Arbetstid från
+          </label>
+          <input
+           type="time"
+           value={workStartTime}
+           onChange={(e) => setWorkStartTime(e.target.value)}
+           className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+          />
+         </div>
+         <div>
+          <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">
+           Arbetstid till
+          </label>
+          <input
+           type="time"
+           value={workEndTime}
+           onChange={(e) => setWorkEndTime(e.target.value)}
+           className="w-full px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm"
+          />
+         </div>
+        </div>
+
+        {/* Break Time */}
+        <div>
+         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Paustid (avdrag)
+         </label>
+         <div className="flex gap-2">
+          {[30, 45, 60].map((mins) => (
+           <button
+            key={mins}
+            type="button"
+            onClick={() => setBreakMinutes(mins)}
+            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+             breakMinutes === mins
+              ? 'bg-blue-500 text-white'
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+            }`}
+           >
+            {mins} min
+           </button>
+          ))}
+         </div>
+        </div>
+
+        {/* Days of Week */}
+        <div>
+         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2">
+          Arbetsdagar
+         </label>
+         <div className="flex gap-1">
+          {DAY_NAMES.map((day) => (
+           <button
+            key={day.num}
+            type="button"
+            onClick={() => toggleDay(day.num)}
+            className={`w-10 h-10 rounded-lg text-xs font-medium transition-all ${
+             daysOfWeek.has(day.num)
+              ? 'bg-blue-500 text-white'
+              : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600'
+            }`}
+            title={day.full}
+           >
+            {day.short}
+           </button>
+          ))}
+         </div>
+        </div>
+
+        {/* Summary */}
+        {patternSummary.totalDays > 0 && (
+         <div className="p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-sm">
+          <div className="flex justify-between text-green-800 dark:text-green-300">
+           <span>{patternSummary.daysPerWeek} dagar/vecka × {dailyHours.toFixed(1)}h</span>
+           <span className="font-semibold">{patternSummary.hoursPerWeek.toFixed(1)}h/vecka</span>
+          </div>
+          <div className="flex justify-between text-green-700 dark:text-green-400 mt-1 font-medium">
+           <span>Totalt för perioden:</span>
+           <span>{patternSummary.totalHours.toFixed(1)}h ({patternSummary.totalDays} dagar)</span>
+          </div>
+         </div>
+        )}
+
+        {/* Exceptions */}
+        <div>
+         <div className="flex items-center justify-between mb-2">
+          <label className="text-xs font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1">
+           <AlertTriangle className="w-3 h-3" />
+           Undantag/Frånvaro
+          </label>
+          <button
+           type="button"
+           onClick={addException}
+           className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1"
+          >
+           <Plus className="w-3 h-3" />
+           Lägg till
+          </button>
+         </div>
+         {exceptions.length > 0 && (
+          <div className="space-y-2">
+           {exceptions.map((exc, idx) => (
+            <div key={idx} className="flex gap-2 items-center">
+             <input
+              type="date"
+              value={exc.date}
+              onChange={(e) => updateException(idx, 'date', e.target.value)}
+              className="flex-1 px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs"
+             />
+             <select
+              value={exc.type}
+              onChange={(e) => updateException(idx, 'type', e.target.value)}
+              className="px-2 py-1.5 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs"
+             >
+              {EXCEPTION_TYPES.map((t) => (
+               <option key={t.value} value={t.value}>{t.label}</option>
+              ))}
+             </select>
+             <button
+              type="button"
+              onClick={() => removeException(idx)}
+              className="p-1 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded"
+             >
+              <Trash2 className="w-3 h-3" />
+             </button>
+            </div>
+           ))}
+          </div>
+         )}
+        </div>
+
+        {/* Notifications */}
+        <div>
+         <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-2 flex items-center gap-1">
+          <Bell className="w-3 h-3" />
+          Notifieringar
+         </label>
+         <div className="flex gap-3 flex-wrap">
+          <label className="flex items-center gap-1.5 cursor-pointer">
+           <input
+            type="checkbox"
+            checked={notifyViaApp}
+            onChange={(e) => setNotifyViaApp(e.target.checked)}
+            className="rounded text-blue-500 text-xs"
+           />
+           <span className="text-xs text-gray-700 dark:text-gray-300">App</span>
+          </label>
+          <label className="flex items-center gap-1.5 cursor-pointer">
+           <input
+            type="checkbox"
+            checked={notifyViaSms}
+            onChange={(e) => setNotifyViaSms(e.target.checked)}
+            className="rounded text-blue-500 text-xs"
+           />
+           <span className="text-xs text-gray-700 dark:text-gray-300">SMS</span>
+          </label>
+          <label className="flex items-center gap-1.5 cursor-pointer">
+           <input
+            type="checkbox"
+            checked={notifyViaEmail}
+            onChange={(e) => setNotifyViaEmail(e.target.checked)}
+            className="rounded text-blue-500 text-xs"
+           />
+           <span className="text-xs text-gray-700 dark:text-gray-300">E-post</span>
+          </label>
+         </div>
+        </div>
+       </div>
+      )}
+
+      {/* Checkbox för flera projekt (only for single shifts) */}
+      {!schedule && patternType === 'single' && (
        <div className="flex items-center">
         <input
          type="checkbox"
