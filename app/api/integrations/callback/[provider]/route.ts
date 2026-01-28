@@ -20,10 +20,11 @@ export async function GET(
   console.log('[OAuth Callback] Provider:', provider);
 
   // Get base URL for redirects (use env var, fallback to headers for error redirects only)
+  // IMPORTANT: Must include /app basePath, prefer x-forwarded-host for proxied requests
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (() => {
-   const host = request.headers.get('host');
-   const protocol = request.headers.get('x-forwarded-proto') || 'http';
-   return `${protocol}://${host}`;
+   const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+   const protocol = request.headers.get('x-forwarded-proto') || 'https';
+   return `${protocol}://${host}/app`;
   })();
   
   console.log('[OAuth Callback] Base URL:', baseUrl);
@@ -189,12 +190,13 @@ export async function GET(
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   
   // Get base URL for error redirect
-  const host = request.headers.get('host');
-  const protocol = request.headers.get('x-forwarded-proto') || 'http';
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}`;
+  // IMPORTANT: Must include /app basePath, prefer x-forwarded-host for proxied requests
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const protocol = request.headers.get('x-forwarded-proto') || 'https';
+  const errorBaseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}/app`;
   
   return NextResponse.redirect(
-   `${baseUrl}/settings/integrations?error=unknown&message=${encodeURIComponent(error.message)}`
+   `${errorBaseUrl}/settings/integrations?error=unknown&message=${encodeURIComponent(error.message)}`
   );
  }
 }

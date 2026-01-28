@@ -50,9 +50,18 @@ export async function GET(
   // Generate authorization URL
   // Use request origin to support ngrok and other dynamic URLs
   // Note: OAuth providers (Fortnox/Visma) require redirect URIs to be pre-registered
-  const host = request.headers.get('host') || request.headers.get('x-forwarded-host');
+  // IMPORTANT: Must include /app basePath since app runs under that prefix
+  // Prefer x-forwarded-host (set by Vercel/proxies) over host header
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
   const proto = request.headers.get('x-forwarded-proto') || 'https';
-  const baseUrl = host ? `${proto}://${host}` : undefined;
+  const baseUrl = host ? `${proto}://${host}/app` : undefined;
+  
+  console.log('[Authorize] Headers:', {
+   host: request.headers.get('host'),
+   xForwardedHost: request.headers.get('x-forwarded-host'),
+   xForwardedProto: request.headers.get('x-forwarded-proto'),
+   resolvedBaseUrl: baseUrl,
+  });
   
   const oauthManager = new OAuthManager();
   const authUrl = oauthManager.generateAuthorizationUrl(provider, tenantId, baseUrl);
