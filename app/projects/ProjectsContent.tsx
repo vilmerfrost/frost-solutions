@@ -791,7 +791,7 @@ export default function ProjectsContent() {
              
              setDeletingId(projectId)
              try {
-              const response = await fetch(`/api/projects/${projectId}`, {
+              const response = await fetch(`${BASE_PATH}/api/projects/${projectId}`, {
                method: 'DELETE',
               })
               const result = await response.json()

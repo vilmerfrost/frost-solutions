@@ -8,6 +8,7 @@ import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import { useAdmin } from '@/hooks/useAdmin'
 import { DollarSign, Edit2, Trash2 } from 'lucide-react'
+import { BASE_PATH } from '@/utils/url'
 
 interface Employee {
  id: string
@@ -267,7 +268,7 @@ export default function EmployeesPage() {
               e.stopPropagation()
               if (confirm(`Är du säker på att du vill ta bort ${emp.name}? Detta kan inte ångras.`)) {
                try {
-                const response = await fetch(`/api/employees/${emp.id}`, {
+                const response = await fetch(`${BASE_PATH}/api/employees/${emp.id}`, {
                  method: 'DELETE',
                 })
                 const result = await response.json()

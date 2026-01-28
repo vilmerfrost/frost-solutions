@@ -12,6 +12,7 @@ import FilterSortBar from '@/components/FilterSortBar'
 import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
 import { PermissionGuard } from '@/components/rbac/PermissionGuard'
 import { Archive, RotateCcw, Trash2 } from 'lucide-react'
+import { BASE_PATH } from '@/utils/url'
 
 interface Client {
  id: string
@@ -163,7 +164,7 @@ export default function ClientsPage() {
 
   setDeletingId(clientId)
   try {
-   const response = await fetch(`/api/clients/${clientId}/delete`, {
+   const response = await fetch(`${BASE_PATH}/api/clients/${clientId}/delete`, {
     method: 'DELETE',
    })
    const result = await response.json()
@@ -186,7 +187,7 @@ export default function ClientsPage() {
  async function handleToggleArchive(clientId: string, currentArchived: boolean) {
   if (!tenantId) return
   try {
-   const response = await fetch(`/api/clients/${clientId}/archive`, {
+   const response = await fetch(`${BASE_PATH}/api/clients/${clientId}/archive`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ action: currentArchived ? 'restore' : 'archive' }),
