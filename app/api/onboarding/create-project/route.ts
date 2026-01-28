@@ -7,7 +7,7 @@ import { createClient } from '@supabase/supabase-js'
  */
 export async function POST(req: Request) {
  try {
-  const { tenantId, name, clientId, baseRate, budgetedHours } = await req.json()
+  const { tenantId, name, clientId, baseRate, budgetedHours, siteAddress } = await req.json()
 
   if (!tenantId || !name) {
    return NextResponse.json(
@@ -195,9 +195,12 @@ export async function POST(req: Request) {
   if (budgetedHours && !isNaN(Number(budgetedHours))) {
    projectPayload.budgeted_hours = Number(budgetedHours)
   }
+  if (siteAddress && String(siteAddress).trim()) {
+   projectPayload.site_address = String(siteAddress).trim()
+  }
 
   // Try to add status field (if it exists)
-  projectPayload.status = 'planned'
+  projectPayload.status = 'active'
 
   console.log('Attempting to create project with payload:', JSON.stringify(projectPayload, null, 2))
   console.log('Tenant ID being used:', verifiedTenantId, 'Type:', typeof verifiedTenantId, 'Length:', verifiedTenantId?.length)

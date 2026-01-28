@@ -35,6 +35,9 @@ export interface Client {
  updated_at?: string
 }
 
+export type PriceModel = 'hourly' | 'fixed' | 'budget'
+export type ProjectStatus = 'planned' | 'active' | 'completed' | 'archived'
+
 export interface Project {
  id: string
  tenant_id: string
@@ -44,7 +47,25 @@ export interface Project {
  customer_orgnr?: string
  base_rate_sek?: number
  budgeted_hours?: number
- status?: string
+ budget?: number
+ hourly_rate?: number
+ budget_hours?: number
+ status?: ProjectStatus
+ // New fields
+ price_model?: PriceModel
+ markup_percent?: number
+ site_address?: string
+ description?: string
+ project_manager_id?: string
+ // ROT/RUT fields
+ is_rot_rut?: boolean
+ property_designation?: string
+ apartment_number?: string
+ brf_org_number?: string
+ // Dates
+ start_date?: string
+ end_date?: string
+ is_active?: boolean
  created_at?: string
  updated_at?: string
 }

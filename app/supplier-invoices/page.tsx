@@ -43,7 +43,7 @@ export default function SupplierInvoicesPage() {
        </div>
        <Link href="/supplier-invoices/new" className="w-full sm:w-auto">
         <Button
-         size="default"
+         size="md"
          className="w-full sm:w-auto shadow-xl bg-primary-500 hover:bg-primary-600"
         >
          <Plus size={20} className="mr-2" />

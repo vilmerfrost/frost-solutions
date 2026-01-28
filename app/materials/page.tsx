@@ -55,7 +55,7 @@ export default function MaterialsPage() {
         </div>
        </div>
        <Link href="/materials/new" className="w-full sm:w-auto">
-        <Button size="default" className="w-full sm:w-auto shadow-md bg-success-600 hover:bg-success-700">
+        <Button size="md" className="w-full sm:w-auto shadow-md bg-success-600 hover:bg-success-700">
          <Plus size={20} className="mr-2" />
          Nytt Material
         </Button>

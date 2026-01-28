@@ -37,6 +37,16 @@ type ProjectRecord = {
   name: string
   org_number?: string | null
  } | null
+ // New fields
+ price_model?: 'hourly' | 'fixed' | 'budget' | null
+ markup_percent?: number | null
+ site_address?: string | null
+ description?: string | null
+ is_rot_rut?: boolean | null
+ property_designation?: string | null
+ apartment_number?: string | null
+ start_date?: string | null
+ end_date?: string | null
 }
 
 export default function ProjectDetailPage() {
@@ -551,11 +561,78 @@ export default function ProjectDetailPage() {
       >
        ← Tillbaka
       </button>
-      <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">{project.name}</h1>
-      <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
-       {(project as any)?.clients?.name || project.customer_name || 'Ingen kund angiven'}
-      </p>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+       <div>
+        <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">{project.name}</h1>
+        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
+         {(project as any)?.clients?.name || project.customer_name || 'Ingen kund angiven'}
+        </p>
+       </div>
+       {/* Status badge */}
+       <div className="flex items-center gap-2">
+        {(project as ProjectRecord).is_rot_rut && (
+         <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold rounded-full">
+          ROT-avdrag
+         </span>
+        )}
+        {(project as ProjectRecord).price_model && (
+         <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold rounded-full">
+          {(project as ProjectRecord).price_model === 'hourly' ? 'Löpande' : 
+           (project as ProjectRecord).price_model === 'fixed' ? 'Fast pris' : 'Budget'}
+         </span>
+        )}
+       </div>
+      </div>
      </div>
+
+     {/* Project Info Card - shows if we have additional info */}
+     {((project as ProjectRecord).site_address || (project as ProjectRecord).description || (project as ProjectRecord).start_date || (project as ProjectRecord).property_designation) && (
+      <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-md p-4 sm:p-6 border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8">
+       <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Projektinformation</h3>
+       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {(project as ProjectRecord).site_address && (
+         <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Objektsadress</p>
+          <p className="text-sm text-gray-900 dark:text-white">{(project as ProjectRecord).site_address}</p>
+         </div>
+        )}
+        {((project as ProjectRecord).start_date || (project as ProjectRecord).end_date) && (
+         <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Period</p>
+          <p className="text-sm text-gray-900 dark:text-white">
+           {(project as ProjectRecord).start_date ? new Date((project as ProjectRecord).start_date!).toLocaleDateString('sv-SE') : '?'} 
+           {' - '} 
+           {(project as ProjectRecord).end_date ? new Date((project as ProjectRecord).end_date!).toLocaleDateString('sv-SE') : 'pågående'}
+          </p>
+         </div>
+        )}
+        {(project as ProjectRecord).markup_percent && (
+         <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Materialpåslag</p>
+          <p className="text-sm text-gray-900 dark:text-white">{(project as ProjectRecord).markup_percent}%</p>
+         </div>
+        )}
+        {(project as ProjectRecord).property_designation && (
+         <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Fastighetsbeteckning (ROT)</p>
+          <p className="text-sm text-gray-900 dark:text-white">{(project as ProjectRecord).property_designation}</p>
+         </div>
+        )}
+        {(project as ProjectRecord).apartment_number && (
+         <div>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Lägenhetsnummer</p>
+          <p className="text-sm text-gray-900 dark:text-white">{(project as ProjectRecord).apartment_number}</p>
+         </div>
+        )}
+        {(project as ProjectRecord).description && (
+         <div className="sm:col-span-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Beskrivning</p>
+          <p className="text-sm text-gray-900 dark:text-white whitespace-pre-line">{(project as ProjectRecord).description}</p>
+         </div>
+        )}
+       </div>
+      </div>
+     )}
 
      {/* Stats Cards */}
      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">

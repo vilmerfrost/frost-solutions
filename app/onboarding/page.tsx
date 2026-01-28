@@ -38,6 +38,7 @@ export default function OnboardingPage() {
  const [projectName, setProjectName] = useState('')
  const [projectBudget, setProjectBudget] = useState('')
  const [projectRate, setProjectRate] = useState('360')
+ const [projectSiteAddress, setProjectSiteAddress] = useState('')
 
  async function handleStep1() {
   if (!companyName.trim()) {
@@ -286,6 +287,7 @@ export default function OnboardingPage() {
      clientId: clientId || null, // Use client ID from step 2 if available
      baseRate: Number(projectRate) || 360,
      budgetedHours: projectBudget ? Number(projectBudget) : null,
+     siteAddress: projectSiteAddress || null,
     }),
    })
 
@@ -565,7 +567,19 @@ export default function OnboardingPage() {
         value={projectName}
         onChange={(e) => setProjectName(e.target.value)}
         className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-        placeholder="Altanbygge, Köksrenovering..."
+        placeholder="Renovering Kök Storgatan 4"
+       />
+      </div>
+      <div>
+       <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+        Objektsadress <span className="text-xs text-gray-400 font-normal">(var jobbet utförs)</span>
+       </label>
+       <input
+        type="text"
+        value={projectSiteAddress}
+        onChange={(e) => setProjectSiteAddress(e.target.value)}
+        className="w-full px-4 py-3 rounded-[8px] border-2 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+        placeholder="Storgatan 4, 123 45 Stockholm"
        />
       </div>
       <div className="grid grid-cols-2 gap-4">

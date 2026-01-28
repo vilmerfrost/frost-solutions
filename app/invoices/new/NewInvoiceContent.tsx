@@ -34,6 +34,13 @@ export default function NewInvoiceContent() {
  const [loadingProject, setLoadingProject] = useState(!!initialProjectId || !!rotApplicationId)
  const [loadingProjects, setLoadingProjects] = useState(false)
  const [rotApplication, setRotApplication] = useState<any>(null)
+ const [projectRotInfo, setProjectRotInfo] = useState<{
+  is_rot_rut: boolean
+  property_designation?: string
+  apartment_number?: string
+  price_model?: string
+  markup_percent?: number
+ } | null>(null)
 
  // Fetch clients on mount
  useEffect(() => {
@@ -113,7 +120,7 @@ export default function NewInvoiceContent() {
     // Fetch project details with client relation
     const projectResult: any = await supabase
      .from('projects')
-     .select('customer_name, base_rate_sek, client_id, clients(id, name, org_number)')
+     .select('customer_name, base_rate_sek, client_id, is_rot_rut, property_designation, apartment_number, price_model, markup_percent, clients(id, name, org_number)')
      .eq('id', projectId)
      .eq('tenant_id', tenantId as string)
      .single()
@@ -128,6 +135,19 @@ export default function NewInvoiceContent() {
     }
 
     if (projectData) {
+     // Store ROT/RUT info from project
+     if (projectData.is_rot_rut) {
+      setProjectRotInfo({
+       is_rot_rut: true,
+       property_designation: projectData.property_designation,
+       apartment_number: projectData.apartment_number,
+       price_model: projectData.price_model,
+       markup_percent: projectData.markup_percent,
+      })
+     } else {
+      setProjectRotInfo(null)
+     }
+
      // Prefer client from relation if available
      const projectClient = projectData?.clients
      if (projectClient?.id) {
@@ -368,6 +388,24 @@ export default function NewInvoiceContent() {
         </p>
         <p className="text-xs text-success-700 dark:text-success-400">
          Fakturabeloppet är justerat med ROT-avdrag ({Math.min(rotApplication.work_cost_sek * 0.3, 75000).toLocaleString('sv-SE', { style: 'currency', currency: 'SEK' })}).
+        </p>
+       </div>
+      )}
+
+      {/* Show project ROT info */}
+      {projectRotInfo?.is_rot_rut && !rotApplication && (
+       <div className="mt-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+        <p className="text-sm font-semibold text-green-800 dark:text-green-300 mb-2">
+         ROT-projekt
+        </p>
+        <p className="text-xs text-green-700 dark:text-green-400">
+         Detta projekt är markerat för ROT-avdrag.
+         {projectRotInfo.property_designation && (
+          <span className="block mt-1">Fastighetsbeteckning: <strong>{projectRotInfo.property_designation}</strong></span>
+         )}
+         {projectRotInfo.apartment_number && (
+          <span className="block">Lägenhetsnummer: <strong>{projectRotInfo.apartment_number}</strong></span>
+         )}
         </p>
        </div>
       )}
