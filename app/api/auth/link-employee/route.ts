@@ -1,20 +1,91 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { createClient as createAdminClient } from '@supabase/supabase-js'
+import { checkRateLimit, getClientIP, isValidUUID, isValidEmail } from '@/lib/security'
 
 /**
  * API route för att automatiskt länka employee-record till auth_user_id
  * Används när en användare loggar in och det finns en employee-record med samma email
  * men utan auth_user_id kopplad
+ * 
+ * SECURITY:
+ * - Requires authentication
+ * - Rate limited to prevent abuse
+ * - Only allows linking for the authenticated user
  */
 export async function POST(req: Request) {
  try {
+  // SECURITY: Rate limiting - max 10 link attempts per IP per hour
+  const clientIP = getClientIP(req)
+  const rateLimitResult = checkRateLimit(`link-employee:${clientIP}`, 10, 60 * 60 * 1000)
+  if (!rateLimitResult.allowed) {
+   return NextResponse.json(
+    { error: 'För många förfrågningar. Försök igen senare.' },
+    { 
+     status: 429,
+     headers: { 'Retry-After': String(rateLimitResult.retryAfter || 3600) }
+    }
+   )
+  }
+
+  // SECURITY: Verify authentication
+  const supabase = createClient()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+
+  if (userError || !user) {
+   return NextResponse.json(
+    { error: 'Not authenticated' },
+    { status: 401 }
+   )
+  }
+
   const { userId, email } = await req.json()
 
   if (!userId || !email) {
    return NextResponse.json(
     { error: 'userId and email are required' },
     { status: 400 }
+   )
+  }
+
+  // SECURITY: Validate input formats
+  if (!isValidUUID(userId)) {
+   return NextResponse.json(
+    { error: 'Invalid userId format' },
+    { status: 400 }
+   )
+  }
+
+  if (!isValidEmail(email)) {
+   return NextResponse.json(
+    { error: 'Invalid email format' },
+    { status: 400 }
+   )
+  }
+
+  // SECURITY: Only allow linking for the authenticated user
+  if (user.id !== userId) {
+   console.warn('SECURITY: Attempt to link employee for different user', {
+    authenticatedUser: user.id,
+    requestedUserId: userId,
+    ip: clientIP
+   })
+   return NextResponse.json(
+    { error: 'Cannot link employee for another user' },
+    { status: 403 }
+   )
+  }
+
+  // SECURITY: Verify email matches the authenticated user's email
+  if (user.email?.toLowerCase() !== email.toLowerCase()) {
+   console.warn('SECURITY: Email mismatch in link-employee', {
+    userEmail: user.email,
+    requestedEmail: email,
+    ip: clientIP
+   })
+   return NextResponse.json(
+    { error: 'Email does not match authenticated user' },
+    { status: 403 }
    )
   }
 

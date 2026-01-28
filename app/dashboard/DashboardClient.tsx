@@ -1,15 +1,37 @@
 'use client'
 
-import { useEffect, useState, useMemo, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback, Suspense } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import { apiFetch } from '@/lib/http/fetcher'
 import Sidebar from '@/components/Sidebar'
-import TimeClock from '@/components/TimeClock'
-import NotificationCenter from '@/components/NotificationCenter'
-import { WeeklySchedules } from '@/components/dashboard/WeeklySchedulesComponent'
-import InvoiceList from '@/components/invoice-list'
+
+// Lazy load heavy components for better initial page load
+const TimeClock = dynamic(() => import('@/components/TimeClock'), {
+ loading: () => <div className="h-48 bg-gray-50 rounded-lg animate-pulse" />,
+ ssr: false,
+})
+
+const NotificationCenter = dynamic(() => import('@/components/NotificationCenter'), {
+ loading: () => <div className="h-12 bg-gray-50 rounded-lg animate-pulse" />,
+})
+
+const WeeklySchedules = dynamic(
+ () => import('@/components/dashboard/WeeklySchedulesComponent').then(mod => ({ default: mod.WeeklySchedules })),
+ { loading: () => <div className="h-64 bg-gray-50 rounded-lg animate-pulse" /> }
+)
+
+const InvoiceList = dynamic(() => import('@/components/invoice-list'), {
+ loading: () => <div className="h-64 bg-gray-50 rounded-lg animate-pulse" />,
+})
+
+// Subscription banner - lazy load since it's not critical for initial render
+const SubscriptionBanner = dynamic(
+ () => import('@/components/subscription/SubscriptionBanner').then(mod => ({ default: mod.SubscriptionBanner })),
+ { ssr: false }
+)
 
 interface ProjectType {
  id: string
@@ -461,6 +483,9 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
    
    {/* Main content */}
    <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
+    {/* Subscription Banner - Shows trial/payment warnings */}
+    <SubscriptionBanner />
+    
     <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full">
      {/* Header */}
      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">

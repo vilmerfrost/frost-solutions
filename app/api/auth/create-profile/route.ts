@@ -1,12 +1,32 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/utils/supabase/server'
+import { checkRateLimit, getClientIP, isValidUUID, isValidEmail } from '@/lib/security'
 
 /**
  * API route för att skapa användarprofil med trial-info under signup
  * Använder service role för att kringgå RLS
+ * 
+ * SECURITY: 
+ * - Rate limited to prevent abuse
+ * - Validates userId format
+ * - Only allows creating profile for the authenticated user (or during signup flow)
  */
 export async function POST(req: Request) {
  try {
+  // SECURITY: Rate limiting - max 5 profile creations per IP per hour
+  const clientIP = getClientIP(req)
+  const rateLimitResult = checkRateLimit(`create-profile:${clientIP}`, 5, 60 * 60 * 1000)
+  if (!rateLimitResult.allowed) {
+   return NextResponse.json(
+    { error: 'För många förfrågningar. Försök igen senare.' },
+    { 
+     status: 429,
+     headers: { 'Retry-After': String(rateLimitResult.retryAfter || 3600) }
+    }
+   )
+  }
+
   const { userId, fullName, email, trialStartedAt, trialEndsAt, subscriptionStatus } = await req.json()
 
   if (!userId) {
@@ -14,6 +34,47 @@ export async function POST(req: Request) {
     { error: 'userId is required' },
     { status: 400 }
    )
+  }
+
+  // SECURITY: Validate userId is a valid UUID
+  if (!isValidUUID(userId)) {
+   return NextResponse.json(
+    { error: 'Invalid userId format' },
+    { status: 400 }
+   )
+  }
+
+  // SECURITY: Validate email format if provided
+  if (email && !isValidEmail(email)) {
+   return NextResponse.json(
+    { error: 'Invalid email format' },
+    { status: 400 }
+   )
+  }
+
+  // SECURITY: Try to verify the requesting user matches the userId being created
+  // This prevents creating profiles for other users
+  // Note: During signup flow, user may not have a session yet, so we allow
+  // profile creation if no session exists (the rate limiting protects against abuse)
+  try {
+   const supabase = createServerClient()
+   const { data: { user } } = await supabase.auth.getUser()
+   
+   // If there's an authenticated user, they can only create their own profile
+   if (user && user.id !== userId) {
+    console.warn('SECURITY: Attempt to create profile for different user', {
+     authenticatedUser: user.id,
+     requestedUserId: userId,
+     ip: clientIP
+    })
+    return NextResponse.json(
+     { error: 'Cannot create profile for another user' },
+     { status: 403 }
+    )
+   }
+  } catch {
+   // No session available - this is okay during signup flow
+   // Rate limiting provides protection against abuse
   }
 
   // Använd service role för att kringgå RLS

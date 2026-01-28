@@ -1,9 +1,29 @@
 import { NextResponse } from 'next/server';
+import { checkRateLimit, getClientIP } from '@/lib/security';
 
 const isProd = process.env.NODE_ENV === 'production';
 const ORIGIN = process.env.NEXT_PUBLIC_SITE_URL; // sätt i .env
 
+/**
+ * SECURITY:
+ * - Rate limited to prevent brute force attacks
+ * - Origin validation for CSRF protection
+ */
 export async function POST(req: Request) {
+ // SECURITY: Rate limiting - max 30 session attempts per IP per 15 minutes
+ // (slightly higher than login to account for token refresh)
+ const clientIP = getClientIP(req);
+ const rateLimitResult = checkRateLimit(`set-session:${clientIP}`, 30, 15 * 60 * 1000);
+ if (!rateLimitResult.allowed) {
+  return NextResponse.json(
+   { error: 'Too many requests. Please try again later.' },
+   { 
+    status: 429,
+    headers: { 'Retry-After': String(rateLimitResult.retryAfter || 900) }
+   }
+  );
+ }
+
  // Enkel Origin/Referer-kontroll (grundläggande CSRF-skydd)
  // I development, tillåt localhost på alla portar för att hantera olika enheter
  const origin = req.headers.get('origin') || req.headers.get('referer') || '';

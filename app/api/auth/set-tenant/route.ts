@@ -1,8 +1,29 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js';
+import { checkRateLimit, getClientIP, isValidUUID } from '@/lib/security'
 
+/**
+ * SECURITY:
+ * - Requires authentication
+ * - Rate limited to prevent abuse
+ * - Only allows setting tenant for the authenticated user
+ * - Validates tenant_id format
+ */
 export async function POST(req: Request) {
  try {
+  // SECURITY: Rate limiting - max 20 set-tenant requests per IP per hour
+  const clientIP = getClientIP(req)
+  const rateLimitResult = checkRateLimit(`set-tenant:${clientIP}`, 20, 60 * 60 * 1000)
+  if (!rateLimitResult.allowed) {
+   return NextResponse.json(
+    { error: 'För många förfrågningar. Försök igen senare.' },
+    { 
+     status: 429,
+     headers: { 'Retry-After': String(rateLimitResult.retryAfter || 3600) }
+    }
+   )
+  }
+
   const body = await req.json()
   const tenantId = body?.tenant_id ?? body?.tenantId
   let userId = body?.user_id ?? body?.userId
@@ -11,16 +32,33 @@ export async function POST(req: Request) {
    return NextResponse.json({ error: 'tenant_id is required' }, { status: 400 })
   }
 
-  // If userId not provided, try to get it from the current session
-  if (!userId) {
-   try {
-    const { createClient: createServerClient } = await import('@/utils/supabase/server')
-    const supabase = createServerClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    userId = user?.id ?? null
-   } catch {
-    // Ignore errors
-   }
+  // SECURITY: Validate tenant_id format
+  if (!isValidUUID(tenantId)) {
+   return NextResponse.json({ error: 'Invalid tenant_id format' }, { status: 400 })
+  }
+
+  // SECURITY: ALWAYS get userId from the current session (authenticated user)
+  // Never trust userId from the request body for security-critical operations
+  const { createClient: createServerClient } = await import('@/utils/supabase/server')
+  const supabase = createServerClient()
+  const { data: { user }, error: userError } = await supabase.auth.getUser()
+  
+  if (userError || !user) {
+   return NextResponse.json({ error: 'Not authenticated' }, { status: 401 })
+  }
+
+  // SECURITY: Always use the authenticated user's ID, ignore any userId from request
+  userId = user.id
+  
+  // SECURITY: If request body contained a different userId, log a warning
+  const requestedUserId = body?.user_id ?? body?.userId
+  if (requestedUserId && requestedUserId !== userId) {
+   console.warn('SECURITY: Attempt to set tenant for different user blocked', {
+    authenticatedUser: userId,
+    requestedUserId: requestedUserId,
+    ip: clientIP
+   })
+   // Continue with the authenticated user's ID, don't return error
   }
 
   let updatedUser: any = null

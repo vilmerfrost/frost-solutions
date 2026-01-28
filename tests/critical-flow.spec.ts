@@ -7,7 +7,8 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Authentication Pages', () => {
   
-  test('Homepage loads and shows login/signup options', async ({ page }) => {
+  test.skip('Homepage loads and shows login/signup options', async ({ page }) => {
+    // SKIPPED: Homepage is in separate marketing repo
     await page.goto('/');
     
     // Should show the landing page with Frost Solutions branding
@@ -19,7 +20,7 @@ test.describe('Authentication Pages', () => {
   });
 
   test('Login page loads correctly', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/app/login');
     
     // Should show login form
     await expect(page.locator('text=Frost Solutions')).toBeVisible();
@@ -38,16 +39,17 @@ test.describe('Authentication Pages', () => {
   });
 
   test('Signup page loads correctly', async ({ page }) => {
-    await page.goto('/signup');
+    await page.goto('/app/signup');
+    await page.waitForLoadState('networkidle');
     
     // Should show signup form
-    await expect(page.locator('text=Kom igång med Frost')).toBeVisible();
     await expect(page.locator('text=30 dagars gratis provperiod')).toBeVisible();
+    await expect(page.getByRole('button', { name: /Skapa gratis konto/i })).toBeVisible();
     
     // Should have all required fields
-    await expect(page.locator('input[type="text"]')).toBeVisible(); // Full name
-    await expect(page.locator('input[type="email"]')).toBeVisible();
-    await expect(page.locator('input[type="password"]')).toBeVisible();
+    await expect(page.getByLabel(/Fullständigt namn/i)).toBeVisible();
+    await expect(page.getByLabel(/E-postadress/i)).toBeVisible();
+    await expect(page.getByLabel(/Lösenord/i)).toBeVisible();
     
     // Should have submit button
     await expect(page.locator('text=Skapa gratis konto')).toBeVisible();
@@ -62,7 +64,7 @@ test.describe('Authentication Pages', () => {
   });
 
   test('Login page magic link flow shows success message', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/app/login');
     
     // Fill in email
     await page.fill('input[type="email"]', 'test@example.com');
@@ -76,7 +78,7 @@ test.describe('Authentication Pages', () => {
   });
 
   test('Signup form validates required fields', async ({ page }) => {
-    await page.goto('/signup');
+    await page.goto('/app/signup');
     
     // Try to submit empty form
     await page.click('button:has-text("Skapa gratis konto")');
@@ -85,48 +87,50 @@ test.describe('Authentication Pages', () => {
     await expect(page).toHaveURL(/signup/);
   });
 
-  test('Navigation from homepage to signup works', async ({ page }) => {
+  test.skip('Navigation from homepage to signup works', async ({ page }) => {
+    // SKIPPED: Homepage is in separate marketing repo
     await page.goto('/');
     
     // Click signup button
     await page.click('text=Kom igång gratis');
     
     // Should navigate to signup
-    await expect(page).toHaveURL(/signup/);
+    await expect(page).toHaveURL(/\/app\/signup/);
   });
 
-  test('Navigation from homepage to login works', async ({ page }) => {
+  test.skip('Navigation from homepage to login works', async ({ page }) => {
+    // SKIPPED: Homepage is in separate marketing repo
     await page.goto('/');
     
     // Click login button  
     await page.click('button:has-text("Logga in")');
     
     // Should navigate to login
-    await expect(page).toHaveURL(/login/);
+    await expect(page).toHaveURL(/\/app\/login/);
   });
 
   test('Navigation from login to signup works', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/app/login');
     
     // Click signup link
     await page.click('text=Skapa konto gratis');
     
     // Should navigate to signup
-    await expect(page).toHaveURL(/signup/);
+    await expect(page).toHaveURL(/\/app\/signup/);
   });
 
   test('Navigation from signup to login works', async ({ page }) => {
-    await page.goto('/signup');
+    await page.goto('/app/signup');
     await page.waitForLoadState('networkidle');
     
     // Click login link and wait for navigation
     await Promise.all([
-      page.waitForURL(/login/, { timeout: 15000 }),
+      page.waitForURL(/\/app\/login/, { timeout: 15000 }),
       page.getByRole('link', { name: 'Logga in' }).click()
     ]);
     
     // Verify we're on login page
-    await expect(page).toHaveURL(/login/);
+    await expect(page).toHaveURL(/\/app\/login/);
   });
 });
 
@@ -134,7 +138,7 @@ test.describe('Onboarding Page', () => {
   
   test('Onboarding page loads with company form', async ({ page }) => {
     // Note: This requires authentication, may redirect to login
-    await page.goto('/onboarding');
+    await page.goto('/app/onboarding');
     
     // Either shows onboarding or redirects to login
     const url = page.url();
@@ -148,7 +152,7 @@ test.describe('Onboarding Page', () => {
 test.describe('Visual Regression Tests', () => {
   
   test('Login page looks correct', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/app/login');
     await page.waitForLoadState('networkidle');
     
     await expect(page).toHaveScreenshot('login-page.png', {
@@ -158,7 +162,7 @@ test.describe('Visual Regression Tests', () => {
   });
 
   test('Signup page looks correct', async ({ page }) => {
-    await page.goto('/signup');
+    await page.goto('/app/signup');
     await page.waitForLoadState('networkidle');
     
     await expect(page).toHaveScreenshot('signup-page.png', {
@@ -167,7 +171,8 @@ test.describe('Visual Regression Tests', () => {
     });
   });
 
-  test('Homepage looks correct', async ({ page }) => {
+  test.skip('Homepage looks correct', async ({ page }) => {
+    // SKIPPED: Homepage is in separate marketing repo
     await page.goto('/');
     await page.waitForLoadState('networkidle');
     
@@ -183,7 +188,7 @@ test.describe('Mobile Responsive Tests', () => {
   test.use({ viewport: { width: 375, height: 667 } }); // iPhone SE
 
   test('Login page is responsive on mobile', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/app/login');
     
     // Form should still be visible and usable
     await expect(page.locator('input[type="email"]')).toBeVisible();
@@ -194,16 +199,17 @@ test.describe('Mobile Responsive Tests', () => {
   });
 
   test('Signup page is responsive on mobile', async ({ page }) => {
-    await page.goto('/signup');
+    await page.goto('/app/signup');
     
     // Form should still be visible and usable
-    await expect(page.locator('input[type="text"]')).toBeVisible();
+    await expect(page.getByLabel(/Fullständigt namn/i)).toBeVisible();
     await expect(page.locator('input[type="email"]')).toBeVisible();
     await expect(page.locator('input[type="password"]')).toBeVisible();
     await expect(page.locator('button:has-text("Skapa gratis konto")')).toBeVisible();
   });
 
-  test('Homepage is responsive on mobile', async ({ page }) => {
+  test.skip('Homepage is responsive on mobile', async ({ page }) => {
+    // SKIPPED: Homepage is in separate marketing repo
     await page.goto('/');
     
     // Buttons should be visible
@@ -215,7 +221,7 @@ test.describe('Mobile Responsive Tests', () => {
 test.describe('Accessibility Tests', () => {
   
   test('Login page has proper form labels', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/app/login');
     
     // Email input should have associated label
     const emailLabel = page.locator('label:has-text("E-post")');
@@ -223,7 +229,7 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('Signup page has proper form labels', async ({ page }) => {
-    await page.goto('/signup');
+    await page.goto('/app/signup');
     
     // All inputs should have associated labels
     await expect(page.locator('label:has-text("Fullständigt namn")')).toBeVisible();
@@ -232,7 +238,7 @@ test.describe('Accessibility Tests', () => {
   });
 
   test('Buttons are keyboard accessible', async ({ page }) => {
-    await page.goto('/login');
+    await page.goto('/app/login');
     
     // Tab to email input
     await page.keyboard.press('Tab');
@@ -249,7 +255,7 @@ test.describe('Accessibility Tests', () => {
 test.describe('Error Handling', () => {
   
   test('Shows error for invalid signup data', async ({ page }) => {
-    await page.goto('/signup');
+    await page.goto('/app/signup');
     
     // Fill form with short password
     await page.fill('input[type="text"]', 'Test User');
@@ -260,6 +266,6 @@ test.describe('Error Handling', () => {
     await page.click('button:has-text("Skapa gratis konto")');
     
     // Should stay on page (HTML5 validation for minLength)
-    await expect(page).toHaveURL(/signup/);
+    await expect(page).toHaveURL(/\/app\/signup/);
   });
 });
