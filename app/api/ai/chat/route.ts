@@ -15,7 +15,7 @@ const BodySchema = z.object({
  pageData: z.record(z.string(), z.unknown()).default({}),
  query: z.string().min(1),
  useCache: z.boolean().default(true),
- model: z.enum(['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'gemini-1.5-flash', 'gemini-2.5-flash']).default('gpt-4'),
+ model: z.enum(['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'gemini-1.5-flash', 'gemini-2.5-flash']).default('gemini-2.5-flash'),
 })
 
 export const runtime = 'nodejs'

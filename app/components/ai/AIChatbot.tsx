@@ -123,7 +123,7 @@ export function AIChatbot() {
      pageContext: getPageContext(),
      pageData: {},
      conversationId: conversationId || undefined, // Don't send null
-     model: 'gpt-4'
+     model: 'gemini-2.5-flash'
     }),
     signal: abortControllerRef.current.signal
    })
