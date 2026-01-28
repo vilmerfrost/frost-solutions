@@ -14,10 +14,10 @@ export async function GET(req: Request) {
  const tenantId = searchParams.get('tenant_id')
  const status = searchParams.get('status') // 'pending', 'approved', 'rejected'
 
- // Try with relations first
+ // Fetch without relations and enrich manually
  let query = supabase
   .from('aeta_requests')
-  .select('*, projects(name), employees(full_name)')
+  .select('*')
   .order('created_at', { ascending: false })
 
  if (tenantId) {
@@ -28,75 +28,50 @@ export async function GET(req: Request) {
   query = query.eq('status', status)
  }
 
- let { data, error } = await query
+ const { data: simpleData, error: simpleError } = await query
 
- // If relation fails, fetch without relations and enrich manually
- if (error && (error.code === 'PGRST200' || error.message?.includes('relationship') || error.message?.includes('Could not find a relationship'))) {
-  // Fetch without relations
-  let simpleQuery = supabase
-   .from('aeta_requests')
-   .select('*')
-   .order('created_at', { ascending: false })
-
-  if (tenantId) {
-   simpleQuery = simpleQuery.eq('tenant_id', tenantId)
-  }
-
-  if (status) {
-   simpleQuery = simpleQuery.eq('status', status)
-  }
-
-  const { data: simpleData, error: simpleError } = await simpleQuery
-
-  if (simpleError) {
-   return NextResponse.json({ error: simpleError.message }, { status: 500 })
-  }
-
-  // Enrich with project and employee names if data exists
-  if (simpleData && simpleData.length > 0) {
-   const projectIds = [...new Set(simpleData.map((r: any) => r.project_id).filter(Boolean))]
-   const employeeIds = [...new Set(simpleData.map((r: any) => r.employee_id).filter(Boolean))]
-
-   let projects: any[] = []
-   let employees: any[] = []
-
-   if (projectIds.length > 0) {
-    const { data: projData } = await supabase
-     .from('projects')
-     .select('id, name')
-     .in('id', projectIds)
-    projects = projData || []
-   }
-
-   if (employeeIds.length > 0) {
-    const { data: empData } = await supabase
-     .from('employees')
-     .select('id, full_name, name')
-     .in('id', employeeIds)
-    employees = empData || []
-   }
-
-   // Enrich the requests
-   const enriched = simpleData.map((req: any) => ({
-    ...req,
-    projects: projects.find(p => p.id === req.project_id) ? { name: projects.find(p => p.id === req.project_id)?.name } : null,
-    employees: employees.find(e => e.id === req.employee_id) ? { full_name: employees.find(e => e.id === req.employee_id)?.full_name || employees.find(e => e.id === req.employee_id)?.name } : null,
-   }))
-
-   return NextResponse.json({ data: enriched })
-  }
-
-  return NextResponse.json({ data: simpleData || [] })
+ if (simpleError) {
+  return NextResponse.json({ error: simpleError.message }, { status: 500 })
  }
 
- if (error) {
-  return NextResponse.json({ error: error.message }, { status: 500 })
+ // Enrich with project and employee names if data exists
+ if (simpleData && simpleData.length > 0) {
+  const projectIds = [...new Set(simpleData.map((r: any) => r.project_id).filter(Boolean))]
+  const employeeIds = [...new Set(simpleData.map((r: any) => r.employee_id).filter(Boolean))]
+
+  let projects: any[] = []
+  let employees: any[] = []
+
+  if (projectIds.length > 0) {
+   const { data: projData } = await supabase
+    .from('projects')
+    .select('id, name')
+    .in('id', projectIds)
+   projects = projData || []
+  }
+
+  if (employeeIds.length > 0) {
+   const { data: empData } = await supabase
+    .from('employees')
+    .select('id, full_name, name')
+    .in('id', employeeIds)
+   employees = empData || []
+  }
+
+  // Enrich the requests
+  const enriched = simpleData.map((req: any) => ({
+   ...req,
+   projects: projects.find(p => p.id === req.project_id) ? { name: projects.find(p => p.id === req.project_id)?.name } : null,
+   employees: employees.find(e => e.id === req.employee_id) ? { full_name: employees.find(e => e.id === req.employee_id)?.full_name || employees.find(e => e.id === req.employee_id)?.name } : null,
+  }))
+
+  return NextResponse.json({ data: enriched })
  }
 
- return NextResponse.json({ data: data || [] })
+ return NextResponse.json({ data: simpleData || [] })
 }
 
-// Skapa ny ÄTA-förfrågan
+// Skapa ny ÄTA-förfrågan (enhanced with new fields)
 export async function POST(req: Request) {
  const supabase = createClient()
  const { data: { user } } = await supabase.auth.getUser()
@@ -106,30 +81,69 @@ export async function POST(req: Request) {
  }
 
  const body = await req.json()
- const { project_id, description, hours, tenant_id, employee_id } = body
+ const { 
+  project_id, 
+  title,
+  description, 
+  change_type,
+  photos,
+  estimated_hours_category,
+  estimated_material_cost,
+  ordered_by_name,
+  hours, 
+  tenant_id, 
+  employee_id 
+ } = body
 
- if (!project_id || !description || !hours || !tenant_id) {
-  return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+ // Validate required fields
+ if (!project_id || !tenant_id) {
+  return NextResponse.json({ error: 'Missing required fields: project_id and tenant_id' }, { status: 400 })
  }
 
- const { data, error } = await supabase
-  .from('aeta_requests')
-  .insert([{
-   project_id,
-   description,
-   hours: Number(hours),
-   tenant_id,
-   employee_id: employee_id || null,
-   status: 'pending',
-   requested_by: user.id,
-  }])
+ // New form requires title and change_type, but support legacy form with just description
+ if (!title && !description) {
+  return NextResponse.json({ error: 'Missing required field: title or description' }, { status: 400 })
+ }
+
+ // Validate photos for UNFORESEEN type
+ if (change_type === 'UNFORESEEN' && (!photos || photos.length === 0)) {
+  return NextResponse.json({ 
+   error: 'Vid oförutsett arbete krävs minst ett foto som dokumentation' 
+  }, { status: 400 })
+ }
+
+ // Build insert payload
+ const insertPayload: any = {
+  project_id,
+  tenant_id,
+  employee_id: employee_id || null,
+  status: 'pending',
+  requested_by: user.id,
+  customer_approval_status: 'DRAFT',
+ }
+
+ // Add new fields if provided
+ if (title) insertPayload.title = title
+ if (description) insertPayload.description = description
+ if (change_type) insertPayload.change_type = change_type
+ if (photos && photos.length > 0) insertPayload.photos = photos
+ if (estimated_hours_category) insertPayload.estimated_hours_category = estimated_hours_category
+ if (estimated_material_cost) insertPayload.estimated_material_cost = Number(estimated_material_cost)
+ if (ordered_by_name) insertPayload.ordered_by_name = ordered_by_name
+ 
+ // Legacy support: hours field
+ if (hours) insertPayload.hours = Number(hours)
+
+ const { data, error } = await (supabase
+  .from('aeta_requests') as any)
+  .insert([insertPayload])
   .select()
   .single()
 
  if (error) {
+  console.error('Error creating ÄTA request:', error)
   return NextResponse.json({ error: error.message }, { status: 500 })
  }
 
  return NextResponse.json({ data }, { status: 201 })
 }
-
