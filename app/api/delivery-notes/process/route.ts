@@ -44,20 +44,28 @@ export async function POST(req: NextRequest) {
  let tenantId: string | null = null;
  let storagePath: string | undefined;
 
+ console.log(`[delivery-notes][${correlationId}] === START ===`);
+
  try {
-  // Auth / tenant
+  // Step 1: Auth / tenant
+  console.log(`[delivery-notes][${correlationId}] Step 1: Checking auth...`);
   tenantId = await getTenantId();
   if (!tenantId) {
+   console.log(`[delivery-notes][${correlationId}] ERROR: No tenant found`);
    return NextResponse.json(
     { success: false, error: 'Ingen tenant hittades' },
     { status: 401 }
    );
   }
+  console.log(`[delivery-notes][${correlationId}] Step 1: Auth OK`);
 
-  // Rate limit
+  // Step 2: Rate limit
+  console.log(`[delivery-notes][${correlationId}] Step 2: Checking rate limit...`);
   await assertRateLimit(tenantId, '/api/delivery-notes/process', 12);
+  console.log(`[delivery-notes][${correlationId}] Step 2: Rate limit OK`);
 
-  // Idempotency
+  // Step 3: Idempotency
+  console.log(`[delivery-notes][${correlationId}] Step 3: Checking idempotency...`);
   const idemKey = req.headers.get('idempotency-key');
   const cached = await checkIdempotency(
    tenantId,
@@ -65,35 +73,46 @@ export async function POST(req: NextRequest) {
    idemKey
   );
   if (cached) {
+   console.log(`[delivery-notes][${correlationId}] Step 3: Returning cached response`);
    return NextResponse.json(cached, { status: 200 });
   }
+  console.log(`[delivery-notes][${correlationId}] Step 3: No cache, proceeding`);
 
-  // Read multipart
+  // Step 4: Read multipart
+  console.log(`[delivery-notes][${correlationId}] Step 4: Reading form data...`);
   const form = await req.formData();
   const file = form.get('file') as File | null;
 
   if (!file) {
+   console.log(`[delivery-notes][${correlationId}] ERROR: No file in form data`);
    return badRequest('Filen saknas (form field "file")');
   }
 
   const mimeType = file.type || 'application/pdf';
   const bytes = new Uint8Array(await file.arrayBuffer());
   const buffer = Buffer.from(bytes);
+  
+  console.log(`[delivery-notes][${correlationId}] Step 4: File received - type: ${mimeType}, size: ${buffer.byteLength} bytes`);
 
-  // Validate file size (max 10MB)
+  // Step 5: Validate file size (max 10MB)
+  console.log(`[delivery-notes][${correlationId}] Step 5: Validating file...`);
   if (buffer.byteLength > 10 * 1024 * 1024) {
+   console.log(`[delivery-notes][${correlationId}] ERROR: File too large`);
    return NextResponse.json(
     { success: false, error: 'Filen är för stor (max 10MB)' },
     { status: 413 }
    );
   }
 
-  // Validate file type
+  // Step 6: Validate file type
   if (!['application/pdf', 'image/jpeg', 'image/png', 'image/jpg'].includes(mimeType)) {
+   console.log(`[delivery-notes][${correlationId}] ERROR: Invalid file type: ${mimeType}`);
    return badRequest('Ogiltig filtyp. Endast PDF och bilder tillåtna.');
   }
+  console.log(`[delivery-notes][${correlationId}] Step 5-6: Validation OK`);
 
-  // Store original file
+  // Step 7: Store original file
+  console.log(`[delivery-notes][${correlationId}] Step 7: Uploading file to storage...`);
   await logOcrStep({
    tenantId,
    correlationId,
@@ -108,10 +127,12 @@ export async function POST(req: NextRequest) {
    buffer,
    mimeType
   ).catch((e) => {
+   console.error(`[delivery-notes][${correlationId}] ERROR: Upload failed:`, e instanceof Error ? e.message : 'Unknown error');
    throw new StorageError('Uppladdning misslyckades', { err: String(e) });
   });
 
   storagePath = path;
+  console.log(`[delivery-notes][${correlationId}] Step 7: Upload OK`);
 
   await logOcrStep({
    tenantId,
@@ -121,7 +142,8 @@ export async function POST(req: NextRequest) {
    filePath: path,
   });
 
-  // Run Textract with retry
+  // Step 8: Run Textract with retry
+  console.log(`[delivery-notes][${correlationId}] Step 8: Running Textract OCR...`);
   await logOcrStep({
    tenantId,
    correlationId,
@@ -135,6 +157,7 @@ export async function POST(req: NextRequest) {
 
   try {
    const tx = await runTextract(bytes, mimeType);
+   console.log(`[delivery-notes][${correlationId}] Step 8: Textract OK, confidence: ${tx.modelConfidence}`);
    await logOcrStep({
     tenantId,
     correlationId,
@@ -148,9 +171,11 @@ export async function POST(req: NextRequest) {
     tx.rawText,
     tx.modelConfidence
    );
+   console.log(`[delivery-notes][${correlationId}] Step 8: Parsing OK`);
   } catch (err) {
    textractOk = false;
-   textractError = String(err);
+   textractError = err instanceof Error ? err.message : 'Unknown error';
+   console.log(`[delivery-notes][${correlationId}] Step 8: Textract failed, trying DocAI...`);
    await logOcrStep({
     tenantId,
     correlationId,
@@ -162,10 +187,12 @@ export async function POST(req: NextRequest) {
    });
   }
 
-  // Fallback DocAI
+  // Step 9: Fallback DocAI
   if (!parsed) {
+   console.log(`[delivery-notes][${correlationId}] Step 9: Running Google DocAI fallback...`);
    try {
     const da = await runGoogleDocAI(bytes, mimeType);
+    console.log(`[delivery-notes][${correlationId}] Step 9: DocAI OK, confidence: ${da.confidence}`);
     await logOcrStep({
      tenantId,
      correlationId,
@@ -176,7 +203,9 @@ export async function POST(req: NextRequest) {
 
     // Reuse parser (it can handle text-only input)
     parsed = parseDeliveryNoteFromTextract([], da.text, da.confidence);
+    console.log(`[delivery-notes][${correlationId}] Step 9: Parsing OK`);
    } catch (docaiErr) {
+    console.error(`[delivery-notes][${correlationId}] ERROR: All OCR providers failed`);
     await logOcrStep({
      tenantId,
      correlationId,
@@ -184,19 +213,21 @@ export async function POST(req: NextRequest) {
      stage: 'docai_failed',
      level: 'error',
      message: 'All OCR providers failed',
-     meta: { err: String(docaiErr) },
+     meta: { err: docaiErr instanceof Error ? docaiErr.message : 'Unknown error' },
     });
     throw new OCRProcessingError(
      'Alla OCR-tjänster misslyckades',
      'ALL_OCR_FAILED',
-     { textractError: textractError ?? 'N/A', docaiError: String(docaiErr) }
+     { textractError: textractError ?? 'N/A', docaiError: docaiErr instanceof Error ? docaiErr.message : 'Unknown error' }
     );
    }
   }
 
-  // Confidence / graceful degradation
+  // Step 10: Confidence / graceful degradation
+  console.log(`[delivery-notes][${correlationId}] Step 10: Validating parsed data...`);
   const result = DeliveryNoteResultSchema.parse(parsed);
   const lowConfidence = result.ocrConfidence < 70;
+  console.log(`[delivery-notes][${correlationId}] Step 10: Validation OK, confidence: ${result.ocrConfidence}, lowConfidence: ${lowConfidence}`);
 
   await logOcrStep({
    tenantId,
@@ -206,7 +237,8 @@ export async function POST(req: NextRequest) {
    meta: { lowConfidence },
   });
 
-  // Persist to database
+  // Step 11: Persist to database
+  console.log(`[delivery-notes][${correlationId}] Step 11: Saving to database...`);
   const admin = createAdminClient();
   const { data: { user } } = await admin.auth.getUser();
 
@@ -234,8 +266,11 @@ export async function POST(req: NextRequest) {
    .single();
 
   if (dbError) {
+   console.error(`[delivery-notes][${correlationId}] ERROR: Database save failed: ${dbError.code}`);
    throw new Error(`Database error: ${dbError.message}`);
   }
+
+  console.log(`[delivery-notes][${correlationId}] Step 11: Database save OK`);
 
   await logOcrStep({
    tenantId,
@@ -266,10 +301,22 @@ export async function POST(req: NextRequest) {
    );
   }
 
+  console.log(`[delivery-notes][${correlationId}] === SUCCESS ===`);
   return NextResponse.json(responsePayload, {
    status: lowConfidence ? 200 : 200,
   });
  } catch (err: any) {
+  const errorType = err?.constructor?.name || 'UnknownError';
+  const errorCode = err instanceof ValidationError ? 'VALIDATION_ERROR'
+   : err instanceof StorageError ? 'STORAGE_ERROR'
+   : err instanceof OCRProcessingError ? 'OCR_ERROR'
+   : 'UNKNOWN_ERROR';
+
+  console.error(`[delivery-notes][${correlationId}] === ERROR ===`);
+  console.error(`[delivery-notes][${correlationId}] Type: ${errorType}`);
+  console.error(`[delivery-notes][${correlationId}] Code: ${errorCode}`);
+  console.error(`[delivery-notes][${correlationId}] Message: ${err?.message || 'No message'}`);
+
   const human =
    err instanceof ValidationError
     ? 'Valideringen misslyckades för dokumentet'
@@ -311,4 +358,3 @@ export async function POST(req: NextRequest) {
   );
  }
 }
-
