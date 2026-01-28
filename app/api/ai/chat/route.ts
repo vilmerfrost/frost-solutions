@@ -10,12 +10,12 @@ import { createAdminClient } from '@/utils/supabase/admin'
 import { createClient } from '@/utils/supabase/server'
 
 const BodySchema = z.object({
- conversationId: z.string().uuid().optional(),
+ conversationId: z.string().uuid().nullish(), // Accept null, undefined, or valid UUID
  pageContext: z.string().default(''),
  pageData: z.record(z.string(), z.unknown()).default({}),
  query: z.string().min(1),
  useCache: z.boolean().default(true),
- model: z.enum(['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'gemini-1.5-flash', 'gemini-2.5-flash']).default('gemini-2.5-flash'),
+ model: z.enum(['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo', 'gemini-1.5-flash', 'gemini-2.5-flash']).default('gpt-4'),
 })
 
 export const runtime = 'nodejs'

@@ -122,8 +122,8 @@ export function AIChatbot() {
      query: userInput,
      pageContext: getPageContext(),
      pageData: {},
-     conversationId: conversationId,
-     model: 'gemini-2.5-flash'
+     conversationId: conversationId || undefined, // Don't send null
+     model: 'gpt-4'
     }),
     signal: abortControllerRef.current.signal
    })
