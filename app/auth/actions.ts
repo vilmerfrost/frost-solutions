@@ -3,14 +3,12 @@
 import { headers } from 'next/headers'
 import { createClient } from '@supabase/supabase-js'
 import { getBaseUrlFromHeaders } from '@/utils/url'
+import * as Sentry from '@sentry/nextjs'
 
 // Typ för att hantera både FormData och JS-objekt (TypeScript-friendly)
 type EmailInput = FormData | { email: string }
 
 export async function sendMagicLink(formData: EmailInput) {
- // Debug-logg! Kolla vad som faktiskt kommer in hit
- console.log('formData:', formData);
-
  // Hantera både FormData och plain objekt
  let email = '';
  if (typeof (formData as FormData).get === 'function') {
@@ -36,7 +34,14 @@ export async function sendMagicLink(formData: EmailInput) {
    emailRedirectTo: `${origin}/auth/callback`,
   },
  });
- if (error) throw error;
+ 
+ if (error) {
+  Sentry.captureException(error, {
+   tags: { component: 'auth', action: 'magic-link' },
+   extra: { email: email.substring(0, 3) + '***' } // Partial email for debugging
+  });
+  throw error;
+ }
 
  return { ok: true };
 }

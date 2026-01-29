@@ -2,11 +2,13 @@ import { NextResponse } from 'next/server'
 
 /**
  * GET /api/cron/invoice-reminders
- * Cron endpoint för invoice reminders (placeholder)
+ * Cron endpoint för invoice reminders
  * Körs dagligen kl 09:00
+ * 
+ * Status: Feature planned for future release
  */
 export async function GET(request: Request) {
-  // 🚨 SÄKERHETSKONTROLL: Verifiera cron secret
+  // Verify cron secret for security
   const authHeader = request.headers.get('authorization')
   const cronSecret = process.env.CRON_SECRET
 
@@ -14,15 +16,10 @@ export async function GET(request: Request) {
     return new NextResponse('Unauthorized', { status: 401 })
   }
 
-  // TODO: Implementera logik för att påminna om fakturor
-  // - Hitta förfallna/snart förfallna fakturor
-  // - Skicka påminnelser till kunder
-  // - Logga skickade påminnelser
-
-  console.log('Invoice reminders cron job executed (placeholder)')
-
+  // Feature not yet implemented - returns success to avoid cron failures
   return NextResponse.json({ 
     success: true, 
-    message: 'Invoice reminders not implemented yet.' 
+    message: 'Invoice reminders feature coming soon',
+    status: 'not_implemented'
   })
 }

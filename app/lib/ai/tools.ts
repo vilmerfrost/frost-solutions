@@ -75,8 +75,7 @@ export const createWorkOrderTool: ToolDefinition = {
   photos: z.array(z.string()).optional().describe('Base64-encoded bilder'),
  }),
  handler: async (params) => {
-  // TODO: Implement work order creation endpoint
-  // For now, return a placeholder
+  // Work order creation via AI - returns placeholder until API endpoint is implemented
   return {
    id: crypto.randomUUID(),
    title: params.title,

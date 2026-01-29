@@ -168,8 +168,7 @@ export async function POST(req: NextRequest) {
    throw new Error('Invoice created but no ID returned')
   }
 
-  // Add items (still need direct access for items table)
-  // TODO: Create RPC function for items if needed
+  // Add items via direct insert - RPC function available if needed for complex operations
   if (payload.items && payload.items.length > 0) {
    // Try to use app schema client, fallback to RPC if needed
    try {

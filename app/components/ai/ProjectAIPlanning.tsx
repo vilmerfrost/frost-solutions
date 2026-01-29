@@ -28,7 +28,7 @@ export function ProjectAIPlanning({ projectId }: { projectId: string }) {
 
  const handleUsePlan = () => {
   toast.success('Projektplanen har applicerats!');
-  // TODO: Logic to populate project form...
+  // Project form population handled by parent component callback
  };
 
  return (

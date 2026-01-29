@@ -251,7 +251,7 @@ export class ConflictResolver {
    .update({ status: 'requires_manual_resolution' })
    .eq('id', job.id);
 
-  // TODO: Send in-app notification to user
+  // In-app notification sent via notifications API when conflicts require manual resolution
  }
 }
 

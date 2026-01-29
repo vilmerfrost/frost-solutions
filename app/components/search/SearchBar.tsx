@@ -37,17 +37,9 @@ export function SearchBar() {
  // Auto-search on debounced query change
  useEffect(() => {
   if (debouncedQuery.length >= 2) {
-   console.log('🔍 SearchBar: Triggering search for:', debouncedQuery);
    search(debouncedQuery);
   }
  }, [debouncedQuery, search]);
-
- // Debug logging
- useEffect(() => {
-  if (results) {
-   console.log('🔍 SearchBar: Results received:', results);
-  }
- }, [results]);
 
  // Return a placeholder that matches the structure to prevent hydration mismatch
  if (!mounted) {
@@ -97,8 +89,6 @@ export function SearchBar() {
     )}
    </div>
    
-   {/* TODO: Implement Filter UI when showFilters is true */}
-
    {/* Loading & Results Dropdown */}
    {query.length >= 2 && (
      <div className="absolute top-full left-0 right-0 mt-2 bg-gray-50 dark:bg-gray-900 rounded-[8px] shadow-xl border border-gray-200 dark:border-gray-700 max-h-96 overflow-y-auto z-[9999]">

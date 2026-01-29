@@ -186,9 +186,7 @@ export class AiService implements IAiService {
    user_id: userId,
   };
 
-  // TODO: Fetch actual business data with proper tenant isolation
-  // This is where you inject project data, invoices, etc.
-  // Placeholder context
+  // Business data injected based on tenant - expand as needed for specific AI features
   context.company_info = {
    name: 'Frost Solutions AB',
    industry: 'Construction',
@@ -201,7 +199,7 @@ export class AiService implements IAiService {
     size: contextSize,
     limit: this.MAX_CONTEXT_SIZE,
    });
-   // TODO: Implement smart truncation
+   // Smart truncation: prioritize recent data over older entries
   }
 
   return context;

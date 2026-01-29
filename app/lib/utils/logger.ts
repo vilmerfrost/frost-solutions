@@ -22,9 +22,9 @@ export class Logger {
    ...meta,
   };
 
-  // In production, send to logging service (Datadog, Sentry, etc.)
+  // In production, output structured JSON logs (can be collected by hosting provider)
   if (process.env.NODE_ENV === 'production') {
-   // TODO: Send to logging service
+   // Structured JSON output - collected by Vercel/hosting logs
    console.log(JSON.stringify(logEntry));
   } else {
    // Pretty print in development

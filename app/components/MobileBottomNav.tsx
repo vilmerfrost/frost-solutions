@@ -26,7 +26,11 @@ export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
   }
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-area-inset-bottom">
+    <nav 
+      className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 safe-area-inset-bottom"
+      role="navigation"
+      aria-label="Huvudnavigation mobil"
+    >
       <div className="grid grid-cols-4 h-16">
         {mainNavItems.map((item) => {
           const Icon = item.icon
@@ -42,8 +46,11 @@ export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                   router.push(item.href)
                 }
               }}
+              aria-label={item.name}
+              aria-current={active ? 'page' : undefined}
               className={`
                 flex flex-col items-center justify-center gap-1
+                min-h-[44px] min-w-[44px]
                 transition-colors duration-200
                 ${active 
                   ? 'text-primary-500 bg-primary-50 dark:bg-primary-500/10' 
@@ -51,7 +58,7 @@ export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
                 }
               `}
             >
-              <Icon className="w-6 h-6" />
+              <Icon className="w-6 h-6" aria-hidden="true" />
               <span className="text-xs font-medium">{item.name}</span>
             </button>
           )

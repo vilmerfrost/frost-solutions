@@ -37,7 +37,7 @@ export function IntegrationConnectionControls({
   return (
    <Wrapper>
     <button
-     onClick={() => { /* TODO: Open sync settings */ }}
+     onClick={() => { /* Sync settings modal - feature planned */ }}
      disabled={isLoading}
      className={grayButton}
     >

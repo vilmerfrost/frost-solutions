@@ -11,21 +11,21 @@ import Sidebar from '@/components/Sidebar'
 
 // Lazy load heavy components for better initial page load
 const TimeClock = dynamic(() => import('@/components/TimeClock'), {
- loading: () => <div className="h-48 bg-gray-50 rounded-lg animate-pulse" />,
+ loading: () => <div className="h-48 bg-gray-50 dark:bg-gray-800 rounded-lg animate-pulse" />,
  ssr: false,
 })
 
 const NotificationCenter = dynamic(() => import('@/components/NotificationCenter'), {
- loading: () => <div className="h-12 bg-gray-50 rounded-lg animate-pulse" />,
+ loading: () => <div className="h-12 bg-gray-50 dark:bg-gray-800 rounded-lg animate-pulse" />,
 })
 
 const WeeklySchedules = dynamic(
  () => import('@/components/dashboard/WeeklySchedulesComponent').then(mod => ({ default: mod.WeeklySchedules })),
- { loading: () => <div className="h-64 bg-gray-50 rounded-lg animate-pulse" /> }
+ { loading: () => <div className="h-64 bg-gray-50 dark:bg-gray-800 rounded-lg animate-pulse" /> }
 )
 
 const InvoiceList = dynamic(() => import('@/components/invoice-list'), {
- loading: () => <div className="h-64 bg-gray-50 rounded-lg animate-pulse" />,
+ loading: () => <div className="h-64 bg-gray-50 dark:bg-gray-800 rounded-lg animate-pulse" />,
 })
 
 // Subscription banner - lazy load since it's not critical for initial render

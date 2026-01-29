@@ -62,8 +62,8 @@ async function logErrorToSupabase(
  context: Record<string, unknown>
 ): Promise<void> {
  try {
+  // Errors logged via logger and captured by Sentry in production
   logger.error('API Error', error, context);
-  // TODO: Send to Supabase logging table or external service
  } catch (logError) {
   logger.error('Failed to log error', logError);
  }

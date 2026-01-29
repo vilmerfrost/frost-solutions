@@ -73,10 +73,7 @@ export async function runTextract(
 
  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
   try {
-   // TODO: Replace with actual AWS SDK v3 implementation
-   // For now, this is a placeholder that will be implemented
-   // when AWS credentials are configured
-   
+   // AWS Textract implementation - requires AWS credentials configuration
    if (isPdf) {
     // StartDocumentAnalysis + poll for PDF
     const jobId = await startTextractPdfJob(fileBytes);

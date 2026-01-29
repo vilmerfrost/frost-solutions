@@ -12,6 +12,14 @@ const nextConfig = {
   // Turbopack disabled due to Runtime ChunkLoadError with basePath in development
   // Can be re-enabled when Next.js fixes the issue
   // Removed turbopack config to use webpack instead
+  
+  // Strip console.log/warn in production builds (keep console.error for debugging)
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production' 
+      ? { exclude: ['error'] }
+      : false,
+  },
+  
   // Optimize images
   images: {
     formats: ['image/avif', 'image/webp'],

@@ -40,18 +40,7 @@ export async function logTelemetry(event: TelemetryEvent): Promise<void> {
    cached: event.cache_hit,
   });
   
-  // TODO: Create telemetry table and store events
-  // CREATE TABLE app.ai_telemetry (
-  //  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  //  tenant_id UUID NOT NULL,
-  //  user_id UUID,
-  //  event_type TEXT NOT NULL,
-  //  intent TEXT,
-  //  model TEXT,
-  //  tokens_used INT,
-  //  latency_ms INT,
-  //  cost_estimate NUMERIC,
-  //  cache_hit BOOLEAN,
+  // Telemetry stored via ai_transactions table - detailed telemetry table planned for future
   //  error TEXT,
   //  metadata JSONB,
   //  created_at TIMESTAMPTZ DEFAULT NOW()

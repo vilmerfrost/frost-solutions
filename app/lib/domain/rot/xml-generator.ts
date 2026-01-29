@@ -109,10 +109,8 @@ function escapeXml(str: string): string {
  * Validate XML against schema (optional)
  */
 export function validateXml(xml: string): boolean {
- // TODO: Implement XML schema validation
- // For now, just check if it's valid XML
+ // Basic XML structure validation - schema validation can be added with xmllint
  try {
-  // Simple validation - can be extended with proper schema validation
   return xml.includes('<?xml') && xml.includes('</RotRutAnsökan>');
  } catch {
   return false;

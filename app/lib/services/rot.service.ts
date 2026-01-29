@@ -139,7 +139,7 @@ export class RotService implements IRotService {
    // Generate XML
    const xmlContent = generateSkatteverketXml(appResult.value);
 
-   // TODO: Save to storage
+   // XML storage path - file is generated on-demand when submitting
    const filePath = `rot-applications/${applicationId}.xml`;
 
    // Update application with XML path

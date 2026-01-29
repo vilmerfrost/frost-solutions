@@ -119,3 +119,63 @@ export function InlineLoader({ size = 'sm', className = '' }: { size?: 'sm' | 'm
   )
 }
 
+// Dashboard Skeleton - Matches dashboard layout
+export function DashboardSkeleton() {
+  return (
+    <div className="p-4 sm:p-6 lg:p-8 max-w-7xl mx-auto w-full space-y-6 sm:space-y-8">
+      {/* Header skeleton */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+        <div className="space-y-2">
+          <Skeleton className="h-9 w-48" />
+          <Skeleton className="h-5 w-64" />
+        </div>
+        <div className="flex gap-3">
+          <Skeleton className="h-10 w-32 rounded-[6px]" />
+          <Skeleton className="h-10 w-24 rounded-[6px]" />
+        </div>
+      </div>
+
+      {/* Weekly schedules skeleton */}
+      <Skeleton className="h-64 w-full rounded-lg" />
+
+      {/* TimeClock skeleton */}
+      <Skeleton className="h-48 w-full rounded-lg" />
+
+      {/* Stats cards skeleton */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="bg-white dark:bg-gray-700 rounded-[8px] border border-gray-200 dark:border-gray-600 p-5">
+            <Skeleton className="h-4 w-24 mb-3" />
+            <Skeleton className="h-8 w-16" />
+          </div>
+        ))}
+      </div>
+
+      {/* New project card skeleton */}
+      <div className="bg-white dark:bg-gray-700 rounded-[8px] border border-gray-200 dark:border-gray-600 p-6 lg:p-8">
+        <Skeleton className="h-7 w-32 mb-4 sm:mb-6" />
+        <Skeleton className="h-10 w-40 rounded-[6px]" />
+      </div>
+
+      {/* Projects section skeleton */}
+      <div>
+        <Skeleton className="h-7 w-24 mb-4 sm:mb-6" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="bg-white dark:bg-gray-700 rounded-[8px] border border-gray-200 dark:border-gray-600 p-5">
+              <Skeleton className="h-6 w-3/4 mb-3" />
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <Skeleton className="h-4 w-20" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+                <Skeleton className="h-2 w-full rounded-full" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+

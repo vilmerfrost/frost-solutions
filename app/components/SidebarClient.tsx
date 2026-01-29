@@ -142,7 +142,7 @@ export default function SidebarClient() {
      </div>
 
      {/* Navigation */}
-     <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+     <nav id="main-navigation" className="flex-1 p-4 space-y-1 overflow-y-auto" role="navigation">
       {navItems.map((item) => {
        const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
        return (
@@ -227,29 +227,33 @@ export default function SidebarClient() {
         <button
          onClick={() => router.push('/admin')}
          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-all duration-200"
+         aria-label="Gå till admin-panel"
         >
-         <SettingsIcon className="w-5 h-5" />
+         <SettingsIcon className="w-5 h-5" aria-hidden="true" />
          <span>Admin</span>
         </button>
         <button
          onClick={() => router.push('/admin/work-sites')}
          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-all duration-200"
+         aria-label="Hantera arbetsplatser"
         >
-         <Map className="w-5 h-5" />
+         <Map className="w-5 h-5" aria-hidden="true" />
          <span>Arbetsplatser</span>
         </button>
         <button
          onClick={() => router.push('/admin/live-map')}
          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-all duration-200"
+         aria-label="Visa live-karta"
         >
-         <MapPin className="w-5 h-5" />
+         <MapPin className="w-5 h-5" aria-hidden="true" />
          <span>Live Karta</span>
         </button>
         <button
          onClick={() => router.push('/admin/aeta')}
          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-all duration-200"
+         aria-label="ÄTA-administration"
         >
-         <FileText className="w-5 h-5" />
+         <FileText className="w-5 h-5" aria-hidden="true" />
          <span>ÄTA Admin</span>
         </button>
        </>

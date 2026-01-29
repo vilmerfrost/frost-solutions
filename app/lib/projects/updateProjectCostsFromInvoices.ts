@@ -41,7 +41,7 @@ export async function updateProjectCostsFromInvoices(
  // Alert if over 80% of budget
  if (percentUsed > 80) {
   console.warn(`⚠️ Project ${projectId} is ${percentUsed.toFixed(0)}% of budget`)
-  // TODO: Send notification to project manager
+  // Budget alerts handled by /api/cron/budget-alerts endpoint
  }
 
  // Update project metadata

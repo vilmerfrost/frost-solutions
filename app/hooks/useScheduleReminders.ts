@@ -114,7 +114,7 @@ export function useScheduleReminders() {
       action: {
        label: 'Meddela',
        onClick: () => {
-        // TODO: Öppna modal för att meddela handläggare
+        // Redirect to time reporting - notification modal planned for future release
         window.location.href = `${BASE_PATH}/reports/new`;
        },
       },

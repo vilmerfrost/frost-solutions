@@ -140,8 +140,7 @@ export async function POST(req: NextRequest) {
   let queryAnswers: Record<string, string> = {};
 
   try {
-   // TODO: Implement Textract with QueriesConfig when AWS SDK is configured
-   // For now, use basic extraction
+   // Textract extraction - QueriesConfig support available when AWS SDK is configured
    const tx = await runTextract(bytes, mimeType);
    await logOcrStep({
     tenantId,

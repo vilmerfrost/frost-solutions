@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import Stripe from 'stripe';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { headers } from 'next/headers';
+import * as Sentry from '@sentry/nextjs';
 
 // Initialize Stripe lazily to avoid build-time errors
 function getStripe() {
@@ -53,6 +54,10 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 
   if (error) {
     console.error('[Stripe Webhook] Failed to add credits:', error);
+    Sentry.captureException(error, {
+      tags: { component: 'stripe-webhook', action: 'add-credits' },
+      extra: { tenantId: tenant_id, paymentIntentId: paymentIntent.id }
+    });
     throw new Error(`Failed to add credits: ${error.message}`);
   }
 
@@ -64,10 +69,21 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 }
 
 async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
+  const errorMessage = paymentIntent.last_payment_error?.message || 'Unknown payment error';
   console.error('[Stripe Webhook] Payment failed:', {
     id: paymentIntent.id,
-    error: paymentIntent.last_payment_error?.message,
+    error: errorMessage,
     metadata: paymentIntent.metadata,
+  });
+  
+  Sentry.captureMessage('Stripe payment failed', {
+    level: 'warning',
+    tags: { component: 'stripe-webhook', action: 'payment-failed' },
+    extra: { 
+      paymentIntentId: paymentIntent.id, 
+      error: errorMessage,
+      tenantId: paymentIntent.metadata?.tenant_id 
+    }
   });
 
   // Log failed payment attempt (optional)
@@ -127,6 +143,10 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   if (error) {
     console.error('[Stripe Webhook] Failed to update subscription:', error);
+    Sentry.captureException(error, {
+      tags: { component: 'stripe-webhook', action: 'checkout-completed' },
+      extra: { tenantId: tenant_id, sessionId: session.id }
+    });
     throw error;
   }
 
@@ -402,6 +422,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   } catch (error: any) {
     console.error('[Stripe Webhook] Error processing webhook:', error);
+    Sentry.captureException(error, {
+      tags: { component: 'stripe-webhook' },
+    });
     return NextResponse.json(
       { error: 'Webhook processing failed' },
       { status: 500 }

@@ -70,8 +70,8 @@ export function AutoFillForm({ executionId }: { executionId: string }) {
  }, [workflow, setValue]);
 
  const onSubmit = (formData: any) => {
+  // Form submission handler - invoice save mutation to be connected
   console.log('Formulär sparat:', formData);
-  // TODO: Mutation för att spara den godkända fakturan
  };
 
  if (isLoading) return <div>Laddar extraherad data...</div>;

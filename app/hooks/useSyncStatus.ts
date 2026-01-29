@@ -138,7 +138,7 @@ export function useSyncStatus() {
   isSyncing: syncState.isSyncing,
   pendingCount,
   progress: syncState,
-  lastSyncTime: null, // TODO: syncManager borde spara detta
+  lastSyncTime: null, // Sync timestamp tracking planned for future release
  }
 }
 
