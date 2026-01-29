@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
   }
 
   return ok({
-   plan: plan || templateProjectPlan(project.name, totalHours),
+   plan: plan || templateProjectPlan(totalHours <= 50),
    model: 'gemini-2.5-flash',
    cached: false,
   });
