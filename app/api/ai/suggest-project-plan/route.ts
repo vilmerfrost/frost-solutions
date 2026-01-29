@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
   } catch (e) {
    console.error('Gemini error:', e);
    // Fallback to template
-   plan = templateProjectPlan(project.name, totalHours);
+   plan = templateProjectPlan(totalHours <= 50);
   }
 
   if (plan) {
