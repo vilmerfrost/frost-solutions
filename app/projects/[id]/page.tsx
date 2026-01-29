@@ -4,23 +4,42 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
-import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import FileUpload from '@/components/FileUpload'
 import FileList from '@/components/FileList'
 import ATA2Card from '@/components/ATA2Card'
 import BudgetCard from '@/components/BudgetCard'
 import { ScheduleCalendar } from '@/components/scheduling/ScheduleCalendar'
-// Removed: useProject and useProjectHours don't exist - using direct queries instead
 import { useAdmin } from '@/hooks/useAdmin'
 import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
-import { Sparkles } from 'lucide-react'
+import { 
+ Sparkles, 
+ Clock, 
+ DollarSign, 
+ FileText, 
+ Users, 
+ Settings, 
+ Calendar,
+ MapPin,
+ Building,
+ FileEdit,
+ Send,
+ Download,
+ Archive,
+ RotateCcw,
+ Mail,
+ TrendingUp,
+ Briefcase,
+ Home
+} from 'lucide-react'
 import { BudgetAIPrediction } from '@/components/ai/BudgetAIPrediction'
 import { MaterialAIIdentifier } from '@/components/ai/MaterialAIIdentifier'
 import { ProjectAIPlanning } from '@/components/ai/ProjectAIPlanning'
 import { ProjectAnalytics } from '@/components/analytics/ProjectAnalytics'
 import { ProjectEmployeeManager } from '@/components/projects/ProjectEmployeeManager'
 import { apiFetch } from '@/lib/http/fetcher'
+import DetailLayout from '@/components/DetailLayout'
+import { StatCard } from '@/components/cards/StatCard'
 
 type ProjectRecord = {
  id: string
@@ -37,7 +56,6 @@ type ProjectRecord = {
   name: string
   org_number?: string | null
  } | null
- // New fields
  price_model?: 'hourly' | 'fixed' | 'budget' | null
  markup_percent?: number | null
  site_address?: string | null
@@ -63,7 +81,7 @@ export default function ProjectDetailPage() {
  const [employeeHours, setEmployeeHours] = useState<any[]>([])
  const [showEmployeeHours, setShowEmployeeHours] = useState(false)
  const [loadingEmployeeHours, setLoadingEmployeeHours] = useState(false)
- const [showAdvanced, setShowAdvanced] = useState(false)
+ const [activeTab, setActiveTab] = useState('overview')
  const { isAdmin, loading: adminLoading } = useAdmin()
 
  const projectId = params?.id as string | undefined
@@ -75,10 +93,8 @@ export default function ProjectDetailPage() {
    return
   }
 
-  // Wait a bit for tenantId to load
   if (!tenantId) {
    console.log('⏳ Waiting for tenantId...')
-   // Don't set error yet, just wait
    return
   }
 
@@ -101,7 +117,6 @@ export default function ProjectDetailPage() {
 
     console.log('🔍 Loading project:', { projectId, tenantId })
     
-    // Fetch project via API route (avoids REST-GUARD issues)
     let projectData = null
     let projectError = null
     
@@ -127,22 +142,15 @@ export default function ProjectDetailPage() {
      return
     }
     
-    const project = projectData as any
-    console.log('✅ Project loaded:', project.name)
-    console.log('📋 Project client info:', {
-     client_id: project.client_id,
-     clients: project.clients,
-     customer_name: project.customer_name
-    })
+    const proj = projectData as any
+    console.log('✅ Project loaded:', proj.name)
 
-    // Ensure we preserve client_id and clients relation
     setProject({
      ...(projectData as ProjectRecord),
-     client_id: project.client_id || null,
-     clients: project.clients || null,
+     client_id: proj.client_id || null,
+     clients: proj.clients || null,
     } as ProjectRecord)
 
-     // Hämta ofakturerade timmar och time entries för AI summary via API route
     try {
      console.log('📊 Project page: Fetching project hours from API...')
      const hoursData = await apiFetch<{ hours?: number; entries?: any[] }>(`/api/projects/${projectId}/hours?projectId=${projectId}&_t=${Date.now()}`, {
@@ -174,23 +182,19 @@ export default function ProjectDetailPage() {
   }
  }, [projectId, tenantId, refreshTrigger])
 
- // Separate useEffect for event listener registration (runs once on mount)
  useEffect(() => {
   if (!projectId) return
 
-  // Listen for time entry updates (from TimeClock checkout)
   const handleTimeEntryUpdate = (event: Event) => {
    const customEvent = event as CustomEvent
    console.log('🔄 Project page: Time entry updated event received!', customEvent.detail)
    
-   // Check if this event is for this project (if projectId is in detail)
    const eventProjectId = customEvent.detail?.projectId
    if (eventProjectId && eventProjectId !== projectId) {
     console.log('⏭️ Project page: Event is for different project, skipping', { eventProjectId, currentProjectId: projectId })
     return
    }
    
-   // Small delay to ensure database has committed the changes
    setTimeout(() => {
     console.log('⏰ Project page: Triggering refresh...')
     setRefreshTrigger(prev => {
@@ -198,10 +202,9 @@ export default function ProjectDetailPage() {
      console.log('✅ Project page: Refresh trigger updated:', newValue)
      return newValue
     })
-   }, 500) // Increased delay to ensure DB commit
+   }, 500)
   }
   
-  // Also listen for localStorage updates (fallback)
   const handleStorageChange = (e: StorageEvent) => {
    if (e.key === 'timeEntryUpdated' && e.newValue) {
     try {
@@ -218,7 +221,6 @@ export default function ProjectDetailPage() {
    }
   }
   
-  // Set up event listener on both window and document for maximum compatibility
   if (typeof window !== 'undefined') {
    window.addEventListener('timeEntryUpdated', handleTimeEntryUpdate)
    document.addEventListener('timeEntryUpdated', handleTimeEntryUpdate)
@@ -226,7 +228,6 @@ export default function ProjectDetailPage() {
    window.addEventListener('storage', handleStorageChange)
    console.log('✅ Project page: Event listeners registered for timeEntryUpdated on window, document, and body')
    
-   // Also check if there's a pending update in localStorage
    const pendingUpdate = localStorage.getItem('timeEntryUpdated')
    if (pendingUpdate) {
     try {
@@ -252,7 +253,24 @@ export default function ProjectDetailPage() {
     console.log('🔌 Project page: Event listeners removed')
    }
   }
- }, [projectId]) // Only re-run when projectId changes, not on refreshTrigger
+ }, [projectId])
+
+ // Load employee hours when switching to team tab
+ useEffect(() => {
+  if (activeTab === 'team' && employeeHours.length === 0 && projectId) {
+   setLoadingEmployeeHours(true)
+   apiFetch<{ employees?: any[] }>(`/api/projects/${projectId}/employee-hours?projectId=${projectId}`)
+    .then(data => {
+     setEmployeeHours(data.employees || [])
+    })
+    .catch(err => {
+     console.error('Error fetching employee hours:', err)
+    })
+    .finally(() => {
+     setLoadingEmployeeHours(false)
+    })
+  }
+ }, [activeTab, projectId, employeeHours.length])
 
  async function handleSendInvoice() {
   if (!isAdmin) {
@@ -266,7 +284,6 @@ export default function ProjectDetailPage() {
   }
   
   try {
-   // Hämta ofakturerade timmar först
    const { data: entries } = await supabase
     .from('time_entries')
     .select('hours_total')
@@ -286,11 +303,9 @@ export default function ProjectDetailPage() {
    const rate = Number(project?.base_rate_sek ?? 0) || 360
    const amount = totalHours * rate
 
-   // Get client_id from project - fetch fresh data to ensure we have client info
    let clientId: string | null = null
    let clientName: string = 'Okänd kund'
    
-   // First try from current project state
    if (project?.client_id) {
     clientId = project.client_id
    } else if (project?.clients?.id) {
@@ -300,7 +315,6 @@ export default function ProjectDetailPage() {
     clientName = project.customer_name
    }
    
-   // If we don't have client_id, fetch project again to get it
    if (!clientId && projectId) {
     try {
      const { data: projectData } = await supabase
@@ -322,17 +336,16 @@ export default function ProjectDetailPage() {
    
    console.log('📝 Invoice creation - Client info:', { clientId, clientName, projectId })
    
-   // Create invoice via API route (invoice lines will be created automatically from time entries)
    let result: any
    try {
     result = await apiFetch<{ data?: { id?: string }; error?: string; details?: string; availableTenants?: any[]; suggestion?: string; diagnostics?: any; warning?: string }>('/api/invoices/create', {
      method: 'POST',
      body: JSON.stringify({
       tenant_id: tenantId,
-      project_id: projectId, // This triggers automatic invoice line creation
+      project_id: projectId,
       client_id: clientId,
       customer_name: clientName,
-      amount, // Initial amount, will be recalculated from invoice lines
+      amount,
       desc: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
       description: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
       status: 'sent',
@@ -348,39 +361,24 @@ export default function ProjectDetailPage() {
    if (result.error) {
     console.error('❌ Error creating invoice:', result)
     
-    // Show detailed error message
-    let errorMessage = result.error || result.details || 'Okänt fel'
-    
-    if (result.availableTenants && result.availableTenants.length > 0) {
-     errorMessage += `\n\nTillgängliga tenants: ${result.availableTenants.map((t: any) => `${t.name} (${t.id})`).join(', ')}`
+    let errorMessage = result.error
+    if (result.details) {
+     errorMessage += `: ${result.details}`
     }
-    
     if (result.suggestion) {
-     errorMessage += `\n\n${result.suggestion}`
+     errorMessage += `. ${result.suggestion}`
     }
     
-    if (result.diagnostics) {
-     errorMessage += `\n\nDiagnostik: Tenant finns: ${result.diagnostics.tenantExists}, Projekt finns: ${result.diagnostics.projectExists}, Kund finns: ${result.diagnostics.clientExists}`
-    }
-    
-    toast.error('Kunde inte skapa faktura: ' + errorMessage)
+    toast.error(errorMessage)
     return
    }
 
-   const invoice = result.data
-
-   // Check if there was a warning about invoice lines
    if (result.warning) {
-    console.warn('⚠️ Warning:', result.warning)
-    toast.error(`Faktura skapad men kunde inte skapa invoice lines: ${result.error || 'Okänt fel'}`)
-   } else {
-    toast.success('Faktura skapad! Granska och godkänn den på fakturasidan för att markera time entries som fakturerade.')
+    toast.info(result.warning)
    }
 
-   // DO NOT mark time entries as billed here - they will be marked when invoice is approved
-   // Time entries are copied to invoice lines and can be reviewed/approved on the invoice page
-
-   router.push(`/invoices/${invoice.id}`)
+   toast.success('Faktura skapad och skickad!')
+   router.push(`/invoices/${result.data?.id}`)
   } catch (err: any) {
    toast.error('Fel: ' + err.message)
   }
@@ -388,7 +386,7 @@ export default function ProjectDetailPage() {
 
  async function handleDownloadPDF() {
   if (!isAdmin) {
-   toast.error('Endast administratörer kan skapa fakturor. Kontakta en administratör för att begära fakturering.')
+   toast.error('Endast administratörer kan ladda ner fakturor.')
    return
   }
   
@@ -398,7 +396,6 @@ export default function ProjectDetailPage() {
   }
   
   try {
-   // Skapa faktura först om den inte finns
    const { data: entries } = await supabase
     .from('time_entries')
     .select('hours_total')
@@ -411,18 +408,16 @@ export default function ProjectDetailPage() {
    }, 0)
 
    if (totalHours === 0) {
-    toast.error('Inga ofakturerade timmar att fakturera.')
+    toast.error('Inga ofakturerade timmar att skapa faktura för.')
     return
    }
 
    const rate = Number(project?.base_rate_sek ?? 0) || 360
    const amount = totalHours * rate
 
-   // Get client_id from project - fetch fresh data to ensure we have client info
    let clientId: string | null = null
    let clientName: string = 'Okänd kund'
    
-   // First try from current project state
    if (project?.client_id) {
     clientId = project.client_id
    } else if (project?.clients?.id) {
@@ -432,7 +427,6 @@ export default function ProjectDetailPage() {
     clientName = project.customer_name
    }
    
-   // If we don't have client_id, fetch project again to get it
    if (!clientId && projectId) {
     try {
      const { data: projectData } = await supabase
@@ -451,20 +445,17 @@ export default function ProjectDetailPage() {
      console.warn('Could not fetch client info from project:', err)
     }
    }
-   
-   console.log('📝 PDF Invoice creation - Client info:', { clientId, clientName, projectId })
-   
-   // Create invoice via API route (invoice lines will be created automatically from time entries)
+
    let result: any
    try {
-    result = await apiFetch<{ data?: { id?: string }; error?: string; details?: string; availableTenants?: any[]; suggestion?: string; diagnostics?: any }>('/api/invoices/create', {
+    result = await apiFetch<{ data?: { id?: string }; error?: string }>('/api/invoices/create', {
      method: 'POST',
      body: JSON.stringify({
       tenant_id: tenantId,
-      project_id: projectId, // This triggers automatic invoice line creation
+      project_id: projectId,
       client_id: clientId,
       customer_name: clientName,
-      amount, // Initial amount, will be recalculated from invoice lines
+      amount,
       desc: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
       description: `${totalHours.toFixed(1)} timmar @ ${rate} kr/tim`,
       status: 'draft',
@@ -472,34 +463,16 @@ export default function ProjectDetailPage() {
      }),
     })
    } catch (apiErr: any) {
-    console.error('Error creating invoice:', apiErr)
+    console.error('❌ Error creating invoice:', apiErr)
     toast.error('Kunde inte skapa faktura: ' + (apiErr.message || 'Okänt fel'))
     return
    }
 
-   if (result.error) {
-    console.error('Error creating invoice:', result)
-    
-    // Show detailed error message
-    let errorMessage = result.error || result.details || 'Okänt fel'
-    
-    if (result.availableTenants && result.availableTenants.length > 0) {
-     errorMessage += `\n\nTillgängliga tenants: ${result.availableTenants.map((t: any) => `${t.name} (${t.id})`).join(', ')}`
-    }
-    
-    if (result.suggestion) {
-     errorMessage += `\n\n${result.suggestion}`
-    }
-    
-    if (result.diagnostics) {
-     errorMessage += `\n\nDiagnostik: Tenant finns: ${result.diagnostics.tenantExists}, Projekt finns: ${result.diagnostics.projectExists}, Kund finns: ${result.diagnostics.clientExists}`
-    }
-    
-    toast.error('Kunde inte skapa faktura: ' + errorMessage)
+   if (result.error || !result.data?.id) {
+    toast.error('Kunde inte skapa faktura: ' + (result.error || 'Okänt fel'))
     return
    }
 
-   // Ladda ner PDF
    window.open(`/api/invoices/${result.data.id}?download=true`, '_blank')
    toast.success('PDF laddas ner...')
   } catch (err: any) {
@@ -507,557 +480,570 @@ export default function ProjectDetailPage() {
   }
  }
 
- if (loading || !tenantId) {
-  return (
-   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row">
-    <Sidebar />
-    <main className="flex-1 w-full flex items-center justify-center p-10">
-     <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-200 dark:border-primary-800 border-t-purple-600 dark:border-t-purple-400 mx-auto mb-4"></div>
-      <p className="text-gray-500 dark:text-gray-400">
-       {!tenantId ? 'Laddar tenant-information...' : 'Laddar projekt...'}
-      </p>
-     </div>
-    </main>
-   </div>
-  )
+ async function handleArchiveProject() {
+  if (!confirm(`Vill du arkivera projektet "${project?.name}"? Det kommer att flyttas till arkivet.`)) {
+   return
+  }
+  
+  if (!projectId || !tenantId) {
+   toast.error('Saknar projekt ID eller tenant ID')
+   return
+  }
+
+  try {
+   let { error } = await (supabase
+    .from('projects') as any)
+    .update({ status: 'archived' })
+    .eq('id', projectId)
+    .eq('tenant_id', tenantId)
+   
+   if (error && (error.code === '42703' || error.message?.includes('status'))) {
+    const fallback = await (supabase
+     .from('projects') as any)
+     .update({ status: 'completed' })
+     .eq('id', projectId)
+     .eq('tenant_id', tenantId)
+    
+    if (fallback.error) {
+     throw fallback.error
+    }
+    
+    toast.success('Projekt markerat som klart och arkiverat!')
+   } else if (error) {
+    throw error
+   } else {
+    toast.success('Projekt arkiverat!')
+    
+    if (typeof window !== 'undefined') {
+     const { addNotification } = await import('@/lib/notifications')
+     addNotification({
+      type: 'info',
+      title: 'Projekt arkiverat',
+      message: `Projektet "${project?.name}" har arkiverats`,
+      link: '/projects'
+     })
+    }
+   }
+   
+   router.push('/projects')
+  } catch (err: any) {
+   console.error('Error archiving project:', err)
+   toast.error('Kunde inte arkivera projekt: ' + (err.message || 'Okänt fel'))
+  }
  }
 
- if (error || !project) {
-  return (
-   <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row">
-    <Sidebar />
-    <main className="flex-1 w-full flex items-center justify-center p-10">
-     <div className="text-center max-w-md">
-      <p className="text-red-600 dark:text-red-400 text-lg mb-4">{error ?? 'Projektet hittas inte!'}</p>
-      <button
-       onClick={() => router.back()}
-       className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
-      >
-       Tillbaka
-      </button>
-     </div>
-    </main>
-   </div>
-  )
+ async function handleRestoreProject() {
+  if (!confirm(`Vill du återställa projektet "${project?.name}"? Det kommer att synas bland aktiva projekt igen.`)) {
+   return
+  }
+  
+  if (!projectId || !tenantId) {
+   toast.error('Saknar projekt ID eller tenant ID')
+   return
+  }
+
+  try {
+   const { error } = await (supabase
+    .from('projects') as any)
+    .update({ status: 'active' })
+    .eq('id', projectId)
+    .eq('tenant_id', tenantId)
+   
+   if (error) {
+    if (error.code === '42703' || error.message?.includes('status')) {
+     toast.error('Status-kolumn finns inte i databasen. Kontakta administratören.')
+     return
+    }
+    throw error
+   }
+   
+   toast.success('Projekt återställt!')
+   router.push('/projects')
+  } catch (err: any) {
+   console.error('Error restoring project:', err)
+   toast.error('Kunde inte återställa projekt: ' + (err.message || 'Okänt fel'))
+  }
  }
 
  const effectiveHours = Number.isFinite(hours) ? hours : 0
- const rate = Number(project.base_rate_sek ?? 0) || 360
+ const rate = Number(project?.base_rate_sek ?? 0) || 360
  const sum = effectiveHours * rate
- const budget = Number(project.budgeted_hours ?? 0)
+ const budget = Number(project?.budgeted_hours ?? 0)
  const progress = budget > 0 ? Math.min((effectiveHours / budget) * 100, 100) : 0
 
- return (
-  <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex flex-col lg:flex-row">
-   <Sidebar />
-   <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
-    <div className="p-4 sm:p-6 lg:p-10 max-w-5xl mx-auto w-full">
-     {/* Header */}
-     <div className="mb-6 sm:mb-8">
-      <button
-       onClick={() => router.back()}
-       className="mb-4 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 flex items-center gap-2 transition-colors"
-      >
-       ← Tillbaka
-      </button>
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-       <div>
-        <h1 className="text-3xl sm:text-4xl font-semibold text-gray-900 dark:text-white mb-1 sm:mb-2">{project.name}</h1>
-        <p className="text-sm sm:text-base text-gray-500 dark:text-gray-400">
-         {(project as any)?.clients?.name || project.customer_name || 'Ingen kund angiven'}
-        </p>
-       </div>
-       {/* Status badge */}
-       <div className="flex items-center gap-2">
-        {(project as ProjectRecord).is_rot_rut && (
-         <span className="px-3 py-1 bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300 text-xs font-semibold rounded-full">
-          ROT-avdrag
-         </span>
-        )}
-        {(project as ProjectRecord).price_model && (
-         <span className="px-3 py-1 bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300 text-xs font-semibold rounded-full">
-          {(project as ProjectRecord).price_model === 'hourly' ? 'Löpande' : 
-           (project as ProjectRecord).price_model === 'fixed' ? 'Fast pris' : 'Budget'}
-         </span>
-        )}
-       </div>
-      </div>
+ // Build status badges
+ const statusBadges: Array<{ label: string; variant: 'success' | 'warning' | 'error' | 'info' | 'default' }> = []
+ 
+ if (project?.is_rot_rut) {
+  statusBadges.push({ label: 'ROT-avdrag', variant: 'success' })
+ }
+ 
+ if (project?.price_model) {
+  const priceModelLabels: Record<string, string> = {
+   hourly: 'Löpande',
+   fixed: 'Fast pris',
+   budget: 'Budget'
+  }
+  statusBadges.push({ label: priceModelLabels[project.price_model] || project.price_model, variant: 'info' })
+ }
+ 
+ if (project?.status === 'archived' || project?.status === 'completed') {
+  statusBadges.push({ label: 'Arkiverad', variant: 'default' })
+ }
+
+ // Build header actions
+ const headerActions = (
+  <div className="flex flex-wrap gap-2">
+   <ExportToIntegrationButton
+    type="project"
+    resourceId={project?.id || ''}
+    resourceName={project?.name || ''}
+    variant="button"
+   />
+   {isAdmin && (
+    <button
+     onClick={() => router.push(`/invoices/new?projectId=${projectId}`)}
+     className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-sm"
+    >
+     <FileEdit className="w-4 h-4" />
+     Skapa faktura
+    </button>
+   )}
+  </div>
+ )
+
+ // Define tabs
+ const tabs = [
+  { id: 'overview', label: 'Översikt', icon: <Briefcase className="w-4 h-4" /> },
+  { id: 'financials', label: 'Ekonomi', icon: <DollarSign className="w-4 h-4" /> },
+  { id: 'team', label: 'Team', icon: <Users className="w-4 h-4" /> },
+  { id: 'files', label: 'Filer', icon: <FileText className="w-4 h-4" /> },
+  { id: 'advanced', label: 'Avancerat', icon: <Settings className="w-4 h-4" /> },
+ ]
+
+ // Overview Tab Content
+ const renderOverviewTab = () => (
+  <div className="space-y-6">
+   {/* Stats Cards */}
+   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <StatCard
+     label="Rapporterade timmar"
+     value={`${effectiveHours.toFixed(1)}h`}
+     icon={<Clock className="w-5 h-5" />}
+     iconColor="blue"
+    />
+    <StatCard
+     label="Timpris"
+     value={`${rate.toLocaleString('sv-SE')} kr`}
+     icon={<DollarSign className="w-5 h-5" />}
+     iconColor="green"
+    />
+    <StatCard
+     label="Ofakturerat"
+     value={`${sum.toLocaleString('sv-SE')} kr`}
+     icon={<TrendingUp className="w-5 h-5" />}
+     iconColor="yellow"
+    />
+    {budget > 0 && (
+     <StatCard
+      label="Budget"
+      value={`${budget}h`}
+      icon={<Briefcase className="w-5 h-5" />}
+      iconColor="blue"
+      trend={{ value: `${progress.toFixed(0)}%`, direction: progress < 90 ? 'up' : 'down' }}
+     />
+    )}
+   </div>
+
+   {/* Budget Progress Bar */}
+   {budget > 0 && (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+     <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
+      <span>Budgetprogression</span>
+      <span className="font-bold">{progress.toFixed(0)}%</span>
      </div>
-
-     {/* Project Info Card - shows if we have additional info */}
-     {((project as ProjectRecord).site_address || (project as ProjectRecord).description || (project as ProjectRecord).start_date || (project as ProjectRecord).property_designation) && (
-      <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-md p-4 sm:p-6 border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8">
-       <h3 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide mb-4">Projektinformation</h3>
-       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {(project as ProjectRecord).site_address && (
-         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Objektsadress</p>
-          <p className="text-sm text-gray-900 dark:text-white">{(project as ProjectRecord).site_address}</p>
-         </div>
-        )}
-        {((project as ProjectRecord).start_date || (project as ProjectRecord).end_date) && (
-         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Period</p>
-          <p className="text-sm text-gray-900 dark:text-white">
-           {(project as ProjectRecord).start_date ? new Date((project as ProjectRecord).start_date!).toLocaleDateString('sv-SE') : '?'} 
-           {' - '} 
-           {(project as ProjectRecord).end_date ? new Date((project as ProjectRecord).end_date!).toLocaleDateString('sv-SE') : 'pågående'}
-          </p>
-         </div>
-        )}
-        {(project as ProjectRecord).markup_percent && (
-         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Materialpåslag</p>
-          <p className="text-sm text-gray-900 dark:text-white">{(project as ProjectRecord).markup_percent}%</p>
-         </div>
-        )}
-        {(project as ProjectRecord).property_designation && (
-         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Fastighetsbeteckning (ROT)</p>
-          <p className="text-sm text-gray-900 dark:text-white">{(project as ProjectRecord).property_designation}</p>
-         </div>
-        )}
-        {(project as ProjectRecord).apartment_number && (
-         <div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Lägenhetsnummer</p>
-          <p className="text-sm text-gray-900 dark:text-white">{(project as ProjectRecord).apartment_number}</p>
-         </div>
-        )}
-        {(project as ProjectRecord).description && (
-         <div className="sm:col-span-2">
-          <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Beskrivning</p>
-          <p className="text-sm text-gray-900 dark:text-white whitespace-pre-line">{(project as ProjectRecord).description}</p>
-         </div>
-        )}
-       </div>
-      </div>
-     )}
-
-     {/* Stats Cards */}
-     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
-      <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
-       <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Rapporterade timmar</div>
-       <div className="text-2xl sm:text-3xl font-semibold text-blue-600 dark:text-blue-400">{effectiveHours.toFixed(1)}h</div>
-      </div>
-      <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
-       <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Timpris</div>
-       <div className="text-2xl sm:text-3xl font-semibold text-primary-500 dark:text-primary-400">{rate.toLocaleString('sv-SE')} kr</div>
-      </div>
-      <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
-       <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Ofakturerat</div>
-       <div className="text-2xl sm:text-3xl font-semibold text-primary-500 dark:text-pink-400">{sum.toLocaleString('sv-SE')} kr</div>
-      </div>
-      {budget > 0 && (
-       <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 border border-gray-100 dark:border-gray-700">
-        <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mb-1">Budget</div>
-        <div className="text-2xl sm:text-3xl font-semibold text-green-600 dark:text-green-400">{budget}h</div>
-       </div>
-      )}
-     </div>
-
-     {/* Progress Bar */}
-     {budget > 0 && (
-      <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8">
-       <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400 mb-2">
-        <span>Budgetprogression</span>
-        <span className="font-bold">{progress.toFixed(0)}%</span>
-       </div>
-       <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
-        <div
-         className={`h-full bg-gradient-to-r ${
-          progress >= 90 ? 'from-red-500 to-red-600' :
-          progress >= 70 ? 'from-orange-500 to-orange-600' :
-          'from-primary-400 to-primary-500'
-         } rounded-full transition-all duration-500`}
-         style={{ width: `${Math.min(progress, 100)}%` }}
-        />
-       </div>
-      </div>
-     )}
-
-      {/* AI-stöd Export-knapp */}
-      {project && (
-       <div className="mb-6 sm:mb-8">
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 dark:from-blue-900/40 dark:to-blue-800/40 border border-blue-200 dark:border-blue-800 rounded-[8px] p-4 sm:p-6">
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-         <div>
-          <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
-           <Sparkles className="w-5 h-5 text-white" />
-           Vill du exportera detta projekt?
-          </h3>
-          <p className="text-sm text-white/80">
-           Exportera projektdata till Fortnox eller Visma för enkel fakturering och bokföring.
-          </p>
-         </div>
-         <ExportToIntegrationButton
-          type="project"
-          resourceId={project.id}
-          resourceName={project.name}
-          variant="button"
-         />
-        </div>
-       </div>
-      </div>
-     )}
-
-     {/* Visa mer / Advanced Features Toggle */}
-     <div className="mb-6 sm:mb-8">
-      <button
-       onClick={() => setShowAdvanced(!showAdvanced)}
-       className="w-full bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 text-gray-700 dark:text-gray-300 px-6 py-4 rounded-[8px] font-semibold shadow-sm hover:shadow-md transition-all flex items-center justify-center gap-2"
-      >
-       {showAdvanced ? (
-        <>
-         <span>Dölj avancerade funktioner</span>
-         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
-        </>
-       ) : (
-        <>
-         <span>Visa mer (Schema, Budget, ÄTA, AI-verktyg)</span>
-         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-        </>
-       )}
-      </button>
-     </div>
-
-     {/* Advanced sections - only show when expanded */}
-     {showAdvanced && (
-      <>
-       {/* ÄTA 2.0 Section */}
-       {project && (
-        <div className="mb-6 sm:mb-8">
-         <ATA2Card projectId={project.id} tenantId={project.tenant_id || tenantId || ''} />
-        </div>
-       )}
-
-       {/* Budget & Alerts Section */}
-       {project && (
-        <div className="mb-6 sm:mb-8">
-         <BudgetCard projectId={project.id} tenantId={project.tenant_id || tenantId || ''} />
-        </div>
-       )}
-
-       {/* Schedule Calendar Section */}
-       {project && (
-        <div className="mb-6 sm:mb-8">
-         <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
-           Schema för projektet
-          </h2>
-          <ScheduleCalendar projectId={project.id} />
-         </div>
-        </div>
-       )}
-      </>
-     )}
-
-     {/* Employee Hours Section */}
-     <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8">
-      <div className="flex justify-between items-center mb-4">
-       <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-        Anställdas timmar
-       </h2>
-       <button
-        onClick={async () => {
-         if (!showEmployeeHours && employeeHours.length === 0) {
-          setLoadingEmployeeHours(true)
-          try {
-           const data = await apiFetch<{ employees?: any[] }>(`/api/projects/${projectId}/employee-hours?projectId=${projectId}`)
-           setEmployeeHours(data.employees || [])
-          } catch (err) {
-           console.error('Error fetching employee hours:', err)
-          } finally {
-           setLoadingEmployeeHours(false)
-          }
-         }
-         setShowEmployeeHours(!showEmployeeHours)
-        }}
-        className="text-sm bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold hover:shadow-md transition-all"
-       >
-        {loadingEmployeeHours ? 'Laddar...' : showEmployeeHours ? 'Dölj' : 'Visa'}
-       </button>
-      </div>
-      
-      {showEmployeeHours && (
-       <div className="space-y-3">
-        {employeeHours.length === 0 ? (
-         <p className="text-gray-500 dark:text-gray-400 text-center py-4">
-          Inga tidsrapporter registrerade ännu.
-         </p>
-        ) : (
-         employeeHours.map((emp: any, idx: number) => (
-          <div
-           key={idx}
-           className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600"
-          >
-           <div className="flex justify-between items-start mb-2">
-            <div>
-             <div className="font-semibold text-gray-900 dark:text-white">
-              {emp.name}
-             </div>
-             {emp.email && (
-              <div className="text-xs text-gray-500 dark:text-gray-400">
-               {emp.email}
-              </div>
-             )}
-            </div>
-            <div className="text-right">
-             <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-              {emp.hours.toFixed(1)}h
-             </div>
-             <div className="text-xs text-gray-500 dark:text-gray-400">
-              {emp.entries.length} rapporter
-             </div>
-            </div>
-           </div>
-           <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
-            <div
-             className="bg-primary-500 hover:bg-primary-600 h-2 rounded-full transition-all"
-             style={{ width: `${effectiveHours > 0 ? (emp.hours / effectiveHours) * 100 : 0}%` }}
-            />
-           </div>
-          </div>
-         ))
-        )}
-       </div>
-      )}
-     </div>
-
-     {/* AI Tools - only show when advanced is expanded */}
-     {showAdvanced && (
-      <>
-       {/* AI Budget Prediction */}
-       {projectId && (
-        <div className="mb-6 sm:mb-8">
-         <BudgetAIPrediction projectId={projectId as string} />
-        </div>
-       )}
-
-       {/* AI Material Identifier */}
-       <div className="mb-6 sm:mb-8">
-        <MaterialAIIdentifier />
-       </div>
-
-       {/* AI Project Planning */}
-       {projectId && (
-        <div className="mb-6 sm:mb-8">
-         <ProjectAIPlanning projectId={projectId as string} />
-        </div>
-       )}
-      </>
-     )}
-
-     {/* Project Analytics */}
-     {projectId && (
-      <div className="mb-6 sm:mb-8">
-       <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">
-         Projektanalys
-        </h2>
-        <ProjectAnalytics projectId={projectId as string} />
-       </div>
-      </div>
-     )}
-
-     {/* Files Section */}
-     <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8">
-      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Bilagor</h2>
-      <FileUpload 
-       entityType="project" 
-       entityId={projectId || ''}
-       onUploadComplete={() => {
-        // Trigger refresh
-        window.location.reload()
-       }}
+     <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-4 overflow-hidden">
+      <div
+       className={`h-full bg-gradient-to-r ${
+        progress >= 90 ? 'from-red-500 to-red-600' :
+        progress >= 70 ? 'from-orange-500 to-orange-600' :
+        'from-primary-400 to-primary-500'
+       } rounded-full transition-all duration-500`}
+       style={{ width: `${Math.min(progress, 100)}%` }}
       />
-      <div className="mt-4">
-       <FileList entityType="project" entityId={projectId || ''} />
-      </div>
      </div>
+    </div>
+   )}
 
-     {/* Action Buttons - Only show for admins - Collapsible */}
-     {isAdmin && (
-      <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8 overflow-hidden">
-       <details className="group" open>
-        <summary className="cursor-pointer p-4 sm:p-6 lg:p-8 flex items-center justify-between hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors list-none">
-         <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">Fakturering</h2>
-         <svg className="w-5 h-5 text-gray-400 group-open:rotate-180 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-        </summary>
-        <div className="px-4 sm:px-6 lg:px-8 pb-4 sm:pb-6 lg:pb-8 border-t border-gray-200 dark:border-gray-700 pt-4">
-         <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
-          Skapa faktura från projektets ofakturerade timmar eller ladda ner som PDF.
-         </p>
-         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-          <button
-           onClick={() => router.push(`/invoices/new?projectId=${projectId}`)}
-           className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 sm:py-4 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2"
-          >
-           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
-           Skapa faktura
-          </button>
-          <button
-           onClick={handleSendInvoice}
-           className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 sm:py-4 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2"
-          >
-           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-           Skapa & skicka
-          </button>
-          <button
-           onClick={handleDownloadPDF}
-           className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 sm:py-4 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2"
-          >
-           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-           Ladda ner PDF
-          </button>
-         </div>
+   {/* Project Info Card */}
+   {(project?.site_address || project?.description || project?.start_date || project?.property_designation) && (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <Building className="w-5 h-5 text-gray-400" />
+      Projektinformation
+     </h3>
+     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {project?.site_address && (
+       <div className="flex items-start gap-3">
+        <MapPin className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+        <div>
+         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Objektsadress</p>
+         <p className="text-sm text-gray-900 dark:text-white">{project.site_address}</p>
         </div>
-       </details>
-      </div>
-     )}
-     
-     {/* Request invoice button for non-admins */}
-     {!isAdmin && !adminLoading && (
-      <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700 mb-6 sm:mb-8">
-       <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Fakturering</h2>
-       <div className="bg-blue-50 dark:bg-blue-900/20 rounded-[8px] p-4 border border-blue-200 dark:border-blue-800">
-        <p className="text-blue-800 dark:text-blue-200 font-semibold mb-2">
-         📧 Begär fakturering
-        </p>
-        <p className="text-sm text-blue-600 dark:text-blue-400 mb-4">
-         Endast administratörer kan skapa och skicka fakturor. Kontakta en administratör för att begära fakturering av detta projekt.
-        </p>
-        <button
-         onClick={() => {
-          const subject = encodeURIComponent(`Begäran om fakturering: ${project.name}`)
-          const body = encodeURIComponent(`Hej,\n\nJag skulle vilja begära fakturering för projektet "${project.name}".\n\nProjekt-ID: ${projectId}\nTotala timmar: ${effectiveHours.toFixed(1)}h\n\nTack!`)
-          window.location.href = `mailto:admin@example.com?subject=${subject}&body=${body}`
-         }}
-         className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all"
-        >
-         📧 Skicka begäran via e-post
-        </button>
        </div>
-      </div>
-     )}
-
-     {/* Archive Button */}
-     <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] sm:rounded-[8px] shadow-md p-4 sm:p-6 lg:p-8 border border-gray-100 dark:border-gray-700">
-      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Projekthantering</h2>
-      {project.status === 'archived' || project.status === 'completed' ? (
-       <div className="space-y-4">
-        <div className="bg-blue-50 dark:bg-blue-900/20 rounded-[8px] p-4 border border-blue-200 dark:border-blue-800">
-         <p className="text-blue-800 dark:text-blue-200 font-semibold mb-2">
-          ✅ Projektet är arkiverat
-         </p>
-         <p className="text-sm text-blue-600 dark:text-blue-400">
-          Detta projekt är markerat som {project.status === 'archived' ? 'arkiverat' : 'klart'} och syns i arkivet.
+      )}
+      {(project?.start_date || project?.end_date) && (
+       <div className="flex items-start gap-3">
+        <Calendar className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+        <div>
+         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Period</p>
+         <p className="text-sm text-gray-900 dark:text-white">
+          {project?.start_date ? new Date(project.start_date).toLocaleDateString('sv-SE') : '?'} 
+          {' - '} 
+          {project?.end_date ? new Date(project.end_date).toLocaleDateString('sv-SE') : 'pågående'}
          </p>
         </div>
-        <button
-         onClick={async () => {
-          if (!confirm(`Vill du återställa projektet "${project.name}"? Det kommer att synas bland aktiva projekt igen.`)) {
-           return
-          }
-          
-          if (!projectId || !tenantId) {
-           toast.error('Saknar projekt ID eller tenant ID')
-           return
-          }
-
-          try {
-           const { error } = await (supabase
-            .from('projects') as any)
-            .update({ status: 'active' })
-            .eq('id', projectId)
-            .eq('tenant_id', tenantId)
-           
-           if (error) {
-            // Try without status if column doesn't exist
-            if (error.code === '42703' || error.message?.includes('status')) {
-             toast.error('Status-kolumn finns inte i databasen. Kontakta administratören.')
-             return
-            }
-            throw error
-           }
-           
-           toast.success('Projekt återställt!')
-           router.push('/projects')
-          } catch (err: any) {
-           console.error('Error restoring project:', err)
-           toast.error('Kunde inte återställa projekt: ' + (err.message || 'Okänt fel'))
-          }
-         }}
-         className="w-full bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
-        >
-         🔄 Återställ projekt
-        </button>
        </div>
-      ) : (
-       <button
-        onClick={async () => {
-         if (!confirm(`Vill du arkivera projektet "${project.name}"? Det kommer att flyttas till arkivet.`)) {
-          return
-         }
-         
-         if (!projectId || !tenantId) {
-          toast.error('Saknar projekt ID eller tenant ID')
-          return
-         }
-
-         try {
-          // First try with status column
-          let { error } = await (supabase
-           .from('projects') as any)
-           .update({ status: 'archived' })
-           .eq('id', projectId)
-           .eq('tenant_id', tenantId)
-          
-          // If status column doesn't exist, try 'completed'
-          if (error && (error.code === '42703' || error.message?.includes('status'))) {
-           const fallback = await (supabase
-            .from('projects') as any)
-            .update({ status: 'completed' })
-            .eq('id', projectId)
-            .eq('tenant_id', tenantId)
-           
-           if (fallback.error) {
-            throw fallback.error
-           }
-           
-           toast.success('Projekt markerat som klart och arkiverat!')
-          } else if (error) {
-           throw error
-          } else {
-           toast.success('Projekt arkiverat!')
-           
-           // Add notification
-           if (typeof window !== 'undefined') {
-            const { addNotification } = await import('@/lib/notifications')
-            addNotification({
-             type: 'info',
-             title: 'Projekt arkiverat',
-             message: `Projektet "${project.name}" har arkiverats`,
-             link: '/projects'
-            })
-           }
-          }
-          
-          // Redirect to projects list
-          router.push('/projects')
-         } catch (err: any) {
-          console.error('Error archiving project:', err)
-          toast.error('Kunde inte arkivera projekt: ' + (err.message || 'Okänt fel'))
-         }
-        }}
-        className="w-full bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
-       >
-        📦 Arkivera projekt
-       </button>
+      )}
+      {project?.markup_percent && (
+       <div className="flex items-start gap-3">
+        <TrendingUp className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+        <div>
+         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Materialpåslag</p>
+         <p className="text-sm text-gray-900 dark:text-white">{project.markup_percent}%</p>
+        </div>
+       </div>
+      )}
+      {project?.property_designation && (
+       <div className="flex items-start gap-3">
+        <Home className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+        <div>
+         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Fastighetsbeteckning (ROT)</p>
+         <p className="text-sm text-gray-900 dark:text-white">{project.property_designation}</p>
+        </div>
+       </div>
+      )}
+      {project?.apartment_number && (
+       <div className="flex items-start gap-3">
+        <Building className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+        <div>
+         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Lägenhetsnummer</p>
+         <p className="text-sm text-gray-900 dark:text-white">{project.apartment_number}</p>
+        </div>
+       </div>
+      )}
+      {project?.description && (
+       <div className="sm:col-span-2 flex items-start gap-3">
+        <FileText className="w-4 h-4 text-gray-400 mt-1 flex-shrink-0" />
+        <div>
+         <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Beskrivning</p>
+         <p className="text-sm text-gray-900 dark:text-white whitespace-pre-line">{project.description}</p>
+        </div>
+       </div>
       )}
      </div>
     </div>
-   </main>
+   )}
+
+   {/* Project Analytics */}
+   {projectId && (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <TrendingUp className="w-5 h-5 text-gray-400" />
+      Projektanalys
+     </h3>
+     <ProjectAnalytics projectId={projectId} />
+    </div>
+   )}
   </div>
+ )
+
+ // Financials Tab Content
+ const renderFinancialsTab = () => (
+  <div className="space-y-6">
+   {/* Export Integration Card */}
+   {project && (
+    <div className="bg-gradient-to-r from-primary-500 to-primary-600 dark:from-blue-900/40 dark:to-blue-800/40 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div>
+       <h3 className="text-lg font-bold text-white mb-1 flex items-center gap-2">
+        <Sparkles className="w-5 h-5 text-white" />
+        Exportera till bokföringssystem
+       </h3>
+       <p className="text-sm text-white/80">
+        Exportera projektdata till Fortnox eller Visma för enkel fakturering och bokföring.
+       </p>
+      </div>
+      <ExportToIntegrationButton
+       type="project"
+       resourceId={project.id}
+       resourceName={project.name}
+       variant="button"
+      />
+     </div>
+    </div>
+   )}
+
+   {/* Invoice Actions */}
+   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+     <FileText className="w-5 h-5 text-gray-400" />
+     Fakturering
+    </h3>
+    
+    {isAdmin ? (
+     <>
+      <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">
+       Skapa faktura från projektets ofakturerade timmar eller ladda ner som PDF.
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+       <button
+        onClick={() => router.push(`/invoices/new?projectId=${projectId}`)}
+        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+       >
+        <FileEdit className="w-5 h-5" />
+        Skapa faktura
+       </button>
+       <button
+        onClick={handleSendInvoice}
+        className="bg-green-600 hover:bg-green-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+       >
+        <Send className="w-5 h-5" />
+        Skapa & skicka
+       </button>
+       <button
+        onClick={handleDownloadPDF}
+        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+       >
+        <Download className="w-5 h-5" />
+        Ladda ner PDF
+       </button>
+      </div>
+     </>
+    ) : !adminLoading && (
+     <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+      <p className="text-blue-800 dark:text-blue-200 font-semibold mb-2 flex items-center gap-2">
+       <Mail className="w-4 h-4" />
+       Begär fakturering
+      </p>
+      <p className="text-sm text-blue-600 dark:text-blue-400 mb-4">
+       Endast administratörer kan skapa och skicka fakturor. Kontakta en administratör för att begära fakturering av detta projekt.
+      </p>
+      <button
+       onClick={() => {
+        const subject = encodeURIComponent(`Begäran om fakturering: ${project?.name}`)
+        const body = encodeURIComponent(`Hej,\n\nJag skulle vilja begära fakturering för projektet "${project?.name}".\n\nProjekt-ID: ${projectId}\nTotala timmar: ${effectiveHours.toFixed(1)}h\n\nTack!`)
+        window.location.href = `mailto:admin@example.com?subject=${subject}&body=${body}`
+       }}
+       className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+      >
+       <Mail className="w-4 h-4" />
+       Skicka begäran via e-post
+      </button>
+     </div>
+    )}
+   </div>
+
+   {/* Budget Card */}
+   {project && (
+    <BudgetCard projectId={project.id} tenantId={project.tenant_id || tenantId || ''} />
+   )}
+
+   {/* Project Management */}
+   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+     <Settings className="w-5 h-5 text-gray-400" />
+     Projekthantering
+    </h3>
+    {project?.status === 'archived' || project?.status === 'completed' ? (
+     <div className="space-y-4">
+      <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4 border border-blue-200 dark:border-blue-800">
+       <p className="text-blue-800 dark:text-blue-200 font-semibold mb-2">
+        ✅ Projektet är arkiverat
+       </p>
+       <p className="text-sm text-blue-600 dark:text-blue-400">
+        Detta projekt är markerat som {project?.status === 'archived' ? 'arkiverat' : 'klart'} och syns i arkivet.
+       </p>
+      </div>
+      <button
+       onClick={handleRestoreProject}
+       className="w-full bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+      >
+       <RotateCcw className="w-5 h-5" />
+       Återställ projekt
+      </button>
+     </div>
+    ) : (
+     <button
+      onClick={handleArchiveProject}
+      className="w-full bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+     >
+      <Archive className="w-5 h-5" />
+      Arkivera projekt
+     </button>
+    )}
+   </div>
+  </div>
+ )
+
+ // Team Tab Content
+ const renderTeamTab = () => (
+  <div className="space-y-6">
+   {/* Employee Hours */}
+   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+     <Clock className="w-5 h-5 text-gray-400" />
+     Anställdas timmar
+    </h3>
+    
+    {loadingEmployeeHours ? (
+     <div className="flex items-center justify-center py-8">
+      <div className="animate-spin rounded-full h-8 w-8 border-4 border-primary-200 dark:border-primary-800 border-t-purple-600 dark:border-t-purple-400"></div>
+     </div>
+    ) : employeeHours.length === 0 ? (
+     <p className="text-gray-500 dark:text-gray-400 text-center py-8">
+      Inga tidsrapporter registrerade ännu.
+     </p>
+    ) : (
+     <div className="space-y-3">
+      {employeeHours.map((emp: any, idx: number) => (
+       <div
+        key={idx}
+        className="bg-gray-50 dark:bg-gray-700/50 rounded-lg p-4 border border-gray-200 dark:border-gray-600"
+       >
+        <div className="flex justify-between items-start mb-2">
+         <div>
+          <div className="font-semibold text-gray-900 dark:text-white">
+           {emp.name}
+          </div>
+          {emp.email && (
+           <div className="text-xs text-gray-500 dark:text-gray-400">
+            {emp.email}
+           </div>
+          )}
+         </div>
+         <div className="text-right">
+          <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
+           {emp.hours.toFixed(1)}h
+          </div>
+          <div className="text-xs text-gray-500 dark:text-gray-400">
+           {emp.entries.length} rapporter
+          </div>
+         </div>
+        </div>
+        <div className="w-full bg-gray-200 dark:bg-gray-600 rounded-full h-2 mt-2">
+         <div
+          className="bg-primary-500 h-2 rounded-full transition-all"
+          style={{ width: `${effectiveHours > 0 ? (emp.hours / effectiveHours) * 100 : 0}%` }}
+         />
+        </div>
+       </div>
+      ))}
+     </div>
+    )}
+   </div>
+
+   {/* Project Employee Manager */}
+   {project && (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <Users className="w-5 h-5 text-gray-400" />
+      Hantera teammedlemmar
+     </h3>
+     <ProjectEmployeeManager projectId={project.id} />
+    </div>
+   )}
+  </div>
+ )
+
+ // Files Tab Content
+ const renderFilesTab = () => (
+  <div className="space-y-6">
+   <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+     <FileText className="w-5 h-5 text-gray-400" />
+     Bilagor
+    </h3>
+    <FileUpload 
+     entityType="project" 
+     entityId={projectId || ''}
+     onUploadComplete={() => {
+      window.location.reload()
+     }}
+    />
+    <div className="mt-4">
+     <FileList entityType="project" entityId={projectId || ''} />
+    </div>
+   </div>
+  </div>
+ )
+
+ // Advanced Tab Content
+ const renderAdvancedTab = () => (
+  <div className="space-y-6">
+   {/* ÄTA 2.0 Section */}
+   {project && (
+    <ATA2Card projectId={project.id} tenantId={project.tenant_id || tenantId || ''} />
+   )}
+
+   {/* Schedule Calendar Section */}
+   {project && (
+    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-100 dark:border-gray-700">
+     <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
+      <Calendar className="w-5 h-5 text-gray-400" />
+      Schema för projektet
+     </h3>
+     <ScheduleCalendar projectId={project.id} />
+    </div>
+   )}
+
+   {/* AI Budget Prediction */}
+   {projectId && (
+    <BudgetAIPrediction projectId={projectId} />
+   )}
+
+   {/* AI Material Identifier */}
+   <MaterialAIIdentifier />
+
+   {/* AI Project Planning */}
+   {projectId && (
+    <ProjectAIPlanning projectId={projectId} />
+   )}
+  </div>
+ )
+
+ // Render tab content based on active tab
+ const renderTabContent = () => {
+  switch (activeTab) {
+   case 'overview':
+    return renderOverviewTab()
+   case 'financials':
+    return renderFinancialsTab()
+   case 'team':
+    return renderTeamTab()
+   case 'files':
+    return renderFilesTab()
+   case 'advanced':
+    return renderAdvancedTab()
+   default:
+    return renderOverviewTab()
+  }
+ }
+
+ return (
+  <DetailLayout
+   title={project?.name || 'Laddar...'}
+   subtitle={(project as any)?.clients?.name || project?.customer_name || 'Ingen kund angiven'}
+   status={statusBadges}
+   actions={headerActions}
+   tabs={tabs}
+   activeTab={activeTab}
+   onTabChange={setActiveTab}
+   loading={loading || !tenantId}
+   error={error || (!project && !loading ? 'Projektet hittas inte!' : null)}
+   onBack={() => router.back()}
+  >
+   {renderTabContent()}
+  </DetailLayout>
  )
 }
