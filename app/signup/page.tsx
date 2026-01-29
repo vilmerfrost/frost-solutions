@@ -113,13 +113,25 @@ function SignupContent() {
    
   } catch (err: any) {
    console.error('Signup error:', err)
-   // Handle common Supabase errors
-   if (err.message?.includes('already registered')) {
+   const errorMsg = err.message || ''
+   
+   // Handle common Supabase errors with specific messages
+   if (errorMsg.includes('already registered') || errorMsg.includes('User already registered')) {
     setError('Den här e-postadressen är redan registrerad. Testa att logga in istället.')
-   } else if (err.message?.includes('Password')) {
+   } else if (errorMsg.includes('Password should be at least')) {
+    // Supabase password length error - show the actual requirement
     setError('Lösenordet måste vara minst 8 tecken.')
+   } else if (errorMsg.includes('weak password') || errorMsg.includes('Password is too weak')) {
+    setError('Lösenordet är för svagt. Använd en blandning av bokstäver, siffror och specialtecken.')
+   } else if (errorMsg.includes('Invalid email')) {
+    setError('Ogiltig e-postadress. Kontrollera att du skrivit rätt.')
+   } else if (errorMsg.includes('rate limit') || errorMsg.includes('too many requests')) {
+    setError('För många försök. Vänta en stund och försök igen.')
+   } else if (errorMsg) {
+    // Show the actual error message for debugging
+    setError(errorMsg)
    } else {
-    setError(err.message || 'Något gick fel vid registreringen')
+    setError('Något gick fel vid registreringen. Försök igen.')
    }
    setLoading(false)
   }
