@@ -6,6 +6,7 @@ import dynamic from 'next/dynamic'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import { apiFetch } from '@/lib/http/fetcher'
+import { clearTenantNotifications } from '@/lib/notifications'
 import { BASE_PATH } from '@/utils/url'
 import Sidebar from '@/components/Sidebar'
 
@@ -506,6 +507,9 @@ export default function DashboardClient({ userEmail, stats, projects: initialPro
        <button
         onClick={async () => {
          if (confirm('Är du säker på att du vill logga ut?')) {
+          // SECURITY: Clear tenant-specific data before logout
+          clearTenantNotifications()
+          localStorage.removeItem('tenant_id')
           await supabase.auth.signOut()
           router.push('/login')
          }

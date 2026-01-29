@@ -27,6 +27,8 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
      if (tenantData.tenantId) {
       console.log('✅ TenantContext: Found tenant via centralized API:', tenantData.tenantId, 'source:', tenantData.source)
       setTenantId(tenantData.tenantId)
+      // SECURITY: Store tenant_id for tenant-scoped localStorage (notifications, etc.)
+      localStorage.setItem('tenant_id', tenantData.tenantId)
       setIsLoading(false)
       return
      }
@@ -39,6 +41,8 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
      if (employeeData.tenantId) {
       console.log('✅ TenantContext: Found tenant via employee API:', employeeData.tenantId)
       setTenantId(employeeData.tenantId)
+      // SECURITY: Store tenant_id for tenant-scoped localStorage
+      localStorage.setItem('tenant_id', employeeData.tenantId)
       setIsLoading(false)
       return
      }
@@ -90,6 +94,8 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
     if (employeeData?.tenant_id) {
      console.log('✅ TenantContext: Found tenant from employees table:', employeeData.tenant_id)
      setTenantId(employeeData.tenant_id)
+     // SECURITY: Store tenant_id for tenant-scoped localStorage
+     localStorage.setItem('tenant_id', employeeData.tenant_id)
     } else {
      console.warn('⚠️ No employee record found for user:', userId, empError)
     }

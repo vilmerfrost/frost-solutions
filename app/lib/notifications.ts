@@ -3,6 +3,8 @@
 /**
  * Notification utilities for localStorage-based notifications
  * These functions handle client-side notification storage and management
+ * 
+ * SECURITY: All localStorage keys are tenant-scoped to prevent cross-tenant data leakage
  */
 
 interface Notification {
@@ -15,16 +17,55 @@ interface Notification {
  link?: string;
 }
 
-const STORAGE_KEY = 'notifications';
+const STORAGE_KEY_PREFIX = 'notifications_tenant_';
 const MAX_NOTIFICATIONS = 50;
 
 /**
- * Gets all notifications from localStorage
+ * Gets the tenant-scoped storage key
+ * Falls back to a session-specific key if no tenant ID is available
+ */
+function getStorageKey(): string {
+ try {
+  // Try to get tenant ID from localStorage (set by TenantContext)
+  const tenantId = localStorage.getItem('tenant_id');
+  if (tenantId) {
+   return `${STORAGE_KEY_PREFIX}${tenantId}`;
+  }
+  // Fallback: use session storage key (cleared on browser close)
+  const sessionKey = sessionStorage.getItem('notification_session_key');
+  if (sessionKey) {
+   return `notifications_session_${sessionKey}`;
+  }
+  // Create new session key
+  const newSessionKey = crypto.randomUUID();
+  sessionStorage.setItem('notification_session_key', newSessionKey);
+  return `notifications_session_${newSessionKey}`;
+ } catch {
+  // If all else fails, use a random key (won't persist)
+  return `notifications_temp_${Date.now()}`;
+ }
+}
+
+/**
+ * Clears notifications for the current tenant (call on logout)
+ */
+export function clearTenantNotifications(): void {
+ try {
+  const key = getStorageKey();
+  localStorage.removeItem(key);
+ } catch (error) {
+  console.error('Error clearing tenant notifications:', error);
+ }
+}
+
+/**
+ * Gets all notifications from localStorage (tenant-scoped)
  * @returns Array of notifications
  */
 export function getNotifications(): Notification[] {
  try {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const key = getStorageKey();
+  const stored = localStorage.getItem(key);
   if (!stored) {
    return [];
   }
@@ -37,14 +78,15 @@ export function getNotifications(): Notification[] {
 }
 
 /**
- * Saves notifications to localStorage
+ * Saves notifications to localStorage (tenant-scoped)
  * @param notifications Array of notifications to save
  */
 function saveNotifications(notifications: Notification[]): void {
  try {
+  const key = getStorageKey();
   // Keep only the last MAX_NOTIFICATIONS
   const toSave = notifications.slice(0, MAX_NOTIFICATIONS);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  localStorage.setItem(key, JSON.stringify(toSave));
  } catch (error) {
   console.error('Error saving notifications to localStorage:', error);
  }
@@ -131,11 +173,12 @@ export function removeNotification(id: string): void {
 }
 
 /**
- * Clears all notifications
+ * Clears all notifications for current tenant
  */
 export function clearAllNotifications(): void {
  try {
-  localStorage.removeItem(STORAGE_KEY);
+  const key = getStorageKey();
+  localStorage.removeItem(key);
   
   // Dispatch event to notify other components
   window.dispatchEvent(new CustomEvent('notifications-updated'));

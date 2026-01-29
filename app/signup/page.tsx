@@ -43,9 +43,19 @@ function SignupContent() {
   setLoading(true)
   setError('')
 
-  // Validate password length
+  // Validate password - Supabase requires: lowercase, uppercase, and number
   if (password.length < 8) {
    setError('Lösenordet måste vara minst 8 tecken.')
+   setLoading(false)
+   return
+  }
+  
+  const hasLowercase = /[a-z]/.test(password)
+  const hasUppercase = /[A-Z]/.test(password)
+  const hasNumber = /[0-9]/.test(password)
+  
+  if (!hasLowercase || !hasUppercase || !hasNumber) {
+   setError('Lösenordet måste innehålla minst en liten bokstav, en stor bokstav och en siffra.')
    setLoading(false)
    return
   }
@@ -121,12 +131,14 @@ function SignupContent() {
    } else if (errorMsg.includes('Password should be at least')) {
     // Supabase password length error - show the actual requirement
     setError('Lösenordet måste vara minst 8 tecken.')
-   } else if (errorMsg.includes('weak password') || errorMsg.includes('Password is too weak')) {
-    setError('Lösenordet är för svagt. Använd en blandning av bokstäver, siffror och specialtecken.')
+   } else if (errorMsg.includes('weak password') || errorMsg.includes('Password is too weak') || errorMsg.includes('WeakPassword') || errorMsg.includes('contain at least one character')) {
+    setError('Lösenordet måste innehålla minst en liten bokstav, en stor bokstav och en siffra.')
    } else if (errorMsg.includes('Invalid email')) {
     setError('Ogiltig e-postadress. Kontrollera att du skrivit rätt.')
    } else if (errorMsg.includes('rate limit') || errorMsg.includes('too many requests')) {
     setError('För många försök. Vänta en stund och försök igen.')
+   } else if (errorMsg.includes('Hook requires authorization') || errorMsg.includes('hook')) {
+    setError('Serverfel vid registrering. Kontakta support om problemet kvarstår.')
    } else if (errorMsg) {
     // Show the actual error message for debugging
     setError(errorMsg)
@@ -282,7 +294,7 @@ function SignupContent() {
         required
         minLength={8}
         disabled={isAnyLoading}
-        placeholder="Minst 8 tecken"
+        placeholder="Aa1 + minst 8 tecken"
         className="w-full px-4 py-3 bg-white text-gray-900 border border-gray-200 rounded-lg placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
        />
       </div>

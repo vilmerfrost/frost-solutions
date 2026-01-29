@@ -284,27 +284,14 @@ export default function NotificationCenter({ className = '' }: NotificationCente
 
 /**
  * Hook to add notifications
+ * Uses the tenant-scoped addNotification from lib/notifications.ts
  */
 export function useNotifications() {
+ const { addNotification: addNotif } = require('@/lib/notifications')
+ 
  const addNotification = (notification: Omit<Notification, 'id' | 'read' | 'createdAt'>) => {
-  const newNotification: Notification = {
-   ...notification,
-   id: crypto.randomUUID(),
-   read: false,
-   createdAt: new Date().toISOString(),
-  }
-
-  try {
-   const stored = localStorage.getItem('notifications')
-   const existing = stored ? JSON.parse(stored) : []
-   const updated = [newNotification, ...existing].slice(0, 50) // Keep last 50
-   localStorage.setItem('notifications', JSON.stringify(updated))
-   
-   // Dispatch custom event to notify NotificationCenter
-   window.dispatchEvent(new CustomEvent('notification-added', { detail: newNotification }))
-  } catch (err) {
-   console.error('Error adding notification:', err)
-  }
+  // Use the tenant-scoped function from lib/notifications.ts
+  addNotif(notification)
  }
 
  return { addNotification }
