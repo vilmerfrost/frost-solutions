@@ -4,8 +4,7 @@
  * Production-ready AI integration for Frost Bygg with optimized prompts
  * 
  * Features:
- * - Gemini 2.0 Flash (Vision) for OCR tasks
- * - Groq Llama 3.3 70B (Text) for summaries and insights
+ * - Gemini 2.5 Flash for all tasks (Text & Vision)
  * - Structured JSON output with Zod validation
  * - Retry logic and error handling
  * - Cost tracking (optional)
@@ -14,6 +13,8 @@
  */
 
 import { z } from 'zod';
+import { templateBudget } from './templates';
+import type { BudgetPrediction } from '@/types/ai';
 
 // ============================================================================
 // TYPES & SCHEMAS
@@ -281,11 +282,11 @@ function getMimeType(buffer: Buffer, filename?: string): string {
 }
 
 // ============================================================================
-// GEMINI 2.0 FLASH (VISION) CLIENT
+// GEMINI 2.5 FLASH CLIENT
 // ============================================================================
 
 /**
- * Process image with Gemini 2.0 Flash Vision API
+ * Process image with Gemini 2.5 Flash Vision API
  */
 async function callGeminiVision(
  imageBuffer: Buffer,
@@ -296,7 +297,7 @@ async function callGeminiVision(
  const base64Image = bufferToBase64(imageBuffer);
  
  const response = await fetch(
-  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
   {
    method: 'POST',
    headers: {
@@ -331,6 +332,10 @@ async function callGeminiVision(
 
  if (!response.ok) {
   const errorText = await response.text();
+  // Fallback to 2.0 if 2.5 fails (temporary safety)
+  if (response.status === 404) {
+    return callGeminiVisionFallback(imageBuffer, prompt, apiKey, mimeType);
+  }
   throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
  }
 
@@ -341,6 +346,92 @@ async function callGeminiVision(
  }
 
  return data.candidates[0].content.parts[0].text;
+}
+
+async function callGeminiVisionFallback(
+ imageBuffer: Buffer,
+ prompt: string,
+ apiKey: string,
+ mimeType: string
+): Promise<string> {
+ const base64Image = bufferToBase64(imageBuffer);
+ const response = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+  {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({
+    contents: [{ parts: [{ text: prompt }, { inline_data: { mime_type: mimeType, data: base64Image } }] }],
+    generationConfig: { responseMimeType: 'application/json' }
+   })
+  }
+ );
+ const data = await response.json();
+ return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+}
+
+/**
+ * Call Gemini 2.5 Flash Text API
+ */
+async function callGeminiText(
+ prompt: string,
+ apiKey: string,
+ systemPrompt?: string
+): Promise<string> {
+ const fullPrompt = systemPrompt ? `${systemPrompt}\n\n${prompt}` : prompt;
+
+ const response = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`,
+  {
+   method: 'POST',
+   headers: {
+    'Content-Type': 'application/json',
+   },
+   body: JSON.stringify({
+    contents: [{ parts: [{ text: fullPrompt }] }],
+    generationConfig: {
+     temperature: 0.2,
+     topK: 32,
+     topP: 1,
+     maxOutputTokens: 8192,
+     responseMimeType: 'application/json',
+    },
+   }),
+  }
+ );
+
+ if (!response.ok) {
+  const errorText = await response.text();
+  // Fallback to 2.0 if 2.5 fails
+  if (response.status === 404) {
+    return callGeminiTextFallback(fullPrompt, apiKey);
+  }
+  throw new Error(`Gemini API error: ${response.status} ${response.statusText} - ${errorText}`);
+ }
+
+ const data = await response.json();
+ 
+ if (!data.candidates?.[0]?.content?.parts?.[0]?.text) {
+  throw new Error('Gemini API returned no content');
+ }
+
+ return data.candidates[0].content.parts[0].text;
+}
+
+async function callGeminiTextFallback(prompt: string, apiKey: string): Promise<string> {
+ const response = await fetch(
+  `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+  {
+   method: 'POST',
+   headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify({
+    contents: [{ parts: [{ text: prompt }] }],
+    generationConfig: { responseMimeType: 'application/json' }
+   })
+  }
+ );
+ const data = await response.json();
+ return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
 }
 
 // ============================================================================
@@ -761,8 +852,8 @@ export async function generateROTRUTSummary(
 ): Promise<ROTRUTSummary> {
  const cfg = { ...DEFAULT_CONFIG, ...config };
  
- if (!cfg.groqApiKey) {
-  throw new Error('GROQ_API_KEY is required for ROT/RUT summary generation');
+ if (!cfg.geminiApiKey) {
+  throw new Error('GEMINI_API_KEY is required for ROT/RUT summary generation');
  }
 
  const prompt = `Skapa en ROT/RUT-sammanfattning för följande projekt:
@@ -779,7 +870,7 @@ ${ROT_RUT_SUMMARY_PROMPT}`;
 
  const result = await retryWithBackoff(
   async () => {
-   const jsonText = await callGroqLlama(prompt, cfg.groqApiKey);
+   const jsonText = await callGeminiText(prompt, cfg.geminiApiKey);
    return JSON.parse(jsonText);
   },
   cfg.maxRetries,
@@ -809,8 +900,8 @@ export async function generateProjectInsights(
 ): Promise<ProjectInsights> {
  const cfg = { ...DEFAULT_CONFIG, ...config };
  
- if (!cfg.groqApiKey) {
-  throw new Error('GROQ_API_KEY is required for project insights');
+ if (!cfg.geminiApiKey) {
+  throw new Error('GEMINI_API_KEY is required for project insights');
  }
 
  const prompt = `Analysera följande projektdata och ge insikter:
@@ -828,7 +919,7 @@ ${PROJECT_INSIGHTS_PROMPT}`;
 
  const result = await retryWithBackoff(
   async () => {
-   const jsonText = await callGroqLlama(prompt, cfg.groqApiKey);
+   const jsonText = await callGeminiText(prompt, cfg.geminiApiKey);
    return JSON.parse(jsonText);
   },
   cfg.maxRetries,
@@ -857,8 +948,8 @@ export async function validatePayroll(
 ): Promise<PayrollValidationResult> {
  const cfg = { ...DEFAULT_CONFIG, ...config };
  
- if (!cfg.groqApiKey) {
-  throw new Error('GROQ_API_KEY is required for payroll validation');
+ if (!cfg.geminiApiKey) {
+  throw new Error('GEMINI_API_KEY is required for payroll validation');
  }
 
  const prompt = `Validera följande lönedata enligt svenska 2025-regler:
@@ -875,7 +966,7 @@ ${PAYROLL_VALIDATION_PROMPT}`;
 
  const result = await retryWithBackoff(
   async () => {
-   const jsonText = await callGroqLlama(prompt, cfg.groqApiKey);
+   const jsonText = await callGeminiText(prompt, cfg.geminiApiKey);
    return JSON.parse(jsonText);
   },
   cfg.maxRetries,
@@ -888,7 +979,112 @@ ${PAYROLL_VALIDATION_PROMPT}`;
 }
 
 /**
- * Generate monthly report using Groq Llama 3.3 70B
+ * Generate budget prediction using Gemini 2.5 Flash
+ */
+export async function generateBudgetPrediction(
+ projectData: {
+  projectId: string;
+  totalHours: number;
+  budgetedHours: number;
+  hourlyRate: number;
+  currentSpend: number;
+  timeEntries: any[];
+ },
+ config?: AIConfig
+): Promise<BudgetPrediction> {
+ const cfg = { ...DEFAULT_CONFIG, ...config };
+ 
+ if (!cfg.geminiApiKey) {
+  throw new Error('GEMINI_API_KEY is required for budget prediction');
+ }
+
+ const prompt = `Analysera följande projektbudget och gör en prognos:
+
+Projekt ID: ${projectData.projectId}
+Budgeterade timmar: ${projectData.budgetedHours}
+Totalt arbetade timmar: ${projectData.totalHours}
+Timpris: ${projectData.hourlyRate} SEK
+Nuvarande kostnad: ${projectData.currentSpend} SEK
+Antal tidsrapporter: ${projectData.timeEntries.length}
+
+Historik (senaste 5):
+${projectData.timeEntries.slice(-5).map((e: any) => `- ${e.date}: ${e.hours_total}h`).join('\n')}
+
+Uppgift:
+1. Beräkna trend baserat på historik.
+2. Prediktera slutkostnad.
+3. Bedöm risk (low/medium/high).
+4. Ge konkreta förslag.
+
+Returnera JSON:
+{
+ "currentSpend": number,
+ "budgetRemaining": number,
+ "currentProgress": number (0-100),
+ "predictedFinal": number,
+ "riskLevel": "low" | "medium" | "high",
+ "suggestions": ["string"],
+ "confidence": "low" | "medium" | "high"
+}`;
+
+ const result = await retryWithBackoff(
+  async () => {
+   const jsonText = await callGeminiText(prompt, cfg.geminiApiKey);
+   return JSON.parse(jsonText);
+  },
+  cfg.maxRetries,
+  cfg.retryDelayMs
+ );
+
+ return templateBudget(result);
+}
+
+/**
+ * Generate project plan using Gemini 2.5 Flash
+ */
+export async function generateProjectPlan(
+ projectData: {
+  name: string;
+  estimatedHours: number;
+ },
+ config?: AIConfig
+): Promise<any> {
+ const cfg = { ...DEFAULT_CONFIG, ...config };
+ 
+ if (!cfg.geminiApiKey) {
+  throw new Error('GEMINI_API_KEY is required for project plan');
+ }
+
+ const system = 'Du är projektledare inom bygg. Ge endast JSON enligt format.';
+ const user = JSON.stringify({
+  project: projectData,
+  constraints: { workDays: 5, maxParallelTeams: 2 },
+  format: {
+   phases: [
+    { name: 'string', duration: 'days', resources: 'int', description: 'string', order: 'int' },
+   ],
+   totalDays: 'int',
+   bufferDays: 'int',
+   riskFactors: ['string'],
+   recommendedTeamSize: 'int',
+   confidenceLevel: 'low|medium|high',
+  },
+ });
+
+ const result = await retryWithBackoff(
+  async () => {
+   const jsonText = await callGeminiText(user, cfg.geminiApiKey, system);
+   return JSON.parse(jsonText);
+  },
+  cfg.maxRetries,
+  cfg.retryDelayMs
+ );
+
+ return result;
+}
+
+/**
+ * Generate monthly report using Gemini 2.5 Flash
  */
 export async function generateMonthlyReport(
  reportData: {
@@ -909,8 +1105,8 @@ export async function generateMonthlyReport(
 ): Promise<MonthlyReport> {
  const cfg = { ...DEFAULT_CONFIG, ...config };
  
- if (!cfg.groqApiKey) {
-  throw new Error('GROQ_API_KEY is required for monthly report generation');
+ if (!cfg.geminiApiKey) {
+  throw new Error('GEMINI_API_KEY is required for monthly report generation');
  }
 
  const prompt = `Skapa en månadsrapport för följande data:
@@ -928,7 +1124,7 @@ ${MONTHLY_REPORT_PROMPT}`;
 
  const result = await retryWithBackoff(
   async () => {
-   const jsonText = await callGroqLlama(prompt, cfg.groqApiKey);
+   const jsonText = await callGeminiText(prompt, cfg.geminiApiKey);
    return JSON.parse(jsonText);
   },
   cfg.maxRetries,
@@ -952,5 +1148,7 @@ export default {
  generateProjectInsights,
  validatePayroll,
  generateMonthlyReport,
+ generateBudgetPrediction,
+ generateProjectPlan,
 };
 

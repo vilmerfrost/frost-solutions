@@ -4,7 +4,7 @@ import { ok, fail } from '@/lib/ai/common';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { getTenantId } from '@/lib/serverTenant';
 import { templateBudget } from '@/lib/ai/templates';
-import type { BudgetPrediction } from '@/types/ai';
+import { generateBudgetPrediction } from '@/lib/ai/frost-bygg-ai-integration';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -48,48 +48,19 @@ export async function POST(req: NextRequest) {
   const rate = project.base_rate_sek ?? 600;
   const currentSpend = hours * rate;
   const budgetHours = project.budgeted_hours ?? 0;
-  const currentProgress = budgetHours > 0 ? Math.min(100, (hours / budgetHours) * 100) : 0;
 
-  // Enkel trend: sista 14 dagars snitt * återstående dagar ~ prox
-  const sorted = (entries ?? []).sort(
-   (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
-  );
-  const recent = sorted.slice(-14);
-  const avgDaily =
-   recent.length > 0
-    ? recent.reduce((a: any, b: any) => a + (parseFloat(b.hours_total || 0)), 0) /
-     Math.max(new Set(recent.map((r: any) => r.date)).size, 1)
-    : 0;
-
-  // Gissa 10 arbetsdagar kvar (enkelt antagande)
-  const predictedHours = hours + avgDaily * 10;
-  const predictedFinal = predictedHours * rate;
-  const budgetAmount = (project.budgeted_hours ?? 0) * rate;
-  const budgetRemaining = Math.max(0, budgetAmount - currentSpend);
-
-  let risk: 'low' | 'medium' | 'high' = 'low';
-  if (budgetAmount > 0) {
-   const over = predictedFinal - budgetAmount;
-   if (over > budgetAmount * 0.15) {
-    risk = 'high';
-   } else if (over > budgetAmount * 0.05) {
-    risk = 'medium';
-   }
-  }
-
-  const prediction: BudgetPrediction = {
+  // Use Gemini 2.5 Flash for prediction
+  const prediction = await generateBudgetPrediction({
+   projectId,
+   totalHours: hours,
+   budgetedHours: budgetHours,
+   hourlyRate: rate,
    currentSpend,
-   budgetRemaining,
-   currentProgress: Math.round(currentProgress),
-   predictedFinal: Math.round(predictedFinal),
-   riskLevel: risk,
-   suggestions: [],
-   confidence: recent.length >= 5 ? 'medium' : 'low',
-  };
+   timeEntries: entries ?? [],
+  });
 
-  return ok({ prediction: templateBudget(prediction) });
+  return ok({ prediction });
  } catch (e) {
   return fail(e, 'Kunde inte beräkna budgetprognos.');
  }
 }
-

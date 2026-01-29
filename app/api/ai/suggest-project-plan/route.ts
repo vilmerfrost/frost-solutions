@@ -5,7 +5,7 @@ import { getTenantId } from '@/lib/serverTenant';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { makeCacheKey, getCached, setCached } from '@/lib/ai/cache';
 import { enforceRateLimit } from '@/lib/ai/ratelimit';
-import { claudeJSON } from '@/lib/ai/claude';
+import { generateProjectPlan } from '@/lib/ai/frost-bygg-ai-integration';
 import { templateProjectPlan } from '@/lib/ai/templates';
 import type { ProjectPlan } from '@/types/ai';
 
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
     const cachedData = cached as ProjectPlan;
     return ok({
      plan: cachedData,
-     model: complex ? 'claude-sonnet' : 'claude-haiku',
+     model: 'gemini-2.5-flash',
      cached: true,
     });
    }
@@ -77,65 +77,30 @@ export async function POST(req: NextRequest) {
    }
   }
 
-  const model = complex ? 'claude-3-5-sonnet-latest' : 'claude-3-5-haiku-latest';
-  const system = 'Du är projektledare inom bygg. Ge endast JSON enligt format.';
-  const user = JSON.stringify({
-   project: { name: project.name, estimatedHours: totalHours },
-   constraints: { workDays: 5, maxParallelTeams: 2 },
-   format: {
-    phases: [
-     { name: 'string', duration: 'days', resources: 'int', description: 'string', order: 'int' },
-    ],
-    totalDays: 'int',
-    bufferDays: 'int',
-    riskFactors: ['string'],
-    recommendedTeamSize: 'int',
-    confidenceLevel: 'low|medium|high',
-   },
-  });
-
   let plan: ProjectPlan | null = null;
 
   try {
-   const res = await claudeJSON(model as any, system, user, 1200);
-   if (res?._raw) {
-    throw new Error('Non-JSON');
-   }
-
-   plan = {
-    phases: Array.isArray(res.phases) ? res.phases : templateProjectPlan(!complex).phases,
-    totalDays: Number(res.totalDays ?? 10),
-    bufferDays: Number(res.bufferDays ?? 2),
-    riskFactors: Array.isArray(res.riskFactors) ? res.riskFactors : ['Resursbrist'],
-    recommendedTeamSize: Number(res.recommendedTeamSize ?? 2),
-    confidenceLevel: (['low', 'medium', 'high'].includes(res.confidenceLevel)
-     ? res.confidenceLevel
-     : 'medium') as 'low' | 'medium' | 'high',
-   } as ProjectPlan;
-  } catch (error) {
-   console.error('Claude API error:', error);
-   plan = templateProjectPlan(!complex);
+   // Use Gemini 2.5 Flash via integration library
+   plan = await generateProjectPlan({
+    name: project.name,
+    estimatedHours: totalHours
+   });
+  } catch (e) {
+   console.error('Gemini error:', e);
+   // Fallback to template
+   plan = templateProjectPlan(project.name, totalHours);
   }
 
   if (plan) {
-   // Cache the result (TTL: 14 days = 1209600 seconds)
-   try {
-    await setCached(tenantId, cacheKey, plan, 1209600);
-   } catch (cacheError) {
-    // Cache write errors shouldn't block the response
-    if (process.env.NODE_ENV === 'development') {
-     console.warn('Cache write error (non-blocking):', cacheError);
-    }
-   }
+   await setCached(tenantId, cacheKey, plan, 60 * 60 * 24); // Cache 24h
   }
 
   return ok({
-   plan: plan || templateProjectPlan(!complex),
-   model: complex ? 'claude-sonnet' : 'claude-haiku',
+   plan: plan || templateProjectPlan(project.name, totalHours),
+   model: 'gemini-2.5-flash',
    cached: false,
   });
  } catch (e) {
   return fail(e, 'Kunde inte generera projektplan.');
  }
 }
-
