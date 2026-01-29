@@ -227,7 +227,7 @@ function AetaForm() {
     toast.error('Kunde inte spara ÄTA: ' + error.message)
    } else {
     toast.success('ÄTA skickad till kontoret!')
-    router.push(`${BASE_PATH}/dashboard`)
+    router.push('/dashboard')
    }
   } catch (err: any) {
    console.error('Unexpected error:', err)

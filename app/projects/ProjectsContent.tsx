@@ -472,7 +472,7 @@ export default function ProjectsContent() {
        <p className="text-gray-500 dark:text-gray-400">Hantera dina projekt</p>
       </div>
       <button
-       onClick={() => router.push(`${BASE_PATH}/projects/new`)}
+       onClick={() => router.push('/projects/new')}
        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all flex items-center gap-2 whitespace-nowrap"
       >
        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -608,7 +608,7 @@ export default function ProjectsContent() {
       <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] shadow-md p-8 border border-gray-100 dark:border-gray-700 text-center">
        <p className="text-gray-500 dark:text-gray-400 mb-4">Inga projekt hittades</p>
        <button
-        onClick={() => router.push(`${BASE_PATH}/projects/new`)}
+        onClick={() => router.push('/projects/new')}
         className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold"
        >
         Skapa första projektet

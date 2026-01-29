@@ -166,7 +166,7 @@ export default function NewClientPage() {
    })
 
    toast.success('Kund skapad!')
-   router.replace(`${BASE_PATH}/clients`)
+   router.replace('/clients')
   } catch (err: any) {
    toast.error('Kunde inte skapa kund: ' + (err.message || 'Okänt fel'))
   } finally {

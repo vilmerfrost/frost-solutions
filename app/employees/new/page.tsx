@@ -156,7 +156,7 @@ export default function NewEmployeePage() {
    }
 
    toast.success('Anställd skapad!')
-   router.replace(`${BASE_PATH}/employees`)
+   router.replace('/employees')
   } catch (err: any) {
    console.error('Unexpected error:', err)
    toast.error('Ett oväntat fel uppstod: ' + (err.message || 'Okänt fel'))

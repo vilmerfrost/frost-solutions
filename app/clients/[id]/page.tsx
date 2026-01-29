@@ -291,7 +291,7 @@ export default function ClientDetailPage() {
      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
       <h3 className="font-semibold text-gray-900 dark:text-white">Alla projekt</h3>
       <button
-       onClick={() => router.push(`${BASE_PATH}/projects/new?clientId=${clientId}`)}
+       onClick={() => router.push(`/projects/new?clientId=${clientId}`)}
        className="text-sm px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white rounded-md font-medium transition-colors flex items-center gap-1"
       >
        <Plus className="w-4 h-4" /> Nytt projekt

@@ -162,7 +162,7 @@ export default function NewMaterialPage() {
 
   const result = await createMutation.mutateAsync(formData)
   if (result.success) {
-   router.push(`${BASE_PATH}/materials`)
+   router.push('/materials')
   }
  }
 

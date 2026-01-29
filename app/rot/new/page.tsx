@@ -339,7 +339,7 @@ export default function NewRotApplicationPage() {
    }
 
    toast.success('ROT-ansökan skapad!')
-   router.push(`${BASE_PATH}/rot/${result.data.id}`)
+   router.push(`/rot/${result.data.id}`)
   } catch (err: any) {
    toast.error('Ett oväntat fel uppstod: ' + (err.message || 'Okänt fel'))
    setLoading(false)
@@ -367,7 +367,7 @@ export default function NewRotApplicationPage() {
        Endast administratörer kan skapa ROT-ansökningar.
       </p>
       <button
-       onClick={() => router.push(`${BASE_PATH}/rot`)}
+       onClick={() => router.push('/rot')}
        className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold"
       >
        Tillbaka
