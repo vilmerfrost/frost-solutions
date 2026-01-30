@@ -111,10 +111,8 @@ export default function OnboardingPage() {
         setTenantId(currentTenantId)
       } else {
         // Update existing tenant
-        await supabase
-          .from('tenants')
-          .update({ name: state.companyName } as any)
-          .eq('id', currentTenantId)
+        // @ts-expect-error - Supabase types are strict but this is valid
+        await supabase.from('tenants').update({ name: state.companyName }).eq('id', currentTenantId)
         
         updateState({ tenantId: currentTenantId })
       }
