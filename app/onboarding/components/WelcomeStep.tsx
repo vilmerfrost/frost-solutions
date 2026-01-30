@@ -1,32 +1,26 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Building2, Wrench, Zap, Paintbrush, Hammer, Package } from 'lucide-react'
-import { Industry, OnboardingActions } from '../hooks/useOnboardingState'
-import { 
-  fadeInVariants, 
-  staggerContainerVariants, 
-  staggerItemVariants,
-  logoVariants 
-} from '../animations/variants'
+import { Loader2 } from 'lucide-react'
+import { fadeInVariants, staggerContainerVariants, staggerItemVariants, logoVariants } from '../animations/variants'
 
 interface WelcomeStepProps {
-  selectedIndustry: Industry | null
-  onSelect: (industry: Industry) => void
+  companyName: string
+  onCompanyNameChange: (value: string) => void
   onContinue: () => void
-  actions: OnboardingActions
+  isLoading: boolean
+  error: string | null
 }
 
-const industries: { id: Industry; label: string; icon: React.ElementType }[] = [
-  { id: 'bygg', label: 'Bygg', icon: Building2 },
-  { id: 'vvs', label: 'VVS', icon: Wrench },
-  { id: 'el', label: 'El', icon: Zap },
-  { id: 'maleri', label: 'Måleri', icon: Paintbrush },
-  { id: 'snickeri', label: 'Snickeri', icon: Hammer },
-  { id: 'ovrigt', label: 'Annat', icon: Package },
-]
+export function WelcomeStep({ 
+  companyName, 
+  onCompanyNameChange, 
+  onContinue,
+  isLoading,
+  error,
+}: WelcomeStepProps) {
+  const isValid = companyName.trim().length > 0
 
-export function WelcomeStep({ selectedIndustry, onSelect, onContinue, actions }: WelcomeStepProps) {
   return (
     <motion.div
       className="flex flex-col items-center justify-center min-h-[60vh] text-center px-4"
@@ -34,17 +28,17 @@ export function WelcomeStep({ selectedIndustry, onSelect, onContinue, actions }:
       initial="initial"
       animate="animate"
     >
-      {/* Animated Logo */}
+      {/* Logo */}
       <motion.div
         variants={logoVariants}
         initial="initial"
         animate="animate"
         className="mb-8"
       >
-        <div className="w-24 h-24 bg-white/10 backdrop-blur-sm rounded-3xl flex items-center justify-center border border-white/20 shadow-2xl">
+        <div className="w-20 h-20 bg-white/10 backdrop-blur-sm rounded-2xl flex items-center justify-center border border-white/20 shadow-2xl">
           <svg
             viewBox="0 0 24 24"
-            className="w-14 h-14 text-white"
+            className="w-10 h-10 text-white"
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -59,83 +53,82 @@ export function WelcomeStep({ selectedIndustry, onSelect, onContinue, actions }:
 
       {/* Title */}
       <motion.h1
-        className="text-4xl md:text-5xl font-bold text-white mb-4"
+        className="text-3xl md:text-4xl font-bold text-white mb-3"
         variants={fadeInVariants}
       >
         Välkommen till Frost
       </motion.h1>
       
       <motion.p
-        className="text-xl text-white/80 mb-12 max-w-md"
+        className="text-lg text-white/70 mb-10 max-w-md"
         variants={fadeInVariants}
       >
-        Låt oss komma igång! Vilken bransch jobbar du inom?
+        Kom igång på under en minut
       </motion.p>
 
-      {/* Industry Selection Grid */}
+      {/* Form */}
       <motion.div
-        className="grid grid-cols-3 gap-4 mb-10 w-full max-w-md"
+        className="w-full max-w-sm space-y-6"
         variants={staggerContainerVariants}
         initial="initial"
         animate="animate"
       >
-        {industries.map((industry) => {
-          const Icon = industry.icon
-          const isSelected = selectedIndustry === industry.id
-          
-          return (
-            <motion.button
-              key={industry.id}
-              variants={staggerItemVariants}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onSelect(industry.id)}
-              className={`
-                relative p-4 rounded-2xl border-2 transition-all duration-200
-                flex flex-col items-center gap-2
-                ${isSelected 
-                  ? 'bg-white text-gray-900 border-white shadow-lg shadow-white/20' 
-                  : 'bg-white/10 text-white border-white/20 hover:bg-white/20 hover:border-white/40'
-                }
-              `}
-            >
-              <Icon className={`w-8 h-8 ${isSelected ? 'text-primary-500' : ''}`} />
-              <span className="text-sm font-medium">{industry.label}</span>
-              
-              {isSelected && (
-                <motion.div
-                  className="absolute -top-2 -right-2 w-6 h-6 bg-primary-500 rounded-full flex items-center justify-center"
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-                >
-                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                  </svg>
-                </motion.div>
-              )}
-            </motion.button>
-          )
-        })}
-      </motion.div>
+        <motion.div variants={staggerItemVariants}>
+          <label className="block text-sm font-medium text-white/80 mb-2 text-left">
+            Företagsnamn
+          </label>
+          <input
+            type="text"
+            value={companyName}
+            onChange={(e) => onCompanyNameChange(e.target.value)}
+            placeholder="Mitt Företag AB"
+            className="w-full px-5 py-4 rounded-xl bg-white/10 border-2 border-white/20 text-white placeholder:text-white/40 focus:outline-none focus:border-white/50 focus:bg-white/15 transition-all duration-200 text-lg"
+            autoFocus
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && isValid && !isLoading) {
+                onContinue()
+              }
+            }}
+          />
+        </motion.div>
 
-      {/* Continue Button */}
-      <motion.button
-        variants={fadeInVariants}
-        whileHover={{ scale: 1.02 }}
-        whileTap={{ scale: 0.98 }}
-        onClick={onContinue}
-        disabled={!selectedIndustry}
-        className={`
-          px-10 py-4 rounded-full font-semibold text-lg transition-all duration-200
-          ${selectedIndustry
-            ? 'bg-white text-gray-900 shadow-lg shadow-white/20 hover:shadow-xl'
-            : 'bg-white/20 text-white/50 cursor-not-allowed'
-          }
-        `}
-      >
-        Fortsätt
-      </motion.button>
+        {/* Error */}
+        {error && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-3 rounded-lg bg-red-500/20 border border-red-500/30 text-red-200 text-sm"
+          >
+            {error}
+          </motion.div>
+        )}
+
+        {/* Continue Button */}
+        <motion.button
+          variants={staggerItemVariants}
+          whileHover={isValid && !isLoading ? { scale: 1.02 } : {}}
+          whileTap={isValid && !isLoading ? { scale: 0.98 } : {}}
+          onClick={onContinue}
+          disabled={!isValid || isLoading}
+          className={`
+            w-full px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200
+            flex items-center justify-center gap-2
+            ${isValid && !isLoading
+              ? 'bg-white text-gray-900 shadow-lg shadow-white/20 hover:shadow-xl'
+              : 'bg-white/20 text-white/50 cursor-not-allowed'
+            }
+          `}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Skapar konto...
+            </>
+          ) : (
+            'Fortsätt'
+          )}
+        </motion.button>
+      </motion.div>
     </motion.div>
   )
 }

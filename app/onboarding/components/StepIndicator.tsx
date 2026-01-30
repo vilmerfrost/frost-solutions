@@ -8,25 +8,31 @@ interface StepIndicatorProps {
 }
 
 export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
-  const progress = (currentStep / totalSteps) * 100
-  
   return (
-    <div className="w-full max-w-md mx-auto mb-8">
-      {/* Progress bar */}
-      <div className="h-1.5 bg-white/20 rounded-full overflow-hidden mb-3">
-        <motion.div
-          className="h-full bg-white rounded-full"
-          initial={{ width: 0 }}
-          animate={{ width: `${progress}%` }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
-        />
-      </div>
-      
-      {/* Step text */}
-      <div className="flex justify-between items-center text-sm text-white/70">
-        <span>Steg {currentStep} av {totalSteps}</span>
-        <span>{Math.round(progress)}% klart</span>
-      </div>
+    <div className="flex items-center gap-2 mb-8">
+      {Array.from({ length: totalSteps }).map((_, index) => {
+        const stepNumber = index + 1
+        const isActive = stepNumber === currentStep
+        const isCompleted = stepNumber < currentStep
+        
+        return (
+          <motion.div
+            key={index}
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: index * 0.1 }}
+            className={`
+              w-2.5 h-2.5 rounded-full transition-all duration-300
+              ${isActive 
+                ? 'w-8 bg-white' 
+                : isCompleted 
+                  ? 'bg-white/80' 
+                  : 'bg-white/30'
+              }
+            `}
+          />
+        )
+      })}
     </div>
   )
 }

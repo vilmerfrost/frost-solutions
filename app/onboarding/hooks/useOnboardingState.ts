@@ -2,91 +2,27 @@
 
 import { useState, useCallback } from 'react'
 
-export type Industry = 'bygg' | 'vvs' | 'el' | 'maleri' | 'snickeri' | 'ovrigt'
-
-export type OnboardingStep = 
-  | 'welcome'
-  | 'company'
-  | 'profile'
-  | 'demo-choice'
-  | 'customer'
-  | 'project'
-  | 'success'
+export type OnboardingStep = 'welcome' | 'setup' | 'success'
 
 export interface OnboardingState {
-  // Current step
   currentStep: OnboardingStep
-  
-  // Step 1: Welcome
-  industry: Industry | null
-  
-  // Step 2: Company
   companyName: string
-  orgNumber: string
-  
-  // Step 3: Profile
-  adminName: string
-  adminEmail: string
-  adminBaseRate: string
-  
-  // Step 4: Demo choice
   useDemo: boolean | null
-  
-  // Step 5: Customer (if not demo)
-  customerName: string
-  customerEmail: string
-  customerAddress: string
-  customerOrgNumber: string
-  
-  // Step 6: Project (if not demo)
-  projectName: string
-  projectBudget: string
-  projectRate: string
-  projectSiteAddress: string
-  
-  // IDs created during onboarding
   tenantId: string | null
-  clientId: string | null
-  projectId: string | null
-  
-  // Loading states
   isLoading: boolean
   error: string | null
 }
 
 const initialState: OnboardingState = {
   currentStep: 'welcome',
-  industry: null,
   companyName: '',
-  orgNumber: '',
-  adminName: '',
-  adminEmail: '',
-  adminBaseRate: '360',
   useDemo: null,
-  customerName: '',
-  customerEmail: '',
-  customerAddress: '',
-  customerOrgNumber: '',
-  projectName: '',
-  projectBudget: '',
-  projectRate: '360',
-  projectSiteAddress: '',
   tenantId: null,
-  clientId: null,
-  projectId: null,
   isLoading: false,
   error: null,
 }
 
-const stepOrder: OnboardingStep[] = [
-  'welcome',
-  'company',
-  'profile',
-  'demo-choice',
-  'customer',
-  'project',
-  'success',
-]
+const stepOrder: OnboardingStep[] = ['welcome', 'setup', 'success']
 
 export function useOnboardingState() {
   const [state, setState] = useState<OnboardingState>(initialState)
@@ -102,12 +38,6 @@ export function useOnboardingState() {
   const nextStep = useCallback(() => {
     setState(prev => {
       const currentIndex = stepOrder.indexOf(prev.currentStep)
-      
-      // Handle demo flow - skip customer and project steps
-      if (prev.currentStep === 'demo-choice' && prev.useDemo) {
-        return { ...prev, currentStep: 'success', error: null }
-      }
-      
       if (currentIndex < stepOrder.length - 1) {
         return { ...prev, currentStep: stepOrder[currentIndex + 1], error: null }
       }
@@ -118,12 +48,6 @@ export function useOnboardingState() {
   const prevStep = useCallback(() => {
     setState(prev => {
       const currentIndex = stepOrder.indexOf(prev.currentStep)
-      
-      // Handle demo flow - go back to demo-choice from success if demo was selected
-      if (prev.currentStep === 'success' && prev.useDemo) {
-        return { ...prev, currentStep: 'demo-choice', error: null }
-      }
-      
       if (currentIndex > 0) {
         return { ...prev, currentStep: stepOrder[currentIndex - 1], error: null }
       }
@@ -140,32 +64,12 @@ export function useOnboardingState() {
   }, [])
   
   const getStepNumber = useCallback(() => {
-    const { currentStep, useDemo } = state
-    
-    // Calculate visible step number based on flow
-    if (currentStep === 'welcome') return 1
-    if (currentStep === 'company') return 2
-    if (currentStep === 'profile') return 3
-    if (currentStep === 'demo-choice') return 4
-    
-    if (useDemo) {
-      // Demo flow: 4 steps total
-      if (currentStep === 'success') return 4
-    } else {
-      // Manual flow: 6 steps total
-      if (currentStep === 'customer') return 5
-      if (currentStep === 'project') return 6
-      if (currentStep === 'success') return 6
-    }
-    
-    return 1
-  }, [state])
+    return stepOrder.indexOf(state.currentStep) + 1
+  }, [state.currentStep])
   
   const getTotalSteps = useCallback(() => {
-    if (state.useDemo === null) return 4 // Before choice
-    if (state.useDemo) return 4 // Demo path
-    return 6 // Manual path
-  }, [state.useDemo])
+    return 3
+  }, [])
   
   return {
     state,
@@ -179,5 +83,3 @@ export function useOnboardingState() {
     getTotalSteps,
   }
 }
-
-export type OnboardingActions = ReturnType<typeof useOnboardingState>
