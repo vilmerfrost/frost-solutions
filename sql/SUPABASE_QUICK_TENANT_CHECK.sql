@@ -36,13 +36,13 @@ SELECT
     t.name AS tenant_name
 FROM employees e
 LEFT JOIN tenants t ON t.id = e.tenant_id
-WHERE e.auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567' -- Ersätt med ditt user ID om behövs
+WHERE e.auth_user_id = '00000000-0000-0000-0000-000000000000' -- Ersätt med ditt user ID om behövs
 ORDER BY e.created_at DESC;
 
 -- 5. Om employee har fel tenant_id, uppdatera den:
 -- UPDATE employees
 -- SET tenant_id = '7d57f1cb-c33f-4317-96f7-0abac0f2aab6' -- Ersätt med rätt tenant ID
--- WHERE auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567'; -- Ersätt med ditt user ID
+-- WHERE auth_user_id = '00000000-0000-0000-0000-000000000000'; -- Ersätt med ditt user ID
 
 -- ============================================================================
 -- INSTRUKTIONER:

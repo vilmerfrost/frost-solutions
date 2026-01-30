@@ -12,7 +12,7 @@ BEGIN
     WITH user_employees AS (
         SELECT DISTINCT e.tenant_id, e.id as employee_id
         FROM employees e
-        WHERE e.auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567'
+        WHERE e.auth_user_id = '00000000-0000-0000-0000-000000000000'
           AND EXISTS (SELECT 1 FROM tenants WHERE id = e.tenant_id)
     ),
     tenant_activity AS (
@@ -36,7 +36,7 @@ BEGIN
         FROM tenants
         WHERE EXISTS (
             SELECT 1 FROM employees e 
-            WHERE e.auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567'
+            WHERE e.auth_user_id = '00000000-0000-0000-0000-000000000000'
             AND e.tenant_id = tenants.id
         )
         LIMIT 1;

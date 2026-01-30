@@ -36,7 +36,7 @@ WHERE employee_id = '47224e0b-5809-4894-8696-49dd2b5f71f0';
 -- OPTION A: Ta bort "Admin" (om den har ingen data)
 DELETE FROM employees
 WHERE id = 'b545c4a3-685d-4af5-8d22-b7b0dcfce233'
-  AND auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567'
+  AND auth_user_id = '00000000-0000-0000-0000-000000000000'
   AND NOT EXISTS (
     SELECT 1 FROM time_entries WHERE employee_id = 'b545c4a3-685d-4af5-8d22-b7b0dcfce233'
   );
@@ -50,7 +50,7 @@ SELECT
     role,
     created_at
 FROM employees
-WHERE auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567'
+WHERE auth_user_id = '00000000-0000-0000-0000-000000000000'
 ORDER BY created_at DESC;
 
 -- 5. Om resultatet ser bra ut:

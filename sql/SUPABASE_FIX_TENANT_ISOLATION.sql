@@ -21,7 +21,7 @@ SELECT
     (SELECT COUNT(*) FROM time_entries WHERE employee_id = e.id) as time_entry_count
 FROM employees e
 LEFT JOIN tenants t ON e.tenant_id = t.id
-WHERE e.auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567'
+WHERE e.auth_user_id = '00000000-0000-0000-0000-000000000000'
 ORDER BY e.created_at DESC;
 
 -- Step 2: Check which projects belong to which tenants
@@ -60,7 +60,7 @@ WHERE p.tenant_id IS NOT NULL
 WITH user_tenants AS (
     SELECT DISTINCT e.tenant_id
     FROM employees e
-    WHERE e.auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567'
+    WHERE e.auth_user_id = '00000000-0000-0000-0000-000000000000'
       AND EXISTS (SELECT 1 FROM tenants WHERE id = e.tenant_id)
 ),
 tenant_stats AS (
@@ -70,7 +70,7 @@ tenant_stats AS (
         (SELECT COUNT(*) FROM projects WHERE tenant_id = t.id) as project_count,
         (SELECT COUNT(*) FROM time_entries te 
          JOIN employees e ON e.id = te.employee_id 
-         WHERE e.auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567' 
+         WHERE e.auth_user_id = '00000000-0000-0000-0000-000000000000' 
          AND te.tenant_id = t.id) as time_entry_count
     FROM tenants t
     WHERE t.id IN (SELECT tenant_id FROM user_tenants)

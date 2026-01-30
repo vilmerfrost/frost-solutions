@@ -41,7 +41,7 @@ SELECT
   t.name as tenant_name
 FROM public.employees e
 LEFT JOIN public.tenants t ON t.id = e.tenant_id
-WHERE e.auth_user_id = '2941e8db-d533-412e-a292-7ff713e76567'
+WHERE e.auth_user_id = '00000000-0000-0000-0000-000000000000'
 ORDER BY e.created_at DESC;
 
 -- 4. If tenant doesn't exist, create it (REPLACE VALUES!)

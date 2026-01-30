@@ -13,21 +13,22 @@ export async function GET(
  console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
  console.log('[OAuth Callback] 🎯 RECEIVED CALLBACK');
 
+ // Get base URL for redirects (use env var, fallback to headers for error redirects only)
+ // IMPORTANT: Must include /app basePath, prefer x-forwarded-host for proxied requests
+ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (() => {
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const protocol = request.headers.get('x-forwarded-proto') || 'https';
+  return `${protocol}://${host}/app`;
+ })();
+
+ console.log('[OAuth Callback] Base URL:', baseUrl);
+
  try {
   const params = await Promise.resolve(context.params);
   const provider = params.provider as AccountingProvider;
 
   console.log('[OAuth Callback] Provider:', provider);
 
-  // Get base URL for redirects (use env var, fallback to headers for error redirects only)
-  // IMPORTANT: Must include /app basePath, prefer x-forwarded-host for proxied requests
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || (() => {
-   const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
-   const protocol = request.headers.get('x-forwarded-proto') || 'https';
-   return `${protocol}://${host}/app`;
-  })();
-  
-  console.log('[OAuth Callback] Base URL:', baseUrl);
 
   // Extract query parameters
   const { searchParams } = new URL(request.url);
@@ -189,14 +190,8 @@ export async function GET(
   console.error('[OAuth Callback] ❌ FATAL ERROR:', error);
   console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
   
-  // Get base URL for error redirect
-  // IMPORTANT: Must include /app basePath, prefer x-forwarded-host for proxied requests
-  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
-  const protocol = request.headers.get('x-forwarded-proto') || 'https';
-  const errorBaseUrl = process.env.NEXT_PUBLIC_APP_URL || `${protocol}://${host}/app`;
-  
   return NextResponse.redirect(
-   `${errorBaseUrl}/settings/integrations?error=unknown&message=${encodeURIComponent(error.message)}`
+   `${baseUrl}/settings/integrations?error=unknown&message=${encodeURIComponent(error.message)}`
   );
  }
 }
