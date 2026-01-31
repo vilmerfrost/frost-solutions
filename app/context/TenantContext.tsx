@@ -88,7 +88,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
       .from('employees')
       .select('tenant_id')
       .eq('auth_user_id', user.id)
-      .maybeSingle()
+      .maybeSingle() as { data: { tenant_id: string } | null }
      
      if (empData && empData.tenant_id) {
       console.log('✅ TenantContext: Found tenant from employees table:', empData.tenant_id)
@@ -104,7 +104,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
        .from('employees')
        .select('tenant_id')
        .eq('email', user.email)
-       .maybeSingle()
+       .maybeSingle() as { data: { tenant_id: string } | null }
       
       if (emailData && emailData.tenant_id) {
        console.log('✅ TenantContext: Found tenant via email lookup:', emailData.tenant_id)
@@ -120,7 +120,7 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
       .from('user_roles')
       .select('tenant_id')
       .eq('user_id', user.id)
-      .maybeSingle()
+      .maybeSingle() as { data: { tenant_id: string } | null }
      
      if (roleData && roleData.tenant_id) {
       console.log('✅ TenantContext: Found tenant via user_roles:', roleData.tenant_id)
