@@ -31,12 +31,41 @@ export async function GET() {
 
   const adminSupabase = createClient(supabaseUrl, serviceKey)
 
-  // Get all employees for this user
-  const { data: allEmployees } = await adminSupabase
+  // Get all employees for this user by auth_user_id
+  let { data: allEmployees } = await adminSupabase
    .from('employees')
-   .select('id, tenant_id, role, full_name, name, email, created_at')
+   .select('id, tenant_id, role, full_name, name, email, created_at, auth_user_id')
    .eq('auth_user_id', user.id)
    .order('created_at', { ascending: false })
+
+  // FALLBACK: If no employees found by auth_user_id, try by email and auto-link
+  if ((!allEmployees || allEmployees.length === 0) && user.email) {
+   console.log('🔍 No employee by auth_user_id, trying email lookup:', user.email)
+   
+   const { data: emailEmployees } = await adminSupabase
+    .from('employees')
+    .select('id, tenant_id, role, full_name, name, email, created_at, auth_user_id')
+    .eq('email', user.email)
+    .order('created_at', { ascending: false })
+   
+   if (emailEmployees && emailEmployees.length > 0) {
+    console.log('✅ Found', emailEmployees.length, 'employee(s) by email')
+    
+    // Auto-link: Update employee records that don't have auth_user_id set
+    for (const emp of emailEmployees) {
+     if (!emp.auth_user_id) {
+      console.log('🔗 Auto-linking employee', emp.id, 'to auth user', user.id)
+      await adminSupabase
+       .from('employees')
+       .update({ auth_user_id: user.id, updated_at: new Date().toISOString() })
+       .eq('id', emp.id)
+      emp.auth_user_id = user.id
+     }
+    }
+    
+    allEmployees = emailEmployees
+   }
+  }
 
   if (!allEmployees || allEmployees.length === 0) {
    return NextResponse.json({

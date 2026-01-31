@@ -36,7 +36,7 @@ export async function getUserRole(userId: string, tenantId?: string): Promise<Ro
  // Fallback: Check employees table for legacy role
  const { data: employeeData, error: employeeError } = await admin
   .from('employees')
-  .select('role')
+  .select('role, email')
   .eq('auth_user_id', userId)
   .eq('tenant_id', tid)
   .maybeSingle();
@@ -53,6 +53,34 @@ export async function getUserRole(userId: string, tenantId?: string): Promise<Ro
   }
   if (legacyRole === 'manager') {
    return 'manager';
+  }
+  return 'employee';
+ }
+
+ // ADDITIONAL FALLBACK: Try to find employee by getting user email from auth
+ // This handles cases where auth_user_id wasn't set in employee record
+ const { createClient } = await import('@/utils/supabase/server');
+ const supabase = createClient();
+ const { data: userData } = await supabase.auth.getUser();
+ 
+ if (userData?.user?.email) {
+  const { data: emailEmployee } = await admin
+   .from('employees')
+   .select('role')
+   .eq('email', userData.user.email)
+   .eq('tenant_id', tid)
+   .maybeSingle();
+  
+  if (emailEmployee?.role) {
+   console.log('✅ Found role via email lookup:', emailEmployee.role);
+   const legacyRole = emailEmployee.role.toLowerCase();
+   if (legacyRole === 'admin' || legacyRole === 'administrator') {
+    return 'admin';
+   }
+   if (legacyRole === 'manager') {
+    return 'manager';
+   }
+   return 'employee';
   }
  }
 
