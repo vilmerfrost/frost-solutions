@@ -20,85 +20,118 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
   async function fetchTenantId() {
    setIsLoading(true)
    try {
-    // PRIORITY 1: Use centralized tenant API (single source of truth)
-    const tenantRes = await fetch(`${BASE_PATH}/api/tenant/get-tenant`, { cache: 'no-store' })
-    if (tenantRes.ok) {
-     const tenantData = await tenantRes.json()
-     if (tenantData.tenantId) {
-      console.log('✅ TenantContext: Found tenant via centralized API:', tenantData.tenantId, 'source:', tenantData.source)
-      setTenantId(tenantData.tenantId)
-      // SECURITY: Store tenant_id for tenant-scoped localStorage (notifications, etc.)
-      localStorage.setItem('tenant_id', tenantData.tenantId)
+    // PRIORITY 1: Check JWT claim first (most authoritative)
+    const { data: userData } = await supabase.auth.getUser()
+    const user = userData?.user
+    
+    if (user) {
+     // Check JWT app_metadata for tenant_id
+     const jwtTenantId = (user.app_metadata as Record<string, unknown>)?.tenant_id
+     if (jwtTenantId && typeof jwtTenantId === 'string') {
+      console.log('✅ TenantContext: Found tenant via JWT claim:', jwtTenantId)
+      setTenantId(jwtTenantId)
+      localStorage.setItem('tenant_id', jwtTenantId)
       setIsLoading(false)
       return
      }
     }
-    
-    // PRIORITY 2: Fallback to employee API
-    const employeeRes = await fetch(`${BASE_PATH}/api/employee/get-current`, { cache: 'no-store' })
-    if (employeeRes.ok) {
-     const employeeData = await employeeRes.json()
-     if (employeeData.tenantId) {
-      console.log('✅ TenantContext: Found tenant via employee API:', employeeData.tenantId)
-      setTenantId(employeeData.tenantId)
-      // SECURITY: Store tenant_id for tenant-scoped localStorage
-      localStorage.setItem('tenant_id', employeeData.tenantId)
-      setIsLoading(false)
-      return
-     }
-    }
-    
-    // PRIORITY 3: Legacy fallback to employees table (should rarely be needed)
-    console.warn('⚠️ TenantContext: All API routes failed, trying legacy method...')
-    const { data: userData, error: userError } = await supabase.auth.getUser()
-    
-    if (userError) {
-     console.warn('Could not get user for tenant lookup:', userError)
-     return
-    }
-    
-    const userId = userData?.user?.id
-    if (!userId) {
-     console.log('No user ID available for tenant lookup')
-     return
-    }
 
-    console.log('🔍 Fetching tenant from employees table for user:', userId)
-
-    const employeeResult = await supabase
-     .from('employees')
-     .select('tenant_id')
-     .eq('auth_user_id', userId)
-     .maybeSingle()
-    
-    let employeeData: any = employeeResult.data
-    let empError = employeeResult.error
-
-    if (empError || !employeeData) {
-     const userEmail = userData?.user?.email
-     if (userEmail) {
-      console.log('Trying to find employee by email:', userEmail)
-      const emailResult = await supabase
-       .from('employees')
-       .select('tenant_id')
-       .eq('email', userEmail)
-       .maybeSingle()
-      
-      if (emailResult.data) {
-       employeeData = emailResult.data
-       empError = null
+    // PRIORITY 2: Use centralized tenant API
+    try {
+     const tenantRes = await fetch(`${BASE_PATH}/api/tenant/get-tenant`, { cache: 'no-store' })
+     if (tenantRes.ok) {
+      const tenantData = await tenantRes.json()
+      if (tenantData.tenantId) {
+       console.log('✅ TenantContext: Found tenant via API:', tenantData.tenantId, 'source:', tenantData.source)
+       setTenantId(tenantData.tenantId)
+       localStorage.setItem('tenant_id', tenantData.tenantId)
+       setIsLoading(false)
+       return
       }
      }
+    } catch (apiErr) {
+     console.warn('TenantContext: API call failed, trying fallbacks...', apiErr)
     }
+    
+    // PRIORITY 3: Check localStorage (set during previous successful lookups)
+    const storedTenantId = localStorage.getItem('tenant_id')
+    if (storedTenantId) {
+     console.log('✅ TenantContext: Found tenant via localStorage:', storedTenantId)
+     setTenantId(storedTenantId)
+     setIsLoading(false)
+     return
+    }
+    
+    // PRIORITY 4: Fallback to employee API
+    try {
+     const employeeRes = await fetch(`${BASE_PATH}/api/employee/get-current`, { cache: 'no-store' })
+     if (employeeRes.ok) {
+      const employeeData = await employeeRes.json()
+      if (employeeData.tenantId) {
+       console.log('✅ TenantContext: Found tenant via employee API:', employeeData.tenantId)
+       setTenantId(employeeData.tenantId)
+       localStorage.setItem('tenant_id', employeeData.tenantId)
+       setIsLoading(false)
+       return
+      }
+     }
+    } catch (empErr) {
+     console.warn('TenantContext: Employee API failed', empErr)
+    }
+    
+    // PRIORITY 5: Direct database lookup (last resort)
+    if (user?.id) {
+     console.log('🔍 TenantContext: Trying direct DB lookup for user:', user.id)
 
-    if (employeeData?.tenant_id) {
-     console.log('✅ TenantContext: Found tenant from employees table:', employeeData.tenant_id)
-     setTenantId(employeeData.tenant_id)
-     // SECURITY: Store tenant_id for tenant-scoped localStorage
-     localStorage.setItem('tenant_id', employeeData.tenant_id)
-    } else {
-     console.warn('⚠️ No employee record found for user:', userId, empError)
+     // Try by auth_user_id
+     const { data: empData } = await supabase
+      .from('employees')
+      .select('tenant_id')
+      .eq('auth_user_id', user.id)
+      .maybeSingle()
+     
+     if (empData?.tenant_id) {
+      console.log('✅ TenantContext: Found tenant from employees table:', empData.tenant_id)
+      setTenantId(empData.tenant_id)
+      localStorage.setItem('tenant_id', empData.tenant_id)
+      setIsLoading(false)
+      return
+     }
+
+     // Try by email
+     if (user.email) {
+      const { data: emailData } = await supabase
+       .from('employees')
+       .select('tenant_id')
+       .eq('email', user.email)
+       .maybeSingle()
+      
+      if (emailData?.tenant_id) {
+       console.log('✅ TenantContext: Found tenant via email lookup:', emailData.tenant_id)
+       setTenantId(emailData.tenant_id)
+       localStorage.setItem('tenant_id', emailData.tenant_id)
+       setIsLoading(false)
+       return
+      }
+     }
+     
+     // Try user_roles table (same as server-side)
+     const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('tenant_id')
+      .eq('user_id', user.id)
+      .maybeSingle()
+     
+     if (roleData?.tenant_id) {
+      console.log('✅ TenantContext: Found tenant via user_roles:', roleData.tenant_id)
+      setTenantId(roleData.tenant_id)
+      localStorage.setItem('tenant_id', roleData.tenant_id)
+      setIsLoading(false)
+      return
+     }
     }
+    
+    console.warn('⚠️ TenantContext: No tenant found after all fallbacks')
    } catch (err) {
     console.error('Error fetching tenant ID:', err)
    } finally {
@@ -109,8 +142,13 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
   fetchTenantId()
   
   // Also listen for auth state changes to refetch tenant
-  const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-   fetchTenantId()
+  const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+   if (event === 'SIGNED_OUT') {
+    setTenantId(null)
+    localStorage.removeItem('tenant_id')
+   } else {
+    fetchTenantId()
+   }
   })
   
   return () => {
