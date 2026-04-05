@@ -2,24 +2,24 @@
 
 ## What This Is
 
-AI-powered project management, time tracking, invoicing, and payroll platform built for Swedish construction companies ("byggforetag"). Live at **frostsolutions.se** with the app served under **/app** basePath.
+AI-powered all-in-one platform for Swedish construction companies ("byggforetag"): project management, time tracking, invoicing, payroll, ROT-avdrag, and accounting integrations. Live at **frostsolutions.se** with the app served under **/app** basePath.
 
-**Price:** 499 SEK/month | **Language:** Swedish UI | **Market:** Nordic construction & blue-collar businesses
+**Price:** 499 SEK/project/month (shifting from flat rate) | **Language:** Swedish UI | **Market:** Nordic construction & blue-collar
 
 ## Tech Stack
 
 | Layer | Technology |
 |-------|-----------|
 | Framework | Next.js 16 (App Router, basePath: `/app`) |
-| Language | TypeScript 5.6 (strict mode) |
+| Language | TypeScript 5.6 (strict mode, zero errors) |
 | UI | React 19, Tailwind CSS 3.4, shadcn/ui, Framer Motion |
-| State | Zustand + React Query 5 (with offline persistence) |
+| State | Zustand + React Query 5 (with offline persistence via Dexie/IndexedDB) |
 | Database | Supabase (PostgreSQL 15+, RLS on all tables) |
 | Auth | Supabase Auth (Google/Microsoft OAuth + Magic Link) |
-| AI | Google Gemini 2.0, Groq Llama 3.3, OpenAI GPT-4 |
-| Payments | Stripe |
+| AI | OpenRouter (Gemini Flash 3.1 Preview) — single provider for all AI features |
+| Payments | Stripe (shared client, webhook idempotency, 14-day trial) |
 | Email | Resend |
-| Integrations | Fortnox, Visma eAccounting, Skatteverket |
+| Integrations | Fortnox, Visma eAccounting (legacy OAuth path) |
 | Monitoring | Sentry |
 | Hosting | Vercel (GitHub integration) |
 | Package Manager | pnpm |
@@ -28,32 +28,67 @@ AI-powered project management, time tracking, invoicing, and payroll platform bu
 
 ### Multi-Tenant Isolation
 - Every table has `tenant_id` with Row Level Security (RLS)
-- Tenant resolution priority: JWT claims -> API -> localStorage -> DB lookup
+- Tenant resolution: JWT claims -> API -> DB lookup (localStorage fallback removed)
 - `TenantContext` provider wraps the entire app
 - Middleware handles session refresh and tenant detection
 
 ### basePath: '/app'
-- The app is served from `frostsolutions.se/app` (root domain = marketing site)
+- The app is served from `frostsolutions.se/app` (root domain = marketing site in separate repo)
 - Middleware paths are ALREADY stripped of `/app` prefix
 - Router.push/replace must NOT include `/app` (Next.js adds it automatically)
 - Redirect URLs for OAuth callbacks must include `/app` prefix
-- **This is the #1 source of routing bugs** - never double-prefix
+- **This is the #1 source of routing bugs** — never double-prefix
+
+### Shared API Infrastructure (`app/lib/api/`)
+All API routes should use the shared helpers:
+```typescript
+import { resolveAuth, resolveAuthAdmin, parseBody, apiSuccess, apiError, handleRouteError } from '@/lib/api'
+```
+- `resolveAuth()` — returns `{ user, tenantId }` or `{ error }` (discriminated union)
+- `resolveAuthAdmin()` — same + Supabase admin client
+- `parseBody(req, zodSchema)` — validates JSON body with Zod
+- `parseSearchParams(req, zodSchema)` — validates query params
+- `apiSuccess(data, status?)` — `{ success: true, data }`
+- `apiError(message, status?, details?)` — `{ success: false, error }`
+- `handleRouteError(error)` — catch-all for route handlers
+
+15 core routes are already migrated. Remaining ~170 routes still use old patterns but work fine — migrate as touched.
+
+### Stripe (`app/lib/stripe/`)
+- `getStripe()` — singleton Stripe client (shared across all routes)
+- Webhook idempotency via `stripe_events` table — duplicates are skipped
+- `isEventProcessed()`, `markEventProcessed()`, `markEventFailed()`
+- 14-day trial (not 30), dynamic checkout (no hardcoded payment links)
+
+### AI (`app/lib/ai/`)
+- `openrouter.ts` — shared OpenRouter client, all AI routes use this
+- `chat-tools.ts` — tool definitions for AI chat
+- Legacy providers (Gemini SDK, Groq, OpenAI, Claude, HuggingFace) have been deleted
+- `OPENROUTER_API_KEY` is the only AI env var needed
 
 ### Key Directories
 ```
 app/
-  api/           # 162+ API route handlers
-  components/    # 149+ React components (shadcn/ui base)
-  lib/           # 68 utility/service modules
-  hooks/         # 36 custom hooks
-  types/         # TypeScript type definitions
-  context/       # TenantContext, ThemeContext
-  (auth-routes)/ # login, signup, onboarding, password-setup
+  api/             # 185 API route handlers
+  components/      # 149+ React components (shadcn/ui base)
+  lib/
+    api/           # Shared API helpers (auth, response, validate, errors)
+    ai/            # OpenRouter client + AI utilities
+    stripe/        # Shared Stripe client + idempotency
+    payroll/       # Payroll calculations, exporters, validation
+    pricing/       # Quote pricing + markup rules
+    integrations/  # Fortnox/Visma sync pipeline
+    security/      # Rate limiting, webhook verification
+  hooks/           # 36 custom hooks
+  types/           # TypeScript type definitions
+  context/         # TenantContext, ThemeContext
+  dashboard/
+    components/    # Split dashboard: Stats, Projects, TimeTracking, Header
 supabase/
-  functions/     # Edge functions (parse-invoice, watchdog, dynamic-api)
-  migrations/    # SQL migrations
-  rpc/           # PostgreSQL stored procedures
-middleware.ts    # Session & tenant middleware
+  functions/       # Edge functions (parse-invoice, watchdog, dynamic-api)
+  migrations/      # SQL migrations (including phase1_stripe_events)
+  rpc/             # PostgreSQL stored procedures
+middleware.ts      # Session & tenant middleware
 ```
 
 ## Key Commands
@@ -62,8 +97,8 @@ middleware.ts    # Session & tenant middleware
 pnpm dev              # Dev server at localhost:3000/app (uses webpack, NOT turbopack)
 pnpm build            # Production build
 pnpm lint             # ESLint
-pnpm typecheck        # TypeScript strict check
-pnpm test             # Jest unit tests
+pnpm typecheck        # TypeScript strict check (currently zero errors)
+pnpm test             # Jest unit tests (56 tests, 7 suites)
 pnpm test:e2e         # Playwright E2E tests
 ```
 
@@ -72,16 +107,26 @@ pnpm test:e2e         # Playwright E2E tests
 - **Supabase project ref:** `rwgqyozifwfgsxwyegoz` (West EU - Ireland)
 - **Vercel project:** `vilmer-frosts-projects/frost-solutions-1`
 - **GitHub repo:** `vilmerfrost/frost-solutions`
-- **Supabase CLI:** Already linked to project
-- **Vercel CLI:** Already linked to project
+- **Supabase CLI:** Linked
+- **Vercel CLI:** Linked
+
+## CLI Tools Available
+
+| CLI | Purpose |
+|-----|---------|
+| `supabase` | Linked to project `rwgqyozifwfgsxwyegoz`. Push/pull migrations, generate types |
+| `vercel` | Linked to `vilmer-frosts-projects/frost-solutions-1`. Deploy, manage env vars |
+| `gh` | GitHub CLI. PRs, issues, Actions |
+| `stripe` | Stripe CLI. Listen to webhooks locally, trigger test events, inspect resources |
+| `ports` | See what's running on ports, kill orphaned processes |
 
 ## Database (50+ tables)
 
-Core: `tenants`, `employees`, `clients`, `projects`, `time_entries`, `invoices`, `payroll_periods`, `rot_applications`, `materials`, `suppliers`, `work_orders`, `quotes`, `notifications`, `audit_logs`
+Core: `tenants`, `employees`, `clients`, `projects`, `time_entries`, `invoices`, `payroll_periods`, `rot_applications`, `materials`, `suppliers`, `work_orders`, `quotes`, `notifications`, `audit_logs`, `stripe_events`
 
-Integration: `integrations` (encrypted OAuth tokens), `integration_syncs`, `subscription_data`
+Integration: `integrations` (encrypted OAuth tokens), `integration_syncs`, `subscriptions`, `subscription_invoices`, `ai_credits`, `ai_transactions`
 
-All tables use RLS. Sensitive data (personnummer) is encrypted for GDPR compliance.
+All tables use RLS. Sensitive data (personnummer) encrypted for GDPR.
 
 ## Cron Jobs (vercel.json)
 
@@ -95,38 +140,28 @@ All tables use RLS. Sensitive data (personnummer) is encrypted for GDPR complian
 | Share Link Cleanup | Daily 2am | `/api/cron/share-link-cleanup` |
 | Integration Sync | Every 5min | `/api/cron/sync-integrations` |
 
-## Feature Modules
+## Testing
 
-### Core
-- **Time Tracking** - OB types (evening/night/weekend), GPS geofencing, approval workflows, CSV export
-- **Projects** - Budget tracking, ROT/RUT property support, AI summaries
-- **Invoicing** - OCR-powered processing (Gemini 2.0), PEPPOL stub, PDF generation
-- **Payroll** - Swedish 2025 rules, OB calculations, Fortnox/Visma export (PAXML/CSV/JSON)
-- **ROT-Avdrag** - Skatteverket integration, personnummer encryption, status polling
+- **56 unit tests** across 7 suites (all passing)
+- Tests cover: API response helpers, auth helpers, validation, payroll validation, pricing calculations, error utilities
+- **Playwright E2E**: 9 test suites for critical flows, auth, dashboard, security, navigation, mobile
+- Test pattern: `__tests__/**/*.[jt]s?(x)` (Jest), `tests/*.spec.ts` (Playwright)
 
-### AI (18 endpoints under /api/ai/)
-- Invoice/receipt/delivery note OCR
-- Material identification from photos
-- Budget predictions, project insights
-- Payroll validation, KMA suggestions
-- Monthly report generation, AI chatbot
+## Security
 
-### Integrations
-- **Fortnox** - OAuth + bidirectional sync
-- **Visma eAccounting** - OAuth + payroll
-- **Stripe** - Payments + webhook handling
-- **Factoring (Resurs)** - Invoice factoring offers
-
-### Other
-- Customer portal (public links, no-login access)
-- Work orders, quotes, delivery notes
-- Materials & supplier management
-- KMA checklists, ATA/ÄTA documents
-- Notification system (in-app + email via Resend)
-- Audit logging (SOC2-ready)
+- RLS on all tables with tenant isolation
+- All API routes require authentication (13 previously unprotected routes fixed)
+- Stripe webhook signature verification + event idempotency
+- Rate limiting on auth, payment, AI, and public endpoints
+- Input validation with Zod on all migrated routes
+- GDPR-compliant personnummer encryption
+- HTTP security headers (X-Frame-Options, X-Content-Type-Options, Referrer-Policy)
+- Console stripping in production (except errors)
+- Audit logging for critical operations
 
 ## Coding Conventions
 
+- **API routes:** Use shared helpers from `@/lib/api` (resolveAuth, parseBody, apiSuccess, etc.)
 - **Validation:** Zod schemas at API boundaries
 - **Forms:** React Hook Form + @hookform/resolvers
 - **Icons:** Lucide React
@@ -147,41 +182,42 @@ All tables use RLS. Sensitive data (personnummer) is encrypted for GDPR complian
 - **Dark mode:** Supported via ThemeContext
 - **Mobile:** Bottom navigation, PWA with service worker + IndexedDB
 
-## Known Issues & Incomplete Features
+## Project Status (Phase 1 Complete — 2026-04-05)
 
-- **AWS Textract** - Stubs exist, not fully implemented (using Gemini OCR instead)
-- **BankID integration** - Stub ready, not implemented
-- **PEPPOL e-invoicing** - Stub ready, not implemented
-- **Quote/Material templates** - API route TODOs
-- **Legacy localStorage tenant fallback** - Marked for removal
-- **DashboardClient.tsx** - Large component (~26KB), should be split
-- **Landing page SEO** - Fully client-rendered, no SSR content for crawlers
+### Completed
+- Shared API infrastructure (response, auth, validation helpers)
+- 15 core routes migrated to shared helpers with Zod validation
+- Stripe hardened (shared client, webhook idempotency, dynamic checkout, 14-day trial)
+- AI consolidated to OpenRouter (all legacy providers deleted)
+- Integration cleanup (removed broken TokenVault/OAuthManager, consolidated to legacy OAuth)
+- Dashboard split into focused components (653 → 65 lines)
+- Legacy code removed (localStorage tenant, backward compat, dead files)
+- 56 unit tests for business logic
+- Security audit + 13 route fixes (P0 + P1)
+- TypeScript strict: zero errors
 
-## CLI Tools Available
+### Planned (Phase 2 — Moat)
+- BankID digital signing (via Idura)
+- PEPPOL e-invoicing (via InExchange/Pagero)
+- Skatteverket direct ROT/RUT submission
+- Fortnox/Visma bidirectional sync hardening
 
-| CLI | Purpose |
-|-----|---------|
-| `supabase` | Linked to project `rwgqyozifwfgsxwyegoz`. Push/pull migrations, generate types |
-| `vercel` | Linked to `vilmer-frosts-projects/frost-solutions-1`. Deploy, manage env vars |
-| `gh` | GitHub CLI. PRs, issues, Actions |
-| `stripe` | Stripe CLI. Listen to webhooks locally, trigger test events, inspect resources |
-| `ports` | See what's running on ports, kill orphaned processes |
+### Planned (Phase 3 — All-in-One)
+- Legal Fortress (ÄTA protection engine)
+- Document Management / Binder (iBinder replacement)
+- Drawing Markup (Bluebeam Lite)
+- Safety & Compliance (SSG replacement)
+- Material Price Engine (nightly scraper)
+- Team Scheduling
+- Customer Portal expansion
+- React Native mobile app
+
+See `docs/superpowers/specs/2026-04-05-frost-solutions-v2-overhaul-design.md` for full spec.
 
 ## Environment Variables
 
 See `.env.example` for all variables. Required:
 - Supabase URL + keys
-- AI provider keys (OpenRouter — migrating from Gemini/Groq/OpenAI to single provider)
-- Stripe keys
+- `OPENROUTER_API_KEY` (single AI provider)
+- `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID`
 - Encryption keys (integration tokens, personnummer)
-
-## Security
-
-- RLS on all tables
-- GDPR-compliant personnummer encryption
-- Rate limiting on critical endpoints
-- Input validation with Zod
-- HTTP security headers (X-Frame-Options, CSP, etc.)
-- Encrypted integration token storage
-- Audit logging for all critical operations
-- Console stripping in production (except errors)
