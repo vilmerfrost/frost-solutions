@@ -5,3 +5,4 @@ node_modules
 tsconfig.tsbuildinfo
 credentials/google/*.json
 .env
+.vercel

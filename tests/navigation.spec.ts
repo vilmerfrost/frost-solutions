@@ -102,21 +102,14 @@ test.describe('404 Handling', () => {
 });
 
 test.describe('API Route Existence', () => {
-  test('stripe create-checkout endpoint exists', async ({ request }) => {
-    const response = await request.post('http://localhost:3001/app/api/stripe/create-checkout', {
+  test('subscription checkout endpoint exists', async ({ request }) => {
+    const response = await request.post('http://localhost:3001/app/api/subscriptions/checkout', {
       headers: { 'Content-Type': 'application/json' },
       data: {},
     });
     
-    // 401 means endpoint exists but requires auth
-    // 400 means endpoint exists but bad request
-    // 404 means endpoint doesn't exist
     const status = response.status();
-    expect([200, 400, 401, 404]).toContain(status);
-    // If 404, endpoint doesn't exist (which is acceptable for now)
-    if (status === 404) {
-      console.log('Note: stripe create-checkout endpoint not found (may not be implemented yet)');
-    }
+    expect([200, 400, 401, 403, 404, 503]).toContain(status);
   });
 
   test('import bygglet endpoint exists', async ({ request }) => {

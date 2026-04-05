@@ -272,7 +272,7 @@ async function runChecks() {
   console.log('7️⃣  Checking Stripe Configuration...\n');
   
   const stripeKey = process.env.STRIPE_SECRET_KEY;
-  const stripePriceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID;
+  const stripePriceId = process.env.STRIPE_PRICE_ID;
   const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
   if (stripeKey && stripeKey.startsWith('sk_')) {
@@ -285,10 +285,10 @@ async function runChecks() {
   }
 
   if (stripePriceId && stripePriceId.startsWith('price_')) {
-    console.log('   ✅ NEXT_PUBLIC_STRIPE_PRICE_ID set');
+    console.log('   ✅ STRIPE_PRICE_ID set');
     results.passed++;
   } else {
-    console.log('   ⚠️  NEXT_PUBLIC_STRIPE_PRICE_ID not set');
+    console.log('   ⚠️  STRIPE_PRICE_ID not set');
     results.warnings++;
   }
 
