@@ -7,12 +7,15 @@ const PORTAL_JWT_SECRET = new TextEncoder().encode(
   process.env.PORTAL_JWT_SECRET || 'portal-secret-change-in-production'
 )
 
+export type PortalUserType = 'customer' | 'subcontractor'
+
 export interface PortalUser {
   id: string
   tenantId: string
   clientId: string
   email: string
   name: string
+  portalUserType: PortalUserType
 }
 
 export async function hashPassword(password: string): Promise<string> {
@@ -30,6 +33,7 @@ export async function createPortalToken(user: PortalUser): Promise<string> {
     client_id: user.clientId,
     email: user.email,
     name: user.name,
+    portal_user_type: user.portalUserType ?? 'customer',
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -46,6 +50,7 @@ export async function verifyPortalToken(token: string): Promise<PortalUser | nul
       clientId: payload.client_id as string,
       email: payload.email as string,
       name: payload.name as string,
+      portalUserType: (payload.portal_user_type as PortalUserType) ?? 'customer',
     }
   } catch {
     return null
