@@ -5,7 +5,7 @@ import { resolveAuthAdmin, apiSuccess, apiError, handleRouteError } from '@/lib/
 const AnnotationSchema = z.object({
   page_number: z.number().int().positive().default(1),
   annotation_type: z.enum(['cloud', 'arrow', 'text', 'highlight', 'measurement', 'pin']),
-  data: z.record(z.unknown()),
+  data: z.record(z.string(), z.unknown()),
   work_order_id: z.string().uuid().optional(),
 })
 
