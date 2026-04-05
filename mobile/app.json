@@ -1,0 +1,10 @@
+{
+  "expo": {
+    "name": "Frost Solutions",
+    "slug": "frost-solutions",
+    "version": "1.0.0",
+    "scheme": "frost",
+    "platforms": ["ios", "android"],
+    "newArchEnabled": true
+  }
+}

@@ -6,3 +6,5 @@ tsconfig.tsbuildinfo
 credentials/google/*.json
 .env
 .vercel
+mobile/node_modules/
+mobile/.expo/
