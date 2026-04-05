@@ -172,17 +172,19 @@ All tables use RLS. Sensitive data (personnummer) encrypted for GDPR.
 - **Charts:** Recharts
 - **Animations:** Framer Motion
 
-## Design System
+## Design System (Warm Base44-Inspired — Overhauled 2026-04-05)
 
-- **Primary:** Nordic Blue `#007AFF`
-- **Accent:** Frost Gold `#FFD700`
+- **Primary:** Amber `#F59E0B` (Frost Gold — buttons use dark text for accessibility)
+- **Grays:** Stone scale (warm brown undertone, `#FAFAF9` to `#1C1917`)
+- **Dark mode:** Warm charcoal `#1C1917` / `#292524` (not cold slate)
+- **Shadows:** `rgba(28, 25, 23, x)` (warm)
+- **Warning:** Orange `#F97316` (shifted from amber to avoid clash with primary)
 - **Font:** Inter (400-700)
 - **Components:** shadcn/ui base with custom wrappers
-- **Effects:** Glassmorphism/frosted glass, micro-interactions
-- **Dark mode:** Supported via ThemeContext
-- **Mobile:** Bottom navigation, PWA with service worker + IndexedDB
+- **Mobile:** Bottom navigation (5 tabs), PWA with service worker + IndexedDB
+- **Sidebar:** Role-based grouped navigation (admin/supervisor/worker), collapsible sections
 
-## Project Status (All 3 Phases Complete — 2026-04-05)
+## Project Status (All Phases + Frontend Complete — 2026-04-05)
 
 ### Phase 1 — Foundation Hardening (Complete)
 - Shared API infrastructure (`app/lib/api/`)
@@ -213,20 +215,38 @@ All tables use RLS. Sensitive data (personnummer) encrypted for GDPR.
 - **Reporting & BI** — profitability (with AI predictions), utilization, cash flow forecast, saved reports, JSON/CSV export, automated monthly email reports via Resend
 - **React Native Mobile** — Expo foundation (`mobile/`), tab navigation, auth store, API client
 
+### Frontend Overhaul (Complete)
+- **Design system:** Cold sky-blue → warm amber + stone (Base44-inspired). 68 files updated for button accessibility.
+- **Sidebar:** Role-based grouped navigation (6 sections, admin/supervisor/worker filtering, collapsible with localStorage)
+- **10 new pages built:**
+  1. ÄTA Kanban — 5-column pipeline with detail panel + hash-verified audit trail
+  2. Document Browser — BSAB two-pane with versioning, AI tags, upload, sharing
+  3. Safety Dashboard — 5 tabs (overview, certificates, incidents, risk assessment, personalliggare)
+  4. Scheduling Calendar — weekly grid with conflict detection + Arbetstidslagen
+  5. Subcontractors — list + detail with F-skatt/insurance badges + payment tracking
+  6. Material Prices — search + compare tabs with 4 supplier columns + price alerts
+  7. Reports — profitability/utilization/cashflow tabs with Recharts + AI predictions + CSV export
+  8. Contracts — AB04/ABT06/consumer template picker with BankID signing
+  9. Customer Portal — separate layout with login, dashboard, messages, ÄTA approval, dagbok, survey
+  10. Settings Integration Health — Fortnox/Visma/BankID/PEPPOL status cards
+
 ### Stats
 - **126 unit tests**, 13 suites, all passing
 - **TypeScript strict**: zero errors
-- **77 commits** across all phases
-- **Cron jobs**: 9 scheduled (original 7 + nightly price scraper + monthly email reports)
-- **Backend spec compliance**: 70/70 backend requirements PASS (8 remaining are frontend-only)
+- **96 commits** this session
+- **83 total pages** in the app
+- **Cron jobs**: 9 scheduled
+- **Backend spec compliance**: 70/70 PASS
+- **Frontend spec compliance**: 24/24 PASS
 
-### What's Next — Frontend
-- Frontend UI for all new features (ÄTA workflow, document browser, safety dashboard, scheduling calendar, portal pages, etc.)
-- PDF.js drawing viewer + revision comparison (frontend for annotation data layer)
+### What's Next
+- Deploy migrations to Supabase production (`supabase db push`)
+- PDF.js drawing viewer integration (frontend for annotation data layer)
 - Multi-language support for safety documents
 - QR/NFC site check-in UI
 - Mobile app screen implementation (camera, GPS geofencing, voice-to-ÄTA)
-- Deploy migrations to Supabase production
+- End-to-end testing for new workflows
+- Production deployment via Vercel
 
 See `docs/superpowers/specs/2026-04-05-frost-solutions-v2-overhaul-design.md` for full spec.
 
