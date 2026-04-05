@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createAdminClient } from '@/utils/supabase/admin'
-import { allScrapers, calcPriceChangePercent, type CatalogItem } from '@/lib/scraper/suppliers'
+import { ALL_SCRAPERS, calcPriceChangePercent, type CatalogItem } from '@/lib/scraper/suppliers'
 
 export const runtime = 'nodejs'
 export const maxDuration = 120
@@ -24,7 +24,7 @@ export async function GET(req: Request) {
     let totalErrors = 0
     const errors: string[] = []
 
-    for (const scraper of allScrapers) {
+    for (const scraper of ALL_SCRAPERS) {
       const urls = scraper.getCategoryUrls()
 
       for (const url of urls) {
