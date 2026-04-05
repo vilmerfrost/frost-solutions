@@ -5,17 +5,8 @@ import Stripe from 'stripe';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { headers } from 'next/headers';
 import * as Sentry from '@sentry/nextjs';
-
-// Initialize Stripe lazily to avoid build-time errors
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    throw new Error('STRIPE_SECRET_KEY is not configured');
-  }
-  return new Stripe(key, {
-    apiVersion: '2025-12-15.clover',
-  });
-}
+import { getStripe } from '@/lib/stripe/client';
+import { isEventProcessed, markEventProcessed, markEventFailed } from '@/lib/stripe/idempotency';
 
 export const runtime = 'nodejs';
 
@@ -388,50 +379,62 @@ export async function POST(req: NextRequest) {
       id: event.id,
     });
 
-    // Handle specific event types
-    switch (event.type) {
-      // AI Credits - Payment Intents
-      case 'payment_intent.succeeded':
-        await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
-        break;
+    // Idempotency check: skip already-processed events
+    if (await isEventProcessed(event.id)) {
+      return NextResponse.json({ received: true, skipped: 'duplicate' });
+    }
 
-      case 'payment_intent.payment_failed':
-        await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
-        break;
+    try {
+      // Handle specific event types
+      switch (event.type) {
+        // AI Credits - Payment Intents
+        case 'payment_intent.succeeded':
+          await handlePaymentIntentSucceeded(event.data.object as Stripe.PaymentIntent);
+          break;
 
-      // Subscriptions - Checkout
-      case 'checkout.session.completed':
-        await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
-        break;
+        case 'payment_intent.payment_failed':
+          await handlePaymentIntentFailed(event.data.object as Stripe.PaymentIntent);
+          break;
 
-      // Subscriptions - Lifecycle
-      case 'customer.subscription.updated':
-        await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
-        break;
+        // Subscriptions - Checkout
+        case 'checkout.session.completed':
+          await handleCheckoutSessionCompleted(event.data.object as Stripe.Checkout.Session);
+          break;
 
-      case 'customer.subscription.deleted':
-        await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
-        break;
+        // Subscriptions - Lifecycle
+        case 'customer.subscription.updated':
+          await handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+          break;
 
-      // Subscriptions - Invoices
-      case 'invoice.paid':
-        await handleInvoicePaid(event.data.object as Stripe.Invoice);
-        break;
+        case 'customer.subscription.deleted':
+          await handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+          break;
 
-      case 'invoice.payment_failed':
-        await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
-        break;
+        // Subscriptions - Invoices
+        case 'invoice.paid':
+          await handleInvoicePaid(event.data.object as Stripe.Invoice);
+          break;
 
-      case 'charge.succeeded':
-        console.log('[Stripe Webhook] Charge succeeded:', (event.data.object as Stripe.Charge).id);
-        break;
+        case 'invoice.payment_failed':
+          await handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+          break;
 
-      case 'charge.refunded':
-        console.log('[Stripe Webhook] Charge refunded:', (event.data.object as Stripe.Charge).id);
-        break;
+        case 'charge.succeeded':
+          console.log('[Stripe Webhook] Charge succeeded:', (event.data.object as Stripe.Charge).id);
+          break;
 
-      default:
-        console.log('[Stripe Webhook] Unhandled event type:', event.type);
+        case 'charge.refunded':
+          console.log('[Stripe Webhook] Charge refunded:', (event.data.object as Stripe.Charge).id);
+          break;
+
+        default:
+          console.log('[Stripe Webhook] Unhandled event type:', event.type);
+      }
+
+      await markEventProcessed(event.id, event.type);
+    } catch (handlerError) {
+      await markEventFailed(event.id, event.type, (handlerError as Error).message);
+      throw handlerError;
     }
 
     return NextResponse.json({ received: true });

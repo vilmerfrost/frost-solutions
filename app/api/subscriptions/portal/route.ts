@@ -1,21 +1,10 @@
 // app/api/subscriptions/portal/route.ts
 // Create Stripe customer portal session
 import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
 import { getTenantId } from '@/lib/serverTenant';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { extractErrorMessage } from '@/lib/errorUtils';
-
-// Initialize Stripe lazily to avoid build-time errors
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) {
-    throw new Error('STRIPE_SECRET_KEY is not configured');
-  }
-  return new Stripe(key, {
-    apiVersion: '2025-12-15.clover',
-  });
-}
+import { getStripe } from '@/lib/stripe/client';
 
 export const runtime = 'nodejs';
 

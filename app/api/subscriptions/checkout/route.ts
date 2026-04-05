@@ -4,12 +4,7 @@ import { getTenantId } from '@/lib/serverTenant';
 import { createAdminClient } from '@/utils/supabase/admin';
 import { createClient } from '@/utils/supabase/server';
 import { extractErrorMessage } from '@/lib/errorUtils';
-
-function getStripe() {
-  const key = process.env.STRIPE_SECRET_KEY;
-  if (!key) throw new Error('STRIPE_SECRET_KEY is not configured');
-  return new Stripe(key, { apiVersion: '2025-12-15.clover' });
-}
+import { getStripe } from '@/lib/stripe/client';
 
 export const runtime = 'nodejs';
 
