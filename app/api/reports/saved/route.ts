@@ -7,7 +7,7 @@ export const runtime = 'nodejs'
 const CreateSavedReportSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   report_type: z.enum(['profitability', 'utilization', 'cashflow', 'project_status', 'custom']),
-  config: z.record(z.unknown()).default({}),
+  config: z.record(z.string(), z.unknown()).default({}),
   schedule: z.string().optional(),
 })
 
