@@ -1,0 +1,138 @@
+<h2>Material Prices — The Blue Ocean Feature</h2>
+<p class="subtitle">This is the page that shows nightly-scraped prices from Byggmax, Beijer, XL-Bygg, and Ahlsell. How should it look?</p>
+
+<div class="split">
+  <div class="mockup" data-choice="a" onclick="toggleSelect(this)" style="cursor:pointer;">
+    <div class="mockup-header">A: Search-First (Google-style)</div>
+    <div class="mockup-body" style="padding: 20px; background: #0f0f0f;">
+      <!-- Search bar -->
+      <div style="max-width: 600px; margin: 0 auto 24px;">
+        <div style="background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 12px; padding: 14px 20px; display: flex; align-items: center; gap: 12px;">
+          <span style="color: #666;">🔍</span>
+          <span style="color: #888; font-size: 15px;">Sök material... t.ex. "plywood 12mm"</span>
+        </div>
+      </div>
+
+      <!-- Category chips -->
+      <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; justify-content: center;">
+        <span style="background: #0ea5e9; color: white; padding: 6px 14px; border-radius: 20px; font-size: 12px;">Alla</span>
+        <span style="background: #1a1a2e; color: #aaa; padding: 6px 14px; border-radius: 20px; font-size: 12px;">Trä & Virke</span>
+        <span style="background: #1a1a2e; color: #aaa; padding: 6px 14px; border-radius: 20px; font-size: 12px;">Skruv & Fäste</span>
+        <span style="background: #1a1a2e; color: #aaa; padding: 6px 14px; border-radius: 20px; font-size: 12px;">Isolering</span>
+        <span style="background: #1a1a2e; color: #aaa; padding: 6px 14px; border-radius: 20px; font-size: 12px;">El</span>
+        <span style="background: #1a1a2e; color: #aaa; padding: 6px 14px; border-radius: 20px; font-size: 12px;">VVS</span>
+      </div>
+
+      <!-- Results -->
+      <div style="background: #1a1a2e; border-radius: 10px; overflow: hidden;">
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; padding: 10px 16px; font-size: 11px; color: #666; border-bottom: 1px solid #2a2a3e;">
+          <span>PRODUKT</span><span>BYGGMAX</span><span>BEIJER</span><span>XL-BYGG</span><span>AHLSELL</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #2a2a3e; align-items: center;">
+          <span style="color: #eee;">Plywood 12mm 2440x1220</span>
+          <span style="color: #22c55e; font-weight: 700;">289 kr ★</span>
+          <span style="color: #ccc;">315 kr</span>
+          <span style="color: #ccc;">329 kr</span>
+          <span style="color: #888;">—</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; padding: 12px 16px; font-size: 13px; border-bottom: 1px solid #2a2a3e; align-items: center;">
+          <span style="color: #eee;">Plywood 18mm 2440x1220</span>
+          <span style="color: #ccc;">459 kr</span>
+          <span style="color: #22c55e; font-weight: 700;">425 kr ★</span>
+          <span style="color: #ccc;">449 kr</span>
+          <span style="color: #ccc;">439 kr</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 2fr 1fr 1fr 1fr 1fr; padding: 12px 16px; font-size: 13px; align-items: center;">
+          <span style="color: #eee;">Plywood 22mm 2440x1220</span>
+          <span style="color: #ccc;">589 kr</span>
+          <span style="color: #ccc;">599 kr</span>
+          <span style="color: #22c55e; font-weight: 700;">549 kr ★</span>
+          <span style="color: #ccc;">575 kr</span>
+        </div>
+      </div>
+
+      <!-- Price trend -->
+      <div style="margin-top: 16px; display: flex; gap: 12px;">
+        <div style="background: #1a1a2e; border-radius: 8px; padding: 12px 16px; flex: 1; text-align: center;">
+          <div style="font-size: 11px; color: #666;">Senast uppdaterad</div>
+          <div style="color: #ccc; font-size: 13px; margin-top: 4px;">Idag 23:59</div>
+        </div>
+        <div style="background: #1a1a2e; border-radius: 8px; padding: 12px 16px; flex: 1; text-align: center;">
+          <div style="font-size: 11px; color: #666;">Prisförändringar idag</div>
+          <div style="color: #f59e0b; font-size: 13px; margin-top: 4px;">↓ 12 produkter billigare</div>
+        </div>
+        <div style="background: #1a1a2e; border-radius: 8px; padding: 12px 16px; flex: 1; text-align: center;">
+          <div style="font-size: 11px; color: #666;">Dina prisaviseringar</div>
+          <div style="color: #0ea5e9; font-size: 13px; margin-top: 4px;">3 aktiva</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="mockup" data-choice="b" onclick="toggleSelect(this)" style="cursor:pointer;">
+    <div class="mockup-header">B: Project Material List Builder</div>
+    <div class="mockup-body" style="padding: 20px; background: #0f0f0f;">
+      <!-- Project selector -->
+      <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: center;">
+        <div style="background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 8px; padding: 10px 16px; flex: 1; color: #ccc; font-size: 13px;">
+          📁 Renovering Storgatan 4
+        </div>
+        <button style="background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; cursor: pointer;">+ Lägg till material</button>
+      </div>
+
+      <!-- Material list -->
+      <div style="background: #1a1a2e; border-radius: 10px; overflow: hidden; margin-bottom: 16px;">
+        <div style="display: grid; grid-template-columns: 2fr 80px 100px 100px; padding: 10px 16px; font-size: 11px; color: #666; border-bottom: 1px solid #2a2a3e;">
+          <span>MATERIAL</span><span>ANTAL</span><span>BILLIGAST</span><span>BESPARING</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 2fr 80px 100px 100px; padding: 14px 16px; font-size: 13px; border-bottom: 1px solid #2a2a3e;">
+          <div>
+            <div style="color: #eee;">Plywood 12mm</div>
+            <div style="color: #22c55e; font-size: 11px;">Byggmax — 289 kr/st</div>
+          </div>
+          <span style="color: #ccc;">20 st</span>
+          <span style="color: #eee; font-weight: 600;">5 780 kr</span>
+          <span style="color: #22c55e;">-520 kr</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 2fr 80px 100px 100px; padding: 14px 16px; font-size: 13px; border-bottom: 1px solid #2a2a3e;">
+          <div>
+            <div style="color: #eee;">Reglar 45x95 C24</div>
+            <div style="color: #22c55e; font-size: 11px;">XL-Bygg — 42 kr/st</div>
+          </div>
+          <span style="color: #ccc;">100 st</span>
+          <span style="color: #eee; font-weight: 600;">4 200 kr</span>
+          <span style="color: #22c55e;">-800 kr</span>
+        </div>
+        <div style="display: grid; grid-template-columns: 2fr 80px 100px 100px; padding: 14px 16px; font-size: 13px;">
+          <div>
+            <div style="color: #eee;">Mineralull 195mm</div>
+            <div style="color: #22c55e; font-size: 11px;">Beijer — 89 kr/m²</div>
+          </div>
+          <span style="color: #ccc;">60 m²</span>
+          <span style="color: #eee; font-weight: 600;">5 340 kr</span>
+          <span style="color: #22c55e;">-360 kr</span>
+        </div>
+      </div>
+
+      <!-- Summary -->
+      <div style="background: #1a1a2e; border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <div style="color: #666; font-size: 11px;">TOTALT (BILLIGAST PER ARTIKEL)</div>
+          <div style="color: #eee; font-size: 22px; font-weight: 700;">15 320 kr</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="color: #22c55e; font-size: 16px; font-weight: 600;">Sparar 1 680 kr</div>
+          <div style="color: #666; font-size: 11px;">vs. dyrast leverantör</div>
+        </div>
+      </div>
+
+      <!-- Alert config -->
+      <div style="margin-top: 16px; background: #1a1a2e; border-radius: 8px; padding: 12px 16px; display: flex; justify-content: space-between; align-items: center;">
+        <div style="color: #ccc; font-size: 13px;">🔔 Bevaka prisändringar på denna lista</div>
+        <span style="background: #0ea5e9; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px;">Aktivera</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top: 20px;">A = Search & compare across suppliers. B = Build a project material list with savings calculator. <strong>My recommendation: Both — tabs on the same page.</strong></p>

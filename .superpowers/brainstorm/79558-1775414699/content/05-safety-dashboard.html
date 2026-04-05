@@ -1,0 +1,121 @@
+<h2>Safety & Compliance Dashboard — SSG Replacement</h2>
+<p class="subtitle">Certificates, incidents, site inductions, risk assessments, and personalliggare — all in one view.</p>
+
+<div class="mockup" style="max-width: 900px; margin: 0 auto;">
+  <div class="mockup-header">KMA & Säkerhet</div>
+  <div class="mockup-body" style="padding: 20px; background: #0f0f0f;">
+
+    <!-- Tab bar -->
+    <div style="display: flex; gap: 4px; margin-bottom: 20px; background: #1a1a2e; border-radius: 10px; padding: 4px;">
+      <div style="background: #0ea5e9; color: white; padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; flex: 1; text-align: center;">Översikt</div>
+      <div style="color: #888; padding: 8px 16px; border-radius: 8px; font-size: 13px; flex: 1; text-align: center;">Certifikat</div>
+      <div style="color: #888; padding: 8px 16px; border-radius: 8px; font-size: 13px; flex: 1; text-align: center;">Incidenter</div>
+      <div style="color: #888; padding: 8px 16px; border-radius: 8px; font-size: 13px; flex: 1; text-align: center;">Riskbedömning</div>
+      <div style="color: #888; padding: 8px 16px; border-radius: 8px; font-size: 13px; flex: 1; text-align: center;">Personalliggare</div>
+    </div>
+
+    <!-- Alert cards row -->
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px;">
+      <div style="background: #ef444422; border: 1px solid #ef444444; border-radius: 10px; padding: 14px;">
+        <div style="color: #ef4444; font-size: 24px; font-weight: 700;">2</div>
+        <div style="color: #ef4444; font-size: 12px;">Utgångna certifikat</div>
+      </div>
+      <div style="background: #f59e0b22; border: 1px solid #f59e0b44; border-radius: 10px; padding: 14px;">
+        <div style="color: #f59e0b; font-size: 24px; font-weight: 700;">3</div>
+        <div style="color: #f59e0b; font-size: 12px;">Utgår inom 30 dagar</div>
+      </div>
+      <div style="background: #3b82f622; border: 1px solid #3b82f644; border-radius: 10px; padding: 14px;">
+        <div style="color: #3b82f6; font-size: 24px; font-weight: 700;">1</div>
+        <div style="color: #3b82f6; font-size: 12px;">Öppna incidenter</div>
+      </div>
+      <div style="background: #22c55e22; border: 1px solid #22c55e44; border-radius: 10px; padding: 14px;">
+        <div style="color: #22c55e; font-size: 24px; font-weight: 700;">12</div>
+        <div style="color: #22c55e; font-size: 12px;">På plats idag</div>
+      </div>
+    </div>
+
+    <!-- Two-column layout -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+
+      <!-- Left: Expiring certificates -->
+      <div style="background: #1a1a2e; border-radius: 10px; padding: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="color: #eee; font-size: 14px; font-weight: 600;">⚠️ Certifikat som kräver åtgärd</span>
+          <span style="color: #0ea5e9; font-size: 12px; cursor: pointer;">Visa alla →</span>
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 8px;">
+          <div style="background: #0f0f1a; border-left: 3px solid #ef4444; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="color: #eee; font-size: 13px;">Johan Svensson — Heta Arbeten</div>
+              <div style="color: #ef4444; font-size: 11px;">Utgånget 2026-03-15</div>
+            </div>
+            <span style="background: #ef444422; color: #ef4444; padding: 3px 10px; border-radius: 6px; font-size: 11px;">UTGÅNGET</span>
+          </div>
+
+          <div style="background: #0f0f1a; border-left: 3px solid #ef4444; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="color: #eee; font-size: 13px;">Maria Lindqvist — Liftkörkort</div>
+              <div style="color: #ef4444; font-size: 11px;">Utgånget 2026-02-28</div>
+            </div>
+            <span style="background: #ef444422; color: #ef4444; padding: 3px 10px; border-radius: 6px; font-size: 11px;">UTGÅNGET</span>
+          </div>
+
+          <div style="background: #0f0f1a; border-left: 3px solid #f59e0b; border-radius: 6px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <div style="color: #eee; font-size: 13px;">Erik Nilsson — Första Hjälpen</div>
+              <div style="color: #f59e0b; font-size: 11px;">Utgår 2026-04-20 (15 dagar kvar)</div>
+            </div>
+            <span style="background: #f59e0b22; color: #f59e0b; padding: 3px 10px; border-radius: 6px; font-size: 11px;">SNART</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Recent incidents + Personalliggare -->
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+
+        <!-- Incidents -->
+        <div style="background: #1a1a2e; border-radius: 10px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <span style="color: #eee; font-size: 14px; font-weight: 600;">🚨 Senaste incidenter</span>
+            <button style="background: #ef444422; color: #ef4444; border: 1px solid #ef444444; padding: 4px 12px; border-radius: 6px; font-size: 11px; cursor: pointer;">+ Rapportera</button>
+          </div>
+
+          <div style="background: #0f0f1a; border-radius: 6px; padding: 10px 12px; margin-bottom: 6px;">
+            <div style="display: flex; justify-content: space-between;">
+              <div style="color: #eee; font-size: 13px;">Tillbud — fallrisk ställning</div>
+              <span style="background: #f59e0b22; color: #f59e0b; padding: 2px 8px; border-radius: 4px; font-size: 10px;">MEDIUM</span>
+            </div>
+            <div style="color: #888; font-size: 11px; margin-top: 4px;">Storgatan 4 — Rapporterad 3 apr — Under utredning</div>
+          </div>
+
+          <div style="background: #0f0f1a; border-radius: 6px; padding: 10px 12px;">
+            <div style="display: flex; justify-content: space-between;">
+              <div style="color: #eee; font-size: 13px;">Observation — bristfällig skyltning</div>
+              <span style="background: #3b82f622; color: #3b82f6; padding: 2px 8px; border-radius: 4px; font-size: 10px;">LÅG</span>
+            </div>
+            <div style="color: #888; font-size: 11px; margin-top: 4px;">Parkvägen 12 — 1 apr — Åtgärdad</div>
+          </div>
+        </div>
+
+        <!-- Today on site -->
+        <div style="background: #1a1a2e; border-radius: 10px; padding: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <span style="color: #eee; font-size: 14px; font-weight: 600;">👷 På plats idag — Storgatan 4</span>
+            <span style="color: #0ea5e9; font-size: 12px; cursor: pointer;">Exportera →</span>
+          </div>
+          <div style="display: flex; flex-wrap: wrap; gap: 6px;">
+            <span style="background: #22c55e22; color: #22c55e; padding: 4px 10px; border-radius: 6px; font-size: 11px;">Johan S. — 07:02</span>
+            <span style="background: #22c55e22; color: #22c55e; padding: 4px 10px; border-radius: 6px; font-size: 11px;">Erik N. — 07:15</span>
+            <span style="background: #22c55e22; color: #22c55e; padding: 4px 10px; border-radius: 6px; font-size: 11px;">Maria L. — 07:30</span>
+            <span style="background: #3b82f622; color: #3b82f6; padding: 4px 10px; border-radius: 6px; font-size: 11px;">Sub: Elgiganten El — 08:00</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top: 16px;">Overview tab with alert cards at top, expiring certificates on the left, incidents + personalliggare on the right. Sub-tabs for deep dives into each area. Does this work?</p>

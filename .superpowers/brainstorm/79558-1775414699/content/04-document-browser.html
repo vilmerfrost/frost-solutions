@@ -1,0 +1,142 @@
+<h2>Document Management — iBinder Replacement</h2>
+<p class="subtitle">BSAB folder structure with versioning, sharing, and required document checklists.</p>
+
+<div class="mockup" style="max-width: 900px; margin: 0 auto;">
+  <div class="mockup-header">Dokument — Renovering Storgatan 4</div>
+  <div class="mockup-body" style="padding: 0; background: #0f0f0f;">
+
+    <!-- Two-pane layout -->
+    <div style="display: grid; grid-template-columns: 240px 1fr; min-height: 480px;">
+
+      <!-- Left: Folder tree -->
+      <div style="background: #12121e; border-right: 1px solid #2a2a3e; padding: 16px 0;">
+        <div style="padding: 8px 16px; color: #888; font-size: 11px; text-transform: uppercase; margin-bottom: 4px;">Projektmappar</div>
+
+        <div style="padding: 8px 16px; color: #ccc; font-size: 13px; cursor: pointer; background: #0ea5e915; border-left: 3px solid #0ea5e9;">📐 01-Ritningar</div>
+        <div style="padding: 6px 16px 6px 36px; color: #888; font-size: 12px;">A-Arkitekt</div>
+        <div style="padding: 6px 16px 6px 36px; color: #888; font-size: 12px;">K-Konstruktion</div>
+        <div style="padding: 6px 16px 6px 36px; color: #888; font-size: 12px;">E-El</div>
+        <div style="padding: 6px 16px 6px 36px; color: #888; font-size: 12px;">VS-VVS</div>
+
+        <div style="padding: 8px 16px; color: #ccc; font-size: 13px; cursor: pointer;">📋 02-Beskrivningar</div>
+        <div style="padding: 8px 16px; color: #ccc; font-size: 13px; cursor: pointer;">📁 03-Administrativt</div>
+        <div style="padding: 8px 16px; color: #ccc; font-size: 13px; cursor: pointer;">
+          🔒 04-Avtal
+          <span style="background: #f59e0b33; color: #f59e0b; font-size: 9px; padding: 1px 6px; border-radius: 4px; margin-left: 6px;">ADMIN</span>
+        </div>
+        <div style="padding: 8px 16px; color: #ccc; font-size: 13px; cursor: pointer;">
+          🔒 05-Ekonomi
+          <span style="background: #f59e0b33; color: #f59e0b; font-size: 9px; padding: 1px 6px; border-radius: 4px; margin-left: 6px;">ADMIN</span>
+        </div>
+        <div style="padding: 8px 16px; color: #ccc; font-size: 13px; cursor: pointer;">📷 06-Foton</div>
+        <div style="padding: 8px 16px; color: #ccc; font-size: 13px; cursor: pointer;">🛡 07-KMA</div>
+
+        <!-- Checklist indicator -->
+        <div style="margin-top: 16px; padding: 12px 16px; border-top: 1px solid #2a2a3e;">
+          <div style="color: #888; font-size: 11px; text-transform: uppercase; margin-bottom: 6px;">Obligatoriska dokument</div>
+          <div style="background: #1a1a2e; border-radius: 6px; padding: 8px 12px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <span style="color: #ccc; font-size: 12px;">5 / 8 uppladdade</span>
+              <span style="color: #f59e0b; font-size: 11px;">62%</span>
+            </div>
+            <div style="background: #333; border-radius: 3px; height: 4px; margin-top: 6px;">
+              <div style="background: #f59e0b; border-radius: 3px; height: 4px; width: 62%;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: File list -->
+      <div style="padding: 16px;">
+
+        <!-- Breadcrumb + actions -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div style="display: flex; align-items: center; gap: 6px; color: #888; font-size: 13px;">
+            <span style="color: #0ea5e9; cursor: pointer;">Dokument</span>
+            <span>›</span>
+            <span style="color: #ccc;">01-Ritningar</span>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <div style="background: #1a1a2e; border: 1px solid #2a2a3e; border-radius: 8px; padding: 6px 12px; color: #888; font-size: 12px;">🔍 Sök...</div>
+            <button style="background: #0ea5e9; color: white; border: none; padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer;">⬆ Ladda upp</button>
+            <button style="background: #1a1a2e; border: 1px solid #2a2a3e; color: #ccc; padding: 6px 14px; border-radius: 8px; font-size: 12px; cursor: pointer;">🔗 Dela mapp</button>
+          </div>
+        </div>
+
+        <!-- File grid -->
+        <div style="display: flex; flex-direction: column; gap: 4px;">
+
+          <!-- File row -->
+          <div style="display: grid; grid-template-columns: 2fr 80px 100px 80px 60px; padding: 10px 12px; background: #1a1a2e; border-radius: 8px; align-items: center; font-size: 13px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: #3b82f6;">📄</span>
+              <div>
+                <div style="color: #eee;">A-101 Planritning BV.pdf</div>
+                <div style="color: #666; font-size: 11px;">v3 — AI: planritning, bottenvåning, arkitekt</div>
+              </div>
+            </div>
+            <span style="color: #888;">v3</span>
+            <span style="color: #888;">2.4 MB</span>
+            <span style="color: #888;">1 apr</span>
+            <span style="color: #0ea5e9; cursor: pointer; font-size: 12px;">•••</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 80px 100px 80px 60px; padding: 10px 12px; background: #1a1a2e; border-radius: 8px; align-items: center; font-size: 13px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: #3b82f6;">📄</span>
+              <div>
+                <div style="color: #eee;">A-102 Planritning ÖV.pdf</div>
+                <div style="color: #666; font-size: 11px;">v1 — AI: planritning, övervåning</div>
+              </div>
+            </div>
+            <span style="color: #888;">v1</span>
+            <span style="color: #888;">1.8 MB</span>
+            <span style="color: #888;">28 mar</span>
+            <span style="color: #0ea5e9; cursor: pointer; font-size: 12px;">•••</span>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 80px 100px 80px 60px; padding: 10px 12px; background: #1a1a2e; border-radius: 8px; align-items: center; font-size: 13px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: #3b82f6;">📄</span>
+              <div>
+                <div style="color: #eee;">K-201 Armering grund.pdf</div>
+                <div style="color: #666; font-size: 11px;">v2 — AI: armering, konstruktion, betong</div>
+              </div>
+            </div>
+            <span style="color: #888;">v2</span>
+            <span style="color: #888;">5.1 MB</span>
+            <span style="color: #888;">25 mar</span>
+            <span style="color: #0ea5e9; cursor: pointer; font-size: 12px;">•••</span>
+          </div>
+
+          <!-- Required doc missing -->
+          <div style="display: grid; grid-template-columns: 2fr 80px 100px 80px 60px; padding: 10px 12px; background: #1a1a2e; border: 1px dashed #f59e0b44; border-radius: 8px; align-items: center; font-size: 13px;">
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="color: #f59e0b;">⚠️</span>
+              <div>
+                <div style="color: #f59e0b;">E-301 Elritning — SAKNAS</div>
+                <div style="color: #666; font-size: 11px;">Obligatorisk — krävs innan projektavslut</div>
+              </div>
+            </div>
+            <span style="color: #666;">—</span>
+            <span style="color: #666;">—</span>
+            <span style="color: #666;">—</span>
+            <button style="background: #f59e0b22; color: #f59e0b; border: 1px solid #f59e0b44; padding: 2px 10px; border-radius: 6px; font-size: 11px; cursor: pointer;">Ladda upp</button>
+          </div>
+
+        </div>
+
+        <!-- Drag & drop zone -->
+        <div style="margin-top: 16px; border: 2px dashed #2a2a3e; border-radius: 10px; padding: 24px; text-align: center;">
+          <div style="color: #666; font-size: 13px;">📁 Dra och släpp filer här, eller klicka för att välja</div>
+          <div style="color: #444; font-size: 11px; margin-top: 4px;">Maxstorlek 10 MB — PDF, bilder, dokument</div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top: 16px;">Two-pane layout: folder tree (left) + file list (right). Shows AI-generated tags, version numbers, required-but-missing docs highlighted in orange, and drag-drop upload zone. Good?</p>

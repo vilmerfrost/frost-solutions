@@ -1,0 +1,147 @@
+<h2>ÄTA Workflow — The Legal Fortress UI</h2>
+<p class="subtitle">The 6-step mandatory workflow is your core differentiator. How should the ÄTA management page look?</p>
+
+<div class="mockup" style="max-width: 900px; margin: 0 auto;">
+  <div class="mockup-header">ÄTA-hantering — Kanban Pipeline</div>
+  <div class="mockup-body" style="padding: 20px; background: #0f0f0f; overflow-x: auto;">
+
+    <!-- Pipeline header -->
+    <div style="display: flex; gap: 12px; margin-bottom: 16px; align-items: center;">
+      <div style="flex: 1;">
+        <div style="color: #eee; font-size: 20px; font-weight: 700;">ÄTA-ärenden</div>
+        <div style="color: #888; font-size: 13px;">Renovering Storgatan 4 — 5 ärenden</div>
+      </div>
+      <button style="background: #0ea5e9; color: white; border: none; padding: 10px 20px; border-radius: 8px; font-size: 13px; cursor: pointer;">+ Ny ÄTA</button>
+    </div>
+
+    <!-- Kanban columns -->
+    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; min-width: 800px;">
+
+      <!-- Column 1: Skapad -->
+      <div style="background: #1a1a2e; border-radius: 10px; padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="color: #f59e0b; font-size: 12px; font-weight: 600;">SKAPAD</span>
+          <span style="background: #f59e0b22; color: #f59e0b; padding: 2px 8px; border-radius: 10px; font-size: 11px;">2</span>
+        </div>
+        <!-- Card -->
+        <div style="background: #0f0f1a; border: 1px solid #2a2a3e; border-radius: 8px; padding: 12px; margin-bottom: 8px;">
+          <div style="color: #eee; font-size: 13px; font-weight: 600;">Extra ventilation badrum</div>
+          <div style="color: #888; font-size: 11px; margin-top: 4px;">Oförutsedd — 📷 3 foton</div>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <span style="color: #666; font-size: 11px;">2 tim sedan</span>
+            <span style="color: #f59e0b; font-size: 11px;">⏳ Väntar granskning</span>
+          </div>
+        </div>
+        <div style="background: #0f0f1a; border: 1px solid #2a2a3e; border-radius: 8px; padding: 12px;">
+          <div style="color: #eee; font-size: 13px; font-weight: 600;">Flytta vägg 50cm</div>
+          <div style="color: #888; font-size: 11px; margin-top: 4px;">Förutsedd</div>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <span style="color: #666; font-size: 11px;">Igår</span>
+            <span style="color: #f59e0b; font-size: 11px;">⏳ Väntar</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 2: Granskad -->
+      <div style="background: #1a1a2e; border-radius: 10px; padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="color: #3b82f6; font-size: 12px; font-weight: 600;">GRANSKAD</span>
+          <span style="background: #3b82f622; color: #3b82f6; padding: 2px 8px; border-radius: 10px; font-size: 11px;">1</span>
+        </div>
+        <div style="background: #0f0f1a; border: 1px solid #2a2a3e; border-radius: 8px; padding: 12px;">
+          <div style="color: #eee; font-size: 13px; font-weight: 600;">Nytt fönster kök</div>
+          <div style="color: #888; font-size: 11px; margin-top: 4px;">Förutsedd — 12 500 kr</div>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <span style="color: #666; font-size: 11px;">Prissatt</span>
+            <span style="color: #3b82f6; font-size: 11px;">📤 Skicka godkännande</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 3: Skickad -->
+      <div style="background: #1a1a2e; border-radius: 10px; padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="color: #a855f7; font-size: 12px; font-weight: 600;">VÄNTAR KUND</span>
+          <span style="background: #a855f722; color: #a855f7; padding: 2px 8px; border-radius: 10px; font-size: 11px;">1</span>
+        </div>
+        <div style="background: #0f0f1a; border: 1px solid #2a2a3e; border-radius: 8px; padding: 12px;">
+          <div style="color: #eee; font-size: 13px; font-weight: 600;">Extra eluttag garage</div>
+          <div style="color: #888; font-size: 11px; margin-top: 4px;">8 400 kr — BankID signering</div>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <span style="color: #666; font-size: 11px;">Skickad 3 apr</span>
+            <span style="color: #a855f7; font-size: 11px;">✍️ Väntar signatur</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Column 4: Godkänd -->
+      <div style="background: #1a1a2e; border-radius: 10px; padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="color: #22c55e; font-size: 12px; font-weight: 600;">GODKÄND</span>
+          <span style="background: #22c55e22; color: #22c55e; padding: 2px 8px; border-radius: 10px; font-size: 11px;">0</span>
+        </div>
+        <div style="color: #444; font-size: 12px; text-align: center; padding: 20px 0;">Inga godkända just nu</div>
+      </div>
+
+      <!-- Column 5: Fakturerad -->
+      <div style="background: #1a1a2e; border-radius: 10px; padding: 12px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+          <span style="color: #10b981; font-size: 12px; font-weight: 600;">FAKTURERAD</span>
+          <span style="background: #10b98122; color: #10b981; padding: 2px 8px; border-radius: 10px; font-size: 11px;">1</span>
+        </div>
+        <div style="background: #0f0f1a; border: 1px solid #10b98133; border-radius: 8px; padding: 12px;">
+          <div style="color: #eee; font-size: 13px; font-weight: 600;">Byte av rör badrum</div>
+          <div style="color: #888; font-size: 11px; margin-top: 4px;">15 200 kr — Faktura #F-042</div>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px;">
+            <span style="color: #666; font-size: 11px;">Signerad 28 mar</span>
+            <span style="color: #10b981; font-size: 11px;">✅ Klar</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Audit trail preview -->
+    <div style="margin-top: 20px; background: #1a1a2e; border-radius: 10px; padding: 16px;">
+      <div style="color: #eee; font-size: 14px; font-weight: 600; margin-bottom: 12px;">🔒 Juridisk kedja — "Extra eluttag garage"</div>
+      <div style="display: flex; gap: 20px; overflow-x: auto; padding-bottom: 8px;">
+        <div style="min-width: 140px; text-align: center;">
+          <div style="width: 32px; height: 32px; background: #22c55e33; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: #22c55e; font-size: 14px;">1</div>
+          <div style="color: #ccc; font-size: 11px;">Skapad</div>
+          <div style="color: #666; font-size: 10px;">1 apr 09:14</div>
+          <div style="color: #444; font-size: 9px;">📷 3 foton</div>
+        </div>
+        <div style="min-width: 140px; text-align: center;">
+          <div style="width: 32px; height: 32px; background: #22c55e33; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: #22c55e; font-size: 14px;">2</div>
+          <div style="color: #ccc; font-size: 11px;">Admin granskad</div>
+          <div style="color: #666; font-size: 10px;">1 apr 14:22</div>
+          <div style="color: #444; font-size: 9px;">💰 8 400 kr</div>
+        </div>
+        <div style="min-width: 140px; text-align: center;">
+          <div style="width: 32px; height: 32px; background: #a855f733; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: #a855f7; font-size: 14px;">3</div>
+          <div style="color: #ccc; font-size: 11px;">Skickad till kund</div>
+          <div style="color: #666; font-size: 10px;">3 apr 08:00</div>
+          <div style="color: #444; font-size: 9px;">📧 BankID begärd</div>
+        </div>
+        <div style="min-width: 140px; text-align: center;">
+          <div style="width: 32px; height: 32px; background: #33333366; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: #666; font-size: 14px;">4</div>
+          <div style="color: #666; font-size: 11px;">Väntar godkännande</div>
+          <div style="color: #444; font-size: 10px;">—</div>
+        </div>
+        <div style="min-width: 140px; text-align: center;">
+          <div style="width: 32px; height: 32px; background: #33333366; border-radius: 50%; margin: 0 auto 6px; display: flex; align-items: center; justify-content: center; color: #666; font-size: 14px;">5</div>
+          <div style="color: #666; font-size: 11px;">Fakturerad</div>
+          <div style="color: #444; font-size: 10px;">—</div>
+        </div>
+      </div>
+      <div style="margin-top: 8px; display: flex; gap: 8px; align-items: center;">
+        <span style="color: #22c55e; font-size: 11px;">✅ Kedja verifierad</span>
+        <span style="color: #444; font-size: 11px;">|</span>
+        <span style="color: #666; font-size: 11px;">SHA-256: a3f8c2...e91b</span>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<p class="subtitle" style="margin-top: 16px;">Kanban pipeline showing all ÄTA states at a glance, with the legal audit chain visible at the bottom when you select an item. Does this feel right?</p>
