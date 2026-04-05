@@ -125,18 +125,33 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
   }
 
   const admin = createAdminClient();
+  const stripe = getStripe();
 
-  // Update subscription record
+  // Retrieve real subscription period dates from Stripe
+  const stripeSubscription = await stripe.subscriptions.retrieve(
+    session.subscription as string
+  ) as any;
+
+  const periodStart = stripeSubscription.current_period_start
+    ? new Date(stripeSubscription.current_period_start * 1000).toISOString()
+    : new Date().toISOString();
+  const periodEnd = stripeSubscription.current_period_end
+    ? new Date(stripeSubscription.current_period_end * 1000).toISOString()
+    : null;
+  const trialEnd = stripeSubscription.trial_end
+    ? new Date(stripeSubscription.trial_end * 1000).toISOString()
+    : null;
+
   const { error } = await admin
     .from('subscriptions')
     .update({
-      status: 'active',
+      status: stripeSubscription.status === 'trialing' ? 'trialing' : 'active',
       stripe_subscription_id: session.subscription as string,
       stripe_customer_id: session.customer as string,
       billing_cycle: billing_cycle || 'monthly',
-      current_period_start: new Date().toISOString(),
-      current_period_end: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
-      trial_end: null, // Trial ended when payment made
+      current_period_start: periodStart,
+      current_period_end: periodEnd,
+      trial_end: trialEnd,
       updated_at: new Date().toISOString(),
     })
     .eq('tenant_id', tenant_id);

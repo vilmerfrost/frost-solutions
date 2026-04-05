@@ -97,7 +97,7 @@ function SignupContent() {
    
    // 3. Create profile with trial start date via API (bypasses RLS)
    const trialEnds = new Date()
-   trialEnds.setDate(trialEnds.getDate() + 30) // 30 days trial
+   trialEnds.setDate(trialEnds.getDate() + 14) // 14 days trial
    
    try {
     await apiFetch('/api/auth/create-profile', {

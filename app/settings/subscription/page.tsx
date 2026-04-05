@@ -63,10 +63,22 @@ function SubscriptionPageContent() {
     portalMutation.mutate();
   };
 
-  const handleUpgrade = () => {
-    // Use direct Stripe payment link
-    const paymentLink = 'https://buy.stripe.com/cNi4gr9um8mq6TeesMdQQ00';
-    window.location.href = paymentLink;
+  const handleUpgrade = async () => {
+    try {
+      const res = await fetch('/app/api/subscriptions/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: plan?.id }),
+      });
+      const data = await res.json();
+      if (data.success && data.data?.url) {
+        window.location.href = data.data.url;
+      } else {
+        toast.error(data.error || 'Kunde inte starta checkout');
+      }
+    } catch {
+      toast.error('Något gick fel. Försök igen.');
+    }
   };
 
   return (
@@ -95,11 +107,11 @@ function SubscriptionPageContent() {
                 </div>
                 <div className="flex-1">
                   <h2 className="text-xl font-bold mb-2">
-                    1 Månad Gratis!
+                    14 dagars gratis provperiod!
                   </h2>
                   <p className="text-white/90 mb-3">
-                    Du har {daysRemaining} dagar kvar av din gratisperiod. 
-                    Efter det kostar prenumerationen {plan?.price_monthly_sek} kr/månad.
+                    Du har {daysRemaining} dagar kvar av din provperiod. 
+                    Efter det kostar prenumerationen 499 kr/månad (exkl. moms).
                   </p>
                   {trialEndDate && (
                     <p className="text-sm text-white/80">

@@ -1,20 +1,35 @@
-// app/components/SubscriptionCTA.tsx
-// Call-to-action component for upgrading to paid subscription
 'use client';
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { CreditCard, Sparkles } from 'lucide-react';
+import { CreditCard, Sparkles, Loader2 } from 'lucide-react';
 
 interface SubscriptionCTAProps {
   variant?: 'default' | 'banner' | 'card';
   showFeatures?: boolean;
+  planId?: string;
 }
 
-export function SubscriptionCTA({ variant = 'default', showFeatures = false }: SubscriptionCTAProps) {
-  const paymentLink = 'https://buy.stripe.com/cNi4gr9um8mq6TeesMdQQ00';
+export function SubscriptionCTA({ variant = 'default', showFeatures = false, planId }: SubscriptionCTAProps) {
+  const [loading, setLoading] = useState(false);
 
-  const handleUpgrade = () => {
-    window.location.href = paymentLink;
+  const handleUpgrade = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch('/app/api/subscriptions/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId }),
+      });
+      const data = await res.json();
+      if (data.success && data.data?.url) {
+        window.location.href = data.data.url;
+      }
+    } catch {
+      // Silently fail — user can retry
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (variant === 'banner') {
@@ -26,16 +41,17 @@ export function SubscriptionCTA({ variant = 'default', showFeatures = false }: S
           </div>
           <div className="flex-1">
             <h2 className="text-xl font-bold mb-2">
-              🎉 1 Månad Gratis!
+              14 dagars gratis provperiod!
             </h2>
             <p className="text-white/90 mb-4">
-              Få full tillgång till alla funktioner helt gratis i 30 dagar. Därefter 499 kr/månad.
+              Få full tillgång till alla funktioner helt gratis i 14 dagar. Därefter 499 kr/månad (exkl. moms).
             </p>
             <Button
               onClick={handleUpgrade}
+              disabled={loading}
               className="bg-white text-purple-600 hover:bg-gray-100"
             >
-              <CreditCard className="w-4 h-4 mr-2" />
+              {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />}
               Starta gratis provperiod
             </Button>
           </div>
@@ -54,7 +70,7 @@ export function SubscriptionCTA({ variant = 'default', showFeatures = false }: S
           </h3>
         </div>
         <p className="text-gray-600 dark:text-gray-400 mb-4">
-          499 kr/månad - 1 månad gratis när du registrerar dig
+          499 kr/månad (exkl. moms) — 14 dagars gratis provperiod
         </p>
         {showFeatures && (
           <ul className="space-y-2 mb-4 text-sm">
@@ -76,20 +92,18 @@ export function SubscriptionCTA({ variant = 'default', showFeatures = false }: S
             </li>
           </ul>
         )}
-        <Button onClick={handleUpgrade} className="w-full">
-          <CreditCard className="w-4 h-4 mr-2" />
+        <Button onClick={handleUpgrade} disabled={loading} className="w-full">
+          {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />}
           Starta gratis provperiod
         </Button>
       </div>
     );
   }
 
-  // Default button
   return (
-    <Button onClick={handleUpgrade}>
-      <CreditCard className="w-4 h-4 mr-2" />
+    <Button onClick={handleUpgrade} disabled={loading}>
+      {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <CreditCard className="w-4 h-4 mr-2" />}
       Aktivera betalning
     </Button>
   );
 }
-
