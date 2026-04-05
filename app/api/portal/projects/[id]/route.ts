@@ -50,11 +50,21 @@ export async function GET(
       .eq('tenant_id', auth.user.tenantId)
       .order('created_at', { ascending: false })
 
+    // Fetch customer-visible daily logs
+    const { data: dailyLogs } = await auth.admin
+      .from('daily_logs')
+      .select('id, log_date, summary, weather, temperature_c, workers_on_site, work_performed, materials_used, issues, photos, created_at')
+      .eq('project_id', projectId)
+      .eq('tenant_id', auth.user.tenantId)
+      .eq('visible_to_customer', true)
+      .order('log_date', { ascending: false })
+
     return apiSuccess({
       project,
       documents: visibleDocs,
       invoices: invoices ?? [],
       quotes: quotes ?? [],
+      daily_logs: dailyLogs ?? [],
     })
   } catch (error) {
     return handleRouteError(error)
