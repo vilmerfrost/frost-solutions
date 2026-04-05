@@ -1,79 +1,130 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTheme } from '@/context/ThemeContext'
 import { useAdmin } from '@/hooks/useAdmin'
 import { SafeOnlineStatusIndicator } from '@/components/SafeSyncComponents'
 import { MobileBottomNav } from './MobileBottomNav'
-import { 
- LayoutDashboard, 
- Users, 
- FolderKanban, 
- Archive, 
- Briefcase, 
- FileText, 
- Package, 
- Leaf,
- Receipt, 
- Download,
- DollarSign,
- Wallet,
- BarChart3,
- Calendar,
- ClipboardList,
- PieChart,
+import {
+ LayoutDashboard,
+ Users,
+ FolderKanban,
+ FileText,
+ GitBranch,
+ Clock,
+ CalendarDays,
+ HardHat,
+ Receipt,
+ Banknote,
  Home,
- MessageCircle,
- HelpCircle,
- Palette,
- Link,
- FileCheck,
+ BarChart3,
+ ShieldCheck,
+ PackageSearch,
+ UserCircle,
+ PenTool,
  Settings as SettingsIcon,
  Moon,
  Sun,
- MapPin,
  Map,
+ MapPin,
  Menu,
  X,
- CreditCard
+ ChevronDown,
+ ChevronRight,
+ type LucideIcon,
 } from 'lucide-react'
 
+// ── Types ──────────────────────────────────────────────
+
+type UserRole = 'admin' | 'supervisor' | 'worker'
+
 interface NavItem {
- name: string
+ label: string
  href: string
- icon: React.ReactNode
+ icon: LucideIcon
+ roles: UserRole[]
 }
 
-const navItems: NavItem[] = [
- { name: 'Dashboard', href: '/dashboard', icon: <LayoutDashboard className="w-5 h-5" /> },
- { name: 'Anställda', href: '/employees', icon: <Users className="w-5 h-5" /> },
- { name: 'Projekt', href: '/projects', icon: <FolderKanban className="w-5 h-5" /> },
- { name: 'Arkiv', href: '/projects/archive', icon: <Archive className="w-5 h-5" /> },
- { name: 'Kunder', href: '/clients', icon: <Briefcase className="w-5 h-5" /> },
- { name: 'Offerter', href: '/quotes', icon: <FileText className="w-5 h-5" /> },
- { name: 'Materialdatabas', href: '/materials', icon: <Package className="w-5 h-5" /> },
- { name: 'KMA', href: '/kma', icon: <Leaf className="w-5 h-5" /> },
- { name: 'Fakturor', href: '/invoices', icon: <Receipt className="w-5 h-5" /> },
- { name: 'Leverantörsfakturor', href: '/supplier-invoices', icon: <Download className="w-5 h-5" /> },
- { name: 'Löneexport', href: '/payroll/periods', icon: <DollarSign className="w-5 h-5" /> },
- { name: 'Lönespec', href: '/payroll', icon: <Wallet className="w-5 h-5" /> },
- { name: 'Rapporter', href: '/reports', icon: <BarChart3 className="w-5 h-5" /> },
- { name: 'Kalender', href: '/calendar', icon: <Calendar className="w-5 h-5" /> },
- { name: 'Arbetsordrar', href: '/work-orders', icon: <ClipboardList className="w-5 h-5" /> },
- { name: 'Analytics', href: '/analytics', icon: <PieChart className="w-5 h-5" /> },
- { name: 'ROT-avdrag', href: '/rot', icon: <Home className="w-5 h-5" /> },
- { name: 'ÄTA', href: '/aeta', icon: <FileText className="w-5 h-5" /> },
- { name: 'Feedback', href: '/feedback', icon: <MessageCircle className="w-5 h-5" /> },
- { name: 'FAQ', href: '/faq', icon: <HelpCircle className="w-5 h-5" /> },
- { name: 'Utseende', href: '/settings/utseende', icon: <Palette className="w-5 h-5" /> },
- { name: 'Integrationer', href: '/settings/integrations', icon: <Link className="w-5 h-5" /> },
- { name: 'Prenumeration', href: '/settings/subscription', icon: <CreditCard className="w-5 h-5" /> },
- { name: 'Följesedlar', href: '/delivery-notes', icon: <FileCheck className="w-5 h-5" /> },
- { name: 'Arbetsflöden', href: '/workflows', icon: <SettingsIcon className="w-5 h-5" /> },
+interface NavGroup {
+ title: string
+ items: NavItem[]
+}
+
+// ── Navigation Config ──────────────────────────────────
+
+const NAV_GROUPS: NavGroup[] = [
+ {
+  title: 'ÖVERSIKT',
+  items: [
+   { label: 'Kontrollpanel', href: '/dashboard', icon: LayoutDashboard, roles: ['admin', 'supervisor', 'worker'] },
+  ],
+ },
+ {
+  title: 'PROJEKT',
+  items: [
+   { label: 'Projekt', href: '/projects', icon: FolderKanban, roles: ['admin', 'supervisor', 'worker'] },
+   { label: 'Dokument', href: '/documents', icon: FileText, roles: ['admin', 'supervisor'] },
+   { label: 'ATA-hantering', href: '/ata', icon: GitBranch, roles: ['admin', 'supervisor'] },
+  ],
+ },
+ {
+  title: 'TID & PERSONAL',
+  items: [
+   { label: 'Tidrapportering', href: '/time-tracking', icon: Clock, roles: ['admin', 'supervisor', 'worker'] },
+   { label: 'Schemaläggning', href: '/scheduling', icon: CalendarDays, roles: ['admin'] },
+   { label: 'Anställda', href: '/employees', icon: Users, roles: ['admin'] },
+   { label: 'Underentreprenörer', href: '/subcontractors', icon: HardHat, roles: ['admin'] },
+  ],
+ },
+ {
+  title: 'EKONOMI',
+  items: [
+   { label: 'Fakturering', href: '/invoices', icon: Receipt, roles: ['admin'] },
+   { label: 'Lönehantering', href: '/payroll', icon: Banknote, roles: ['admin'] },
+   { label: 'ROT-avdrag', href: '/rot', icon: Home, roles: ['admin'] },
+   { label: 'Rapporter', href: '/reports', icon: BarChart3, roles: ['admin'] },
+  ],
+ },
+ {
+  title: 'SÄKERHET',
+  items: [
+   { label: 'KMA & Säkerhet', href: '/safety', icon: ShieldCheck, roles: ['admin', 'supervisor', 'worker'] },
+   { label: 'Materialpriser', href: '/materials/prices', icon: PackageSearch, roles: ['admin', 'supervisor'] },
+  ],
+ },
+ {
+  title: 'KUNDPORTAL',
+  items: [
+   { label: 'Kunder', href: '/clients', icon: UserCircle, roles: ['admin'] },
+   { label: 'Avtal & Signering', href: '/contracts', icon: PenTool, roles: ['admin'] },
+  ],
+ },
 ]
 
-const adminNavItems: NavItem[] = []
+// ── Collapsed state persistence ────────────────────────
+
+const COLLAPSED_KEY = 'sidebar-collapsed-groups'
+
+function loadCollapsedGroups(): Record<string, boolean> {
+ if (typeof window === 'undefined') return {}
+ try {
+  const stored = localStorage.getItem(COLLAPSED_KEY)
+  return stored ? JSON.parse(stored) : {}
+ } catch {
+  return {}
+ }
+}
+
+function saveCollapsedGroups(collapsed: Record<string, boolean>) {
+ try {
+  localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsed))
+ } catch {
+  // ignore
+ }
+}
+
+// ── Component ──────────────────────────────────────────
 
 export default function SidebarClient() {
  const pathname = usePathname()
@@ -82,10 +133,29 @@ export default function SidebarClient() {
  const { isAdmin, loading: adminLoading } = useAdmin()
  const [isOpen, setIsOpen] = useState(false)
  const [hydrated, setHydrated] = useState(false)
+ const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
 
  useEffect(() => {
   setHydrated(true)
+  setCollapsedGroups(loadCollapsedGroups())
  }, [])
+
+ const toggleGroup = useCallback((title: string) => {
+  setCollapsedGroups(prev => {
+   const next = { ...prev, [title]: !prev[title] }
+   saveCollapsedGroups(next)
+   return next
+  })
+ }, [])
+
+ // Determine user role based on admin status
+ const userRole: UserRole = isAdmin ? 'admin' : 'worker'
+
+ // Filter groups based on role
+ const filteredGroups = NAV_GROUPS.map(group => ({
+  ...group,
+  items: group.items.filter(item => item.roles.includes(userRole)),
+ })).filter(group => group.items.length > 0)
 
  if (!hydrated) {
   return null
@@ -122,7 +192,7 @@ export default function SidebarClient() {
    <aside
     className={`
      fixed lg:sticky inset-y-0 left-0 z-40 top-0
-     w-64 h-screen bg-[#1e293b] border-r border-white/10
+     w-64 h-screen bg-gray-900 border-r border-white/10
      transform transition-transform duration-300 ease-in-out
      ${isOpen ? 'translate-x-0' : '-translate-x-full'}
      lg:translate-x-0 lg:z-auto
@@ -142,68 +212,59 @@ export default function SidebarClient() {
      </div>
 
      {/* Navigation */}
-     <nav id="main-navigation" className="flex-1 p-4 space-y-1 overflow-y-auto" role="navigation">
-      {navItems.map((item) => {
-       const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
+     <nav id="main-navigation" className="flex-1 p-4 space-y-4 overflow-y-auto" role="navigation">
+      {filteredGroups.map((group) => {
+       const isCollapsed = collapsedGroups[group.title] || false
        return (
-        <button
-         key={item.name}
-         onClick={() => {
-          router.push(item.href)
-          setIsOpen(false)
-         }}
-         className={`
-          w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px]
-          font-medium text-sm transition-all duration-200
-          ${
-           isActive
-            ? 'bg-primary-500/10 text-primary-500'
-            : 'text-gray-300 hover:bg-white/5 hover:text-white'
+        <div key={group.title}>
+         {/* Group header */}
+         <button
+          onClick={() => toggleGroup(group.title)}
+          className="w-full flex items-center justify-between px-3 py-1.5 mb-1"
+         >
+          <span className="text-xs font-semibold text-stone-400 uppercase tracking-wider">
+           {group.title}
+          </span>
+          {isCollapsed
+           ? <ChevronRight className="w-3.5 h-3.5 text-stone-400" />
+           : <ChevronDown className="w-3.5 h-3.5 text-stone-400" />
           }
-         `}
-         aria-current={isActive ? 'page' : undefined}
-        >
-         {item.icon}
-         <span className="truncate">{item.name}</span>
-        </button>
+         </button>
+
+         {/* Group items */}
+         {!isCollapsed && (
+          <div className="space-y-0.5">
+           {group.items.map((item) => {
+            const Icon = item.icon
+            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
+            return (
+             <button
+              key={item.href}
+              onClick={() => {
+               router.push(item.href)
+               setIsOpen(false)
+              }}
+              className={`
+               w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px]
+               font-medium text-sm transition-all duration-200
+               ${
+                isActive
+                 ? 'bg-primary-500/10 text-primary-500'
+                 : 'text-gray-300 hover:bg-white/5 hover:text-white'
+               }
+              `}
+              aria-current={isActive ? 'page' : undefined}
+             >
+              <Icon className="w-5 h-5" />
+              <span className="truncate">{item.label}</span>
+             </button>
+            )
+           })}
+          </div>
+         )}
+        </div>
        )
       })}
-      
-      {/* Admin-only items */}
-      {adminNavItems.length > 0 && isAdmin && (
-       <>
-        <div className="pt-4 mt-4 border-t border-white/10">
-         <p className="px-3 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">
-          Administratör
-         </p>
-        </div>
-        {adminNavItems.map((item) => {
-         const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
-         return (
-          <button
-           key={item.name}
-           onClick={() => {
-            router.push(item.href)
-            setIsOpen(false)
-           }}
-           className={`
-            w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px]
-            font-medium text-sm transition-all duration-200
-            ${
-             isActive
-              ? 'bg-primary-500/10 text-primary-500'
-              : 'text-gray-300 hover:bg-white/5 hover:text-white'
-            }
-           `}
-           aria-current={isActive ? 'page' : undefined}
-          >
-           {item.icon}
-           <span className="truncate">{item.name}</span>
-          </button>
-         )
-        })}
-       </>
-      )}
      </nav>
 
      {/* Footer */}
@@ -212,7 +273,7 @@ export default function SidebarClient() {
       <div className="mb-2">
        <SafeOnlineStatusIndicator />
       </div>
-      
+
       <button
        onClick={toggleTheme}
        className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-all duration-200"
@@ -221,7 +282,7 @@ export default function SidebarClient() {
        {theme === 'light' ? <Moon className="w-5 h-5" /> : <Sun className="w-5 h-5" />}
        <span>{theme === 'light' ? 'Mörkt läge' : 'Ljust läge'}</span>
       </button>
-      
+
       {!adminLoading && isAdmin && (
        <>
         <button
@@ -248,14 +309,6 @@ export default function SidebarClient() {
          <MapPin className="w-5 h-5" aria-hidden="true" />
          <span>Live Karta</span>
         </button>
-        <button
-         onClick={() => router.push('/admin/aeta')}
-         className="w-full flex items-center gap-3 px-3 py-2.5 rounded-[6px] text-gray-300 hover:bg-white/5 hover:text-white font-medium text-sm transition-all duration-200"
-         aria-label="ÄTA-administration"
-        >
-         <FileText className="w-5 h-5" aria-hidden="true" />
-         <span>ÄTA Admin</span>
-        </button>
        </>
       )}
      </div>
@@ -264,4 +317,3 @@ export default function SidebarClient() {
   </>
  )
 }
-

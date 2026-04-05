@@ -3,7 +3,7 @@
 
 import React from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, FolderKanban, Clock, Menu } from 'lucide-react'
+import { LayoutDashboard, FolderKanban, Clock, ShieldCheck, Menu } from 'lucide-react'
 
 interface MobileBottomNavProps {
   onMenuClick: () => void
@@ -16,7 +16,8 @@ export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
   const mainNavItems = [
     { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { name: 'Projekt', href: '/projects', icon: FolderKanban },
-    { name: 'Tid', href: '/reports/new', icon: Clock },
+    { name: 'Tid', href: '/time-tracking', icon: Clock },
+    { name: 'Säkerhet', href: '/safety', icon: ShieldCheck },
     { name: 'Mer', onClick: onMenuClick, icon: Menu },
   ]
 
@@ -31,7 +32,7 @@ export function MobileBottomNav({ onMenuClick }: MobileBottomNavProps) {
       role="navigation"
       aria-label="Huvudnavigation mobil"
     >
-      <div className="grid grid-cols-4 h-16">
+      <div className="grid grid-cols-5 h-16">
         {mainNavItems.map((item) => {
           const Icon = item.icon
           const active = item.href ? isActive(item.href) : false
