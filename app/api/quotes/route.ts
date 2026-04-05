@@ -1,91 +1,108 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { createAdminClient } from '@/utils/supabase/admin'
-import { getTenantId } from '@/lib/serverTenant'
-import { extractErrorMessage } from '@/lib/errorUtils'
+import { NextRequest } from 'next/server'
+import { z } from 'zod'
+import { resolveAuthAdmin, apiSuccess, apiError, handleRouteError } from '@/lib/api'
 import { generateQuoteNumber } from '@/lib/pricing/generateQuoteNumber'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+const QuotesQuerySchema = z.object({
+  status: z.string().optional(),
+  customer_id: z.string().uuid().optional(),
+  page: z.coerce.number().min(1).default(1),
+  limit: z.coerce.number().min(1).max(100).default(20),
+})
+
+const CreateQuoteSchema = z.object({
+  title: z.string().min(1, 'Title is required'),
+  customer_id: z.string().uuid().optional().nullable(),
+  project_id: z.string().uuid().optional().nullable(),
+  valid_until: z.string().optional().nullable(),
+  kma_enabled: z.boolean().default(false),
+  created_by: z.string().uuid().optional().nullable(),
+})
+
 export async function GET(req: NextRequest) {
- try {
-  const tenantId = await getTenantId()
-  if (!tenantId) {
-   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+  try {
+    const auth = await resolveAuthAdmin()
+    if (auth.error) return auth.error
+
+    const rawParams = Object.fromEntries(req.nextUrl.searchParams.entries())
+    const parsed = QuotesQuerySchema.safeParse(rawParams)
+    if (!parsed.success) {
+      const issues = parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`)
+      return apiError('Invalid query parameters', 400, { issues })
+    }
+
+    const { status, customer_id, page, limit } = parsed.data
+    const from = (page - 1) * limit
+    const to = from + limit - 1
+
+    let q = auth.admin
+      .from('quotes')
+      .select('id, quote_number, title, status, total_amount, created_at, customer_id', { count: 'exact' })
+      .eq('tenant_id', auth.tenantId)
+      .order('created_at', { ascending: false })
+      .range(from, to)
+
+    if (status) q = q.eq('status', status)
+    if (customer_id) q = q.eq('customer_id', customer_id)
+
+    const { data, error, count } = await q
+    if (error) throw error
+
+    return apiSuccess({ data, meta: { page, limit, count } })
+  } catch (e) {
+    return handleRouteError(e)
   }
-
-  const admin = createAdminClient()
-  const url = new URL(req.url)
-  const status = url.searchParams.get('status')
-  const customerId = url.searchParams.get('customer_id')
-  const page = Number(url.searchParams.get('page') ?? 1)
-  const limit = Math.min(100, Number(url.searchParams.get('limit') ?? 20))
-  const from = (page - 1) * limit
-  const to = from + limit - 1
-
-  let q = admin
-   .from('quotes')
-   .select('id, quote_number, title, status, total_amount, created_at, customer_id', { count: 'exact' })
-   .eq('tenant_id', tenantId)
-   .order('created_at', { ascending: false })
-   .range(from, to)
-
-  if (status) q = q.eq('status', status)
-  if (customerId) q = q.eq('customer_id', customerId)
-
-  const { data, error, count } = await q
-  if (error) throw error
-
-  return NextResponse.json({ success: true, data, meta: { page, limit, count } })
- } catch (e: any) {
-  return NextResponse.json({ success: false, error: extractErrorMessage(e) }, { status: 500 })
- }
 }
 
 export async function POST(req: NextRequest) {
- try {
-  const tenantId = await getTenantId()
-  if (!tenantId) {
-   return NextResponse.json({ success: false, error: 'Unauthorized' }, { status: 401 })
+  try {
+    const auth = await resolveAuthAdmin()
+    if (auth.error) return auth.error
+
+    let body: unknown
+    try {
+      body = await req.json()
+    } catch {
+      return apiError('Invalid JSON body', 400)
+    }
+
+    const parsed = CreateQuoteSchema.safeParse(body)
+    if (!parsed.success) {
+      const issues = parsed.error.issues.map(i => `${i.path.join('.')}: ${i.message}`)
+      return apiError('Validation failed', 400, { issues })
+    }
+
+    const quoteNumber = await generateQuoteNumber(auth.tenantId)
+
+    // Ensure empty strings are converted to null for UUID fields
+    const payload = {
+      tenant_id: auth.tenantId,
+      quote_number: quoteNumber,
+      title: parsed.data.title,
+      customer_id: parsed.data.customer_id || null,
+      project_id: parsed.data.project_id || null,
+      valid_until: parsed.data.valid_until || null,
+      kma_enabled: parsed.data.kma_enabled,
+      created_by: auth.user.id,
+      status: 'draft'
+    }
+
+    const { data, error } = await auth.admin.from('quotes').insert(payload).select().single()
+    if (error) throw error
+
+    // Log history
+    await auth.admin.from('quote_history').insert({
+      tenant_id: auth.tenantId,
+      quote_id: data.id,
+      event_type: 'created',
+      event_data: { payload }
+    })
+
+    return apiSuccess(data, 201)
+  } catch (e) {
+    return handleRouteError(e)
   }
-
-  const body = await req.json()
-  const admin = createAdminClient()
-
-  const quoteNumber = await generateQuoteNumber(tenantId)
-
-  // Get user ID from session
-  const { createClient } = await import('@/utils/supabase/server')
-  const supabase = createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  // Ensure empty strings are converted to null for UUID fields
-  const payload = {
-   tenant_id: tenantId,
-   quote_number: quoteNumber,
-   title: body.title,
-   customer_id: body.customer_id || null, // Convert empty string to null
-   project_id: body.project_id || null, // Convert empty string to null
-   valid_until: body.valid_until || null,
-   kma_enabled: !!body.kma_enabled,
-   created_by: user?.id || body.created_by || null,
-   status: 'draft'
-  }
-
-  const { data, error } = await admin.from('quotes').insert(payload).select().single()
-  if (error) throw error
-
-  // Log history
-  await admin.from('quote_history').insert({
-   tenant_id: tenantId,
-   quote_id: data.id,
-   event_type: 'created',
-   event_data: { payload }
-  })
-
-  return NextResponse.json({ success: true, data }, { status: 201 })
- } catch (e: any) {
-  return NextResponse.json({ success: false, error: extractErrorMessage(e) }, { status: 500 })
- }
 }
-
