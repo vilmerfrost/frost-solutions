@@ -27,6 +27,10 @@
     {
       "path": "/api/cron/sync-integrations",
       "schedule": "*/5 * * * *"
+    },
+    {
+      "path": "/api/cron/scrape-prices",
+      "schedule": "59 23 * * *"
     }
   ],
   "functions": {
