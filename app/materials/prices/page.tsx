@@ -166,10 +166,10 @@ export default function MaterialPricesPage() {
       const params = new URLSearchParams()
       if (search) params.set('q', search)
       if (category !== 'alla') params.set('category', category)
-      const data = await apiFetch<PriceSearchResponse>(`/api/materials/prices?${params.toString()}`)
-      setSearchResults(data.results ?? [])
-      setUpdatedAt(data.updated_at ?? '')
-      setChangesToday(data.changes_today ?? 0)
+      const res = await apiFetch<{ success: boolean; data: PriceSearchResponse }>(`/api/materials/prices?${params.toString()}`)
+      setSearchResults(res.data?.results ?? [])
+      setUpdatedAt(res.data?.updated_at ?? '')
+      setChangesToday(res.data?.changes_today ?? 0)
     } catch (err: any) {
       setSearchError(err.message || 'Kunde inte hämta priser')
       setSearchResults([])
@@ -189,8 +189,8 @@ export default function MaterialPricesPage() {
     if (!tenantId) return
     setAlertsLoading(true)
     try {
-      const data = await apiFetch<{ alerts: PriceAlert[] }>('/api/materials/prices/alerts')
-      setAlerts(data.alerts ?? [])
+      const res = await apiFetch<{ success: boolean; data: PriceAlert[] }>('/api/materials/prices/alerts')
+      setAlerts(res.data ?? [])
     } catch {
       // silent — alerts are secondary
     } finally {

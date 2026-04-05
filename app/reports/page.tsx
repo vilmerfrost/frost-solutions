@@ -183,10 +183,10 @@ export default function ReportsPage() {
         params.set('from', customFrom)
         params.set('to', customTo)
       }
-      const data = await apiFetch<ProfitabilityResponse>(`/api/reports/profitability?${params}`)
-      setProfitKPIs(data.kpis ?? [])
-      setProfitRows(data.rows ?? [])
-      setAiPrediction(data.ai_prediction ?? '')
+      const res = await apiFetch<{ success: boolean; data: ProfitabilityResponse }>(`/api/reports/profitability?${params}`)
+      setProfitKPIs(res.data?.kpis ?? [])
+      setProfitRows(res.data?.rows ?? [])
+      setAiPrediction(res.data?.ai_prediction ?? '')
     } catch (err: any) {
       setProfitError(err.message || 'Kunde inte hämta lönsamhetsdata')
     } finally {
@@ -199,8 +199,8 @@ export default function ReportsPage() {
     setUtilLoading(true)
     setUtilError(null)
     try {
-      const data = await apiFetch<UtilizationResponse>(`/api/reports/utilization?period=${period}`)
-      setUtilRows(data.rows ?? [])
+      const res = await apiFetch<{ success: boolean; data: UtilizationResponse }>(`/api/reports/utilization?period=${period}`)
+      setUtilRows(res.data?.rows ?? [])
     } catch (err: any) {
       setUtilError(err.message || 'Kunde inte hämta beläggningsdata')
     } finally {
@@ -213,8 +213,8 @@ export default function ReportsPage() {
     setCashLoading(true)
     setCashError(null)
     try {
-      const data = await apiFetch<CashFlowResponse>('/api/reports/cashflow?months=6')
-      setCashRows(data.rows ?? [])
+      const res = await apiFetch<{ success: boolean; data: CashFlowResponse }>('/api/reports/cashflow?months=6')
+      setCashRows(res.data?.rows ?? [])
     } catch (err: any) {
       setCashError(err.message || 'Kunde inte hämta kassaflödesdata')
     } finally {
@@ -226,8 +226,8 @@ export default function ReportsPage() {
     if (!tenantId) return
     setSavedLoading(true)
     try {
-      const data = await apiFetch<SavedReportsResponse>('/api/reports/saved')
-      setSavedReports(data.reports ?? [])
+      const res = await apiFetch<{ success: boolean; data: SavedReport[] }>('/api/reports/saved')
+      setSavedReports(res.data ?? [])
     } catch {
       // silent
     } finally {

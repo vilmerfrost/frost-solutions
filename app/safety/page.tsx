@@ -259,8 +259,8 @@ export default function SafetyPage() {
   const fetchEmployees = useCallback(async () => {
     if (!tenantId) return
     try {
-      const data = await apiFetch<{ employees?: Employee[] }>('/api/employees/list')
-      setEmployees(data.employees || [])
+      const res = await apiFetch<{ success: boolean; data: { employees?: Employee[] } }>('/api/employees/list')
+      setEmployees(res.data?.employees || [])
     } catch { /* silent */ }
   }, [tenantId])
 
@@ -269,15 +269,15 @@ export default function SafetyPage() {
     setLoading(true)
     try {
       const [expiringRes, incidentsRes] = await Promise.allSettled([
-        apiFetch<ExpiringResponse>('/api/safety/certificates/expiring'),
-        apiFetch<Incident[]>('/api/safety/incidents?status=reported,investigating'),
+        apiFetch<{ success: boolean; data: ExpiringResponse }>('/api/safety/certificates/expiring'),
+        apiFetch<{ success: boolean; data: Incident[] }>('/api/safety/incidents?status=reported,investigating'),
       ])
       if (expiringRes.status === 'fulfilled') {
-        setExpiringCerts(expiringRes.value.expiring_soon || [])
-        setExpiredCerts(expiringRes.value.expired || [])
+        setExpiringCerts(expiringRes.value.data?.expiring_soon || [])
+        setExpiredCerts(expiringRes.value.data?.expired || [])
       }
       if (incidentsRes.status === 'fulfilled') {
-        setOpenIncidents(incidentsRes.value || [])
+        setOpenIncidents(incidentsRes.value.data || [])
       }
     } catch { /* silent */ }
     finally { setLoading(false) }
@@ -286,9 +286,9 @@ export default function SafetyPage() {
   const fetchAttendance = useCallback(async (projectId: string) => {
     if (!tenantId || !projectId) return
     try {
-      const data = await apiFetch<AttendanceRecord[]>(`/api/projects/${projectId}/attendance`)
-      setAttendanceToday(data)
-      setAttendanceRecords(data)
+      const res = await apiFetch<{ success: boolean; data: AttendanceRecord[] }>(`/api/projects/${projectId}/attendance`)
+      setAttendanceToday(res.data || [])
+      setAttendanceRecords(res.data || [])
     } catch {
       setAttendanceToday([])
       setAttendanceRecords([])
@@ -299,8 +299,8 @@ export default function SafetyPage() {
     if (!tenantId) return
     setLoading(true)
     try {
-      const data = await apiFetch<Certificate[]>('/api/safety/certificates')
-      const withStatus = data.map(c => ({
+      const res = await apiFetch<{ success: boolean; data: Certificate[] }>('/api/safety/certificates')
+      const withStatus = (res.data || []).map(c => ({
         ...c,
         status: computeCertStatus(c.expiry_date),
         employee_name:
@@ -317,8 +317,8 @@ export default function SafetyPage() {
     if (!tenantId) return
     setLoading(true)
     try {
-      const data = await apiFetch<Incident[]>('/api/safety/incidents')
-      setAllIncidents(data)
+      const res = await apiFetch<{ success: boolean; data: Incident[] }>('/api/safety/incidents')
+      setAllIncidents(res.data || [])
     } catch { setAllIncidents([]) }
     finally { setLoading(false) }
   }, [tenantId])
@@ -327,9 +327,9 @@ export default function SafetyPage() {
     if (!tenantId) return
     setLoading(true)
     try {
-      const data = await apiFetch<{ templates: RiskTemplate[]; assessments: RiskAssessment[] }>('/api/safety/risk-assessments')
-      setRiskTemplates(data.templates || [])
-      setRiskAssessments(data.assessments || [])
+      const res = await apiFetch<{ success: boolean; data: { templates: RiskTemplate[]; assessments: RiskAssessment[] } }>('/api/safety/risk-assessments')
+      setRiskTemplates(res.data?.templates || [])
+      setRiskAssessments(res.data?.assessments || [])
     } catch {
       setRiskTemplates([])
       setRiskAssessments([])

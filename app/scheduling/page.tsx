@@ -153,8 +153,8 @@ export default function SchedulingPage() {
   const fetchEmployees = useCallback(async () => {
     if (!tenantId) return
     try {
-      const data = await apiFetch<{ employees?: Employee[] }>('/api/employees/list')
-      setEmployees(data.employees || [])
+      const res = await apiFetch<{ success: boolean; data: { employees?: Employee[] } }>('/api/employees/list')
+      setEmployees(res.data?.employees || [])
     } catch { /* silent */ }
   }, [tenantId])
 
@@ -172,10 +172,10 @@ export default function SchedulingPage() {
     try {
       const startDate = formatDateISO(currentWeekStart)
       const endDate = formatDateISO(addDays(currentWeekStart, 4))
-      const data = await apiFetch<ScheduleSlot[]>(
+      const res = await apiFetch<{ success: boolean; data: ScheduleSlot[] }>(
         `/api/schedules?start_date=${startDate}&end_date=${endDate}`
       )
-      setSchedules(data || [])
+      setSchedules(res.data || [])
     } catch {
       setSchedules([])
     } finally {

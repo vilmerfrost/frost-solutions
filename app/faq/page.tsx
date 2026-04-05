@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import Link from 'next/link'
 import Sidebar from '@/components/Sidebar'
 import FrostLogo from '@/components/FrostLogo'
 import { BASE_PATH } from '@/utils/url'
@@ -575,12 +576,12 @@ export default function FAQPage() {
        Kontakta support eller rapportera en bugg via feedback-sidan.
       </p>
       <div className="flex gap-3">
-       <a
-        href={`${BASE_PATH}/feedback`}
+       <Link
+        href="/feedback"
         className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-[8px] font-semibold transition-colors"
        >
         💬 Kontakta Support
-       </a>
+       </Link>
       </div>
      </div>
     </div>

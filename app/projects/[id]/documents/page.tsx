@@ -112,8 +112,8 @@ export default function DocumentBrowserPage() {
     setLoading(true)
     setError(null)
     try {
-      const data = await apiFetch<DocItem[]>(`/api/projects/${projectId}/documents?folder=${activeFolder}`)
-      setDocs(data)
+      const res = await apiFetch<{ success: boolean; data: DocItem[] }>(`/api/projects/${projectId}/documents?folder=${activeFolder}`)
+      setDocs(res.data || [])
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Kunde inte ladda dokument')
     } finally {
@@ -124,8 +124,8 @@ export default function DocumentBrowserPage() {
   const loadChecklist = useCallback(async () => {
     if (!tenantId || !projectId) return
     try {
-      const data = await apiFetch<ChecklistItem[]>(`/api/projects/${projectId}/documents/checklist`)
-      setChecklist(data)
+      const res = await apiFetch<{ success: boolean; data: ChecklistItem[] }>(`/api/projects/${projectId}/documents/checklist`)
+      setChecklist(res.data || [])
     } catch {
       // non-critical
     }
@@ -143,8 +143,8 @@ export default function DocumentBrowserPage() {
     }
     const timer = setTimeout(async () => {
       try {
-        const data = await apiFetch<DocItem[]>(`/api/projects/${projectId}/documents/search?q=${encodeURIComponent(search)}`)
-        setSearchResults(data)
+        const res = await apiFetch<{ success: boolean; data: DocItem[] }>(`/api/projects/${projectId}/documents/search?q=${encodeURIComponent(search)}`)
+        setSearchResults(res.data || [])
       } catch {
         setSearchResults([])
       }
@@ -192,11 +192,11 @@ export default function DocumentBrowserPage() {
 
   async function handleShare() {
     try {
-      const result = await apiFetch<{ share_url: string }>(`/api/projects/${projectId}/documents/share`, {
+      const result = await apiFetch<{ success: boolean; data: { share_url: string } }>(`/api/projects/${projectId}/documents/share`, {
         method: 'POST',
         body: JSON.stringify({ folder: activeFolder }),
       })
-      await navigator.clipboard.writeText(result.share_url)
+      await navigator.clipboard.writeText(result.data.share_url)
       alert('Delningslänk kopierad!')
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Kunde inte skapa delningslänk')
@@ -205,8 +205,8 @@ export default function DocumentBrowserPage() {
 
   async function loadVersions(docId: string) {
     try {
-      const data = await apiFetch<VersionEntry[]>(`/api/projects/${projectId}/documents/${docId}/versions`)
-      setVersionsModal({ docId, versions: data })
+      const res = await apiFetch<{ success: boolean; data: VersionEntry[] }>(`/api/projects/${projectId}/documents/${docId}/versions`)
+      setVersionsModal({ docId, versions: res.data || [] })
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Kunde inte hämta versionshistorik')
     }

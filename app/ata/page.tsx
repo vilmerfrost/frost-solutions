@@ -162,11 +162,11 @@ export default function AtaKanbanPage() {
     setChainValid(null)
     try {
       const [trailRes, chainRes] = await Promise.allSettled([
-        apiFetch<AuditEvent[]>(`/api/ata/v2/${item.id}/documents`),
-        apiFetch<ChainVerification>(`/api/ata/v2/${item.id}/verify-chain`),
+        apiFetch<{ success: boolean; data: AuditEvent[] }>(`/api/ata/v2/${item.id}/documents`),
+        apiFetch<{ success: boolean; data: ChainVerification }>(`/api/ata/v2/${item.id}/verify-chain`),
       ])
-      if (trailRes.status === 'fulfilled') setAuditTrail(trailRes.value || [])
-      if (chainRes.status === 'fulfilled') setChainValid(chainRes.value)
+      if (trailRes.status === 'fulfilled') setAuditTrail(trailRes.value.data || [])
+      if (chainRes.status === 'fulfilled') setChainValid(chainRes.value.data)
     } catch {
       // non-critical
     }
