@@ -2,11 +2,15 @@
 // ✅ AI-powered ROT summary generation
 import { NextRequest, NextResponse } from 'next/server';
 import { generateROTRUTSummary } from '@/lib/ai/frost-bygg-ai-integration';
+import { resolveAuth } from '@/lib/api/auth';
 
 export const runtime = 'nodejs';
 
 export async function POST(req: NextRequest) {
  try {
+  const auth = await resolveAuth();
+  if (auth.error) return auth.error;
+
   const body = await req.json();
   
   // Validate required fields

@@ -1,13 +1,16 @@
 // app/api/create-project/route.ts
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { resolveAuth } from '@/lib/api/auth'
 
 export async function POST(req: Request) {
+ const auth = await resolveAuth()
+ if (auth.error) return auth.error
+
  const body = await req.json()
- const { 
-  name, 
-  tenant_id, 
-  client_id, 
+ const {
+  name,
+  client_id,
   customer_name, 
   base_rate_sek, 
   budgeted_hours,
@@ -34,7 +37,6 @@ export async function POST(req: Request) {
 
  const supabase = createClient(supabaseUrl, serviceKey)
 
- if (!tenant_id) return NextResponse.json({ error: 'Missing tenant_id' }, { status: 400 })
  if (!client_id) return NextResponse.json({ error: 'Missing client_id - ett projekt måste ha en kund' }, { status: 400 })
 
  // Validate ROT requirements
@@ -44,7 +46,7 @@ export async function POST(req: Request) {
 
  const payload: Record<string, unknown> = {
   name,
-  tenant_id,
+  tenant_id: auth.tenantId,
   client_id,
   status: 'active',
  }

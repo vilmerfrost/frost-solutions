@@ -1,7 +1,14 @@
 // /app/api/onboard-new-tenant/route.ts
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/utils/supabase/server'
+import { apiError } from '@/lib/api/response'
 
 export async function POST(req: Request) {
+ // Auth check — user must be logged in (no tenant required yet)
+ const supabaseAuth = await createServerClient()
+ const { data: { user }, error: authError } = await supabaseAuth.auth.getUser()
+ if (authError || !user) return apiError('Unauthorized', 401)
+
  // Prefer service envs for server-side operations, but fall back to public vars
  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL
  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

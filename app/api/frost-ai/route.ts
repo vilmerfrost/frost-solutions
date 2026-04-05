@@ -1,6 +1,10 @@
 import { NextResponse } from 'next/server'
+import { resolveAuth } from '@/lib/api/auth'
 
 export async function POST(req: Request) {
+ const auth = await resolveAuth()
+ if (auth.error) return auth.error
+
  const { text } = await req.json()
  console.log("Text från frontend:", text)
 
