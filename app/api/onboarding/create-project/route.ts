@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { createClient as createServerClient } from '@/utils/supabase/server'
 
 /**
  * API route för att skapa project under onboarding
@@ -7,6 +8,13 @@ import { createClient } from '@supabase/supabase-js'
  */
 export async function POST(req: Request) {
  try {
+  // Auth check: user must be authenticated (onboarding context)
+  const supabaseAuth = await createServerClient()
+  const { data: { user }, error: authError } = await supabaseAuth.auth.getUser()
+  if (authError || !user) {
+   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
   const { tenantId, name, clientId, baseRate, budgetedHours, siteAddress } = await req.json()
 
   if (!tenantId || !name) {

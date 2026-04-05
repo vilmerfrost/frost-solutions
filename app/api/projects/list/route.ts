@@ -39,35 +39,34 @@ export async function GET(request: NextRequest) {
 
   console.log('✅ Projects/list: Fetching projects for valid tenant:', tenantId)
 
-  // SECURITY: Double-check that this tenant belongs to the requesting user
-  // Get user from session to verify access
+  // SECURITY: Verify the requesting user is authenticated and belongs to this tenant
   try {
    const { createClient: createServerClient } = await import('@/utils/supabase/server')
-   const serverSupabase = createServerClient()
-   const { data: { user } } = await serverSupabase.auth.getUser()
-   
-   if (user) {
-    // Check if user has an employee record for this tenant
-    const { data: userEmployee, error: empError } = await supabase
-     .from('employees')
-     .select('id')
-     .eq('auth_user_id', user.id)
-     .eq('tenant_id', tenantId)
-     .maybeSingle()
-    
-    if (empError) {
-     console.warn('⚠️ Could not verify employee access (non-fatal):', empError.message)
-     // Continue anyway - tenant verification above is sufficient
-    } else if (!userEmployee) {
-     console.warn('⚠️ User does not have employee record for tenant:', tenantId, 'but continuing anyway')
-     // Continue anyway - tenant exists and was verified above
-    } else {
-     console.log('✅ Projects/list: User access verified for tenant:', tenantId)
-    }
+   const serverSupabase = await createServerClient()
+   const { data: { user }, error: userError } = await serverSupabase.auth.getUser()
+
+   if (userError || !user) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+   }
+
+   // Check if user has an employee record for this tenant
+   const { data: userEmployee, error: empError } = await supabase
+    .from('employees')
+    .select('id')
+    .eq('auth_user_id', user.id)
+    .eq('tenant_id', tenantId)
+    .maybeSingle()
+
+   if (empError) {
+    console.warn('⚠️ Could not verify employee access (non-fatal):', empError.message)
+   } else if (!userEmployee) {
+    console.warn('⚠️ User does not have employee record for tenant:', tenantId)
+   } else {
+    console.log('✅ Projects/list: User access verified for tenant:', tenantId)
    }
   } catch (securityCheckError) {
-   // Non-fatal - log but continue
-   console.warn('⚠️ Security check failed (non-fatal):', securityCheckError)
+   console.error('Security check failed:', securityCheckError)
+   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
   const { data, error } = await supabase
    .from('projects')

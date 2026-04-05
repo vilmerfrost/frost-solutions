@@ -5,12 +5,11 @@ import { getTenantId } from '@/lib/serverTenant'
 export async function POST(req: NextRequest) {
  const data = await req.json()
 
- // Get tenant from JWT claim (authoritative) or fallback to payload/cookie
- const claimTenant = await getTenantId()
- const finalTenantId = claimTenant || data.tenant_id
+ // Get tenant from JWT claim only (no body fallback to prevent spoofing)
+ const finalTenantId = await getTenantId()
 
  if (!finalTenantId) {
-  return NextResponse.json({ error: 'Missing tenant_id' }, { status: 400 })
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
  }
 
  data.tenant_id = finalTenantId

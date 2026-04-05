@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
+import { resolveAuth } from '@/lib/api/auth'
+import { apiError } from '@/lib/api/response'
 
 /**
  * API route för att skapa client (privat eller företag)
@@ -8,14 +10,19 @@ import { createClient } from '@supabase/supabase-js'
  */
 export async function POST(req: Request) {
  try {
+  // Auth check: use JWT-based tenant
+  const auth = await resolveAuth()
+  if (auth.error) return auth.error
+
+  const tenantId = auth.tenantId
+
   const body = await req.json()
-  const { 
-   tenantId, 
-   name, 
-   email, 
-   phone, 
-   address, 
-   orgNumber, 
+  const {
+   name,
+   email,
+   phone,
+   address,
+   orgNumber,
    clientType,
    // Enhanced private customer fields
    firstName,
@@ -43,9 +50,9 @@ export async function POST(req: Request) {
    notes,
   } = body
 
-  if (!tenantId || !name) {
+  if (!name) {
    return NextResponse.json(
-    { error: 'tenantId and name are required' },
+    { error: 'name is required' },
     { status: 400 }
    )
   }
@@ -62,20 +69,6 @@ export async function POST(req: Request) {
   }
 
   const supabase = createClient(supabaseUrl, serviceKey)
-
-  // Verify tenant exists before creating client
-  const { data: tenantCheck, error: tenantCheckError } = await supabase
-   .from('tenants')
-   .select('id')
-   .eq('id', tenantId)
-   .maybeSingle()
-
-  if (tenantCheckError || !tenantCheck) {
-   return NextResponse.json(
-    { error: `Tenant with ID ${tenantId} does not exist. Please ensure you have completed onboarding.` },
-    { status: 400 }
-   )
-  }
 
   // Build client payload with all fields
   const clientPayload: any = {

@@ -14,7 +14,13 @@ Max 150 ord. Svara med ren text, ingen JSON.`;
 export async function POST(req: NextRequest) {
   try {
     const tenantId = await getTenantId();
-    const cacheTenantId = tenantId || '00000000-0000-0000-0000-000000000000';
+    if (!tenantId) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized' },
+        { status: 401 }
+      );
+    }
+    const cacheTenantId = tenantId;
 
     const { resourceType, type, data } = await req.json();
     const actualType = resourceType || type;
