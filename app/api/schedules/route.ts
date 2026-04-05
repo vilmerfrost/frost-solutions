@@ -34,9 +34,12 @@ export async function POST(req: NextRequest) {
     if ((+end - +start) / 36e5 > 12) return apiError('duration must be <= 12 hours', 400)
 
     // Soft conflict check for DX (DB EXCLUDE handles races)
-    const conf = await findConflicts(auth.tenantId, parsed.employee_id, parsed.start_time, parsed.end_time)
-    if (conf.hasConflict) {
-      return apiError('Conflict detected', 409, { conflicts: conf.conflicts as unknown as Record<string, unknown> })
+    // Allow override with force: true
+    if (!parsed.force) {
+      const conf = await findConflicts(auth.tenantId, parsed.employee_id, parsed.start_time, parsed.end_time)
+      if (conf.hasConflict) {
+        return apiError('Conflict detected', 409, { conflicts: conf.conflicts as unknown as Record<string, unknown> })
+      }
     }
 
     const insertPayload: Record<string, unknown> = {

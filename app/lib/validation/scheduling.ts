@@ -12,7 +12,8 @@ export const createScheduleSchema = z.object({
  status: z.enum(['scheduled','confirmed','completed','cancelled']).optional(),
  shift_type: z.enum(['day', 'night', 'evening', 'weekend', 'other']).optional(),
  transport_time_minutes: z.number().int().min(0).max(480).optional(), // Max 8 hours transport
- notes: z.string().max(10_000).optional()
+ notes: z.string().max(10_000).optional(),
+ force: z.boolean().optional(), // Override conflict detection
 });
 
 export const updateScheduleSchema = z.object({
