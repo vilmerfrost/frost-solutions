@@ -71,13 +71,23 @@ export async function POST(req: NextRequest) {
           tenant_id: tenantId,
           user_id: user.id,
         },
+      }, {
+        idempotencyKey: `cust_${tenantId}_${Date.now()}`,
       });
       customerId = customer.id;
 
-      await admin
+      const { error: upsertError } = await admin
         .from('subscriptions')
-        .update({ stripe_customer_id: customerId })
-        .eq('tenant_id', tenantId);
+        .upsert(
+          { tenant_id: tenantId, stripe_customer_id: customerId },
+          { onConflict: 'tenant_id' }
+        );
+
+      if (upsertError) {
+        // Roll back: delete the orphaned Stripe customer
+        await stripe.customers.del(customerId).catch(() => {});
+        throw new Error(`Kunde inte spara kund-ID: ${upsertError.message}`);
+      }
     }
 
     const baseUrl = `${req.nextUrl.origin}/app`;
@@ -103,7 +113,9 @@ export async function POST(req: NextRequest) {
       locale: 'sv',
     };
 
-    const session = await stripe.checkout.sessions.create(sessionParams);
+    const session = await stripe.checkout.sessions.create(sessionParams, {
+      idempotencyKey: `cs_${tenantId}_${Date.now()}`,
+    });
 
     return NextResponse.json({
       success: true,

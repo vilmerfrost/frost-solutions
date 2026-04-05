@@ -102,6 +102,8 @@ export async function POST(req: NextRequest) {
         amount_sek: (amount / 100).toFixed(2),
       },
       description: `AI-krediter för ${tenant?.name || 'Frost Solutions'}`,
+    }, {
+      idempotencyKey: `pi_${tenantId}_${Date.now()}`,
     });
 
     console.log('[Stripe] Payment intent created:', {
