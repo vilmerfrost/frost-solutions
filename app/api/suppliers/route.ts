@@ -1,87 +1,76 @@
 // app/api/suppliers/route.ts
-import { NextRequest, NextResponse } from 'next/server'
-import { getTenantId } from '@/lib/serverTenant'
-import { createAdminClient } from '@/utils/supabase/admin'
-import { extractErrorMessage } from '@/lib/errorUtils'
+import { NextRequest } from 'next/server'
+import { z } from 'zod'
+import { resolveAuthAdmin, parseBody, apiSuccess, apiError, handleRouteError } from '@/lib/api'
 
 export const runtime = 'nodejs'
 
+const CreateSupplierSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  org_number: z.string().optional().nullable(),
+  email: z.string().email().optional().nullable(),
+  phone: z.string().optional().nullable(),
+})
+
 export async function GET(req: NextRequest) {
- try {
-  const tenantId = await getTenantId()
-  if (!tenantId) {
-   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const auth = await resolveAuthAdmin()
+    if (auth.error) return auth.error
+
+    const search = req.nextUrl.searchParams.get('search')
+
+    let query = auth.admin
+      .from('suppliers')
+      .select('*')
+      .eq('tenant_id', auth.tenantId)
+      .order('name', { ascending: true })
+
+    if (search) {
+      query = query.ilike('name', `%${search}%`)
+    }
+
+    const { data, error } = await query
+
+    if (error) {
+      console.error('[Suppliers API] Error:', error)
+      return apiError('Failed to fetch suppliers', 500)
+    }
+
+    return apiSuccess(data || [])
+  } catch (error) {
+    return handleRouteError(error)
   }
-
-  const { searchParams } = req.nextUrl
-  const search = searchParams.get('search')
-
-  const admin = createAdminClient()
-
-  let query = admin
-   .from('suppliers')
-   .select('*')
-   .eq('tenant_id', tenantId)
-   .order('name', { ascending: true })
-
-  if (search) {
-   query = query.ilike('name', `%${search}%`)
-  }
-
-  const { data, error } = await query
-
-  if (error) {
-   console.error('[Suppliers API] Error:', error)
-   return NextResponse.json({ error: 'Failed to fetch suppliers' }, { status: 500 })
-  }
-
-  return NextResponse.json({ success: true, data: data || [] })
- } catch (error: any) {
-  console.error('[Suppliers API] Unexpected error:', error)
-  return NextResponse.json({ error: extractErrorMessage(error) }, { status: 500 })
- }
 }
 
 export async function POST(req: NextRequest) {
- try {
-  const tenantId = await getTenantId()
-  if (!tenantId) {
-   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  try {
+    const auth = await resolveAuthAdmin()
+    if (auth.error) return auth.error
+
+    const body = await parseBody(req, CreateSupplierSchema)
+    if (body.error) return body.error
+
+    const { name, org_number, email, phone } = body.data
+
+    const { data, error } = await auth.admin
+      .from('suppliers')
+      .insert({
+        tenant_id: auth.tenantId,
+        name,
+        org_number: org_number || null,
+        email: email || null,
+        phone: phone || null,
+      })
+      .select()
+      .single()
+
+    if (error) {
+      console.error('[Suppliers API] Create error:', error)
+      return apiError(error.message || 'Failed to create supplier', 500)
+    }
+
+    return apiSuccess(data, 201)
+  } catch (error) {
+    return handleRouteError(error)
   }
-
-  const body = await req.json()
-  const { name, org_number, email, phone } = body
-
-  if (!name) {
-   return NextResponse.json({ error: 'Name is required' }, { status: 400 })
-  }
-
-  const admin = createAdminClient()
-
-  // Get user ID
-  const { data: { user } } = await admin.auth.getUser()
-
-  const { data, error } = await admin
-   .from('suppliers')
-   .insert({
-    tenant_id: tenantId,
-    name,
-    org_number: org_number || null,
-    email: email || null,
-    phone: phone || null
-   })
-   .select()
-   .single()
-
-  if (error) {
-   console.error('[Suppliers API] Create error:', error)
-   return NextResponse.json({ error: extractErrorMessage(error) }, { status: 500 })
-  }
-
-  return NextResponse.json({ success: true, data })
- } catch (error: any) {
-  console.error('[Suppliers API] Unexpected error:', error)
-  return NextResponse.json({ error: extractErrorMessage(error) }, { status: 500 })
- }
 }
-
