@@ -22,7 +22,11 @@ export async function resolveAuth(): Promise<AuthResult> {
   return { user: { id: user.id, email: user.email ?? '', app_metadata: user.app_metadata ?? {} }, tenantId, error: null }
 }
 
-export async function resolveAuthAdmin() {
+type AuthAdminResult =
+  | { user: { id: string; email: string; app_metadata: Record<string, unknown> }; tenantId: string; admin: ReturnType<typeof createAdminClient>; error: null }
+  | { user: null; tenantId: null; error: ReturnType<typeof apiError> }
+
+export async function resolveAuthAdmin(): Promise<AuthAdminResult> {
   const result = await resolveAuth()
   if (result.error) return result
 
