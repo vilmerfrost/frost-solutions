@@ -41,7 +41,13 @@ export async function POST(req: NextRequest) {
    return NextResponse.json({ error: 'Kunde inte skapa integration' }, { status: 500 });
   }
 
-  const state = `${integrationId}:${tenantId}`;
+  // Generate CSRF nonce and store in integration metadata
+  const csrfNonce = crypto.randomUUID();
+  await admin.from('integrations').update({
+   metadata: { oauth_csrf_state: csrfNonce }
+  }).eq('id', integrationId);
+
+  const state = `${integrationId}:${tenantId}:${csrfNonce}`;
   const url = getAuthorizationUrl(integrationId, state);
   return NextResponse.json({ url });
  } catch (e: any) {

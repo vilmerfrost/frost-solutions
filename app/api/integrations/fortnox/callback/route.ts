@@ -73,14 +73,37 @@ export async function GET(req: NextRequest) {
    );
   }
 
-  // Extract integrationId from state
-  const [integrationId] = state.split(':');
+  // Extract integrationId and CSRF nonce from state
+  const [integrationId, , csrfNonce] = state.split(':');
   if (!integrationId) {
    console.error('❌ Invalid state format:', state);
    const baseUrl = `${req.nextUrl.origin}${BASE_PATH}`;
    return NextResponse.redirect(
     new URL(`/settings/integrations?error=${encodeURIComponent('Ogiltigt state-format.')}`, baseUrl)
    );
+  }
+
+  // Validate CSRF state nonce
+  if (csrfNonce) {
+   const admin2 = createAdminClient();
+   const { data: integration } = await admin2.from('integrations')
+    .select('metadata')
+    .eq('id', integrationId)
+    .single();
+
+   const storedNonce = (integration?.metadata as any)?.oauth_csrf_state;
+   if (!storedNonce || storedNonce !== csrfNonce) {
+    console.error('❌ CSRF state mismatch for integration:', integrationId);
+    const baseUrl = `${req.nextUrl.origin}${BASE_PATH}`;
+    return NextResponse.redirect(
+     new URL(`/settings/integrations?error=${encodeURIComponent('CSRF-validering misslyckades. Försök ansluta igen.')}`, baseUrl)
+    );
+   }
+
+   // Clear CSRF state after successful validation
+   await admin2.from('integrations').update({
+    metadata: { oauth_csrf_state: null }
+   }).eq('id', integrationId);
   }
 
   // Exchange code for token

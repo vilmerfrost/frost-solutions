@@ -12,10 +12,33 @@ export async function GET(req: NextRequest) {
   const state = searchParams.get('state');
   if (!code || !state) return NextResponse.json({ error: 'Saknar code/state.' }, { status: 400 });
 
-  const [integrationId] = state.split(':');
+  const [integrationId, , csrfNonce] = state.split(':');
+
+  // Validate CSRF state nonce
+  const admin = createAdminClient();
+  if (csrfNonce) {
+   const { data: integration } = await admin.from('integrations')
+    .select('metadata')
+    .eq('id', integrationId)
+    .single();
+
+   const storedNonce = (integration?.metadata as any)?.oauth_csrf_state;
+   if (!storedNonce || storedNonce !== csrfNonce) {
+    console.error('❌ CSRF state mismatch for Visma integration:', integrationId);
+    const baseUrl = `${req.nextUrl.origin}${BASE_PATH}`;
+    return NextResponse.redirect(
+     new URL(`/settings/integrations?error=${encodeURIComponent('CSRF-validering misslyckades. Försök ansluta igen.')}`, baseUrl)
+    );
+   }
+
+   // Clear CSRF state after successful validation
+   await admin.from('integrations').update({
+    metadata: { oauth_csrf_state: null }
+   }).eq('id', integrationId);
+  }
+
   await exchangeCodeForToken(integrationId, code);
 
-  const admin = createAdminClient();
   await admin.from('integrations').update({ status: 'connected', last_error: null }).eq('id', integrationId);
 
   // redirect till UI (include basePath since req.nextUrl.origin doesn't)
