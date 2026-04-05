@@ -100,7 +100,7 @@ export async function POST(
 
     const { data: employee } = await auth.admin
       .from('employees')
-      .select('id')
+      .select('id, name')
       .eq('auth_user_id', auth.user.id)
       .eq('tenant_id', auth.tenantId)
       .single()
@@ -120,7 +120,21 @@ export async function POST(
       userAgent: req.headers.get('user-agent') ?? undefined,
     })
 
+    // Create a project message notifying the customer about the pending ÄTA approval
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000/app'
+    const portalApprovalUrl = `${appUrl}/portal/ata/${id}/approve`
+    await auth.admin
+      .from('project_messages')
+      .insert({
+        tenant_id: auth.tenantId,
+        project_id: ata.project_id,
+        sender_type: 'employee',
+        sender_id: employee?.id ?? auth.user.id,
+        sender_name: employee?.name ?? 'System',
+        message: `En ÄTA-ändring behöver ditt godkännande: "${ata.description}". Totalt belopp: ${ata.cost_frame ?? 'TBD'} SEK. Godkänn här: ${portalApprovalUrl}`,
+        attachments: [],
+      })
+
     return apiSuccess({
       approval_token: approvalToken,
       approval_url: `${appUrl}/api/ata/v2/${id}/approve?token=${approvalToken}`,
