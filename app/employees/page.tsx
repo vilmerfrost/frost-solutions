@@ -7,7 +7,8 @@ import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { toast } from '@/lib/toast'
 import { useAdmin } from '@/hooks/useAdmin'
-import { DollarSign, Edit2, Trash2 } from 'lucide-react'
+import { apiFetch } from '@/lib/http/fetcher'
+import { DollarSign, Edit2, Trash2, Mail } from 'lucide-react'
 import { BASE_PATH } from '@/utils/url'
 
 interface Employee {
@@ -16,6 +17,7 @@ interface Employee {
  full_name?: string
  role?: string
  email?: string
+ auth_user_id?: string | null
 }
 
 export default function EmployeesPage() {
@@ -46,7 +48,7 @@ export default function EmployeesPage() {
     
     const { data, error } = await supabase
      .from('employees')
-     .select('id, name, full_name, role, email')
+     .select('id, name, full_name, role, email, auth_user_id')
      .eq('tenant_id', tenantId as string)
      .order('full_name', { ascending: true })
 
@@ -88,6 +90,7 @@ export default function EmployeesPage() {
       name: e.full_name || e.name || 'Okänd',
       role: e.role,
       email: e.email,
+      auth_user_id: e.auth_user_id,
      })))
     }
    } catch (err) {
@@ -256,6 +259,29 @@ export default function EmployeesPage() {
           </button>
           {isAdmin && (
            <>
+            {emp.email && !emp.auth_user_id && (
+             <button
+              onClick={async (e) => {
+               e.stopPropagation()
+               try {
+                const result = await apiFetch<{ error?: string }>(`/api/employees/${emp.id}/resend-invite`, {
+                 method: 'POST',
+                })
+                if (result.error) {
+                 toast.error(result.error)
+                } else {
+                 toast.success(`Inbjudan skickad till ${emp.email}`)
+                }
+               } catch (err: any) {
+                toast.error('Kunde inte skicka inbjudan: ' + (err.message || 'Okänt fel'))
+               }
+              }}
+              className="px-3 py-2.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg text-sm font-semibold hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all"
+              title="Skicka om inbjudan"
+             >
+              <Mail className="w-4 h-4" />
+             </button>
+            )}
             <button
              onClick={() => router.push(`/employees/${emp.id}/edit`)}
              className="px-3 py-2.5 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all"

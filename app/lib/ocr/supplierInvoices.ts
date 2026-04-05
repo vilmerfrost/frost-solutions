@@ -5,7 +5,8 @@ import path from 'node:path'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { createClient } from '@supabase/supabase-js'
 import type { OCRResult } from '@/types/supplierInvoices'
-import { processInvoiceOCR as geminiInvoiceOCR } from '@/lib/ai/frost-bygg-ai-integration'
+import { callOpenRouterVision, MODELS } from '@/lib/ai/openrouter'
+import { InvoiceOCRResultSchema } from '@/lib/ai/frost-bygg-ai-schemas'
 import { ocrLogger as logger } from '@/lib/logger'
 
 type TesseractModule = typeof import('tesseract.js')
@@ -106,29 +107,66 @@ export async function scanInvoiceWithGemini(
  buffer: Buffer,
  filename?: string
 ): Promise<OCRResult> {
- const geminiKey = process.env.GEMINI_API_KEY
- if (!geminiKey) {
-  throw new Error('GEMINI_API_KEY saknas')
+ if (!process.env.OPENROUTER_API_KEY) {
+  throw new Error('OPENROUTER_API_KEY saknas')
  }
 
  try {
-  const result = await geminiInvoiceOCR(buffer, filename)
-  
+  const base64 = buffer.toString('base64')
+  const ext = filename?.split('.').pop()?.toLowerCase()
+  const mimeMap: Record<string, string> = {
+   jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png',
+   gif: 'image/gif', webp: 'image/webp', pdf: 'application/pdf',
+  }
+  const mimeType = mimeMap[ext || ''] || 'image/jpeg'
+
+  const INVOICE_OCR_PROMPT = `Du är en AI-specialist på dokumenttolkning för svenska bygg- och hantverksföretag. Extrahera strukturerad data från denna leverantörsfaktura.
+
+DOMÄNKUNSKAP:
+- Svenska fakturor har ofta bankgiro/plusgiro, OCR-nummer, organisationsnummer (XXXXXX-XXXX)
+- Momssatser: 25% (standard), 12% (livsmedel), 6% (kultur), 0% (omvänd skattskyldighet)
+- Byggmaterialleverantörer: Beijer, Byggmax, Dahl, Ahlsell, Solar
+- "Att betala" / "Summa att betala" = totalAmount. "Netto" / "Exkl moms" = subtotal
+- Förfallodatum: "Förfaller", "Sista betalningsdag", "Due date"
+
+REGLER:
+- Returnera ALLTID giltig JSON. Datum: YYYY-MM-DD. Belopp: nummer utan tusentalsavgränsare ("1 234,50" → 1234.50)
+- Om ett fält saknas: null. Inkludera ALLA synliga rader.
+- ocrConfidence: 90+ tydligt, 60-89 osäkert, under 60 gissning
+
+JSON-SCHEMA:
+{
+ "supplierName": "string", "supplierEmail": "string|null", "supplierPhone": "string|null", "supplierOrgNumber": "string|null",
+ "invoiceNumber": "string", "invoiceDate": "YYYY-MM-DD", "dueDate": "YYYY-MM-DD|null",
+ "subtotal": number, "vatRate": number, "vatAmount": number, "totalAmount": number, "currency": "SEK",
+ "lineItems": [{"description":"string","quantity":number,"unit":"string","unitPrice":number,"total":number,"taxRate":number|null}],
+ "projectReference": "string|null", "projectNumber": "string|null",
+ "ocrConfidence": number, "extractedAt": "ISO 8601", "rawText": "all synlig text"
+}`
+
+  const result = await callOpenRouterVision(
+   INVOICE_OCR_PROMPT,
+   'Läs och extrahera all information från denna faktura.',
+   base64,
+   { jsonMode: true, model: MODELS.OCR, mimeType }
+  )
+
+  const parsed = InvoiceOCRResultSchema.parse(result)
+
   return {
-   text: result.rawText,
-   confidence: result.ocrConfidence,
+   text: parsed.rawText,
+   confidence: parsed.ocrConfidence,
    fields: {
-    invoiceNumber: result.invoiceNumber,
-    invoiceDate: result.invoiceDate,
-    amount: String(result.totalAmount),
-    supplier: result.supplierName,
-    projectReference: result.projectReference || undefined,
+    invoiceNumber: parsed.invoiceNumber,
+    invoiceDate: parsed.invoiceDate,
+    amount: String(parsed.totalAmount),
+    supplier: parsed.supplierName,
+    projectReference: parsed.projectReference || undefined,
    },
-   // Full structured data from Gemini
-   structuredData: result,
+   structuredData: parsed,
   }
  } catch (error) {
-  logger.error({ error }, 'Gemini OCR error')
+  logger.error({ error }, 'OpenRouter OCR error')
   throw error
  }
 }
@@ -239,7 +277,7 @@ export async function processScannedInvoice(
  // 1) OCR - Priority: Gemini 2.0 Flash > Google Vision > Tesseract (free)
  const mimeType = options?.mimeType ?? ''
  const isImage = mimeType.startsWith('image/')
- const hasGeminiKey = Boolean(process.env.GEMINI_API_KEY)
+ const hasGeminiKey = Boolean(process.env.OPENROUTER_API_KEY)
  const hasVisionKey = Boolean(process.env.GOOGLE_VISION_API_KEY)
 
  let ocr: OCRResult | null = null

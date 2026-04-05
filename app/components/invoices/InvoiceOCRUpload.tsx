@@ -4,7 +4,7 @@
 
 import { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import type { InvoiceOCRResult } from '@/lib/ai/frost-bygg-ai-integration';
+import type { InvoiceOCRResult } from '@/lib/ai/frost-bygg-ai-schemas';
 import { BASE_PATH } from '@/utils/url';
 
 interface InvoiceOCRUploadProps {

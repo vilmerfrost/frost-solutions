@@ -10,7 +10,7 @@ import { InvoiceUpload } from '@/components/supplier-invoices/InvoiceUpload'
 import { InvoiceOCRUpload } from '@/components/invoices/InvoiceOCRUpload'
 import { ArrowLeft, FileText, Upload, Sparkles } from 'lucide-react'
 import { useCreateSupplierInvoice } from '@/hooks/useSupplierInvoices'
-import type { InvoiceOCRResult } from '@/lib/ai/frost-bygg-ai-integration'
+import type { InvoiceOCRResult } from '@/lib/ai/frost-bygg-ai-schemas'
 import supabase from '@/utils/supabase/supabaseClient'
 import { toast } from '@/lib/toast'
 

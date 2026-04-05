@@ -1,16 +1,26 @@
 const OPENROUTER_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL = 'google/gemini-3.1-flash-lite-preview';
 const MAX_RETRIES = 2;
+
+export const MODELS = {
+  DEFAULT: 'google/gemini-3.1-flash-lite-preview',
+  OCR: 'google/gemini-3.1-flash-lite-preview',
+} as const;
 
 interface OpenRouterMessage {
   role: 'system' | 'user' | 'assistant';
   content: string | Array<{ type: string; text?: string; image_url?: { url: string } }>;
 }
 
+interface CallOptions {
+  jsonMode?: boolean;
+  maxTokens?: number;
+  model?: string;
+}
+
 export async function callOpenRouter(
   systemPrompt: string,
   userPrompt: string,
-  options?: { jsonMode?: boolean; maxTokens?: number }
+  options?: CallOptions
 ): Promise<any> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error('OPENROUTER_API_KEY is not configured');
@@ -27,7 +37,7 @@ export async function callOpenRouterVision(
   systemPrompt: string,
   textPrompt: string,
   imageBase64: string,
-  options?: { jsonMode?: boolean; maxTokens?: number; mimeType?: string }
+  options?: CallOptions & { mimeType?: string }
 ): Promise<any> {
   const apiKey = process.env.OPENROUTER_API_KEY;
   if (!apiKey) throw new Error('OPENROUTER_API_KEY is not configured');
@@ -51,7 +61,7 @@ export async function callOpenRouterVision(
 async function callWithMessages(
   apiKey: string,
   messages: OpenRouterMessage[],
-  options?: { jsonMode?: boolean; maxTokens?: number }
+  options?: CallOptions
 ): Promise<any> {
   let lastError: Error | null = null;
 
@@ -62,7 +72,7 @@ async function callWithMessages(
 
     try {
       const body: Record<string, any> = {
-        model: MODEL,
+        model: options?.model || MODELS.DEFAULT,
         messages,
         max_tokens: options?.maxTokens ?? 2048,
         temperature: 0.3,

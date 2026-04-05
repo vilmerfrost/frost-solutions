@@ -4,6 +4,7 @@ import { getTenantId } from '@/lib/serverTenant'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { extractErrorMessage } from '@/lib/errorUtils'
 import { generateQuoteNumber } from '@/lib/pricing/generateQuoteNumber'
+import { callOpenRouter } from '@/lib/ai/openrouter'
 
 export const runtime = 'nodejs'
 
@@ -105,25 +106,19 @@ export async function POST(req: NextRequest) {
 
   let generatedData
 
-  // Försök använda extern AI först (om den finns)
   try {
-   // Use getBaseUrlFromHeaders to get current origin (works with ngrok, localhost, production)
-   const { getBaseUrlFromHeaders } = await import('@/utils/url')
-   const baseUrl = getBaseUrlFromHeaders(req.headers)
-   const aiResponse = await fetch(`${baseUrl}/api/ai/generate-quote`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, context }),
-   })
+   const QUOTE_SYSTEM_PROMPT = `Du är en erfaren offertspecialist inom svensk byggbransch.
+Skapa ett offertförslag baserat på beskrivningen. Svara med JSON:
+{
+ "title": "string",
+ "description": "string",
+ "notes": "string",
+ "items": [{"name": "string", "description": "string", "quantity": number, "unit": "string", "unit_price": number, "discount": number, "vat_rate": 25}]
+}
+Alla priser i SEK. Inkludera planering, material och arbete som separata poster.`
 
-   if (aiResponse.ok) {
-    const aiData = await aiResponse.json()
-    generatedData = aiData.data
-   } else {
-    throw new Error('External AI failed')
-   }
+   generatedData = await callOpenRouter(QUOTE_SYSTEM_PROMPT, `${prompt}\n\nKontext: ${JSON.stringify(context)}`, { jsonMode: true })
   } catch (aiError) {
-   // Fallback till lokal generation
    console.warn('[AI Generate] Using fallback generation')
    generatedData = generateQuoteWithFallback(prompt, context)
   }

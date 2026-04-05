@@ -95,6 +95,11 @@ export default function NewEmployeePage() {
    return
   }
 
+  if (!email.trim()) {
+   toast.error('E-post krävs för att skicka inbjudan')
+   return
+  }
+
   if (!phone.trim()) {
    toast.error('Telefonnummer krävs')
    return
@@ -155,7 +160,7 @@ export default function NewEmployeePage() {
     throw new Error(result.error)
    }
 
-   toast.success('Anställd skapad!')
+   toast.success(`Anställd skapad! En inbjudan har skickats till ${email.trim()}`)
    router.replace('/employees')
   } catch (err: any) {
    console.error('Unexpected error:', err)
@@ -258,7 +263,7 @@ export default function NewEmployeePage() {
        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
         <div>
          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-          E-post
+          E-post *
          </label>
          <input
           type="email"
@@ -266,7 +271,9 @@ export default function NewEmployeePage() {
           onChange={(e) => setEmail(e.target.value)}
           className="w-full px-4 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500"
           placeholder="namn@example.com"
+          required
          />
+         <p className="mt-1 text-xs text-gray-500">En inbjudan skickas automatiskt till denna e-post</p>
         </div>
         <div>
          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">

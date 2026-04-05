@@ -10,7 +10,7 @@ import { useUploadSupplierInvoice } from '@/hooks/useSupplierInvoices'
 import { useSuppliers } from '@/hooks/useSuppliers'
 import { useProjects } from '@/hooks/useProjects'
 import { InvoiceOCRUpload } from '@/components/invoices/InvoiceOCRUpload'
-import type { InvoiceOCRResult } from '@/lib/ai/frost-bygg-ai-integration'
+import type { InvoiceOCRResult } from '@/lib/ai/frost-bygg-ai-schemas'
 
 interface InvoiceUploadProps {
  onComplete: (data: { invoiceId: string }) => void

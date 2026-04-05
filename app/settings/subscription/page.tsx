@@ -1,18 +1,21 @@
 'use client';
 
-import { useEffect, Suspense } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Sidebar from '@/components/SidebarClient';
 import { useCurrentSubscription, useCustomerPortal } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Loader2, CreditCard, Calendar, CheckCircle, AlertCircle, ExternalLink, Sparkles } from 'lucide-react';
 import { toast } from '@/lib/toast';
+import { AIBalanceWidget } from '@/components/ai/AIBalanceWidget';
+import { PaymentModal } from '@/components/ai/PaymentModal';
 
 function SubscriptionPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { data, isLoading, refetch } = useCurrentSubscription();
   const portalMutation = useCustomerPortal();
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   // Handle checkout success/cancel redirects
   useEffect(() => {
@@ -307,6 +310,23 @@ function SubscriptionPageContent() {
               </div>
             </div>
           )}
+
+          {/* AI Credits */}
+          <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2 mb-4">
+              <Sparkles className="w-5 h-5" />
+              AI-krediter
+            </h2>
+            <AIBalanceWidget
+              onTopUp={() => setShowPaymentModal(true)}
+              showTopUpButton={true}
+            />
+          </div>
+
+          <PaymentModal
+            isOpen={showPaymentModal}
+            onClose={() => setShowPaymentModal(false)}
+          />
 
           {/* Help Text */}
           <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">

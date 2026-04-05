@@ -9,7 +9,7 @@ const CreateEmployeeSchema = z.object({
   full_name: z.string().optional(),
   first_name: z.string().optional(),
   last_name: z.string().optional(),
-  email: z.string().email().optional().nullable(),
+  email: z.string().email('Giltig e-postadress krävs'),
   role: z.enum(['employee', 'admin']).default('employee'),
   base_rate_sek: z.number().min(0).max(1000000).default(360),
   default_rate_sek: z.number().min(0).max(1000000).optional(),
@@ -103,12 +103,12 @@ export async function POST(req: NextRequest) {
       name: sanitizedName,
       full_name: sanitizedFullName,
       base_rate_sek,
+      email: email.trim().toLowerCase(),
     }
 
     // Add optional fields
     if (first_name) payload.first_name = sanitizeString(first_name.trim())
     if (last_name) payload.last_name = sanitizeString(last_name.trim())
-    if (email) payload.email = email.trim().toLowerCase()
     if (phone) payload.phone = phone.trim()
     if (personal_id) payload.personal_id = personal_id.trim()
     if (employment_type) payload.employment_type = employment_type
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
         name: sanitizedName,
         full_name: sanitizedFullName,
         base_rate_sek,
-        email: email ? email.trim().toLowerCase() : undefined,
+        email: email.trim().toLowerCase(),
       }
 
       insertResult = await auth.admin
@@ -171,7 +171,27 @@ export async function POST(req: NextRequest) {
       return apiError(errorMessage, 500)
     }
 
-    return apiSuccess({ employee: insertResult.data })
+    // Send Supabase magic link invite to the worker
+    let inviteSent = false
+    const normalizedEmail = email.trim().toLowerCase()
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000/app'
+      const redirectTo = `${appUrl}/auth/callback`
+
+      const { error: inviteError } = await auth.admin.auth.admin.inviteUserByEmail(normalizedEmail, {
+        redirectTo,
+      })
+
+      if (inviteError) {
+        console.warn('Failed to send invite (employee still created):', inviteError.message)
+      } else {
+        inviteSent = true
+      }
+    } catch (inviteErr) {
+      console.warn('Invite send threw (employee still created):', inviteErr)
+    }
+
+    return apiSuccess({ employee: insertResult.data, invite_sent: inviteSent })
   } catch (err) {
     return handleRouteError(err)
   }
