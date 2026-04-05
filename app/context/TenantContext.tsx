@@ -30,7 +30,6 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
      if (jwtTenantId && typeof jwtTenantId === 'string') {
       console.log('✅ TenantContext: Found tenant via JWT claim:', jwtTenantId)
       setTenantId(jwtTenantId)
-      localStorage.setItem('tenant_id', jwtTenantId)
       setIsLoading(false)
       return
      }
@@ -44,7 +43,6 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
       if (tenantData.tenantId) {
        console.log('✅ TenantContext: Found tenant via API:', tenantData.tenantId, 'source:', tenantData.source)
        setTenantId(tenantData.tenantId)
-       localStorage.setItem('tenant_id', tenantData.tenantId)
        setIsLoading(false)
        return
       }
@@ -52,34 +50,8 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
     } catch (apiErr) {
      console.warn('TenantContext: API call failed, trying fallbacks...', apiErr)
     }
-    
-    // PRIORITY 3: Check localStorage (set during previous successful lookups)
-    const storedTenantId = localStorage.getItem('tenant_id')
-    if (storedTenantId) {
-     console.log('✅ TenantContext: Found tenant via localStorage:', storedTenantId)
-     setTenantId(storedTenantId)
-     setIsLoading(false)
-     return
-    }
-    
-    // PRIORITY 4: Fallback to employee API
-    try {
-     const employeeRes = await fetch(`${BASE_PATH}/api/employee/get-current`, { cache: 'no-store' })
-     if (employeeRes.ok) {
-      const employeeData = await employeeRes.json()
-      if (employeeData.tenantId) {
-       console.log('✅ TenantContext: Found tenant via employee API:', employeeData.tenantId)
-       setTenantId(employeeData.tenantId)
-       localStorage.setItem('tenant_id', employeeData.tenantId)
-       setIsLoading(false)
-       return
-      }
-     }
-    } catch (empErr) {
-     console.warn('TenantContext: Employee API failed', empErr)
-    }
-    
-    // PRIORITY 5: Direct database lookup (last resort)
+
+    // PRIORITY 3: Direct database lookup (last resort)
     if (user?.id) {
      console.log('🔍 TenantContext: Trying direct DB lookup for user:', user.id)
 
@@ -89,11 +61,10 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
       .select('tenant_id')
       .eq('auth_user_id', user.id)
       .maybeSingle() as { data: { tenant_id: string } | null }
-     
+
      if (empData && empData.tenant_id) {
       console.log('✅ TenantContext: Found tenant from employees table:', empData.tenant_id)
       setTenantId(empData.tenant_id)
-      localStorage.setItem('tenant_id', empData.tenant_id)
       setIsLoading(false)
       return
      }
@@ -105,27 +76,25 @@ export const TenantProvider = ({ children }: { children: React.ReactNode }) => {
        .select('tenant_id')
        .eq('email', user.email)
        .maybeSingle() as { data: { tenant_id: string } | null }
-      
+
       if (emailData && emailData.tenant_id) {
        console.log('✅ TenantContext: Found tenant via email lookup:', emailData.tenant_id)
        setTenantId(emailData.tenant_id)
-       localStorage.setItem('tenant_id', emailData.tenant_id)
        setIsLoading(false)
        return
       }
      }
-     
+
      // Try user_roles table (same as server-side)
      const { data: roleData } = await supabase
       .from('user_roles')
       .select('tenant_id')
       .eq('user_id', user.id)
       .maybeSingle() as { data: { tenant_id: string } | null }
-     
+
      if (roleData && roleData.tenant_id) {
       console.log('✅ TenantContext: Found tenant via user_roles:', roleData.tenant_id)
       setTenantId(roleData.tenant_id)
-      localStorage.setItem('tenant_id', roleData.tenant_id)
       setIsLoading(false)
       return
      }

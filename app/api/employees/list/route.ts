@@ -109,14 +109,8 @@ export async function GET(req: NextRequest) {
   }
 
   console.log('✅ Found', employees?.length || 0, 'employees');
-  
-  // Map base_rate_sek to default_rate_sek for backward compatibility
-  const mappedEmployees = (employees || []).map((emp: any) => ({
-   ...emp,
-   default_rate_sek: emp.base_rate_sek ?? emp.default_rate_sek,
-  }));
-  
-  return NextResponse.json({ employees: mappedEmployees });
+
+  return NextResponse.json({ employees: employees || [] });
  } catch (error) {
   console.error('❌ Unexpected error in GET /api/employees/list:', error);
   console.error('❌ Error stack:', error instanceof Error ? error.stack : 'No stack');

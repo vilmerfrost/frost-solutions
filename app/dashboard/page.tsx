@@ -5,13 +5,6 @@ import { redirect } from 'next/navigation'
 import { cookies } from 'next/headers'
 import Link from 'next/link'
 
-interface ProjectType {
- id: string
- name: string
- budget: number
- hours: number
-}
-
 export default async function DashboardPage() {
  const supabase = createClient()
  
@@ -98,57 +91,22 @@ export default async function DashboardPage() {
   )
  }
 
- // Fetch projects
- const { data: projectRows } = await supabase
-  .from('projects')
-  .select('id, name, budgeted_hours')
-  .eq('tenant_id', tenantId)
-
- // Get current user's employee ID and role FIRST (needed for filtering hours)
+ // Get current user's employee ID and role (needed for filtering hours)
  const { data: employeeData } = await supabase
   .from('employees')
   .select('id, role')
   .eq('auth_user_id', finalUser.id)
   .eq('tenant_id', tenantId)
   .maybeSingle()
- 
+
  const isAdmin = employeeData?.role === 'admin' || employeeData?.role === 'Admin' || employeeData?.role === 'ADMIN'
  const employeeId = (!isAdmin && employeeData) ? employeeData.id : null
 
- // Get project IDs for hours aggregation
- const projectIds = (projectRows ?? []).map((p) => p.id)
- let projectHoursMap = new Map<string, number>()
- 
- if (projectIds.length > 0) {
-  let hoursQuery = supabase
-   .from('time_entries')
-   .select('project_id, hours_total')
-   .in('project_id', projectIds)
-   .eq('tenant_id', tenantId)
-   .eq('is_billed', false)
-  
-  // If not admin, only get this employee's hours
-  if (!isAdmin && employeeId) {
-   hoursQuery = hoursQuery.eq('employee_id', employeeId)
-  }
-  
-  const { data: hoursData } = await hoursQuery
-  
-  // Aggregate hours per project
-  ;(hoursData ?? []).forEach((entry) => {
-   const projId = entry.project_id
-   const hours = Number(entry.hours_total ?? 0)
-   const current = projectHoursMap.get(projId) ?? 0
-   projectHoursMap.set(projId, current + hours)
-  })
- }
- 
- const projects: ProjectType[] = (projectRows ?? []).map((p) => ({
-  id: p.id,
-  name: p.name,
-  budget: p.budgeted_hours ?? 0,
-  hours: projectHoursMap.get(p.id) ?? 0
- }))
+ // Get active projects count
+ const { count: activeProjectsCount } = await supabase
+  .from('projects')
+  .select('id', { count: 'exact', head: true })
+  .eq('tenant_id', tenantId)
 
  // Calculate stats - get time entries for this week (unbilled only for dashboard)
  // For employees: only their own hours. For admins: all hours
@@ -180,7 +138,7 @@ export default async function DashboardPage() {
 
  const stats = {
   totalHours,
-  activeProjects: projects.length,
+  activeProjects: activeProjectsCount ?? 0,
   invoicesToSend: invoiceRows?.length ?? 0
  }
 
