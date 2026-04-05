@@ -188,7 +188,6 @@ export default async function DashboardPage() {
   <DashboardClient
    userEmail={finalUser?.email ?? null}
    stats={stats}
-   projects={projects}
   />
  )
 }

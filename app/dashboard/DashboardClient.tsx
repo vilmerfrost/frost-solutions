@@ -22,13 +22,6 @@ const SubscriptionBanner = dynamic(
   { ssr: false }
 )
 
-interface ProjectType {
-  id: string
-  name: string
-  budgeted_hours?: number
-  base_rate_sek?: number
-}
-
 interface DashboardClientProps {
   userEmail: string | null
   stats: {
@@ -36,7 +29,6 @@ interface DashboardClientProps {
     activeProjects: number
     invoicesToSend: number
   }
-  projects: ProjectType[]
 }
 
 export default function DashboardClient({ userEmail, stats }: DashboardClientProps) {
