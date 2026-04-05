@@ -155,12 +155,12 @@ export function DashboardProjects({ tenantId }: DashboardProjectsProps) {
     window.addEventListener('timeEntryCreated', handleTimeEntryUpdate)
     window.addEventListener('timeEntryDeleted', handleTimeEntryUpdate)
 
-    // Poll every 30 seconds
+    // Poll every 2 minutes
     const syncInterval = setInterval(() => {
       if (!cancelled) {
         fetchDashboardProjects()
       }
-    }, 30000)
+    }, 120000)
 
     return () => {
       cancelled = true

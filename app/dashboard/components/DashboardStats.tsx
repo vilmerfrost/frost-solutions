@@ -81,9 +81,6 @@ export function DashboardStats({ tenantId, initialStats }: DashboardStatsProps) 
       }
     }
 
-    // Initial fetch with small delay
-    const initialTimeout = setTimeout(doFetch, 1000)
-
     const handleTimeEntryUpdate = () => {
       if (process.env.NODE_ENV === 'development') {
         console.log('DashboardStats: Time entry updated, refreshing stats...')
@@ -97,16 +94,15 @@ export function DashboardStats({ tenantId, initialStats }: DashboardStatsProps) 
     window.addEventListener('timeEntryCreated', handleTimeEntryUpdate)
     window.addEventListener('timeEntryDeleted', handleTimeEntryUpdate)
 
-    // Poll every 30 seconds
+    // Poll every 2 minutes
     const syncInterval = setInterval(() => {
       if (!cancelled) {
         fetchDashboardStats()
       }
-    }, 30000)
+    }, 120000)
 
     return () => {
       cancelled = true
-      clearTimeout(initialTimeout)
       clearInterval(syncInterval)
       window.removeEventListener('timeEntryUpdated', handleTimeEntryUpdate)
       window.removeEventListener('timeEntryCreated', handleTimeEntryUpdate)

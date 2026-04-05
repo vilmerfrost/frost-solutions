@@ -47,10 +47,10 @@ export default function NotificationCenter({ className = '' }: NotificationCente
   window.addEventListener('notification-added', handleNotificationAdded)
   window.addEventListener('notifications-updated', handleNotificationsUpdated)
   
-  // Poll for new notifications every 30 seconds
+  // Poll for new notifications every 2 minutes
   const interval = setInterval(() => {
    loadNotifications()
-  }, 30000)
+  }, 120000)
 
   return () => {
    clearInterval(interval)

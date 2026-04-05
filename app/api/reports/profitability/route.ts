@@ -53,10 +53,10 @@ export async function GET(req: NextRequest) {
     // Fetch invoices for revenue
     const { data: invoices, error: invErr } = await admin
       .from('invoices')
-      .select('id, project_id, client_id, total_amount, invoice_date')
+      .select('id, project_id, client_id, total_amount, issue_date')
       .eq('tenant_id', auth.tenantId)
-      .gte('invoice_date', dateFrom)
-      .lte('invoice_date', dateTo)
+      .gte('issue_date', dateFrom)
+      .lte('issue_date', dateTo)
 
     if (invErr) {
       console.error('Profitability invoices error:', invErr)
@@ -66,7 +66,7 @@ export async function GET(req: NextRequest) {
     // Fetch time entries for labor costs
     const { data: timeEntries, error: teErr } = await admin
       .from('time_entries')
-      .select('id, project_id, employee_id, hours, hourly_rate, date')
+      .select('id, project_id, employee_id, hours_total, date')
       .eq('tenant_id', auth.tenantId)
       .gte('date', dateFrom)
       .lte('date', dateTo)
@@ -74,6 +74,17 @@ export async function GET(req: NextRequest) {
     if (teErr) {
       console.error('Profitability time_entries error:', teErr)
       return apiError('Failed to fetch time entries', 500)
+    }
+
+    // Fetch projects for hourly rates (base_rate_sek)
+    const { data: projects } = await admin
+      .from('projects')
+      .select('id, base_rate_sek')
+      .eq('tenant_id', auth.tenantId)
+
+    const projectRateMap = new Map<string, number>()
+    for (const p of projects ?? []) {
+      projectRateMap.set(p.id, Number(p.base_rate_sek ?? 0))
     }
 
     // Fetch supplier invoices for material costs
@@ -113,7 +124,9 @@ export async function GET(req: NextRequest) {
     // Labor costs from time entries
     for (const te of timeEntries ?? []) {
       const key = getGroupKey(te as Record<string, unknown>)
-      const cost = Number(te.hours ?? 0) * Number(te.hourly_rate ?? 0)
+      const hours = Number(te.hours_total ?? 0)
+      const rate = projectRateMap.get(te.project_id as string) ?? 0
+      const cost = hours * rate
       ensureGroup(key).laborCost += cost
     }
 
