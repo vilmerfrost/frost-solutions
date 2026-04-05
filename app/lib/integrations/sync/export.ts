@@ -14,6 +14,24 @@ async function getIntegrationProvider(integrationId: string): Promise<string> {
   return data?.provider || 'fortnox';
 }
 
+/** Look up an existing mapping to determine if we should update instead of create. */
+async function getExistingRemoteId(
+  tenantId: string,
+  integrationId: string,
+  entityType: string,
+  localId: string
+): Promise<string | null> {
+  const admin = createAdminClient();
+  const { data } = await admin.from('integration_mappings')
+    .select('remote_id')
+    .eq('tenant_id', tenantId)
+    .eq('integration_id', integrationId)
+    .eq('entity_type', entityType)
+    .eq('local_id', localId)
+    .single();
+  return data?.remote_id ?? null;
+}
+
 export async function exportInvoice(tenantId: string, integrationId: string, invoiceId: string) {
   const admin = createAdminClient();
   const { data: inv, error } = await admin.from('invoices')
@@ -22,21 +40,27 @@ export async function exportInvoice(tenantId: string, integrationId: string, inv
   if (error || !inv) throw new Error(extractErrorMessage(error) || 'Faktura saknas.');
 
   const provider = await getIntegrationProvider(integrationId);
+  const existingRemoteId = await getExistingRemoteId(tenantId, integrationId, 'invoice', invoiceId);
   let res: any;
 
   if (provider === 'visma_eaccounting') {
     const visma = new VismaEAccountingClient(integrationId);
     const payload = mapFrostInvoiceToVisma(inv);
-    res = await visma.createInvoice(payload);
+    res = existingRemoteId
+      ? await visma.updateInvoice(existingRemoteId, payload)
+      : await visma.createInvoice(payload);
   } else {
     const fx = new FortnoxClient(integrationId);
     const payload = mapFrostInvoiceToFortnox(inv);
-    res = await fx.createInvoice(payload);
+    res = existingRemoteId
+      ? await fx.updateInvoice(existingRemoteId, payload)
+      : await fx.createInvoice(payload);
   }
 
-  const remoteId = provider === 'visma_eaccounting'
-    ? String(res?.Id || res?.id)
-    : String(res?.Invoice?.DocumentNumber || res?.Invoice?.InvoiceNumber || res?.DocumentNumber || res?.InvoiceNumber || res?.id);
+  const remoteId = existingRemoteId
+    ?? (provider === 'visma_eaccounting'
+      ? String(res?.Id ?? res?.id ?? '')
+      : String(res?.Invoice?.DocumentNumber ?? res?.Invoice?.InvoiceNumber ?? res?.DocumentNumber ?? res?.InvoiceNumber ?? res?.id ?? ''));
 
   await admin.from('integration_mappings').upsert({
     tenant_id: tenantId,
@@ -56,21 +80,27 @@ export async function exportCustomer(tenantId: string, integrationId: string, cu
   if (error || !c) throw new Error(extractErrorMessage(error) || 'Kund saknas.');
 
   const provider = await getIntegrationProvider(integrationId);
+  const existingRemoteId = await getExistingRemoteId(tenantId, integrationId, 'customer', customerId);
   let res: any;
 
   if (provider === 'visma_eaccounting') {
     const visma = new VismaEAccountingClient(integrationId);
     const payload = mapFrostClientToVisma(c);
-    res = await visma.createCustomer(payload);
+    res = existingRemoteId
+      ? await visma.updateCustomer(existingRemoteId, payload)
+      : await visma.createCustomer(payload);
   } else {
     const fx = new FortnoxClient(integrationId);
     const payload = mapFrostClientToFortnox(c);
-    res = await fx.createCustomer(payload);
+    res = existingRemoteId
+      ? await fx.updateCustomer(existingRemoteId, payload)
+      : await fx.createCustomer(payload);
   }
 
-  const remoteId = provider === 'visma_eaccounting'
-    ? String(res?.Id || res?.id)
-    : String(res?.Customer?.CustomerNumber || res?.CustomerNumber || res?.id);
+  const remoteId = existingRemoteId
+    ?? (provider === 'visma_eaccounting'
+      ? String(res?.Id ?? res?.id ?? '')
+      : String(res?.Customer?.CustomerNumber ?? res?.CustomerNumber ?? res?.id ?? ''));
 
   await admin.from('integration_mappings').upsert({
     tenant_id: tenantId,
