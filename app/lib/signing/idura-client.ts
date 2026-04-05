@@ -24,7 +24,51 @@ async function graphql<T>(query: string, variables?: Record<string, unknown>): P
   return json.data
 }
 
-export async function createSigningOrder(request: SigningRequest): Promise<SigningOrder> {
+export type AllowedEid = 'swedish_bankid' | 'freja_eid' | 'email'
+
+const EID_PROVIDER_MAP: Record<AllowedEid, { __typename: string }> = {
+  swedish_bankid: { __typename: 'CriiptoVerifyProviderInput' },
+  freja_eid: { __typename: 'CriiptoVerifyProviderInput' },
+  email: { __typename: 'DrawableSignatureProviderInput' },
+}
+
+function buildEvidenceProviders(allowedEids: AllowedEid[]) {
+  // Map allowed EIDs to Criipto/Idura evidence provider inputs
+  const providers: Record<string, unknown>[] = []
+
+  const hasBankId = allowedEids.includes('swedish_bankid')
+  const hasFreja = allowedEids.includes('freja_eid')
+
+  if (hasBankId || hasFreja) {
+    providers.push({
+      criiptoVerify: {
+        acrValues: [
+          ...(hasBankId ? ['urn:grn:authn:se:bankid:same-device', 'urn:grn:authn:se:bankid:another-device'] : []),
+          ...(hasFreja ? ['urn:grn:authn:se:freja:high'] : []),
+        ],
+        alwaysRedirect: true,
+      },
+    })
+  }
+
+  if (allowedEids.includes('email')) {
+    providers.push({
+      drawable: {
+        requireName: true,
+      },
+    })
+  }
+
+  return providers
+}
+
+export async function createSigningOrder(request: SigningRequest & {
+  allowedEids?: AllowedEid[]
+}): Promise<SigningOrder> {
+  // Default to allowing both Swedish BankID and Freja eID
+  const allowedEids = request.allowedEids ?? ['swedish_bankid', 'freja_eid']
+  const evidenceProviders = buildEvidenceProviders(allowedEids)
+
   const data = await graphql<{ createSignatureOrder: { signatureOrder: SigningOrder } }>(`
     mutation CreateOrder($input: CreateSignatureOrderInput!) {
       createSignatureOrder(input: $input) {
@@ -45,6 +89,7 @@ export async function createSigningOrder(request: SigningRequest): Promise<Signi
           blob: request.documentPdfBase64,
         }
       }],
+      ...(evidenceProviders.length > 0 && { evidenceProviders }),
       signatories: request.signatories.map(s => ({ reference: s.reference })),
       webhook: { uri: request.webhookUrl },
     }
