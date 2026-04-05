@@ -1,68 +1,61 @@
 // app/api/projects/route.ts
-// app/api/projects/route.ts (anon+RLS-variant, prefererad)
-import { NextResponse } from 'next/server';
-import { cookies } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
-import { getTenantId } from '@/lib/serverTenant';
+import { NextRequest } from 'next/server'
+import { z } from 'zod'
+import { resolveAuth, parseBody, apiSuccess, apiError, handleRouteError } from '@/lib/api'
+import { createClient } from '@/utils/supabase/server'
 
-async function ssrClient() {
- const c = await cookies();
- const access = c.get('sb-access-token')?.value;
- return createClient(process.env.SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-  auth: { autoRefreshToken: false, persistSession: false, detectSessionInUrl: false },
-  global: { headers: access ? { Authorization: `Bearer ${access}` } : {} },
- });
-}
+const CreateProjectSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  client_id: z.string().uuid().optional().nullable(),
+  base_rate_sek: z.number().optional(),
+  status: z.string().optional(),
+  description: z.string().optional(),
+  start_date: z.string().optional(),
+  end_date: z.string().optional(),
+  budget_hours: z.number().optional(),
+  budget_amount: z.number().optional(),
+}).passthrough()
 
-export async function POST(req: Request) {
- const body = await req.json()
- const { name, tenant_id: bodyTenant, ...rest } = body || {}
+export async function POST(req: NextRequest) {
+  try {
+    const auth = await resolveAuth()
+    if (auth.error) return auth.error
 
- if (!name) {
-  return NextResponse.json({ error: 'Missing name' }, { status: 400 });
- }
+    const body = await parseBody(req, CreateProjectSchema)
+    if (body.error) return body.error
 
- const supa = await ssrClient();
- const { data: { user } = {}, error: userErr } = await supa.auth.getUser();
- if (userErr || !user) {
-  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
- }
+    const { name, ...rest } = body.data
 
- // Security: Always validate against JWT claim (authoritative)
- const claimTenant = await getTenantId();
- if (!claimTenant) {
-  return NextResponse.json({ error: 'No tenant found' }, { status: 403 });
- }
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('projects')
+      .insert([{ name, tenant_id: auth.tenantId, created_by: auth.user.id, ...rest }])
+      .select('*')
+      .single()
 
- // If body provides tenant_id, it must match the JWT claim
- if (bodyTenant && bodyTenant !== claimTenant) {
-  return NextResponse.json({ error: 'Tenant mismatch' }, { status: 403 });
- }
+    if (error) {
+      return apiError(error.message, 400)
+    }
 
- const { data, error } = await supa
-  .from('projects')
-  .insert([{ name, tenant_id: claimTenant, created_by: user.id, ...rest }])
-  .select('*')
-  .single();
-
- if (error) {
-  return NextResponse.json({ error: error.message }, { status: 400 });
- }
-
- return NextResponse.json({ project: data }, { status: 201 });
+    return apiSuccess({ project: data }, 201)
+  } catch (error) {
+    return handleRouteError(error)
+  }
 }
 
 // Redirect GET requests to /api/projects/list
-export async function GET(req: Request) {
- const tenantId = await getTenantId();
- if (!tenantId) {
-  return NextResponse.json({ error: 'No tenant found' }, { status: 403 });
- }
- 
- // Redirect to list endpoint
- const url = new URL(req.url);
- url.pathname = '/api/projects/list';
- url.searchParams.set('tenantId', tenantId);
- 
- return NextResponse.redirect(url);
+export async function GET(req: NextRequest) {
+  try {
+    const auth = await resolveAuth()
+    if (auth.error) return auth.error
+
+    const url = new URL(req.url)
+    url.pathname = '/api/projects/list'
+    url.searchParams.set('tenantId', auth.tenantId)
+
+    const { NextResponse } = await import('next/server')
+    return NextResponse.redirect(url)
+  } catch (error) {
+    return handleRouteError(error)
+  }
 }
