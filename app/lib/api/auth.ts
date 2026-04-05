@@ -28,8 +28,10 @@ type AuthAdminResult =
 
 export async function resolveAuthAdmin(): Promise<AuthAdminResult> {
   const result = await resolveAuth()
-  if (result.error) return result
+  if (result.error) {
+    return { user: null, tenantId: null, error: result.error }
+  }
 
   const admin = createAdminClient()
-  return { ...result, admin }
+  return { user: result.user, tenantId: result.tenantId, admin, error: null }
 }
