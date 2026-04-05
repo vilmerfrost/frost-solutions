@@ -182,35 +182,37 @@ All tables use RLS. Sensitive data (personnummer) encrypted for GDPR.
 - **Dark mode:** Supported via ThemeContext
 - **Mobile:** Bottom navigation, PWA with service worker + IndexedDB
 
-## Project Status (Phase 1 Complete — 2026-04-05)
+## Project Status (Phase 1 + 2 Complete — 2026-04-05)
 
-### Completed
-- Shared API infrastructure (response, auth, validation helpers)
+### Phase 1 — Foundation Hardening (Complete)
+- Shared API infrastructure (`app/lib/api/` — response, auth, validation, errors)
 - 15 core routes migrated to shared helpers with Zod validation
-- Stripe hardened (shared client, webhook idempotency, dynamic checkout, 14-day trial)
-- AI consolidated to OpenRouter (all legacy providers deleted)
-- Integration cleanup (removed broken TokenVault/OAuthManager, consolidated to legacy OAuth)
+- Stripe hardened (shared client at `app/lib/stripe/`, webhook idempotency via `stripe_events` table, dynamic checkout, 14-day trial)
+- AI consolidated to OpenRouter (`app/lib/ai/openrouter.ts` — all legacy providers deleted)
+- Integration cleanup (removed broken TokenVault/OAuthManager/ConflictResolver/SyncQueue)
 - Dashboard split into focused components (653 → 65 lines)
 - Legacy code removed (localStorage tenant, backward compat, dead files)
-- 56 unit tests for business logic
 - Security audit + 13 route fixes (P0 + P1)
 - TypeScript strict: zero errors
 
-### Planned (Phase 2 — Moat)
-- BankID digital signing (via Idura)
-- PEPPOL e-invoicing (via InExchange/Pagero)
-- Skatteverket direct ROT/RUT submission
-- Fortnox/Visma bidirectional sync hardening
+### Phase 2 — The Moat (Complete)
+- **BankID signing** via Idura GraphQL API (`app/lib/signing/`) — create/status/webhook routes, `signing_orders` table
+- **PEPPOL e-invoicing** via peppol.sh REST API (`app/lib/peppol/`) — mapper with Swedish org validation, send endpoint at `/api/invoices/[id]/peppol`
+- **Skatteverket ROT** — XML generator rewritten to valid Begaran.xsd v6 (`app/lib/domain/rot/xml-generator.ts`), download endpoint at `/api/rot/[id]/download-xml` (no API exists — user uploads XML to Skatteverket portal manually)
+- **Fortnox/Visma hardened** — update support in sync export, mapper validation (18 tests), sync health dashboard at `/api/integrations/[id]/health`, OAuth CSRF state validation
+- **99 unit tests** across 11 suites, all passing
 
-### Planned (Phase 3 — All-in-One)
-- Legal Fortress (ÄTA protection engine)
-- Document Management / Binder (iBinder replacement)
-- Drawing Markup (Bluebeam Lite)
-- Safety & Compliance (SSG replacement)
-- Material Price Engine (nightly scraper)
-- Team Scheduling
-- Customer Portal expansion
-- React Native mobile app
+### Phase 3 — All-in-One (Not Started)
+- Legal Fortress (ÄTA protection engine with mandatory workflow + audit trail)
+- Document Management / Binder (iBinder replacement with BSAB folders, versioning, RBAC)
+- Drawing Markup (Bluebeam Lite — PDF.js + annotations + measurement)
+- Safety & Compliance (SSG replacement — certificates, site induction, incident reporting)
+- Material Price Engine (nightly scraper for Byggmax/Beijer/XL-Bygg/Ahlsell)
+- Team Scheduling & Resource Planning
+- Customer Portal & Communication expansion
+- Subcontractor Management
+- Reporting & Business Intelligence
+- React Native mobile app (Expo)
 
 See `docs/superpowers/specs/2026-04-05-frost-solutions-v2-overhaul-design.md` for full spec.
 
@@ -220,4 +222,6 @@ See `.env.example` for all variables. Required:
 - Supabase URL + keys
 - `OPENROUTER_API_KEY` (single AI provider)
 - `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID`
+- `IDURA_CLIENT_ID`, `IDURA_CLIENT_SECRET`, `IDURA_WEBHOOK_SECRET` (BankID signing)
+- `PEPPOL_API_KEY` (e-invoicing)
 - Encryption keys (integration tokens, personnummer)
