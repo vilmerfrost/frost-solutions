@@ -9,3 +9,6 @@ CREATE TABLE IF NOT EXISTS public.stripe_events (
 CREATE INDEX idx_stripe_events_stripe_id ON public.stripe_events(stripe_event_id);
 ALTER TABLE public.stripe_events ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role only" ON public.stripe_events FOR ALL USING (auth.role() = 'service_role');
+
+-- Grace period tracking: records when a subscription entered past_due status
+ALTER TABLE public.subscriptions ADD COLUMN IF NOT EXISTS past_due_since TIMESTAMPTZ;
