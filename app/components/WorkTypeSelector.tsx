@@ -21,13 +21,13 @@ export default function WorkTypeSelector({ value, onChange }: WorkTypeSelectorPr
     {options.map(opt => {
      const isActive = value === opt.id
      const colorClasses = {
-      blue: isActive ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md' : 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100',
-      purple: isActive ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md' : 'bg-purple-50 text-primary-500 border-primary-200 hover:bg-purple-100',
-      indigo: isActive ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md' : 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100',
-      pink: isActive ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md' : 'bg-pink-50 text-primary-500 border-primary-200 hover:bg-pink-100',
-      green: isActive ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md' : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100',
-      yellow: isActive ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md' : 'bg-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100',
-      orange: isActive ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md' : 'bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100',
+      blue: isActive ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md' : 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100',
+      purple: isActive ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md' : 'bg-purple-50 text-primary-500 border-primary-200 hover:bg-purple-100',
+      indigo: isActive ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md' : 'bg-indigo-50 text-indigo-600 border-indigo-200 hover:bg-indigo-100',
+      pink: isActive ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md' : 'bg-pink-50 text-primary-500 border-primary-200 hover:bg-pink-100',
+      green: isActive ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md' : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100',
+      yellow: isActive ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md' : 'bg-yellow-50 text-yellow-600 border-yellow-200 hover:bg-yellow-100',
+      orange: isActive ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md' : 'bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100',
       gray: isActive ? 'bg-gray-500 hover:bg-gray-600 text-white shadow-md' : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100',
      }
      return (

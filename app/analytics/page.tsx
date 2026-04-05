@@ -106,7 +106,7 @@ export default function AnalyticsPage() {
         onClick={() => setPeriod('week')}
         className={`px-4 py-2 rounded-lg font-semibold transition-all ${
          period === 'week'
-          ? 'bg-primary-500 hover:bg-primary-600 text-white'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
           : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
         }`}
        >
@@ -116,7 +116,7 @@ export default function AnalyticsPage() {
         onClick={() => setPeriod('month')}
         className={`px-4 py-2 rounded-lg font-semibold transition-all ${
          period === 'month'
-          ? 'bg-primary-500 hover:bg-primary-600 text-white'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
           : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
         }`}
        >
@@ -126,7 +126,7 @@ export default function AnalyticsPage() {
         onClick={() => setPeriod('year')}
         className={`px-4 py-2 rounded-lg font-semibold transition-all ${
          period === 'year'
-          ? 'bg-primary-500 hover:bg-primary-600 text-white'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
           : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700'
         }`}
        >

@@ -141,7 +141,7 @@ export function DashboardAnalytics() {
       onClick={() => setPeriod(p)}
       className={`px-4 py-2 rounded-lg font-semibold transition-all ${
        period === p
-        ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md'
+        ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md'
         : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300'
       }`}
      >

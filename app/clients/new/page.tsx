@@ -208,7 +208,7 @@ export default function NewClientPage() {
          onClick={() => setClientType('company')}
          className={`flex items-center justify-center gap-2 px-4 py-4 rounded-xl border-2 font-semibold transition-all ${
           clientType === 'company'
-           ? 'bg-primary-500 text-white border-primary-500 shadow-md'
+           ? 'bg-primary-500 text-gray-900 border-primary-500 shadow-md'
            : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300'
          }`}
         >
@@ -220,7 +220,7 @@ export default function NewClientPage() {
          onClick={() => setClientType('private')}
          className={`flex items-center justify-center gap-2 px-4 py-4 rounded-xl border-2 font-semibold transition-all ${
           clientType === 'private'
-           ? 'bg-primary-500 text-white border-primary-500 shadow-md'
+           ? 'bg-primary-500 text-gray-900 border-primary-500 shadow-md'
            : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300'
          }`}
         >
@@ -724,7 +724,7 @@ export default function NewClientPage() {
        <button
         type="submit"
         disabled={loading}
-        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-xl py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-xl py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
        >
         {loading ? (
          <>

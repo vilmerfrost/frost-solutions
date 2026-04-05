@@ -113,7 +113,7 @@ function LoginContent() {
      <button
       type="submit"
       disabled={loading}
-      className="w-full bg-primary-500 hover:bg-primary-600 text-white rounded-lg py-3 font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+      className="w-full bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-lg py-3 font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
      >
       {loading ? 'Skickar...' : 'Skicka Magic Link'}
      </button>

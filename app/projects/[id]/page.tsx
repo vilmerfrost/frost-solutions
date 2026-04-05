@@ -603,7 +603,7 @@ export default function ProjectDetailPage() {
    {isAdmin && (
     <button
      onClick={() => router.push(`/invoices/new?projectId=${projectId}`)}
-     className="bg-primary-500 hover:bg-primary-600 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-sm"
+     className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-4 py-2 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2 text-sm"
     >
      <FileEdit className="w-4 h-4" />
      Skapa faktura
@@ -799,7 +799,7 @@ export default function ProjectDetailPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
        <button
         onClick={() => router.push(`/invoices/new?projectId=${projectId}`)}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+        className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
        >
         <FileEdit className="w-5 h-5" />
         Skapa faktura
@@ -813,7 +813,7 @@ export default function ProjectDetailPage() {
        </button>
        <button
         onClick={handleDownloadPDF}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+        className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
        >
         <Download className="w-5 h-5" />
         Ladda ner PDF
@@ -867,7 +867,7 @@ export default function ProjectDetailPage() {
       </div>
       <button
        onClick={handleRestoreProject}
-       className="w-full bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
+       className="w-full bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-lg font-bold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2"
       >
        <RotateCcw className="w-5 h-5" />
        Återställ projekt

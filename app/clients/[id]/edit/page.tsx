@@ -202,7 +202,7 @@ export default function EditClientPage() {
           }}
           className={`px-4 py-3 rounded-[8px] border-2 font-semibold transition-all ${
            clientType === 'company'
-            ? 'bg-primary-500 hover:bg-primary-600 text-white border-transparent shadow-md'
+            ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 border-transparent shadow-md'
             : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
           }`}
          >
@@ -216,7 +216,7 @@ export default function EditClientPage() {
           }}
           className={`px-4 py-3 rounded-[8px] border-2 font-semibold transition-all ${
            clientType === 'private'
-            ? 'bg-primary-500 hover:bg-primary-600 text-white border-transparent shadow-md'
+            ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 border-transparent shadow-md'
             : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600'
           }`}
          >
@@ -299,7 +299,7 @@ export default function EditClientPage() {
        <button
         type="submit"
         disabled={saving}
-        className="w-full sm:flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] py-3 sm:py-4 font-bold text-base sm:text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className="w-full sm:flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-[8px] py-3 sm:py-4 font-bold text-base sm:text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
        >
         {saving ? (
          <span className="flex items-center justify-center gap-2">

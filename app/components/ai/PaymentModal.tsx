@@ -112,7 +112,7 @@ function PaymentForm({
         <button
           type="submit"
           disabled={!stripe || isProcessing}
-          className="flex-1 px-4 py-3 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+          className="flex-1 px-4 py-3 rounded-lg bg-primary-500 text-gray-900 font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
         >
           {isProcessing ? (
             <>
@@ -232,7 +232,7 @@ export function PaymentModal({ isOpen, onClose, onSuccess }: PaymentModalProps) 
               <button
                 onClick={createPaymentIntent}
                 disabled={isLoading}
-                className="w-full px-4 py-3 rounded-lg bg-primary-500 text-white font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+                className="w-full px-4 py-3 rounded-lg bg-primary-500 text-gray-900 font-medium hover:bg-primary-600 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
               >
                 {isLoading ? (
                   <>

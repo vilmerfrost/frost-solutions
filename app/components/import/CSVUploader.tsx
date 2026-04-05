@@ -250,7 +250,7 @@ export function CSVUploader({ onImportComplete }: CSVUploaderProps) {
                   className={`
                     px-4 py-2 rounded-lg text-sm font-medium transition-all
                     ${selectedType === type
-                      ? 'bg-primary-500 text-white'
+                      ? 'bg-primary-500 text-gray-900'
                       : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-600 hover:border-primary-300'
                     }
                     ${preview.dataType === type ? 'ring-2 ring-primary-300 ring-offset-1' : ''}

@@ -539,7 +539,7 @@ export default function ReportsPage() {
        )}
        <button
         onClick={() => router.push('/reports/new')}
-        className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
+        className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
        >
         + Ny tidsrapport
        </button>

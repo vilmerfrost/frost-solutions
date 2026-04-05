@@ -589,7 +589,7 @@ function InvoiceContent() {
       </div>
       <button
        onClick={() => router.push('/invoices/new')}
-       className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
+       className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
       >
        + Ny faktura
       </button>
@@ -790,7 +790,7 @@ function InvoiceContent() {
        <button
         onClick={handleDownloadPDF}
         disabled={downloading}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2"
+        className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2"
        >
         <FileText className="w-4 h-4" />
         {downloading ? 'Laddar...' : 'Ladda ner PDF'}
@@ -806,7 +806,7 @@ function InvoiceContent() {
        {invoice.status !== 'paid' && (
         <button
          onClick={handleMarkPaid}
-         className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all"
+         className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all"
         >
          ✓ Markera som betald
         </button>
@@ -861,7 +861,7 @@ function InvoiceContent() {
             router.push(`/invoices/${invoiceId}/edit`)
            }
           }}
-          className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all"
+          className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all"
          >
           <Edit2 className="w-4 h-4" /> Redigera
          </button>

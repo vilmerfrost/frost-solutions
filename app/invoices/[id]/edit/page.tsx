@@ -300,7 +300,7 @@ export default function EditInvoicePage() {
         disabled={saving}
         aria-label={saving ? 'Sparar ändringar' : 'Spara ändringar'}
         aria-busy={saving}
-        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50"
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50"
        >
         {saving ? 'Sparar...' : 'Spara ändringar'}
        </button>

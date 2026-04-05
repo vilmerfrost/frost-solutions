@@ -27,7 +27,7 @@ export function PillTabs({ tabs, activeTab, onChange, className = '' }: PillTabs
       px-6 py-2.5 rounded-full font-medium text-sm transition-all duration-200
       flex items-center gap-2
       ${activeTab === tab.id
-       ? 'bg-primary-500 text-white shadow-sm'
+       ? 'bg-primary-500 text-gray-900 shadow-sm'
        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
       }
      `}

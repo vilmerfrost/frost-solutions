@@ -490,7 +490,7 @@ export default function FAQPage() {
          onClick={() => setSelectedCategory(category)}
          className={`px-4 py-2 rounded-lg font-semibold transition-all ${
           selectedCategory === category
-           ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md'
+           ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md'
            : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:border-gray-300'
          }`}
         >
@@ -511,7 +511,7 @@ export default function FAQPage() {
          className="bg-gray-50 dark:bg-gray-900 rounded-[8px] shadow-md p-6 border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all scroll-mt-20"
         >
          <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center text-white font-bold">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center text-gray-900 font-bold">
            ?
           </div>
           <div className="flex-1">
@@ -544,7 +544,7 @@ export default function FAQPage() {
          className="bg-gray-50 dark:bg-gray-900 rounded-[8px] shadow-md p-6 border border-gray-100 dark:border-gray-700 hover:shadow-xl transition-all scroll-mt-20"
         >
          <div className="flex items-start gap-4">
-          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center text-white font-bold">
+          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-primary-500 hover:bg-primary-600 flex items-center justify-center text-gray-900 font-bold">
            ?
           </div>
           <div className="flex-1">

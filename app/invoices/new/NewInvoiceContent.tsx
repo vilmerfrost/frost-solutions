@@ -653,7 +653,7 @@ export default function NewInvoiceContent() {
             onClick={() => setInvoiceType(type.value)}
             className={`px-4 py-2 rounded-lg border-2 font-medium transition-all ${
              invoiceType === type.value
-              ? 'bg-primary-500 text-white border-primary-500'
+              ? 'bg-primary-500 text-gray-900 border-primary-500'
               : 'bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-gray-300'
             }`}
            >
@@ -887,7 +887,7 @@ export default function NewInvoiceContent() {
          <button
           type="submit"
           disabled={loading || loadingProject}
-          className="w-full sm:flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-lg py-3 font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-lg py-3 font-semibold shadow-sm hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed"
          >
           {loading ? (
            <span className="flex items-center justify-center gap-2">

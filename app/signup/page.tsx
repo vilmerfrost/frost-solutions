@@ -334,7 +334,7 @@ function SignupContent() {
       <button
        type="submit"
        disabled={isAnyLoading}
-       className="w-full py-3.5 bg-primary-500 text-white font-semibold rounded-lg hover:bg-primary-600 transition-colors mt-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+       className="w-full py-3.5 bg-primary-500 text-gray-900 font-semibold rounded-lg hover:bg-primary-600 transition-colors mt-2 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
        {loading ? (
         <>

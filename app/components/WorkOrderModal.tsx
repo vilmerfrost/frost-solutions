@@ -477,7 +477,7 @@ export function WorkOrderModal({ isOpen, onClose, workOrder }: WorkOrderModalPro
            onClick={() => setEstimatedHours(opt.value)}
            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
             estimatedHours === opt.value
-             ? 'bg-primary-500 text-white'
+             ? 'bg-primary-500 text-gray-900'
              : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200'
            }`}
           >
@@ -671,7 +671,7 @@ export function WorkOrderModal({ isOpen, onClose, workOrder }: WorkOrderModalPro
                ? 'bg-red-500 text-white' 
                : p.value === 'medium'
                  ? 'bg-yellow-500 text-white'
-                 : 'bg-primary-500 text-white'
+                 : 'bg-primary-500 text-gray-900'
              : p.color
            }`}
           >
@@ -747,7 +747,7 @@ export function WorkOrderModal({ isOpen, onClose, workOrder }: WorkOrderModalPro
        type="submit"
        onClick={handleSubmit}
        disabled={isLoading}
-       className="px-6 py-2.5 text-sm font-medium text-white bg-primary-500 rounded-lg hover:bg-primary-600 flex items-center gap-2 disabled:opacity-50"
+       className="px-6 py-2.5 text-sm font-medium text-gray-900 bg-primary-500 rounded-lg hover:bg-primary-600 flex items-center gap-2 disabled:opacity-50"
       >
        {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Skapa Arbetsorder'}
       </button>

@@ -77,7 +77,7 @@ export default async function DashboardPage() {
      <p className="text-gray-600 mb-4">Ingen tenant hittad. Du behöver slutföra onboarding först.</p>
      <Link 
       href="/onboarding" 
-      className="inline-block bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
+      className="inline-block bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
      >
       Starta onboarding
      </Link>

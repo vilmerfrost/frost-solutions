@@ -80,7 +80,7 @@ export default function AISummary({ type, data, className = '' }: AISummaryProps
      <button
       onClick={generateSummary}
       disabled={loading}
-      className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-semibold hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+      className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-lg font-semibold hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed text-sm"
      >
       {loading ? 'Genererar...' : 'Generera'}
      </button>

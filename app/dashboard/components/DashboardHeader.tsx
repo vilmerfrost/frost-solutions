@@ -26,7 +26,7 @@ export function DashboardHeader({ userEmail }: DashboardHeaderProps) {
         <NotificationCenter className="hidden sm:block" />
         <button
           onClick={() => router.push('/reports/new')}
-          className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-5 py-2.5 rounded-[6px] font-medium shadow-sm hover:shadow-md hover:-translate-y-[1px] transition-all text-sm sm:text-base"
+          className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-gray-900 px-5 py-2.5 rounded-[6px] font-medium shadow-sm hover:shadow-md hover:-translate-y-[1px] transition-all text-sm sm:text-base"
           aria-label="Rapportera tid"
         >
           Rapportera tid

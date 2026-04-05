@@ -75,7 +75,7 @@ export default function ProjectsArchivePage() {
       </div>
       <button
        onClick={() => router.push('/projects')}
-       className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
+       className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
       >
        ← Tillbaka till projekt
       </button>
@@ -86,7 +86,7 @@ export default function ProjectsArchivePage() {
        <p className="text-gray-500 dark:text-gray-400 mb-4">Inga arkiverade projekt hittades</p>
        <button
         onClick={() => router.push('/projects')}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold"
+        className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold"
        >
         Gå till aktiva projekt
        </button>

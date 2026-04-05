@@ -83,7 +83,7 @@ export default function DetailLayout({
             {onBack && (
               <button
                 onClick={onBack}
-                className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
+                className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
               >
                 Tillbaka
               </button>

@@ -454,7 +454,7 @@ function AetaForm() {
        <button
         type="submit"
         disabled={loading || !canSubmit || uploadingPhotos}
-        className="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 text-white rounded-xl py-4 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="w-full bg-primary-500 hover:bg-primary-600 disabled:bg-gray-400 text-gray-900 rounded-xl py-4 font-bold text-lg shadow-lg hover:shadow-xl transition-all disabled:cursor-not-allowed flex items-center justify-center gap-2"
        >
         {uploadingPhotos ? (
          <>

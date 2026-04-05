@@ -145,7 +145,7 @@ export default function InvoicesPage() {
        <PermissionGuard resource="invoices" action="create">
         <button
          onClick={() => router.push('/invoices/new')}
-         className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
+         className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
         >
          + Ny faktura
         </button>
@@ -162,7 +162,7 @@ export default function InvoicesPage() {
        <p className="mb-4">Inga fakturor funna än!</p>
        <button
         onClick={() => router.push('/invoices/new')}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
+        className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
        >
         + Skapa första fakturan
        </button>
@@ -264,7 +264,7 @@ export default function InvoicesPage() {
             <td className="p-3 sm:p-4 text-right">
              <div className="flex items-center justify-end gap-2">
               <button
-               className="bg-primary-500 hover:bg-primary-600 text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold hover:shadow-md transition-all"
+               className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-semibold hover:shadow-md transition-all"
                onClick={() => router.push(`/invoices/${inv.id}`)}
               >
                Visa

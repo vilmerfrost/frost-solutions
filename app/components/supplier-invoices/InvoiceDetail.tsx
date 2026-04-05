@@ -162,7 +162,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
       onClick={() => setActiveTab('info')}
       className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
        activeTab === 'info'
-        ? 'bg-primary-500 hover:bg-primary-600 text-white'
+        ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
       }`}
      >
@@ -172,7 +172,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
       onClick={() => setActiveTab('items')}
       className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
        activeTab === 'items'
-        ? 'bg-primary-500 hover:bg-primary-600 text-white'
+        ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
       }`}
      >
@@ -182,7 +182,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
       onClick={() => setActiveTab('payments')}
       className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
        activeTab === 'payments'
-        ? 'bg-primary-500 hover:bg-primary-600 text-white'
+        ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
       }`}
      >
@@ -192,7 +192,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
       onClick={() => setActiveTab('history')}
       className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
        activeTab === 'history'
-        ? 'bg-primary-500 hover:bg-primary-600 text-white'
+        ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
       }`}
      >

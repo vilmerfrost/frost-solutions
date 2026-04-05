@@ -47,7 +47,7 @@ export default function NotFound() {
      </button>
      <button
       onClick={() => router.push('/dashboard')}
-      className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-500 text-white rounded-lg font-medium hover:bg-primary-600 transition-all shadow-sm"
+      className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-primary-500 text-gray-900 rounded-lg font-medium hover:bg-primary-600 transition-all shadow-sm"
      >
       <Home className="w-5 h-5" />
       Till Dashboard

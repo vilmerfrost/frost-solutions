@@ -275,7 +275,7 @@ export default function CreateNotificationModal({ isOpen, onClose, onSuccess }: 
        <button
         type="submit"
         disabled={loading}
-        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
        >
         {loading ? 'Skapar...' : 'Skapa notis'}
        </button>

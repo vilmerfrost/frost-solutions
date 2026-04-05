@@ -180,7 +180,7 @@ export function DashboardProjects({ tenantId }: DashboardProjectsProps) {
         <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white mb-4 sm:mb-6">Nytt projekt</h2>
         <button
           onClick={() => router.push('/projects/new')}
-          className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-5 py-2.5 rounded-[6px] font-medium shadow-sm hover:shadow-md hover:-translate-y-[1px] transition-all text-sm sm:text-base"
+          className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-gray-900 px-5 py-2.5 rounded-[6px] font-medium shadow-sm hover:shadow-md hover:-translate-y-[1px] transition-all text-sm sm:text-base"
         >
           + Skapa nytt projekt
         </button>

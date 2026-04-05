@@ -41,7 +41,7 @@ export default function HomePage() {
     
     {/* Primary CTA - Signup */}
     <button
-     className="w-full bg-primary-500 hover:bg-primary-600 text-white rounded-lg py-3 font-semibold shadow-sm hover:shadow-md transition-all mb-3"
+     className="w-full bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-lg py-3 font-semibold shadow-sm hover:shadow-md transition-all mb-3"
      onClick={() => router.push('/signup')}
     >
      Kom igång gratis

@@ -94,7 +94,7 @@ export default function NewSupplierInvoicePage() {
         onClick={() => setActiveTab('manual')}
         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
          activeTab === 'manual'
-          ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md'
           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
         }`}
        >
@@ -105,7 +105,7 @@ export default function NewSupplierInvoicePage() {
         onClick={() => setActiveTab('upload')}
         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
          activeTab === 'upload'
-          ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md'
           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
         }`}
        >
@@ -116,7 +116,7 @@ export default function NewSupplierInvoicePage() {
         onClick={() => setActiveTab('ai-ocr')}
         className={`flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-all duration-200 ${
          activeTab === 'ai-ocr'
-          ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md'
           : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
         }`}
        >

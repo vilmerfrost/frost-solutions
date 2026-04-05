@@ -216,7 +216,7 @@ export default function PayrollPeriodDetailPage() {
         onClick={() => setActiveTab('overview')}
         className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
          activeTab === 'overview'
-          ? 'bg-primary-500 hover:bg-primary-600 text-white'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
         }`}
        >
@@ -226,7 +226,7 @@ export default function PayrollPeriodDetailPage() {
         onClick={() => setActiveTab('validation')}
         className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
          activeTab === 'validation'
-          ? 'bg-primary-500 hover:bg-primary-600 text-white'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
         }`}
        >
@@ -236,7 +236,7 @@ export default function PayrollPeriodDetailPage() {
         onClick={() => setActiveTab('export')}
         className={`flex-1 px-6 py-4 font-semibold transition-all duration-200 ${
          activeTab === 'export'
-          ? 'bg-primary-500 hover:bg-primary-600 text-white'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900'
           : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700'
         }`}
        >

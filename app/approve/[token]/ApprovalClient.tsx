@@ -144,7 +144,7 @@ export default function ApprovalClient({ ata, token, alreadyProcessed }: Approva
     {/* Main Card */}
     <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
      {/* Project info */}
-     <div className="bg-primary-500 text-white p-6">
+     <div className="bg-primary-500 text-gray-900 p-6">
       <div className="flex items-center gap-3 mb-2">
        <Building2 className="w-6 h-6" />
        <span className="text-primary-100 text-sm">Projekt</span>

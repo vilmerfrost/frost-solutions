@@ -520,7 +520,7 @@ export default function NewEmployeePage() {
        <button
         type="submit"
         disabled={loading}
-        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-xl py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-xl py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
        >
         {loading ? (
          <>

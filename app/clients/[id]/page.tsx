@@ -292,7 +292,7 @@ export default function ClientDetailPage() {
       <h3 className="font-semibold text-gray-900 dark:text-white">Alla projekt</h3>
       <button
        onClick={() => router.push(`/projects/new?clientId=${clientId}`)}
-       className="text-sm px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-white rounded-md font-medium transition-colors flex items-center gap-1"
+       className="text-sm px-3 py-1.5 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-md font-medium transition-colors flex items-center gap-1"
       >
        <Plus className="w-4 h-4" /> Nytt projekt
       </button>

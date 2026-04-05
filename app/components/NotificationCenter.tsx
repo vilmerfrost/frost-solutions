@@ -197,7 +197,7 @@ export default function NotificationCenter({ className = '' }: NotificationCente
         {isAdmin && (
          <button
           onClick={() => setShowCreateModal(true)}
-          className="text-sm bg-primary-500 hover:bg-primary-600 text-white px-3 py-1.5 rounded-lg font-semibold hover:shadow-md transition-all whitespace-nowrap flex-shrink-0"
+          className="text-sm bg-primary-500 hover:bg-primary-600 text-gray-900 px-3 py-1.5 rounded-lg font-semibold hover:shadow-md transition-all whitespace-nowrap flex-shrink-0"
           title="Skapa notis"
          >
           + Skapa

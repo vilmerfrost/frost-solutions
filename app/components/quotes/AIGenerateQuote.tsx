@@ -79,7 +79,7 @@ export function AIGenerateQuote({ onGenerate, isLoading = false, onClose }: AIGe
    <Button
     type="button"
     onClick={() => setShowForm(true)}
-    className="bg-primary-500 hover:bg-primary-600 hover: hover: hover: shadow-md hover:shadow-xl transition-all duration-200 text-white font-semibold"
+    className="bg-primary-500 hover:bg-primary-600 hover: hover: hover: shadow-md hover:shadow-xl transition-all duration-200 text-gray-900 font-semibold"
    >
     <Sparkles size={18} className="mr-2" />
     AI Generera Offert
@@ -213,7 +213,7 @@ export function AIGenerateQuote({ onGenerate, isLoading = false, onClose }: AIGe
      <Button
       type="submit"
       disabled={isLoading || !formData.customer_id || !formData.project_type || !formData.description}
-      className="bg-primary-500 hover:bg-primary-600 hover: hover: hover: shadow-md hover:shadow-xl transition-all duration-200 text-white font-semibold disabled:opacity-50"
+      className="bg-primary-500 hover:bg-primary-600 hover: hover: hover: shadow-md hover:shadow-xl transition-all duration-200 text-gray-900 font-semibold disabled:opacity-50"
      >
       {isLoading ? (
        <>

@@ -215,7 +215,7 @@ small {
 
 .btn-primary {
   background-color: var(--primary-500);
-  color: white;
+  color: var(--gray-900);
   border: none;
 }
 

@@ -169,7 +169,7 @@ export function ExportToIntegrationButton({
   return (
    <button
     onClick={() => router.push('/settings/integrations')}
-    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-500 hover:bg-primary-600 text-white hover: hover: shadow-md transition-all disabled:opacity-70 ${className}`}
+    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-500 hover:bg-primary-600 text-gray-900 hover: hover: shadow-md transition-all disabled:opacity-70 ${className}`}
    >
     <Sparkles className="w-4 h-4" />
     <span>Anslut integration för export</span>
@@ -183,7 +183,7 @@ export function ExportToIntegrationButton({
    <button
     onClick={handleExport}
     disabled={isExporting}
-    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-500 hover:bg-primary-600 text-white hover: hover: shadow-md transition-all disabled:opacity-70 ${className}`}
+    className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium bg-primary-500 hover:bg-primary-600 text-gray-900 hover: hover: shadow-md transition-all disabled:opacity-70 ${className}`}
    >
     {isExporting ? (
      <>

@@ -1249,7 +1249,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
      </p>
      <button
       onClick={() => router.push('/projects/new')}
-      className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
+      className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
      >
       Skapa projekt
      </button>
@@ -1322,7 +1322,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
        <button
         onClick={handlePause}
         disabled={loading}
-        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
        >
         <Pause className="w-5 h-5" />
         Pausa
@@ -1340,7 +1340,7 @@ export default function TimeClock({ employeeId, projects, tenantId: propTenantId
       <button
        onClick={handleCheckOut}
        disabled={loading}
-       className="flex-1 bg-primary-500 hover:bg-primary-600 text-white py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
+       className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 py-3 px-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2"
       >
        <Square className="w-5 h-5" />
        {loading ? 'Stämplar ut...' : 'Stämpla ut'}

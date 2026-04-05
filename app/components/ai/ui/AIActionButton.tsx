@@ -16,7 +16,7 @@ export function AIActionButton({
   'px-4 py-2 rounded-lg font-semibold hover:shadow-md transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 min-h-[44px]';
 
  const styles = {
-  primary: 'bg-primary-500 hover:bg-primary-600 text-white',
+  primary: 'bg-primary-500 hover:bg-primary-600 text-gray-900',
   secondary:
    'bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600',
  };

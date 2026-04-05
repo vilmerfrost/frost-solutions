@@ -296,7 +296,7 @@ export default function RotApplicationDetailPage() {
         <button
          onClick={handleSubmitToSkatteverket}
          disabled={submitting}
-         className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+         className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
         >
          {submitting ? 'Skickar...' : 'Skicka till Skatteverket'}
         </button>
@@ -306,7 +306,7 @@ export default function RotApplicationDetailPage() {
         <button
          onClick={handleCheckStatus}
          disabled={checkingStatus}
-         className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+         className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
          {checkingStatus ? 'Kontrollerar...' : 'Uppdatera status'}
         </button>
@@ -356,7 +356,7 @@ export default function RotApplicationDetailPage() {
             toast.success('Data exporterad!')
            }
           }}
-          className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
+          className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
          >
           📥 Exportera data (GDPR)
          </button>
@@ -537,7 +537,7 @@ export default function RotApplicationDetailPage() {
         href="https://skatteverket.se/rotochrut"
         target="_blank"
         rel="noopener noreferrer"
-        className="block w-full bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold text-center shadow-md hover:shadow-xl transition-all"
+        className="block w-full bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold text-center shadow-md hover:shadow-xl transition-all"
        >
         Öppna Skatteverkets ROT/RUT-sida
        </a>

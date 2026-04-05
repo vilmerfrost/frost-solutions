@@ -133,7 +133,7 @@ export class ErrorBoundary extends Component<Props, State> {
       <div className="flex flex-col sm:flex-row gap-3 mt-6">
        <button
         onClick={this.handleRetry}
-        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white font-bold py-2 px-6 rounded-[8px] hover:shadow-md transition-all min-h-[44px]"
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 font-bold py-2 px-6 rounded-[8px] hover:shadow-md transition-all min-h-[44px]"
         aria-label={canRetry ? 'Försök igen' : 'Ladda om sidan'}
        >
         🔄 {canRetry ? `Försök igen (${MAX_RETRIES - this.state.retryCount} kvar)` : 'Ladda om sidan'}

@@ -13,7 +13,7 @@ export function SkipLinks() {
     href="#main-content"
     className="
      fixed top-0 left-0 z-[100] 
-     bg-primary-500 text-white 
+     bg-primary-500 text-gray-900 
      px-4 py-2 m-2 rounded-md
      font-medium text-sm
      focus:not-sr-only focus:outline-none focus:ring-2 focus:ring-white

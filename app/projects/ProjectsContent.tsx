@@ -473,7 +473,7 @@ export default function ProjectsContent() {
       </div>
       <button
        onClick={() => router.push('/projects/new')}
-       className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all flex items-center gap-2 whitespace-nowrap"
+       className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all flex items-center gap-2 whitespace-nowrap"
       >
        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -588,7 +588,7 @@ export default function ProjectsContent() {
         <div className="flex gap-4">
          <button
           type="submit"
-          className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold"
+          className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold"
          >
           Skapa projekt
          </button>
@@ -609,7 +609,7 @@ export default function ProjectsContent() {
        <p className="text-gray-500 dark:text-gray-400 mb-4">Inga projekt hittades</p>
        <button
         onClick={() => router.push('/projects/new')}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold"
+        className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold"
        >
         Skapa första projektet
        </button>
@@ -756,7 +756,7 @@ export default function ProjectsContent() {
              }
             }}
             disabled={deletingId === p.id}
-            className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-semibold hover:shadow-md transition-all hover:scale-105 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-lg text-sm font-semibold hover:shadow-md transition-all hover:scale-105 disabled:opacity-50 flex items-center justify-center gap-2"
             aria-label={`Markera projekt ${p.name} som klart`}
            >
             {deletingId === p.id ? (
@@ -803,7 +803,7 @@ export default function ProjectsContent() {
              }
             }}
             disabled={deletingId === p.id}
-            className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-white rounded-lg text-sm font-semibold hover:shadow-md transition-all hover:scale-105 disabled:opacity-50 flex items-center justify-center gap-2"
+            className="flex-1 px-4 py-2.5 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-lg text-sm font-semibold hover:shadow-md transition-all hover:scale-105 disabled:opacity-50 flex items-center justify-center gap-2"
             aria-label={`Ta bort projekt ${p.name}`}
            >
             {deletingId === p.id ? (

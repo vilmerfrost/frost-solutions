@@ -138,7 +138,7 @@ export default function RotApplicationsPage() {
       </div>
       <button
        onClick={() => router.push('/rot/new')}
-       className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
+       className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all text-sm sm:text-base"
       >
        + Ny ROT-ansökan
       </button>
@@ -153,7 +153,7 @@ export default function RotApplicationsPage() {
         onClick={() => setFilter(f)}
         className={`px-4 py-2 rounded-[8px] font-semibold transition ${
          filter === f
-          ? 'bg-primary-500 hover:bg-primary-600 text-white shadow-md'
+          ? 'bg-primary-500 hover:bg-primary-600 text-gray-900 shadow-md'
           : 'bg-gray-50 dark:bg-gray-900 text-gray-700 dark:text-gray-300 border-2 border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
        >
@@ -172,7 +172,7 @@ export default function RotApplicationsPage() {
        <p className="mb-4">Inga ROT-ansökningar {filter !== 'all' ? `med status "${statusLabels[filter]}"` : ''}</p>
        <button
         onClick={() => router.push('/rot/new')}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
+        className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
        >
         + Skapa första ROT-ansökan
        </button>

@@ -76,13 +76,13 @@ export default function PayslipExport({
     targetId={targetId}
     fileName={fileName}
     label="📄 Ladda ner PDF"
-    className="px-4 py-2 rounded-[8px] bg-primary-500 hover:bg-primary-600 text-white font-semibold hover:shadow-md transition-all disabled:opacity-50"
+    className="px-4 py-2 rounded-[8px] bg-primary-500 hover:bg-primary-600 text-gray-900 font-semibold hover:shadow-md transition-all disabled:opacity-50"
    />
    <button
     type="button"
     onClick={handleExportCSV}
     disabled={busyCSV}
-    className="px-4 py-2 rounded-[8px] bg-primary-500 hover:bg-primary-600 text-white font-semibold hover:shadow-md transition-all disabled:opacity-50"
+    className="px-4 py-2 rounded-[8px] bg-primary-500 hover:bg-primary-600 text-gray-900 font-semibold hover:shadow-md transition-all disabled:opacity-50"
    >
     {busyCSV ? 'Genererar…' : '📊 Ladda ner CSV'}
    </button>

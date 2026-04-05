@@ -166,7 +166,7 @@ export function NewProjectModal({ isOpen, onClose, onSuccess }: NewProjectModalP
      <Button
       type="submit"
       disabled={loading}
-      className="flex-1 bg-primary-500 hover:bg-primary-600 text-white"
+      className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900"
       onClick={(e) => {
        e.preventDefault()
        const form = e.currentTarget.closest('form')

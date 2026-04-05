@@ -233,7 +233,7 @@ export function AIChatbot() {
        e.stopPropagation()
        setIsOpen(true)
       }}
-      className="bg-primary-500 hover:bg-primary-600 text-white p-3 sm:p-4 rounded-full shadow-md hover:shadow-xl transition-all transform hover:scale-110 flex items-center justify-center gap-2 group"
+      className="bg-primary-500 hover:bg-primary-600 text-gray-900 p-3 sm:p-4 rounded-full shadow-md hover:shadow-xl transition-all transform hover:scale-110 flex items-center justify-center gap-2 group"
       style={{
        pointerEvents: 'auto',
        cursor: 'pointer',
@@ -262,7 +262,7 @@ export function AIChatbot() {
     >
      {/* Header */}
      <div 
-      className="bg-primary-500 hover:bg-primary-600 text-white p-3 sm:p-4 rounded-t-xl sm:rounded-t-2xl flex items-center justify-between flex-shrink-0" 
+      className="bg-primary-500 hover:bg-primary-600 text-gray-900 p-3 sm:p-4 rounded-t-xl sm:rounded-t-2xl flex items-center justify-between flex-shrink-0" 
       style={{ 
        flexShrink: 0,
        position: 'sticky',
@@ -316,7 +316,7 @@ export function AIChatbot() {
         <div
          className={`max-w-[85%] sm:max-w-[80%] rounded-lg p-2.5 sm:p-3 ${
           msg.role === 'user'
-           ? 'bg-primary-500 text-white'
+           ? 'bg-primary-500 text-gray-900'
            : 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
          }`}
         >
@@ -449,7 +449,7 @@ export function AIChatbot() {
        <button
         onClick={handleSend}
         disabled={!input.trim() || isTyping}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex items-center justify-center"
+        className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-3 sm:px-4 py-2 rounded-lg hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity flex items-center justify-center"
        >
         <Send className="w-4 h-4 sm:w-5 sm:h-5" />
        </button>

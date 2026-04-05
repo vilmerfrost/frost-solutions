@@ -252,7 +252,7 @@ export default function ClientsPage() {
       <PermissionGuard resource="clients" action="create">
        <button
         onClick={() => router.push('/clients/new')}
-        className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] font-semibold shadow-sm hover:shadow-md transition-all"
+        className="px-4 py-2 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-[8px] font-semibold shadow-sm hover:shadow-md transition-all"
        >
         + Ny kund
        </button>
@@ -308,7 +308,7 @@ export default function ClientsPage() {
        <PermissionGuard resource="clients" action="create">
         <button
          onClick={() => router.push('/clients/new')}
-         className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] font-semibold shadow-sm hover:shadow-md transition-all"
+         className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-[8px] font-semibold shadow-sm hover:shadow-md transition-all"
         >
          + Lägg till kund
         </button>

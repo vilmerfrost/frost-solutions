@@ -1527,7 +1527,7 @@ export default function NewReportPage() {
        <button
         type="submit"
         disabled={saving}
-        className="w-full sm:flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] py-3 sm:py-4 px-6 text-base sm:text-lg font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+        className="w-full sm:flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-[8px] py-3 sm:py-4 px-6 text-base sm:text-lg font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
        >
         {saving ? (
          <span className="flex items-center justify-center gap-2">

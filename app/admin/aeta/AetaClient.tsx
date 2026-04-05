@@ -365,7 +365,7 @@ export default function AetaClient({ tenantId }: AetaClientProps) {
         onClick={() => setFilter(f)}
         className={`px-4 py-2 rounded-lg font-semibold transition ${
          filter === f
-          ? 'bg-primary-500 text-white shadow-md'
+          ? 'bg-primary-500 text-gray-900 shadow-md'
           : 'bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700'
         }`}
        >
@@ -674,7 +674,7 @@ export default function AetaClient({ tenantId }: AetaClientProps) {
              <button
               onClick={() => handleSave(request.id)}
               disabled={savingId === request.id}
-              className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-white rounded-lg font-medium flex items-center gap-2 disabled:opacity-50"
+              className="px-6 py-2 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-lg font-medium flex items-center gap-2 disabled:opacity-50"
              >
               {savingId === request.id ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
               Spara ändringar

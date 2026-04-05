@@ -43,7 +43,7 @@ export function PillSelector({ label, options, value, onChange, required }: Pill
         px-4 py-2.5 rounded-full font-medium text-sm transition-all duration-150
         ${
          isSelected
-          ? 'bg-primary-500 text-white shadow-md'
+          ? 'bg-primary-500 text-gray-900 shadow-md'
           : 'bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-500'
         }
        `}

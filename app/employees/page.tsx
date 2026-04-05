@@ -140,7 +140,7 @@ export default function EmployeesPage() {
        {isAdmin && (
         <button
          onClick={() => router.push('/employees/new')}
-         className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2"
+         className="w-full sm:w-auto bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all text-sm sm:text-base flex items-center justify-center gap-2"
         >
          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
          Lägg till anställd
@@ -208,7 +208,7 @@ export default function EmployeesPage() {
        {isAdmin && (
         <button
          onClick={() => router.push('/employees/new')}
-         className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all inline-flex items-center gap-2"
+         className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-semibold shadow-md hover:shadow-xl transition-all inline-flex items-center gap-2"
         >
          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
          Lägg till första anställde
@@ -252,7 +252,7 @@ export default function EmployeesPage() {
          <div className="flex gap-2 pt-4 border-t border-gray-100 dark:border-gray-700">
           <button
            onClick={() => router.push(`/payroll/employeeID/${emp.id}`)}
-           className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-4 py-2.5 rounded-lg text-sm font-semibold hover:shadow-md transition-all flex items-center justify-center gap-2"
+           className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 px-4 py-2.5 rounded-lg text-sm font-semibold hover:shadow-md transition-all flex items-center justify-center gap-2"
           >
            <DollarSign className="w-4 h-4" />
            Lönespec

@@ -154,7 +154,7 @@ export default function UtseendePage() {
           onClick={() => setSettings({ ...settings, fontSize: option.value as FontSize })}
           className={`px-6 py-3 rounded-[8px] border-2 transition-all ${
            settings.fontSize === option.value
-            ? 'border-primary-500 bg-primary-500 text-white'
+            ? 'border-primary-500 bg-primary-500 text-gray-900'
             : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
           }`}
          >
@@ -178,7 +178,7 @@ export default function UtseendePage() {
           onClick={() => setSettings({ ...settings, sidebarWidth: option.value as 'narrow' | 'normal' | 'wide' })}
           className={`px-6 py-3 rounded-[8px] border-2 transition-all ${
            settings.sidebarWidth === option.value
-            ? 'border-primary-500 bg-primary-500 text-white'
+            ? 'border-primary-500 bg-primary-500 text-gray-900'
             : 'border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600'
           }`}
          >
@@ -218,7 +218,7 @@ export default function UtseendePage() {
        <button
         onClick={handleSave}
         disabled={saving}
-        className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 sm:py-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 sm:py-4 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
        >
         {saving ? 'Sparar...' : 'Spara inställningar'}
        </button>

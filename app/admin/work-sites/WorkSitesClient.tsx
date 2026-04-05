@@ -396,7 +396,7 @@ export default function WorkSitesClient({ tenantId }: WorkSitesClientProps) {
          </button>
          <button
           type="submit"
-          className="flex-1 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
+          className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold shadow-md hover:shadow-xl transition-all"
          >
           {editingSite ? 'Uppdatera' : 'Skapa'}
          </button>
@@ -409,7 +409,7 @@ export default function WorkSitesClient({ tenantId }: WorkSitesClientProps) {
      {!showForm && (
       <button
        onClick={() => setShowForm(true)}
-       className="mb-6 bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-xl transition-all flex items-center gap-2"
+       className="mb-6 bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-xl font-bold shadow-md hover:shadow-xl transition-all flex items-center gap-2"
       >
        <Plus className="w-5 h-5" />
        Lägg till arbetsplats
@@ -433,7 +433,7 @@ export default function WorkSitesClient({ tenantId }: WorkSitesClientProps) {
        </p>
        <button
         onClick={() => setShowForm(true)}
-        className="bg-primary-500 hover:bg-primary-600 text-white px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
+        className="bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-xl font-bold inline-flex items-center gap-2"
        >
         <Plus className="w-5 h-5" />
         Skapa första arbetsplatsen

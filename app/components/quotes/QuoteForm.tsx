@@ -310,7 +310,7 @@ export function QuoteForm({ quote, onSubmit, isLoading }: QuoteFormProps) {
     <Button 
      type="submit" 
      disabled={isLoading}
-     className="bg-primary-500 hover:bg-primary-600 hover: hover: shadow-md hover:shadow-xl transition-all duration-200 disabled:opacity-50 text-white font-semibold px-6 py-2.5"
+     className="bg-primary-500 hover:bg-primary-600 hover: hover: shadow-md hover:shadow-xl transition-all duration-200 disabled:opacity-50 text-gray-900 font-semibold px-6 py-2.5"
     >
      {isLoading ? 'Sparar...' : quote ? 'Uppdatera Offert' : 'Skapa Offert'}
     </Button>

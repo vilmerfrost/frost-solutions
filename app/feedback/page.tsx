@@ -164,7 +164,7 @@ function FeedbackContent() {
           onClick={() => setFeedbackType('other')}
           className={`px-4 py-3 rounded-[8px] font-semibold transition-all ${
            feedbackType === 'other'
-            ? 'bg-primary-500 text-white shadow-md'
+            ? 'bg-primary-500 text-gray-900 shadow-md'
             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
           }`}
          >
@@ -238,7 +238,7 @@ function FeedbackContent() {
         <button
          type="submit"
          disabled={loading || !subject.trim() || !message.trim()}
-         className="flex-1 bg-primary-500 hover:bg-primary-600 text-white rounded-[8px] py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+         className="flex-1 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-[8px] py-4 font-bold text-lg shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
          {loading ? 'Skickar...' : '📤 Skicka feedback'}
         </button>
