@@ -100,6 +100,39 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
 // SUBSCRIPTION HANDLERS
 // ============================================================================
 
+async function handlePortalInvoicePayment(session: Stripe.Checkout.Session) {
+  const { invoice_id, tenant_id } = session.metadata || {};
+  if (!invoice_id || !tenant_id) return;
+
+  console.log('[Stripe Webhook] Portal invoice payment:', { invoice_id, tenant_id });
+
+  const admin = createAdminClient();
+
+  const { error } = await admin
+    .from('invoices')
+    .update({
+      status: 'paid',
+      paid_at: new Date().toISOString(),
+      metadata: {
+        stripe_checkout_session_id: session.id,
+        stripe_payment_intent_id: session.payment_intent,
+        paid_via: 'stripe_portal',
+        paid_at: new Date().toISOString(),
+      },
+    })
+    .eq('id', invoice_id)
+    .eq('tenant_id', tenant_id);
+
+  if (error) {
+    console.error('[Stripe Webhook] Failed to mark invoice paid:', error);
+    Sentry.captureException(error, {
+      tags: { component: 'stripe-webhook', action: 'portal-invoice-payment' },
+      extra: { invoiceId: invoice_id, tenantId: tenant_id },
+    });
+    throw error;
+  }
+}
+
 async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) {
   console.log('[Stripe Webhook] Checkout completed:', {
     id: session.id,
@@ -108,8 +141,14 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
     metadata: session.metadata,
   });
 
+  // Handle portal invoice payments
+  if (session.metadata?.type === 'portal_invoice_payment') {
+    await handlePortalInvoicePayment(session);
+    return;
+  }
+
   const { tenant_id, plan_id, plan_name, billing_cycle } = session.metadata || {};
-  
+
   if (!tenant_id || !session.subscription) {
     console.log('[Stripe Webhook] Not a subscription checkout, skipping');
     return;
@@ -135,7 +174,8 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
 
   const { error } = await admin
     .from('subscriptions')
-    .update({
+    .upsert({
+      tenant_id,
       status: stripeSubscription.status === 'trialing' ? 'trialing' : 'active',
       stripe_subscription_id: session.subscription as string,
       stripe_customer_id: session.customer as string,
@@ -144,8 +184,7 @@ async function handleCheckoutSessionCompleted(session: Stripe.Checkout.Session) 
       current_period_end: periodEnd,
       trial_end: trialEnd,
       updated_at: new Date().toISOString(),
-    })
-    .eq('tenant_id', tenant_id);
+    }, { onConflict: 'tenant_id' });
 
   if (error) {
     console.error('[Stripe Webhook] Failed to update subscription:', error);
@@ -196,7 +235,6 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
     paused: 'paused',
   };
 
-  // Cast to any to handle Stripe API version differences
   const sub = subscription as any;
   const { error } = await admin
     .from('subscriptions')
@@ -214,6 +252,8 @@ async function handleSubscriptionUpdated(subscription: Stripe.Subscription) {
       canceled_at: sub.canceled_at 
         ? new Date(sub.canceled_at * 1000).toISOString() 
         : null,
+      // Set past_due_since on transition to past_due, clear on recovery
+      past_due_since: subscription.status === 'past_due' ? new Date().toISOString() : null,
       updated_at: new Date().toISOString(),
     })
     .eq('stripe_subscription_id', subscription.id);
@@ -304,6 +344,50 @@ async function handleInvoicePaid(invoice: Stripe.Invoice) {
   }, {
     onConflict: 'stripe_invoice_id',
   });
+}
+
+async function handleChargeRefunded(charge: Stripe.Charge) {
+  console.log('[Stripe Webhook] Charge refunded:', {
+    id: charge.id,
+    amount_refunded: charge.amount_refunded,
+    customer: charge.customer,
+  });
+
+  const customerId = typeof charge.customer === 'string' ? charge.customer : charge.customer?.id;
+  if (!customerId) return;
+
+  const admin = createAdminClient();
+
+  const { data: sub } = await admin
+    .from('subscriptions')
+    .select('tenant_id')
+    .eq('stripe_customer_id', customerId)
+    .maybeSingle();
+
+  if (!sub?.tenant_id) return;
+
+  await admin.from('subscription_events').insert({
+    tenant_id: sub.tenant_id,
+    event_type: 'charge_refunded',
+    stripe_event_id: charge.id,
+    data: {
+      amount_refunded: charge.amount_refunded / 100,
+      currency: charge.currency.toUpperCase(),
+      reason: charge.refunds?.data?.[0]?.reason || null,
+    },
+  });
+
+  // Full refund on a subscription charge — mark subscription as canceled
+  if (charge.refunded) {
+    await admin
+      .from('subscriptions')
+      .update({
+        status: 'canceled',
+        canceled_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      .eq('stripe_customer_id', customerId);
+  }
 }
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
@@ -424,7 +508,7 @@ export async function POST(req: NextRequest) {
           break;
 
         case 'charge.refunded':
-          console.log('[Stripe Webhook] Charge refunded:', (event.data.object as Stripe.Charge).id);
+          await handleChargeRefunded(event.data.object as Stripe.Charge);
           break;
 
         default:
