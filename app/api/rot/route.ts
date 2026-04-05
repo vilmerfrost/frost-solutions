@@ -5,7 +5,7 @@ import { createAdminClient } from '@/utils/supabase/admin';
 import { getTenantId } from '@/lib/serverTenant';
 import { extractErrorMessage } from '@/lib/errorUtils';
 import { resolveRotPercent, calcRot } from '@/lib/rot/calc';
-import { buildSkatteverketXml } from '@/lib/rot/xml';
+import { generateRotXml } from '@/lib/domain/rot/xml-generator';
 import { decryptPnr } from '@/lib/crypto/pnr';
 
 const RotInput = z.object({
@@ -91,14 +91,20 @@ export async function POST(req: NextRequest) {
   const deduction = calcRot(input.laborAmountSEK, percent);
   const pnr = await decryptPnr(input.customerPnrEnc);
 
-  const xml = buildSkatteverketXml({
-   orgNumber: process.env.COMPANY_ORG_NUMBER || '',
-   personalIdentityNoDecrypted: pnr,
-   invoiceNumber: inv.number,
-   invoiceDate: inv.issue_date,
-   laborAmountSEK: input.laborAmountSEK,
-   deductionAmountSEK: deduction,
-   projectAddress: input.projectAddress,
+  const xml = generateRotXml({
+   batchName: `ROT-${inv.number?.substring(0, 12) || 'BATCH'}`,
+   cases: [{
+    personnummer: pnr,
+    paymentDate: inv.issue_date,
+    laborCost: input.laborAmountSEK,
+    amountPaid: input.laborAmountSEK + input.materialAmountSEK,
+    requestedAmount: deduction,
+    invoiceNumber: inv.number,
+    propertyDesignation: input.projectAddress,
+    workTypes: {
+     bygg: { hours: 0, materialCost: input.materialAmountSEK },
+    },
+   }],
   });
 
   const { data: rot, error } = await admin

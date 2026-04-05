@@ -1,119 +1,136 @@
-// app/lib/domain/rot/xml-generator.ts
-import type { RotApplication } from './types';
-import { XmlGenerationError } from './errors';
-import { decryptPersonnummer } from './validation';
-import { createLogger } from '@/lib/utils/logger';
-
-const logger = createLogger('RotXmlGenerator');
-
 /**
- * Generate Skatteverket XML for ROT/RUT application
- * Format: Skatteverket's XML schema for ROT/RUT submissions
+ * Skatteverket ROT XML generator — Begaran.xsd v6
+ *
+ * Produces valid XML for manual upload to Skatteverket's portal.
+ * Root: <Begaran xmlns="http://xmls.skatteverket.se/se/skatteverket/ht/begaran/6.0">
  */
-export function generateSkatteverketXml(application: RotApplication): string {
- logger.info('Generating Skatteverket XML', { applicationId: application.id });
 
- try {
-  // Decrypt personnummer for XML (only in memory, never logged)
-  const personnummer = decryptPersonnummer(application.customer_personnummer);
+export type RotWorkType =
+  | 'bygg'
+  | 'el'
+  | 'glasPlatarbete'
+  | 'markDraneringarbete'
+  | 'murning'
+  | 'malningTapetsering'
+  | 'vvs'
 
-  // Format dates
-  const formatDate = (date: Date) => date.toISOString().split('T')[0];
-
-  // Build XML
-  const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<RotRutAnsökan xmlns="http://www.skatteverket.se/rotrutansokan">
- <Ansökan>
-  <AnsökanId>${application.id}</AnsökanId>
-  <Arbetstyp>${mapWorkTypeToSkatteverket(application.work_type)}</Arbetstyp>
-  
-  <!-- Property Information -->
-  <Fastighet>
-   <Fastighetsbeteckning>${escapeXml(application.property_designation)}</Fastighetsbeteckning>
-   ${application.apartment_number ? `<Lägenhetsnummer>${escapeXml(application.apartment_number)}</Lägenhetsnummer>` : ''}
-  </Fastighet>
-  
-  <!-- Customer Information -->
-  <Köpare>
-   <Personnummer>${personnummer}</Personnummer>
-   <Namn>${escapeXml(application.customer_name)}</Namn>
-   <Adress>
-    <Gatuadress>${escapeXml(application.customer_address)}</Gatuadress>
-    <Postnummer>${application.customer_postal_code}</Postnummer>
-    <Ort>${escapeXml(application.customer_city)}</Ort>
-   </Adress>
-  </Köpare>
-  
-  <!-- Work Details -->
-  <Arbete>
-   <Startdatum>${formatDate(application.work_start_date)}</Startdatum>
-   <Slutdatum>${formatDate(application.work_end_date)}</Slutdatum>
-   <Fakturadatum>${formatDate(application.invoice_date)}</Fakturadatum>
-  </Arbete>
-  
-  <!-- Financial Details -->
-  <Belopp>
-   <Arbetskostnad>${application.labor_cost}</Arbetskostnad>
-   <Materialkostnad>${application.material_cost}</Materialkostnad>
-   <TotaltBelopp>${application.total_amount}</TotaltBelopp>
-   <AvdragsgilltBelopp>${application.deductible_amount}</AvdragsgilltBelopp>
-   <Avdragsprocent>${application.deduction_percentage}</Avdragsprocent>
-  </Belopp>
-  
-  <!-- Invoice Reference -->
-  <Faktura>
-   <Fakturanummer>${application.invoice_id}</Fakturanummer>
-  </Faktura>
- </Ansökan>
-</RotRutAnsökan>`;
-
-  logger.info('XML generated successfully', { applicationId: application.id });
-  return xml;
- } catch (error) {
-  logger.error('XML generation failed', error, { applicationId: application.id });
-  throw new XmlGenerationError(
-   error instanceof Error ? error.message : 'Unknown error',
-   { applicationId: application.id }
-  );
- }
+export interface RotCase {
+  personnummer: string        // 12 digits YYYYMMDDXXXX
+  paymentDate: string         // YYYY-MM-DD
+  laborCost: number           // PrisForArbete (integer SEK)
+  amountPaid: number          // BetaltBelopp (integer SEK)
+  requestedAmount: number     // BegartBelopp (integer SEK)
+  invoiceNumber?: string      // max 20 chars
+  otherCost?: number          // Ovrigkostnad
+  propertyDesignation?: string // Fastighetsbeteckning
+  apartmentNumber?: string    // LagenhetsNr
+  brfOrgNumber?: string       // BrfOrgNr
+  workTypes: Partial<Record<RotWorkType, { hours: number; materialCost: number }>>
 }
 
-/**
- * Map internal work type to Skatteverket format
- */
-function mapWorkTypeToSkatteverket(workType: string): string {
- const mapping: Record<string, string> = {
-  rot_repair: 'Reparation',
-  rot_maintenance: 'Underhåll',
-  rot_improvement: 'Ombyggnad',
-  rut_cleaning: 'Städning',
-  rut_gardening: 'Trädgårdsarbete',
- };
-
- return mapping[workType] || workType;
+export interface RotBatch {
+  batchName: string  // max 16 chars (NamnPaBegaran)
+  cases: RotCase[]
 }
 
-/**
- * Escape XML special characters
- */
+const WORK_TYPE_ELEMENTS: Record<RotWorkType, string> = {
+  bygg: 'Bygg',
+  el: 'El',
+  glasPlatarbete: 'GlasPlatarbete',
+  markDraneringarbete: 'MarkDraneringarbete',
+  murning: 'Murning',
+  malningTapetsering: 'MalningTapetsering',
+  vvs: 'Vvs',
+}
+
+export function generateRotXml(batch: RotBatch): string {
+  // Validation
+  if (batch.batchName.length > 16) {
+    throw new Error('Batch name max 16 characters')
+  }
+  if (batch.cases.length === 0) {
+    throw new Error('At least one case required')
+  }
+  if (batch.cases.length > 100) {
+    throw new Error('Max 100 cases per file')
+  }
+
+  for (const c of batch.cases) {
+    if (!/^\d{12}$/.test(c.personnummer)) {
+      throw new Error(`Invalid personnummer: must be 12 digits`)
+    }
+    if (c.invoiceNumber && c.invoiceNumber.length > 20) {
+      throw new Error('Invoice number max 20 characters')
+    }
+  }
+
+  const casesXml = batch.cases.map(c => {
+    const workXml = Object.entries(c.workTypes)
+      .filter(([, v]) => v)
+      .map(([type, data]) => {
+        const element = WORK_TYPE_ELEMENTS[type as RotWorkType]
+        return `        <${element}><AntalTimmar>${data!.hours}</AntalTimmar><Materialkostnad>${data!.materialCost}</Materialkostnad></${element}>`
+      }).join('\n')
+
+    const optionalFields = [
+      c.invoiceNumber ? `        <FakturaNr>${escapeXml(c.invoiceNumber)}</FakturaNr>` : '',
+      c.otherCost ? `        <Ovrigkostnad>${Math.round(c.otherCost)}</Ovrigkostnad>` : '',
+      c.propertyDesignation ? `        <Fastighetsbeteckning>${escapeXml(c.propertyDesignation)}</Fastighetsbeteckning>` : '',
+      c.apartmentNumber ? `        <LagenhetsNr>${escapeXml(c.apartmentNumber)}</LagenhetsNr>` : '',
+      c.brfOrgNumber ? `        <BrfOrgNr>${escapeXml(c.brfOrgNumber)}</BrfOrgNr>` : '',
+    ].filter(Boolean).join('\n')
+
+    return `      <Arende>
+        <Kopare>${c.personnummer}</Kopare>
+        <BetalningsDatum>${c.paymentDate}</BetalningsDatum>
+        <PrisForArbete>${Math.round(c.laborCost)}</PrisForArbete>
+        <BetaltBelopp>${Math.round(c.amountPaid)}</BetaltBelopp>
+        <BegartBelopp>${Math.round(c.requestedAmount)}</BegartBelopp>
+${optionalFields ? optionalFields + '\n' : ''}${workXml ? `        <UtfortArbete>\n${workXml}\n        </UtfortArbete>\n` : ''}      </Arende>`
+  }).join('\n')
+
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<Begaran xmlns="http://xmls.skatteverket.se/se/skatteverket/ht/begaran/6.0">
+  <NamnPaBegaran>${escapeXml(batch.batchName)}</NamnPaBegaran>
+  <RotBegaran>
+    <Arenden>
+${casesXml}
+    </Arenden>
+  </RotBegaran>
+</Begaran>`
+}
+
 function escapeXml(str: string): string {
- return str
-  .replace(/&/g, '&amp;')
-  .replace(/</g, '&lt;')
-  .replace(/>/g, '&gt;')
-  .replace(/"/g, '&quot;')
-  .replace(/'/g, '&apos;');
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
 }
 
 /**
- * Validate XML against schema (optional)
+ * Backward-compatible wrapper for rot.service.ts.
+ * Maps the old RotApplication interface to the new RotBatch format.
  */
-export function validateXml(xml: string): boolean {
- // Basic XML structure validation - schema validation can be added with xmllint
- try {
-  return xml.includes('<?xml') && xml.includes('</RotRutAnsökan>');
- } catch {
-  return false;
- }
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function generateSkatteverketXml(application: any): string {
+  const batch: RotBatch = {
+    batchName: `ROT-${String(application.id).substring(0, 8)}`,
+    cases: [{
+      personnummer: application.customer_personnummer,
+      paymentDate: application.invoice_date instanceof Date
+        ? application.invoice_date.toISOString().split('T')[0]
+        : String(application.invoice_date),
+      laborCost: application.labor_cost,
+      amountPaid: application.total_amount,
+      requestedAmount: application.deductible_amount,
+      invoiceNumber: application.invoice_id,
+      propertyDesignation: application.property_designation,
+      apartmentNumber: application.apartment_number,
+      workTypes: {
+        bygg: { hours: 0, materialCost: application.material_cost || 0 },
+      },
+    }],
+  }
+  return generateRotXml(batch)
 }
-
