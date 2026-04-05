@@ -39,11 +39,13 @@ export async function updateSession(request: NextRequest) {
   const path = request.nextUrl.pathname
 
   // Lista på publika rutter som inte kräver inloggning
-  const isPublicPath = 
-    path.startsWith('/login') || 
-    path.startsWith('/signup') || 
-    path.startsWith('/auth') || 
-    path.startsWith('/error')
+  const isPublicPath =
+    path.startsWith('/login') ||
+    path.startsWith('/signup') ||
+    path.startsWith('/auth') ||
+    path.startsWith('/error') ||
+    path.startsWith('/portal') ||
+    path.startsWith('/api/portal')
 
   // A. Oinloggad användare på skyddad sida -> Redirect till Login
   if (!user && !isPublicPath) {
