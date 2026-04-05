@@ -337,8 +337,7 @@ export const ahlsellScraper: SupplierScraper = {
 
       const sku =
         $el.attr('data-article-id') ??
-        $el.find('[data-sku], .article-number').first().text().trim() ||
-        null
+        ($el.find('[data-sku], .article-number').first().text().trim() || null)
 
       const stockText = $el.find('.stock-status, .availability, .stock-indicator').text().toLowerCase()
       const inStock = stockText

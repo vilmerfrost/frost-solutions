@@ -47,6 +47,7 @@ export async function POST(req: NextRequest) {
       clientId: user.client_id,
       email: user.email,
       name: user.name,
+      portalUserType: user.portal_user_type ?? 'customer',
     })
 
     return apiSuccess({ token, user: { id: user.id, email: user.email, name: user.name } })
