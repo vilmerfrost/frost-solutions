@@ -14,7 +14,11 @@ const customJestConfig = {
   },
   testMatch: [
     '**/__tests__/**/*.[jt]s?(x)',
-    '**/?(*.)+(spec|test).[jt]s?(x)',
+  ],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/.next/',
+    '/tests/',  // Playwright specs live here — run via `pnpm exec playwright test`
   ],
   collectCoverageFrom: [
     'app/**/*.{js,jsx,ts,tsx}',

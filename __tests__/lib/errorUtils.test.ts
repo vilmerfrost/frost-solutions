@@ -62,7 +62,7 @@ describe('logError', () => {
     
     expect(consoleSpy).toHaveBeenCalled()
     const call = consoleSpy.mock.calls[0]
-    expect(call[0]).toBe('[TestContext]')
+    expect(call[0]).toBe('[TestContext] Test error')
   })
 })
 
