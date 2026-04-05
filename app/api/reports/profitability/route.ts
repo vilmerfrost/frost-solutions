@@ -1,6 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { resolveAuthAdmin, parseSearchParams, apiSuccess, apiError } from '@/lib/api'
+import { callOpenRouter } from '@/lib/ai/openrouter'
 
 export const runtime = 'nodejs'
 
@@ -142,15 +143,36 @@ export async function GET(req: NextRequest) {
     // Sort by margin descending
     results.sort((a, b) => b.margin - a.margin)
 
+    const totals = {
+      revenue: results.reduce((s, r) => s + r.revenue, 0),
+      total_cost: results.reduce((s, r) => s + r.total_cost, 0),
+      margin: results.reduce((s, r) => s + r.margin, 0),
+    }
+
+    // AI predictions (optional — do not fail the report if AI call fails)
+    let predictions: string | null = null
+    try {
+      const systemPrompt = 'Du ar en svensk byggekonom. Baserat pa denna projektdata, ge en kort prediktion om lonsamhetsrisk och rekommendationer. Svara pa svenska, max 300 ord.'
+      const userPrompt = JSON.stringify({
+        period: { from: dateFrom, to: dateTo },
+        group_by: groupBy,
+        rows: results.slice(0, 20), // Limit to avoid token overflow
+        totals,
+      })
+
+      predictions = await callOpenRouter(systemPrompt, userPrompt, {
+        maxTokens: 1024,
+      })
+    } catch (aiErr) {
+      console.warn('AI predictions failed (non-critical):', aiErr instanceof Error ? aiErr.message : String(aiErr))
+    }
+
     return apiSuccess({
       period: { from: dateFrom, to: dateTo },
       group_by: groupBy,
       rows: results,
-      totals: {
-        revenue: results.reduce((s, r) => s + r.revenue, 0),
-        total_cost: results.reduce((s, r) => s + r.total_cost, 0),
-        margin: results.reduce((s, r) => s + r.margin, 0),
-      },
+      totals,
+      ...(predictions ? { predictions } : {}),
     })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error)
