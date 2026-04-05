@@ -198,34 +198,35 @@ All tables use RLS. Sensitive data (personnummer) encrypted for GDPR.
 - **Fortnox/Visma** — update support, mapper validation, health dashboard, OAuth CSRF
 
 ### Phase 3A — Core Platform (Complete)
-- **Legal Fortress** — mandatory 6-step ÄTA workflow (`app/api/ata/v2/`) with immutable audit trail (`ata_audit_trail`), BankID approval, auto-invoice generation
-- **Document Management** — BSAB/CoClass folders (`app/lib/documents/folders.ts`), versioning, sharing, upload to Supabase Storage (`project-documents` bucket)
-- **Customer Portal** — JWT login (`app/lib/portal/auth.ts`), dashboard, project view, messaging, ÄTA approval
+- **Legal Fortress** — 7-route ÄTA workflow (`app/api/ata/v2/`), immutable hash-chained audit trail, BankID approval, auto-invoice, AB04/ABT06 contract templates, pre-project credit check (GREEN/YELLOW/RED), chain verification endpoint
+- **Document Management** — BSAB/CoClass folders, versioning, sharing, AI auto-tagging, full-text search, required document checklists with project-close enforcement
+- **Customer Portal** — JWT login, dashboard, project view, messaging, ÄTA approval, invoice payment (Stripe), dagbok (daily log), satisfaction survey, subcontractor portal
 
 ### Phase 3B — Field & Operations (Complete)
-- **Drawing Markup** — annotation CRUD on documents (cloud, arrow, text, pin, measurement)
-- **Safety & Compliance** — certificate tracking with expiry alerts, incident reporting, site inductions
-- **Team Scheduling** — conflict detection, force override
-- **Subcontractor Management** — CRUD, project assignments, F-skatt verification stub
+- **Drawing Markup** — annotation CRUD (cloud, arrow, text, pin, measurement) with work order linking
+- **Safety & Compliance** — certificates with expiry alerts, incident reporting, site inductions, 5 risk assessment templates, personalliggare (attendance check-in/out + CSV export)
+- **Team Scheduling** — conflict detection, Arbetstidslagen compliance checks, shift swap with manager approval
+- **Subcontractor Management** — CRUD, project assignments, F-skatt verification, subcontractor portal, payment tracking
 
 ### Phase 3C — Intelligence & Mobile (Complete)
-- **Material Price Engine** — Byggmax scraper with cheerio, nightly cron, full-text search, price comparison, tenant alerts
-- **Reporting & BI** — profitability, utilization, cash flow forecast, saved reports, JSON/CSV export
-- **React Native Mobile** — Expo foundation (`mobile/`), tab navigation, auth store, API client (placeholder screens)
+- **Material Price Engine** — 4 supplier scrapers (Byggmax, Beijer, XL-Bygg, Ahlsell), nightly cron, full-text search, price comparison, tenant alerts, CSV price list upload
+- **Reporting & BI** — profitability (with AI predictions), utilization, cash flow forecast, saved reports, JSON/CSV export, automated monthly email reports via Resend
+- **React Native Mobile** — Expo foundation (`mobile/`), tab navigation, auth store, API client
 
 ### Stats
-- **119 unit tests**, 11 suites, all passing
+- **126 unit tests**, 13 suites, all passing
 - **TypeScript strict**: zero errors
-- **51 commits** across all phases
-- **Cron jobs**: 8 scheduled (original 7 + nightly price scraper)
+- **77 commits** across all phases
+- **Cron jobs**: 9 scheduled (original 7 + nightly price scraper + monthly email reports)
+- **Backend spec compliance**: 70/70 backend requirements PASS (8 remaining are frontend-only)
 
-### What's Next
-- Frontend UI for new Phase 3 features (ÄTA workflow pages, document browser, safety dashboard, etc.)
-- PDF.js drawing viewer integration (frontend for annotation data layer)
-- Mobile app screen implementation (beyond placeholders)
-- Remaining ~170 API routes to migrate to shared helpers (as touched)
+### What's Next — Frontend
+- Frontend UI for all new features (ÄTA workflow, document browser, safety dashboard, scheduling calendar, portal pages, etc.)
+- PDF.js drawing viewer + revision comparison (frontend for annotation data layer)
+- Multi-language support for safety documents
+- QR/NFC site check-in UI
+- Mobile app screen implementation (camera, GPS geofencing, voice-to-ÄTA)
 - Deploy migrations to Supabase production
-- End-to-end testing for new workflows
 
 See `docs/superpowers/specs/2026-04-05-frost-solutions-v2-overhaul-design.md` for full spec.
 
