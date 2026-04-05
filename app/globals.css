@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 /* =================================
-   LOVABLE DESIGN SYSTEM
-   Complete redesign matching Lovable's aesthetic
+   FROST DESIGN SYSTEM
+   Warm amber + stone design system
    ================================= */
 
 /* Base Styles */
@@ -12,29 +12,29 @@
   color-scheme: light dark;
   
   /* PRIMARY COLORS */
-  --primary-500: #0ea5e9;
-  --primary-600: #0284c7;
-  --primary-700: #0369a1;
-  --primary-50: #f0f9ff;
-  --primary-100: #e0f2fe;
+  --primary-500: #F59E0B;
+  --primary-600: #D97706;
+  --primary-700: #B45309;
+  --primary-50: #FFFBEB;
+  --primary-100: #FEF3C7;
   
   /* NEUTRAL COLORS */
-  --gray-50: #f8fafc;
-  --gray-100: #f1f5f9;
-  --gray-200: #e2e8f0;
-  --gray-300: #cbd5e1;
-  --gray-400: #94a3b8;
-  --gray-500: #64748b;
-  --gray-600: #475569;
-  --gray-700: #334155;
-  --gray-800: #1e293b;
-  --gray-900: #0f172a;
+  --gray-50: #FAFAF9;
+  --gray-100: #F5F5F4;
+  --gray-200: #E7E5E4;
+  --gray-300: #D6D3D1;
+  --gray-400: #A8A29E;
+  --gray-500: #78716C;
+  --gray-600: #57534E;
+  --gray-700: #44403C;
+  --gray-800: #292524;
+  --gray-900: #1C1917;
   
   /* DARK MODE */
-  --dark-bg: #1e293b;
-  --dark-surface: #334155;
-  --dark-border: #475569;
-  --dark-text: #f1f5f9;
+  --dark-bg: #1C1917;
+  --dark-surface: #292524;
+  --dark-border: #44403C;
+  --dark-text: #FAFAF9;
   
   /* SEMANTIC COLORS */
   --success-50: #dcfce7;
@@ -42,10 +42,10 @@
   --success-600: #16a34a;
   --success-700: #15803d;
   
-  --warning-50: #fef3c7;
-  --warning-500: #eab308;
-  --warning-600: #d97706;
-  --warning-700: #b45309;
+  --warning-50: #FFF7ED;
+  --warning-500: #F97316;
+  --warning-600: #EA580C;
+  --warning-700: #C2410C;
   
   --error-50: #fee2e2;
   --error-500: #ef4444;
@@ -114,10 +114,10 @@
   --radius-full: 9999px;
   
   /* SHADOWS */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-  --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.10);
-  --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+  --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.05);
+  --shadow-md: 0 4px 6px rgba(28, 25, 23, 0.07);
+  --shadow-lg: 0 10px 15px rgba(28, 25, 23, 0.10);
+  --shadow-xl: 0 20px 25px rgba(28, 25, 23, 0.15);
 }
 
 html, body { 
@@ -296,7 +296,7 @@ small {
 
 .dark .input:focus {
   border-color: var(--primary-500);
-  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }
 
 .input:disabled {
@@ -351,7 +351,7 @@ select:focus {
 .dark input:focus,
 .dark textarea:focus,
 .dark select:focus {
-  box-shadow: 0 0 0 2px rgba(14, 165, 233, 0.2);
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }
 
 textarea {
