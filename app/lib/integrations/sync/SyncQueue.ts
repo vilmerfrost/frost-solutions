@@ -120,7 +120,7 @@ export class SyncQueue {
    .eq('id', job.id);
 
   try {
-   // Sync handler dispatches to AccountingSyncOrchestrator based on job.action
+   // Sync handler dispatches to the appropriate provider client based on job.action
    // Processing simulation - actual handlers connected per integration
    await new Promise((resolve) => setTimeout(resolve, 1000));
 

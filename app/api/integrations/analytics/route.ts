@@ -96,7 +96,7 @@ export async function GET(request: NextRequest) {
 
   // Calculate provider statistics
   const { data: integrations } = await adminClient
-   .from('accounting_integrations')
+   .from('integrations')
    .select('id, provider')
    .eq('tenant_id', tenantId);
 

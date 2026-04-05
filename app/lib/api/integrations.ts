@@ -106,7 +106,7 @@ export class IntegrationAPI {
   */
  static startOAuthFlow(provider: AccountingProvider): void {
   console.log('[IntegrationAPI] 🔐 Starting OAuth flow:', provider);
-  window.location.href = `${BASE_PATH}/api/integrations/authorize/${provider}`;
+  window.location.href = `${BASE_PATH}/api/integrations/${provider}/connect`;
  }
 
  /**
@@ -121,10 +121,10 @@ export class IntegrationAPI {
    provider,
   });
   try {
-   const result = await apiFetch<SyncInvoiceResponse>('/api/integrations/sync-invoice', {
+   const result = await apiFetch<SyncInvoiceResponse>(`/api/integrations/${provider}/export-invoice`, {
     method: 'POST',
     credentials: 'include',
-    body: JSON.stringify({ invoiceId, provider }),
+    body: JSON.stringify({ invoiceId }),
    });
 
    console.log('[IntegrationAPI] ✅ Invoice synced:', result.externalId);

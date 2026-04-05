@@ -1,8 +1,8 @@
 // app/lib/integrations/visma/oauth.ts
 import { storeToken, getToken, isExpired } from '@/lib/integrations/token-storage';
 
-const VISMA_AUTH_URL = 'https://identity.visma.com/connect/authorize';
-const VISMA_TOKEN_URL = 'https://identity.visma.com/connect/token';
+const VISMA_AUTH_URL = 'https://identity.vismaonline.com/connect/authorize';
+const VISMA_TOKEN_URL = 'https://identity.vismaonline.com/connect/token';
 
 export function getAuthorizationUrl(integrationId: string, state: string, scope = 'ea:customer:read ea:customer:write ea:invoice:read ea:invoice:write offline_access') {
  const p = new URLSearchParams({
