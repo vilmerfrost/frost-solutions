@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { useTenant } from '@/context/TenantContext'
 import { apiFetch } from '@/lib/http/fetcher'
 import Sidebar from '@/components/Sidebar'
-import supabase from '@/utils/supabase/supabaseClient'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -137,29 +136,15 @@ export default function AtaKanbanPage() {
     setLoading(true)
     setError(null)
     try {
-      // Load ÄTA items (from rot_applications where ata_type is set)
-      let query = supabase
-        .from('rot_applications')
-        .select('*, projects(name)')
-        .eq('tenant_id', tenantId)
-        .not('ata_type', 'is', null)
-        .order('created_at', { ascending: false })
-
-      if (projectFilter !== 'all') {
-        query = query.eq('project_id', projectFilter)
-      }
-
-      const { data, error: fetchError } = await query
-      if (fetchError) throw new Error(fetchError.message)
-      setItems((data as unknown as AtaItem[]) || [])
+      // Load ÄTA items via API
+      const params = new URLSearchParams()
+      if (projectFilter !== 'all') params.set('project_id', projectFilter)
+      const ataRes = await apiFetch<{ data: AtaItem[] }>(`/api/ata/v2/list?${params.toString()}`)
+      setItems(ataRes.data || [])
 
       // Load projects for filter dropdown
-      const { data: projData } = await supabase
-        .from('projects')
-        .select('id, name')
-        .eq('tenant_id', tenantId)
-        .order('name')
-      setProjects((projData as Project[]) || [])
+      const projRes = await apiFetch<{ projects?: Project[] }>(`/api/projects/list?tenantId=${tenantId}`)
+      setProjects(projRes.projects || [])
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : 'Kunde inte ladda ÄTA-ärenden')
     } finally {
@@ -176,17 +161,12 @@ export default function AtaKanbanPage() {
     setAuditTrail([])
     setChainValid(null)
     try {
-      const [trailRes, chainRes] = await Promise.all([
-        supabase
-          .from('ata_audit_trail')
-          .select('*')
-          .eq('ata_id', item.id)
-          .eq('tenant_id', tenantId!)
-          .order('created_at', { ascending: true }),
+      const [trailRes, chainRes] = await Promise.allSettled([
+        apiFetch<AuditEvent[]>(`/api/ata/v2/${item.id}/documents`),
         apiFetch<ChainVerification>(`/api/ata/v2/${item.id}/verify-chain`),
       ])
-      setAuditTrail((trailRes.data as unknown as AuditEvent[]) || [])
-      setChainValid(chainRes)
+      if (trailRes.status === 'fulfilled') setAuditTrail(trailRes.value || [])
+      if (chainRes.status === 'fulfilled') setChainValid(chainRes.value)
     } catch {
       // non-critical
     }

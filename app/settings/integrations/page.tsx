@@ -6,7 +6,6 @@ import { useAdmin } from '@/hooks/useAdmin';
 import { useIntegrationStatus, useConnectIntegration, useDisconnectIntegration } from '@/hooks/useIntegrations';
 import { useTenant } from '@/context/TenantContext';
 import { apiFetch } from '@/lib/http/fetcher';
-import supabase from '@/utils/supabase/supabaseClient';
 import {
   Loader2,
   Lock,
@@ -243,23 +242,12 @@ function BankIdCard() {
     if (!tenantId) return
     async function load() {
       try {
-        // Get this month's signing orders
-        const startOfMonth = new Date()
-        startOfMonth.setDate(1)
-        startOfMonth.setHours(0, 0, 0, 0)
-
-        const { data, error } = await supabase
-          .from('signing_orders')
-          .select('id, status')
-          .eq('tenant_id', tenantId as string)
-          .gte('created_at', startOfMonth.toISOString())
-
-        if (!error && data) {
-          setSigningCount(data.length)
-          setPendingCount(data.filter((o: any) => o.status === 'pending').length)
-        }
+        const res = await apiFetch<{ data?: Array<{ id: string; status: string }> }>('/api/signing/orders')
+        const orders = res.data ?? []
+        setSigningCount(orders.length)
+        setPendingCount(orders.filter(o => o.status === 'pending').length)
       } catch {
-        // Silent — table may not exist
+        // Silent — endpoint may not exist yet
       } finally {
         setLoading(false)
       }

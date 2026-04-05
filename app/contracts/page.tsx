@@ -5,7 +5,6 @@ import Sidebar from '@/components/Sidebar'
 import { useTenant } from '@/context/TenantContext'
 import { apiFetch } from '@/lib/http/fetcher'
 import { toast } from '@/lib/toast'
-import supabase from '@/utils/supabase/supabaseClient'
 import {
   PenTool,
   Scale,
@@ -140,12 +139,10 @@ export default function ContractsPage() {
   useEffect(() => {
     if (!tenantId) return
     async function loadProjects() {
-      const { data } = await supabase
-        .from('projects')
-        .select('id, name')
-        .eq('tenant_id', tenantId as string)
-        .order('name', { ascending: true })
-      setProjects(data ?? [])
+      try {
+        const res = await apiFetch<{ projects?: Project[] }>(`/api/projects/list?tenantId=${tenantId}`)
+        setProjects(res.projects ?? [])
+      } catch { /* silent */ }
     }
     loadProjects()
   }, [tenantId])
@@ -155,16 +152,11 @@ export default function ContractsPage() {
     if (!tenantId) return
     setLoadingOrders(true)
     try {
-      const { data, error } = await supabase
-        .from('signing_orders')
-        .select('id, idura_order_id, document_type, document_id, status, created_at')
-        .eq('tenant_id', tenantId as string)
-        .order('created_at', { ascending: false })
-        .limit(50)
-
-      if (!error) setSigningOrders(data ?? [])
+      const res = await apiFetch<{ data?: SigningOrder[] }>('/api/signing/orders')
+      setSigningOrders(res.data ?? [])
     } catch {
-      // Silent — table may not exist yet
+      // Silent — endpoint may not exist yet
+      setSigningOrders([])
     } finally {
       setLoadingOrders(false)
     }
