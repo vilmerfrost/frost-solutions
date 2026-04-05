@@ -6,9 +6,10 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { tenantId, admin, error } = await resolveAuthAdmin();
-    if (error) return error;
+    const auth = await resolveAuthAdmin();
+    if (auth.error) return auth.error;
 
+    const { tenantId, admin } = auth;
     const { id: integrationId } = await params;
 
     // Verify integration belongs to this tenant
