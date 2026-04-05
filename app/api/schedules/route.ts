@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { resolveAuthAdmin, apiSuccess, apiError, handleRouteError } from '@/lib/api'
 import { createScheduleSchema } from '@/lib/validation/scheduling'
 import { findConflicts } from '@/lib/scheduling/conflicts'
+import { checkArbetstidslagen } from '@/lib/scheduling/compliance'
 
 export async function POST(req: NextRequest) {
   try {
@@ -40,6 +41,67 @@ export async function POST(req: NextRequest) {
       if (conf.hasConflict) {
         return apiError('Conflict detected', 409, { conflicts: conf.conflicts as unknown as Record<string, unknown> })
       }
+    }
+
+    // ── Arbetstidslagen compliance check ──
+    const newShiftHours = (+end - +start) / 36e5
+
+    // Fetch this week's existing shifts for the employee
+    const weekStart = new Date(start)
+    weekStart.setDate(weekStart.getDate() - weekStart.getDay() + 1) // Monday
+    weekStart.setHours(0, 0, 0, 0)
+    const weekEnd = new Date(weekStart)
+    weekEnd.setDate(weekEnd.getDate() + 6)
+    weekEnd.setHours(23, 59, 59, 999)
+
+    const { data: weekShifts } = await auth.admin
+      .from('schedule_slots')
+      .select('start_time, end_time')
+      .eq('tenant_id', auth.tenantId)
+      .eq('employee_id', parsed.employee_id)
+      .gte('start_time', weekStart.toISOString())
+      .lte('end_time', weekEnd.toISOString())
+      .neq('status', 'cancelled')
+
+    const weeklyHours = (weekShifts ?? []).reduce((sum, s) => {
+      return sum + (+new Date(s.end_time) - +new Date(s.start_time)) / 36e5
+    }, newShiftHours)
+
+    // Fetch same-day shifts for daily hours
+    const dayStart = new Date(start)
+    dayStart.setHours(0, 0, 0, 0)
+    const dayEnd = new Date(start)
+    dayEnd.setHours(23, 59, 59, 999)
+
+    const dayShifts = (weekShifts ?? []).filter((s) => {
+      const sStart = new Date(s.start_time)
+      return sStart >= dayStart && sStart <= dayEnd
+    })
+    const dailyHours = dayShifts.reduce((sum, s) => {
+      return sum + (+new Date(s.end_time) - +new Date(s.start_time)) / 36e5
+    }, newShiftHours)
+
+    // Find rest since last shift
+    const { data: lastShift } = await auth.admin
+      .from('schedule_slots')
+      .select('end_time')
+      .eq('tenant_id', auth.tenantId)
+      .eq('employee_id', parsed.employee_id)
+      .lt('end_time', start.toISOString())
+      .neq('status', 'cancelled')
+      .order('end_time', { ascending: false })
+      .limit(1)
+      .maybeSingle()
+
+    const restHours = lastShift
+      ? (+start - +new Date(lastShift.end_time)) / 36e5
+      : 24 // Assume sufficient rest if no previous shift
+
+    const compliance = checkArbetstidslagen(weeklyHours, dailyHours, restHours)
+    if (!compliance.valid && !parsed.force) {
+      return apiError('Arbetstidslagen compliance violation', 422, {
+        violations: compliance.violations as unknown as Record<string, unknown>,
+      })
     }
 
     const insertPayload: Record<string, unknown> = {
