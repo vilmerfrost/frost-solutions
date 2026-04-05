@@ -29,7 +29,7 @@ export function DashboardProjects({ tenantId }: DashboardProjectsProps) {
   }, [])
 
   const activeProjects = useMemo(() => {
-    return dashboardProjects.filter(p => {
+    return (dashboardProjects || []).filter(p => {
       // Projects already filtered by status during fetch, but guard against stale data
       const status = 'status' in p ? (p as ProjectWithHours & { status?: string }).status : undefined
       return status !== 'completed' && status !== 'archived'

@@ -34,7 +34,7 @@ export default function NotificationCenter({ className = '' }: NotificationCente
  const router = useRouter()
  const { isAdmin } = useAdmin()
 
- const unreadCount = notifications.filter(n => !n.read).length
+ const unreadCount = (notifications || []).filter(n => !n.read).length
 
  useEffect(() => {
   // Load notifications from both localStorage and API
@@ -62,14 +62,15 @@ export default function NotificationCenter({ className = '' }: NotificationCente
  async function loadNotifications() {
   try {
    // Load from localStorage (legacy support)
-   const localNotifications = getNotifications()
+   const rawLocal = getNotifications()
+   const localNotifications = Array.isArray(rawLocal) ? rawLocal : []
    
    // Load from API (database)
    try {
     const response = await fetch(`${BASE_PATH}/api/notifications/list`, { cache: 'no-store' })
     if (response.ok) {
      const data = await response.json()
-     const dbNotifications: Notification[] = (data.notifications || []).map((n: any) => ({
+     const dbNotifications: Notification[] = (Array.isArray(data.notifications) ? data.notifications : []).map((n: any) => ({
       id: n.id,
       type: n.type,
       title: n.title,
@@ -128,7 +129,7 @@ export default function NotificationCenter({ className = '' }: NotificationCente
 
  async function markAllAsRead() {
   // Mark all unread notifications as read
-  const unread = notifications.filter(n => !n.read)
+  const unread = (notifications || []).filter(n => !n.read)
   await Promise.all(unread.map(n => markAsRead(n.id)))
   
   // Also mark localStorage notifications

@@ -40,7 +40,8 @@ export function WeeklySchedules() {
   if (!schedules) return {};
   
   const grouped: Record<string, ScheduleSlot[]> = {};
-  schedules.forEach(schedule => {
+  const safeSchedules = Array.isArray(schedules) ? schedules : [];
+  safeSchedules.forEach(schedule => {
    const date = new Date(schedule.start_time).toISOString().split('T')[0];
    if (!grouped[date]) grouped[date] = [];
    grouped[date].push(schedule);
@@ -68,8 +69,9 @@ export function WeeklySchedules() {
   return date.toLocaleDateString('sv-SE', { weekday: 'short', day: 'numeric', month: 'short' });
  };
 
- const totalSchedules = schedules?.length || 0;
- const totalHours = schedules?.reduce((sum, s) => {
+ const safeSchedulesList = Array.isArray(schedules) ? schedules : [];
+ const totalSchedules = safeSchedulesList.length;
+ const totalHours = safeSchedulesList.reduce((sum, s) => {
   const start = new Date(s.start_time);
   const end = new Date(s.end_time);
   const hours = (end.getTime() - start.getTime()) / (1000 * 60 * 60);
@@ -128,7 +130,7 @@ export function WeeklySchedules() {
        <span className="text-xs text-gray-600 dark:text-gray-300">Projekt</span>
       </div>
       <div className="text-xl font-semibold text-gray-800 dark:text-gray-200">
-       {new Set(schedules?.map(s => s.project_id)).size}
+       {new Set(safeSchedulesList.map(s => s.project_id)).size}
       </div>
      </div>
     </div>

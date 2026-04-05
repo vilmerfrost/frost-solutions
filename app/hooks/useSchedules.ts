@@ -40,12 +40,19 @@ export const useSchedules = (filters: ScheduleFilters) => {
    params.append('start_date', filters.start_date);
    params.append('end_date', filters.end_date);
 
-   const schedules = await apiFetch<ScheduleSlot[]>(`/api/schedules?${params.toString()}`, {
+   const response = await apiFetch<ScheduleSlot[] | { success?: boolean; data?: ScheduleSlot[] }>(`/api/schedules?${params.toString()}`, {
     cache: 'no-store',
    });
-   
+
+   // Handle both raw array and { success, data } wrapper from apiSuccess
+   const schedules = Array.isArray(response)
+    ? response
+    : Array.isArray((response as any)?.data)
+     ? (response as any).data
+     : [];
+
    // Return schedules as-is - enrichment happens in components using useEmployees() and useProjects()
-   return schedules || [];
+   return schedules;
   },
   enabled: !!tenantId && !!filters.start_date && !!filters.end_date,
  });

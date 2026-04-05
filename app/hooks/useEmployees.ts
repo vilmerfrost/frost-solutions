@@ -18,8 +18,12 @@ export function useEmployees() {
    if (!tenantId) return []
 
    // Använd API route istället för direkt Supabase för att undvika RLS-problem
-   const data = await apiFetch<{ employees?: Employee[] }>('/api/employees/list', { cache: 'no-store' })
-   return (data.employees || []) as Employee[]
+   const raw = await apiFetch<{ employees?: Employee[] } | { success?: boolean; data?: { employees?: Employee[] } }>('/api/employees/list', { cache: 'no-store' })
+   // Handle both raw { employees } and { success, data: { employees } } wrapper from apiSuccess
+   const data = (raw && typeof raw === 'object' && 'data' in raw && raw.data && typeof raw.data === 'object')
+    ? raw.data as { employees?: Employee[] }
+    : raw as { employees?: Employee[] }
+   return (Array.isArray(data.employees) ? data.employees : []) as Employee[]
   },
   enabled: !!tenantId,
   staleTime: 1000 * 60 * 10, // 10 minuter stale time (anställda ändras sällan)
