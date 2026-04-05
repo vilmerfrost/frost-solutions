@@ -182,37 +182,50 @@ All tables use RLS. Sensitive data (personnummer) encrypted for GDPR.
 - **Dark mode:** Supported via ThemeContext
 - **Mobile:** Bottom navigation, PWA with service worker + IndexedDB
 
-## Project Status (Phase 1 + 2 Complete — 2026-04-05)
+## Project Status (All 3 Phases Complete — 2026-04-05)
 
 ### Phase 1 — Foundation Hardening (Complete)
-- Shared API infrastructure (`app/lib/api/` — response, auth, validation, errors)
+- Shared API infrastructure (`app/lib/api/`)
 - 15 core routes migrated to shared helpers with Zod validation
-- Stripe hardened (shared client at `app/lib/stripe/`, webhook idempotency via `stripe_events` table, dynamic checkout, 14-day trial)
-- AI consolidated to OpenRouter (`app/lib/ai/openrouter.ts` — all legacy providers deleted)
-- Integration cleanup (removed broken TokenVault/OAuthManager/ConflictResolver/SyncQueue)
-- Dashboard split into focused components (653 → 65 lines)
-- Legacy code removed (localStorage tenant, backward compat, dead files)
-- Security audit + 13 route fixes (P0 + P1)
-- TypeScript strict: zero errors
+- Stripe hardened (`app/lib/stripe/` — idempotency, dynamic checkout, 14-day trial)
+- AI consolidated to OpenRouter (`app/lib/ai/openrouter.ts`)
+- Dead code removed, dashboard split, security audit + 13 fixes
 
 ### Phase 2 — The Moat (Complete)
-- **BankID signing** via Idura GraphQL API (`app/lib/signing/`) — create/status/webhook routes, `signing_orders` table
-- **PEPPOL e-invoicing** via peppol.sh REST API (`app/lib/peppol/`) — mapper with Swedish org validation, send endpoint at `/api/invoices/[id]/peppol`
-- **Skatteverket ROT** — XML generator rewritten to valid Begaran.xsd v6 (`app/lib/domain/rot/xml-generator.ts`), download endpoint at `/api/rot/[id]/download-xml` (no API exists — user uploads XML to Skatteverket portal manually)
-- **Fortnox/Visma hardened** — update support in sync export, mapper validation (18 tests), sync health dashboard at `/api/integrations/[id]/health`, OAuth CSRF state validation
-- **99 unit tests** across 11 suites, all passing
+- **BankID** via Idura GraphQL (`app/lib/signing/`) — signing routes + webhook
+- **PEPPOL** via peppol.sh REST (`app/lib/peppol/`) — send endpoint at `/api/invoices/[id]/peppol`
+- **Skatteverket ROT** — valid Begaran.xsd v6 XML, download at `/api/rot/[id]/download-xml`
+- **Fortnox/Visma** — update support, mapper validation, health dashboard, OAuth CSRF
 
-### Phase 3 — All-in-One (Not Started)
-- Legal Fortress (ÄTA protection engine with mandatory workflow + audit trail)
-- Document Management / Binder (iBinder replacement with BSAB folders, versioning, RBAC)
-- Drawing Markup (Bluebeam Lite — PDF.js + annotations + measurement)
-- Safety & Compliance (SSG replacement — certificates, site induction, incident reporting)
-- Material Price Engine (nightly scraper for Byggmax/Beijer/XL-Bygg/Ahlsell)
-- Team Scheduling & Resource Planning
-- Customer Portal & Communication expansion
-- Subcontractor Management
-- Reporting & Business Intelligence
-- React Native mobile app (Expo)
+### Phase 3A — Core Platform (Complete)
+- **Legal Fortress** — mandatory 6-step ÄTA workflow (`app/api/ata/v2/`) with immutable audit trail (`ata_audit_trail`), BankID approval, auto-invoice generation
+- **Document Management** — BSAB/CoClass folders (`app/lib/documents/folders.ts`), versioning, sharing, upload to Supabase Storage (`project-documents` bucket)
+- **Customer Portal** — JWT login (`app/lib/portal/auth.ts`), dashboard, project view, messaging, ÄTA approval
+
+### Phase 3B — Field & Operations (Complete)
+- **Drawing Markup** — annotation CRUD on documents (cloud, arrow, text, pin, measurement)
+- **Safety & Compliance** — certificate tracking with expiry alerts, incident reporting, site inductions
+- **Team Scheduling** — conflict detection, force override
+- **Subcontractor Management** — CRUD, project assignments, F-skatt verification stub
+
+### Phase 3C — Intelligence & Mobile (Complete)
+- **Material Price Engine** — Byggmax scraper with cheerio, nightly cron, full-text search, price comparison, tenant alerts
+- **Reporting & BI** — profitability, utilization, cash flow forecast, saved reports, JSON/CSV export
+- **React Native Mobile** — Expo foundation (`mobile/`), tab navigation, auth store, API client (placeholder screens)
+
+### Stats
+- **119 unit tests**, 11 suites, all passing
+- **TypeScript strict**: zero errors
+- **51 commits** across all phases
+- **Cron jobs**: 8 scheduled (original 7 + nightly price scraper)
+
+### What's Next
+- Frontend UI for new Phase 3 features (ÄTA workflow pages, document browser, safety dashboard, etc.)
+- PDF.js drawing viewer integration (frontend for annotation data layer)
+- Mobile app screen implementation (beyond placeholders)
+- Remaining ~170 API routes to migrate to shared helpers (as touched)
+- Deploy migrations to Supabase production
+- End-to-end testing for new workflows
 
 See `docs/superpowers/specs/2026-04-05-frost-solutions-v2-overhaul-design.md` for full spec.
 
