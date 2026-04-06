@@ -59,6 +59,8 @@ export function buildVismaCSV(input: BuildVismaCSVInput): string {
  * Handles missing columns gracefully
  */
 function resolveVismaWageCode(te: any): string {
+ // TODO: Integrate with actual OB/OT mapping from rates.ts
+ console.warn('Payroll export using default wage codes — custom OB/OT rates not integrated');
  // Overtime codes - check if column exists
  if (te.ot_type !== undefined && te.ot_type !== null) {
   if (te.ot_type === 'ot1') return 'OT1';

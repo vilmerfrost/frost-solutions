@@ -37,7 +37,7 @@ const CreateChecklistTemplateSchema = z.object({
       items: z.array(z.object({
         label: z.string().min(1),
         type: z.enum(['yes_no', 'measurement', 'dropdown', 'text']),
-        config: z.record(z.unknown()).optional(),
+        config: z.record(z.string(), z.unknown()).optional(),
       })),
     })),
   }),

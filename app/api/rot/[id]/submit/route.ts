@@ -4,13 +4,12 @@ import { getTenantId } from '@/lib/serverTenant'
 
 /**
  * Skicka ROT-ansökan till Skatteverket
- * 
- * OBS: Detta är en STUB-implementation. För riktig integration behöver du:
+ *
+ * OBS: Skatteverket-integration saknas. Ansökan sparas lokalt med status
+ * pending_submission men skickas INTE till Skatteverket. Kräver:
  * 1. Skatteverkets API-nyckel och dokumentation
  * 2. BankID-autentisering
  * 3. E-tjänst certifiering
- * 
- * För nu simulerar vi API-anropet och sparar ärendenummer.
  */
 export async function POST(
  req: Request,
@@ -48,50 +47,17 @@ export async function POST(
   }
 
   // ============================================================================
-  // SKATTEVERKETS API STUB
+  // SKATTEVERKETS API — NOT YET INTEGRATED
   // ============================================================================
-  // I produktion skulle detta vara ett riktigt API-anrop till Skatteverket
-  // För nu simulerar vi ett lyckat svar
+  // Riktig integration kräver Skatteverkets API-nyckel, BankID och e-tjänst-
+  // certifiering. Ansökan sparas lokalt med status pending_submission.
   // ============================================================================
-  
-  // Simulera API-anrop (tar 1-2 sekunder)
-  await new Promise(resolve => setTimeout(resolve, 1500))
 
-  // Generera mock ärendenummer
-  const mockCaseNumber = `ROT-${Date.now().toString().slice(-8)}`
-  const mockReferenceId = `REF-${Date.now()}`
-
-  // Logga API-anropet
-  await supabase.from('rot_api_logs').insert({
-   rot_application_id: id,
-   tenant_id: tenantId,
-   api_endpoint: 'https://api.skatteverket.se/rot/submit',
-   http_method: 'POST',
-   request_body: {
-    application_id: id,
-    customer_person_number: application.customer_person_number,
-    property_designation: application.property_designation,
-    work_type: application.work_type,
-    work_cost_sek: application.work_cost_sek,
-    material_cost_sek: application.material_cost_sek,
-    total_cost_sek: application.total_cost_sek,
-   },
-   response_body: {
-    case_number: mockCaseNumber,
-    reference_id: mockReferenceId,
-    status: 'submitted',
-   },
-   response_status: 200,
-  })
-
-  // Uppdatera ansökan
+  // Uppdatera ansökan till pending_submission så användaren ser att den behöver skickas manuellt
   const { error: updateError } = await supabase
    .from('rot_applications')
    .update({
-    status: 'submitted',
-    case_number: mockCaseNumber,
-    reference_id: mockReferenceId,
-    submission_date: new Date().toISOString(),
+    status: 'pending_submission',
     last_status_check: new Date().toISOString(),
    })
    .eq('id', id)
@@ -102,10 +68,9 @@ export async function POST(
   }
 
   return NextResponse.json({
-   success: true,
-   case_number: mockCaseNumber,
-   reference_id: mockReferenceId,
-   message: 'Ansökan skickad till Skatteverket',
+   error: 'Skatteverket-integration är inte konfigurerad. ROT-ansökan har sparats lokalt men har inte skickats till Skatteverket.',
+   status: 'pending_integration',
+   submitted: false,
   })
  } catch (err: any) {
   console.error('Error submitting ROT application:', err)

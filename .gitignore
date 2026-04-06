@@ -8,3 +8,4 @@ credentials/google/*.json
 .vercel
 mobile/node_modules/
 mobile/.expo/
+gcp-docai-key.json

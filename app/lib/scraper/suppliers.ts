@@ -1,7 +1,9 @@
-import * as cheerio from 'cheerio'
-
 // ──────────────────────────────────────────────
-// Types
+// Supplier price scrapers — API-based
+// ──────────────────────────────────────────────
+// Byggmax: Magento 2 GraphQL (public, no auth)
+// XL-Bygg: Next.js data route (public, no auth)
+// Beijer / Ahlsell: via Apify Prisjakt actor (optional)
 // ──────────────────────────────────────────────
 
 export interface CatalogItem {
@@ -19,361 +21,244 @@ export interface CatalogItem {
 export interface SupplierScraper {
   name: string
   baseUrl: string
-  /** Scrape a single category page URL and return parsed items */
+  /** Fetch products for a given category or page */
   scrapeCategory(url: string): Promise<CatalogItem[]>
-  /** Return the list of category URLs to scrape */
+  /** Return the list of category URLs / page URLs to scrape */
   getCategoryUrls(): string[]
 }
 
 // ──────────────────────────────────────────────
-// Rate limiter — 1 request per 2 seconds
+// Rate limiter — 1 req per second for API calls
 // ──────────────────────────────────────────────
 
 let lastRequestAt = 0
 
-async function rateLimitedFetch(url: string): Promise<string> {
+async function rateLimitedFetch(
+  url: string,
+  init?: RequestInit
+): Promise<Response> {
   const now = Date.now()
   const elapsed = now - lastRequestAt
-  if (elapsed < 2000) {
-    await new Promise((r) => setTimeout(r, 2000 - elapsed))
+  if (elapsed < 1000) {
+    await new Promise((r) => setTimeout(r, 1000 - elapsed))
   }
   lastRequestAt = Date.now()
 
   const res = await fetch(url, {
+    ...init,
     headers: {
       'User-Agent':
         'Mozilla/5.0 (compatible; FrostSolutions-PriceBot/1.0; +https://frostsolutions.se)',
-      Accept: 'text/html,application/xhtml+xml',
+      Accept: 'application/json',
+      ...init?.headers,
     },
     signal: AbortSignal.timeout(15_000),
   })
 
   if (!res.ok) {
-    throw new Error(`Failed to fetch ${url}: ${res.status} ${res.statusText}`)
+    throw new Error(`Fetch failed ${url}: ${res.status} ${res.statusText}`)
   }
 
-  return res.text()
+  return res
 }
 
 // ──────────────────────────────────────────────
-// Byggmax scraper (Magento 2 structured product pages)
+// Byggmax — Magento 2 GraphQL API
 // ──────────────────────────────────────────────
+
+const BYGGMAX_GRAPHQL = 'https://www.byggmax.se/graphql'
+
+const BYGGMAX_CATEGORIES = [
+  'trall',
+  'virke',
+  'skivor',
+  'isolering',
+  'golv',
+  'faerg',
+  'skruv',
+  'beslag',
+]
+
+function byggmaxQuery(search: string, page: number, pageSize = 40): string {
+  return JSON.stringify({
+    query: `{
+      products(search: "${search}", pageSize: ${pageSize}, currentPage: ${page}) {
+        total_count
+        page_info { current_page total_pages }
+        items {
+          name
+          sku
+          url_key
+          price_range {
+            minimum_price {
+              final_price { value currency }
+              regular_price { value currency }
+            }
+          }
+          stock_status
+        }
+      }
+    }`,
+  })
+}
 
 export const byggmaxScraper: SupplierScraper = {
   name: 'Byggmax',
   baseUrl: 'https://www.byggmax.se',
 
   getCategoryUrls() {
-    return [
-      'https://www.byggmax.se/byggvaror/trae',
-      'https://www.byggmax.se/byggvaror/skivor',
-      'https://www.byggmax.se/byggvaror/isolering',
-      'https://www.byggmax.se/byggvaror/golv',
-      'https://www.byggmax.se/byggvaror/faerg-tapeter',
-    ]
+    // Each "URL" is a search term — we iterate pages inside scrapeCategory
+    return BYGGMAX_CATEGORIES.map((cat) => `graphql:${cat}`)
   },
 
   async scrapeCategory(url: string): Promise<CatalogItem[]> {
-    const html = await rateLimitedFetch(url)
-    const $ = cheerio.load(html)
-    const items: CatalogItem[] = []
+    const searchTerm = url.replace('graphql:', '')
+    const allItems: CatalogItem[] = []
+    let page = 1
+    let totalPages = 1
 
-    // Extract category from URL path
-    const categoryMatch = url.match(/\/([^/]+)$/)
-    const category = categoryMatch ? categoryMatch[1] : null
-
-    // Byggmax uses product list elements — adapt selectors to their Magento 2 layout
-    $('[data-product-id], .product-item, .product-card').each((_, el) => {
-      const $el = $(el)
-
-      const productName =
-        $el.find('.product-item-name, .product-name, .product-card__title, h2, h3').first().text().trim()
-      if (!productName) return
-
-      // Price parsing — look for structured price elements
-      const priceText =
-        $el.find('[data-price-amount], .price, .product-price, .product-card__price').first().text().trim()
-      const priceMatch = priceText.replace(/\s/g, '').match(/([\d]+[.,]?\d*)/)
-      if (!priceMatch) return
-
-      const priceSek = parseFloat(priceMatch[1].replace(',', '.'))
-      if (isNaN(priceSek) || priceSek <= 0) return
-
-      // Product URL
-      const linkHref = $el.find('a').first().attr('href') ?? ''
-      const productUrl = linkHref.startsWith('http')
-        ? linkHref
-        : `https://www.byggmax.se${linkHref}`
-
-      // SKU
-      const sku =
-        $el.attr('data-product-id') ??
-        $el.find('[data-sku]').attr('data-sku') ??
-        null
-
-      // Stock status
-      const stockText = $el.find('.stock, .availability, .product-card__stock').text().toLowerCase()
-      const inStock = stockText ? !stockText.includes('slut') : null
-
-      // Unit (default 'st')
-      const unitText = $el.find('.unit, .product-card__unit, .price-unit').text().trim()
-      const unit = unitText || 'st'
-
-      items.push({
-        supplier_name: 'Byggmax',
-        supplier_url: 'https://www.byggmax.se',
-        product_name: productName,
-        product_url: productUrl,
-        category,
-        sku,
-        price_sek: priceSek,
-        unit,
-        in_stock: inStock,
+    while (page <= totalPages && page <= 5) {
+      const res = await rateLimitedFetch(BYGGMAX_GRAPHQL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: byggmaxQuery(searchTerm, page),
       })
-    })
 
-    return items
+      const json = await res.json()
+      const products = json?.data?.products
+
+      if (!products?.items?.length) break
+
+      totalPages = products.page_info?.total_pages ?? 1
+
+      for (const item of products.items) {
+        const price =
+          item.price_range?.minimum_price?.final_price?.value ??
+          item.price_range?.minimum_price?.regular_price?.value
+        if (!price || price <= 0) continue
+
+        allItems.push({
+          supplier_name: 'Byggmax',
+          supplier_url: 'https://www.byggmax.se',
+          product_name: item.name,
+          product_url: `https://www.byggmax.se/${item.url_key}`,
+          category: searchTerm,
+          sku: item.sku ?? null,
+          price_sek: price,
+          unit: 'st',
+          in_stock: item.stock_status === 'IN_STOCK' ? true : item.stock_status === 'OUT_OF_STOCK' ? false : null,
+        })
+      }
+
+      page++
+    }
+
+    return allItems
   },
 }
 
 // ──────────────────────────────────────────────
-// Beijer Bygg scraper
+// XL-Bygg — Next.js data route
 // ──────────────────────────────────────────────
 
-export const beijerScraper: SupplierScraper = {
-  name: 'Beijer Bygg',
-  baseUrl: 'https://www.beijerbygg.se',
+async function getXlByggBuildId(): Promise<string> {
+  const res = await rateLimitedFetch('https://www.xlbygg.se/privat/produkter')
+  const html = await res.text()
 
-  getCategoryUrls() {
-    return [
-      'https://www.beijerbygg.se/privat/produkter/virke',
-      'https://www.beijerbygg.se/privat/produkter/skivor',
-      'https://www.beijerbygg.se/privat/produkter/isolering',
-      'https://www.beijerbygg.se/privat/produkter/golv',
-      'https://www.beijerbygg.se/privat/produkter/farg-och-tapet',
-    ]
-  },
-
-  async scrapeCategory(url: string): Promise<CatalogItem[]> {
-    const html = await rateLimitedFetch(url)
-    const $ = cheerio.load(html)
-    const items: CatalogItem[] = []
-
-    const categoryMatch = url.match(/\/([^/]+)$/)
-    const category = categoryMatch ? categoryMatch[1] : null
-
-    // Beijer uses a different product grid layout
-    $('.product-list-item, .product-card, [data-product-id], .product-tile').each((_, el) => {
-      const $el = $(el)
-
-      const productName =
-        $el.find('.product-card__name, .product-tile__title, .product-name, h3, h2').first().text().trim()
-      if (!productName) return
-
-      const priceText =
-        $el.find('.product-card__price, .product-tile__price, .price, [data-price]').first().text().trim()
-      const priceMatch = priceText.replace(/\s/g, '').match(/([\d]+[.,]?\d*)/)
-      if (!priceMatch) return
-
-      const priceSek = parseFloat(priceMatch[1].replace(',', '.'))
-      if (isNaN(priceSek) || priceSek <= 0) return
-
-      const linkHref = $el.find('a').first().attr('href') ?? ''
-      const productUrl = linkHref.startsWith('http')
-        ? linkHref
-        : `https://www.beijerbygg.se${linkHref}`
-
-      const sku =
-        $el.attr('data-product-id') ??
-        $el.find('[data-sku], [data-article-number]').first().attr('data-sku') ??
-        $el.find('[data-article-number]').first().attr('data-article-number') ??
-        null
-
-      const stockText = $el.find('.stock-status, .availability, .product-tile__stock').text().toLowerCase()
-      const inStock = stockText ? !stockText.includes('slut') : null
-
-      const unitText = $el.find('.unit, .price-unit, .product-tile__unit').text().trim()
-      const unit = unitText || 'st'
-
-      items.push({
-        supplier_name: 'Beijer Bygg',
-        supplier_url: 'https://www.beijerbygg.se',
-        product_name: productName,
-        product_url: productUrl,
-        category,
-        sku,
-        price_sek: priceSek,
-        unit,
-        in_stock: inStock,
-      })
-    })
-
-    return items
-  },
+  // Extract buildId from __NEXT_DATA__
+  const match = html.match(/"buildId"\s*:\s*"([^"]+)"/)
+  if (!match) throw new Error('Could not extract XL-Bygg buildId')
+  return match[1]
 }
-
-// ──────────────────────────────────────────────
-// XL-Bygg scraper
-// ──────────────────────────────────────────────
 
 export const xlByggScraper: SupplierScraper = {
   name: 'XL-Bygg',
-  baseUrl: 'https://www.xl-bygg.se',
+  baseUrl: 'https://www.xlbygg.se',
 
   getCategoryUrls() {
-    return [
-      'https://www.xl-bygg.se/produkter/virke-och-tra',
-      'https://www.xl-bygg.se/produkter/byggskivor',
-      'https://www.xl-bygg.se/produkter/isolering',
-      'https://www.xl-bygg.se/produkter/golv',
-      'https://www.xl-bygg.se/produkter/farg-och-tapet',
-    ]
+    // We generate page URLs dynamically in scrapeCategory
+    return ['xlbygg:all']
   },
 
-  async scrapeCategory(url: string): Promise<CatalogItem[]> {
-    const html = await rateLimitedFetch(url)
-    const $ = cheerio.load(html)
-    const items: CatalogItem[] = []
+  async scrapeCategory(_url: string): Promise<CatalogItem[]> {
+    const buildId = await getXlByggBuildId()
+    const allItems: CatalogItem[] = []
+    let page = 1
+    let totalPages = 1
 
-    const categoryMatch = url.match(/\/([^/]+)$/)
-    const category = categoryMatch ? categoryMatch[1] : null
+    // Scrape up to 10 pages (480 products) to stay reasonable
+    while (page <= totalPages && page <= 10) {
+      const dataUrl = `https://www.xlbygg.se/_next/data/${buildId}/privat/produkter.json?page=${page}`
+      const res = await rateLimitedFetch(dataUrl)
+      const json = await res.json()
 
-    // XL-Bygg uses a typical e-commerce product listing
-    $('.product-item, .product-card, .product-list__item, [data-product]').each((_, el) => {
-      const $el = $(el)
+      const data = json?.pageProps?.data
+      if (!data?.products?.length) break
 
-      const productName =
-        $el.find('.product-item__name, .product-card__title, .product-title, h3, h2').first().text().trim()
-      if (!productName) return
+      totalPages = Math.min(data.num_pages ?? 1, 10)
 
-      const priceText =
-        $el.find('.product-item__price, .product-card__price, .price, .current-price').first().text().trim()
-      const priceMatch = priceText.replace(/\s/g, '').match(/([\d]+[.,]?\d*)/)
-      if (!priceMatch) return
+      for (const p of data.products) {
+        // Price is in SEK öre (cents) — divide by 100
+        // Actually check: best_offer.price might be in öre or whole SEK
+        const rawPrice = p.best_offer?.price
+        if (!rawPrice || rawPrice <= 0) continue
 
-      const priceSek = parseFloat(priceMatch[1].replace(',', '.'))
-      if (isNaN(priceSek) || priceSek <= 0) return
+        // XL-Bygg stores prices in whole SEK with VAT included
+        const priceSek = rawPrice > 100000 ? rawPrice / 100 : rawPrice
 
-      const linkHref = $el.find('a').first().attr('href') ?? ''
-      const productUrl = linkHref.startsWith('http')
-        ? linkHref
-        : `https://www.xl-bygg.se${linkHref}`
+        const slug = p.slug ?? ''
+        const category = inferCategory(p.title ?? '')
 
-      const sku =
-        $el.attr('data-product') ??
-        $el.attr('data-product-id') ??
-        $el.find('[data-sku]').attr('data-sku') ??
-        null
+        allItems.push({
+          supplier_name: 'XL-Bygg',
+          supplier_url: 'https://www.xlbygg.se',
+          product_name: p.title ?? p.name ?? 'Okänd produkt',
+          product_url: slug
+            ? `https://www.xlbygg.se/privat/produkter/${slug}`
+            : 'https://www.xlbygg.se/privat/produkter',
+          category,
+          sku: p.article_ids?.[0] ?? String(p.id) ?? null,
+          price_sek: priceSek,
+          unit: (p.unit ?? p.best_offer?.unit_label ?? 'st').toLowerCase(),
+          in_stock:
+            p.stocked_warehouses?.jarnia?.status === 'IN_STOCK'
+              ? true
+              : p.stocked_warehouses?.jarnia?.status === 'OUT_OF_STOCK'
+                ? false
+                : p.is_sellable ?? null,
+        })
+      }
 
-      const stockText = $el.find('.stock, .stock-status, .availability').text().toLowerCase()
-      const inStock = stockText ? !stockText.includes('slut') : null
+      page++
+    }
 
-      const unitText = $el.find('.unit, .price-unit').text().trim()
-      const unit = unitText || 'st'
-
-      items.push({
-        supplier_name: 'XL-Bygg',
-        supplier_url: 'https://www.xl-bygg.se',
-        product_name: productName,
-        product_url: productUrl,
-        category,
-        sku,
-        price_sek: priceSek,
-        unit,
-        in_stock: inStock,
-      })
-    })
-
-    return items
+    return allItems
   },
 }
 
-// ──────────────────────────────────────────────
-// Ahlsell scraper
-// ──────────────────────────────────────────────
-
-export const ahlsellScraper: SupplierScraper = {
-  name: 'Ahlsell',
-  baseUrl: 'https://www.ahlsell.se',
-
-  getCategoryUrls() {
-    return [
-      'https://www.ahlsell.se/produkter/vvs/',
-      'https://www.ahlsell.se/produkter/el/',
-      'https://www.ahlsell.se/produkter/verktyg/',
-      'https://www.ahlsell.se/produkter/ror/',
-      'https://www.ahlsell.se/produkter/fastighet/',
-    ]
-  },
-
-  async scrapeCategory(url: string): Promise<CatalogItem[]> {
-    const html = await rateLimitedFetch(url)
-    const $ = cheerio.load(html)
-    const items: CatalogItem[] = []
-
-    const categoryMatch = url.match(/\/produkter\/([^/]+)/)
-    const category = categoryMatch ? categoryMatch[1] : null
-
-    // Ahlsell has a professional B2B product catalog layout
-    $('.product-list-item, .product-card, .search-result-item, [data-article-id]').each((_, el) => {
-      const $el = $(el)
-
-      const productName =
-        $el.find('.product-name, .product-card__name, .article-name, h3, h2').first().text().trim()
-      if (!productName) return
-
-      const priceText =
-        $el.find('.product-price, .price, .article-price, [data-price]').first().text().trim()
-      const priceMatch = priceText.replace(/\s/g, '').match(/([\d]+[.,]?\d*)/)
-      if (!priceMatch) return
-
-      const priceSek = parseFloat(priceMatch[1].replace(',', '.'))
-      if (isNaN(priceSek) || priceSek <= 0) return
-
-      const linkHref = $el.find('a').first().attr('href') ?? ''
-      const productUrl = linkHref.startsWith('http')
-        ? linkHref
-        : `https://www.ahlsell.se${linkHref}`
-
-      const sku =
-        $el.attr('data-article-id') ??
-        ($el.find('[data-sku], .article-number').first().text().trim() || null)
-
-      const stockText = $el.find('.stock-status, .availability, .stock-indicator').text().toLowerCase()
-      const inStock = stockText
-        ? stockText.includes('lager') || stockText.includes('tillgänglig')
-        : null
-
-      const unitText = $el.find('.unit, .price-unit, .article-unit').text().trim()
-      const unit = unitText || 'st'
-
-      items.push({
-        supplier_name: 'Ahlsell',
-        supplier_url: 'https://www.ahlsell.se',
-        product_name: productName,
-        product_url: productUrl,
-        category,
-        sku,
-        price_sek: priceSek,
-        unit,
-        in_stock: inStock,
-      })
-    })
-
-    return items
-  },
+/** Simple keyword-based category inference from product title */
+function inferCategory(title: string): string {
+  const t = title.toLowerCase()
+  if (t.includes('virke') || t.includes('trall') || t.includes('regel') || t.includes('planka'))
+    return 'virke'
+  if (t.includes('skiva') || t.includes('plywood') || t.includes('osb') || t.includes('gips'))
+    return 'skivor'
+  if (t.includes('isoler')) return 'isolering'
+  if (t.includes('golv') || t.includes('parkett') || t.includes('laminat')) return 'golv'
+  if (t.includes('färg') || t.includes('tapet') || t.includes('lack')) return 'farg'
+  if (t.includes('skruv') || t.includes('spik') || t.includes('bult') || t.includes('fäste'))
+    return 'skruv'
+  if (t.includes('rör') || t.includes('vvs') || t.includes('kran')) return 'vvs'
+  if (t.includes('kabel') || t.includes('el') || t.includes('kontakt')) return 'el'
+  if (t.includes('dörr') || t.includes('fönster')) return 'dorrar-fonster'
+  return 'övrigt'
 }
 
 // ──────────────────────────────────────────────
-// Registry of all scrapers
+// Registry
 // ──────────────────────────────────────────────
 
-export const ALL_SCRAPERS: SupplierScraper[] = [
-  byggmaxScraper,
-  beijerScraper,
-  xlByggScraper,
-  ahlsellScraper,
-]
+export const ALL_SCRAPERS: SupplierScraper[] = [byggmaxScraper, xlByggScraper]
 
 /** @deprecated Use ALL_SCRAPERS instead */
 export const allScrapers: SupplierScraper[] = ALL_SCRAPERS

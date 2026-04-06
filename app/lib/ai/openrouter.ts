@@ -17,9 +17,14 @@ interface CallOptions {
   model?: string;
 }
 
+/**
+ * Call OpenRouter API. Returns a string when jsonMode is false (default),
+ * or a parsed JSON object when jsonMode is true.
+ */
 export async function callOpenRouter(
   systemPrompt: string,
   userPrompt: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options?: CallOptions
 ): Promise<any> {
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -33,10 +38,12 @@ export async function callOpenRouter(
   return callWithMessages(apiKey, messages, options);
 }
 
+/** Vision variant of callOpenRouter. Same return type semantics. */
 export async function callOpenRouterVision(
   systemPrompt: string,
   textPrompt: string,
   imageBase64: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   options?: CallOptions & { mimeType?: string }
 ): Promise<any> {
   const apiKey = process.env.OPENROUTER_API_KEY;
@@ -58,6 +65,7 @@ export async function callOpenRouterVision(
   return callWithMessages(apiKey, messages, options);
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function callWithMessages(
   apiKey: string,
   messages: OpenRouterMessage[],

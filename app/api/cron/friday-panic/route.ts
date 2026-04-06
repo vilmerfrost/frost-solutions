@@ -1,22 +1,31 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
 
-// VIKTIGT: Här skapar vi en klient som kan se ALLA användare (Service Role)
-// Detta krävs för att kunna leta upp slarvers oavsett vem som är inloggad.
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
-
 export async function GET(request: Request) {
   // 1. SÄKERHET: Kolla att anropet verkligen kommer från Vercel Cron
   // Vercel skickar automatiskt med denna header när jobbet körs.
   const authHeader = request.headers.get('authorization');
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  const cronSecret = process.env.CRON_SECRET;
+
+  if (!cronSecret) {
+    return new NextResponse('CRON_SECRET is not configured', { status: 503 });
+  }
+
+  if (authHeader !== `Bearer ${cronSecret}`) {
     return new NextResponse('Unauthorized', { status: 401 });
   }
 
   try {
+    const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+    if (!supabaseUrl || !serviceRoleKey) {
+      return new NextResponse('Supabase is not configured', { status: 503 });
+    }
+
+    // Create the admin client lazily so the route does not crash at build time.
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+
     // 2. LOGIK: Hitta de som inte rapporterat tid
     // Exempel: Vi kollar vilka som inte loggat in eller uppdaterat något på 3 dagar
     const threeDaysAgo = new Date();

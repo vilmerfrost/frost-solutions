@@ -55,7 +55,7 @@ export default function ChecklistsPage() {
       const url = statusFilter
         ? `/api/projects/${projectId}/checklists?status=${statusFilter}`
         : `/api/projects/${projectId}/checklists`
-      const res = await apiFetch(url)
+      const res: any = await apiFetch(url)
       setChecklists(res.checklists || [])
     } catch (err: any) {
       toast.error(err.message)
@@ -66,7 +66,7 @@ export default function ChecklistsPage() {
 
   async function fetchTemplates() {
     try {
-      const res = await apiFetch('/api/templates/checklists')
+      const res: any = await apiFetch('/api/templates/checklists')
       setTemplates(res.templates || [])
     } catch {
       // Templates may not exist yet
@@ -75,7 +75,7 @@ export default function ChecklistsPage() {
 
   async function handleCreateChecklist(templateId: string) {
     try {
-      const res = await apiFetch(`/api/projects/${projectId}/checklists`, {
+      const res: any = await apiFetch(`/api/projects/${projectId}/checklists`, {
         method: 'POST',
         body: JSON.stringify({ templateId }),
       })

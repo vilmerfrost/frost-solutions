@@ -5,13 +5,58 @@
  * Based on GPT-5 implementation with retry logic and fallback
  */
 
+import {
+ TextractClient,
+ StartExpenseAnalysisCommand,
+ GetExpenseAnalysisCommand,
+ AnalyzeExpenseCommand,
+ type ExpenseDocument,
+} from '@aws-sdk/client-textract';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { OCRProcessingError } from '../errors';
-import type { OCRProvider } from '@/types/ocr';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
+async function cleanupS3File(bucket: string, key: string): Promise<void> {
+ const s3 = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+   accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+ });
+ await s3.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
+}
+
+function getTextractClient(): TextractClient {
+ const region = process.env.AWS_REGION;
+ const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
+ const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
+
+ if (!region || !accessKeyId || !secretAccessKey) {
+  throw new OCRProcessingError(
+   'AWS credentials missing. Set AWS_REGION, AWS_ACCESS_KEY_ID, and AWS_SECRET_ACCESS_KEY environment variables.',
+   'TEXTRACT_CONFIG_MISSING'
+  );
+ }
+
+ return new TextractClient({
+  region,
+  credentials: { accessKeyId, secretAccessKey },
+ });
+}
+
+export interface TextractBlock {
+ BlockType: string;
+ Text: string;
+ Confidence: number;
+ FieldType?: string;
+ FieldValue?: string;
+ IsLineItem?: boolean;
+}
+
 export interface TextractResult {
- blocks: any[];
+ blocks: TextractBlock[];
  rawText: string;
  modelConfidence: number; // 0-100
 }
@@ -49,23 +94,25 @@ export async function runTextract(
   modelConfidence: 92,
  };
 
- // PRODUCTION NOTE: OCR uses mock data by default until AWS Textract is configured
- // To enable real OCR:
- // 1. Set OCR_USE_MOCK=false in .env.local
- // 2. Configure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_REGION
- const useMock = (process.env.OCR_USE_MOCK ?? 'true').toLowerCase() !== 'false';
- 
+ // Mock defaults to true in development, but throws in production to prevent silent fake data
+ const useMock = process.env.OCR_USE_MOCK === 'true' ||
+  (process.env.OCR_USE_MOCK === undefined && process.env.NODE_ENV !== 'production');
+
  const hasAwsConfig =
   Boolean(process.env.AWS_ACCESS_KEY_ID) &&
   Boolean(process.env.AWS_SECRET_ACCESS_KEY) &&
   Boolean(process.env.AWS_REGION);
 
- if (useMock || !hasAwsConfig) {
-  // Log for debugging - this is expected in development/demo mode
-  if (process.env.NODE_ENV === 'development') {
-   console.log('[OCR] Using mock data (OCR_USE_MOCK=true or AWS not configured)');
-  }
+ if (useMock) {
+  console.warn('[OCR] AWS Textract running in MOCK mode. Set OCR_USE_MOCK=false to use real OCR.');
   return mockResult;
+ }
+
+ if (!hasAwsConfig) {
+  throw new OCRProcessingError(
+   'AWS Textract is not configured. Set AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_REGION, or set OCR_USE_MOCK=true to use mock data.',
+   'TEXTRACT_NOT_CONFIGURED',
+  );
  }
 
  const isPdf = mimeType === 'application/pdf';
@@ -76,8 +123,10 @@ export async function runTextract(
    // AWS Textract implementation - requires AWS credentials configuration
    if (isPdf) {
     // StartDocumentAnalysis + poll for PDF
-    const jobId = await startTextractPdfJob(fileBytes);
+    const { jobId, s3Key, s3Bucket } = await startTextractPdfJob(fileBytes);
     const result = await pollTextractJob(jobId);
+    // Clean up the staging file from S3
+    cleanupS3File(s3Bucket, s3Key).catch(() => {});
     return result;
    } else {
     // AnalyzeDocument for images
@@ -106,76 +155,268 @@ export async function runTextract(
 }
 
 /**
- * Start async PDF analysis job
- * TODO: Implement with AWS SDK v3
+ * Start async expense analysis job for PDFs.
+ * Uses StartExpenseAnalysisCommand which is optimized for invoices/receipts.
+ * The document bytes are sent inline (no S3 bucket required).
  */
-async function startTextractPdfJob(_fileBytes: Uint8Array): Promise<string> {
- // Placeholder - implement with AWS SDK
- // const client = new TextractClient({ region: process.env.AWS_REGION });
- // const command = new StartDocumentAnalysisCommand({...});
- // const response = await client.send(command);
- // return response.JobId;
- 
- throw new Error('AWS Textract not configured. Set AWS_REGION, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY');
+async function startTextractPdfJob(fileBytes: Uint8Array): Promise<{ jobId: string; s3Key: string; s3Bucket: string }> {
+ const client = getTextractClient();
+
+ // StartExpenseAnalysis requires an S3 document location (no inline bytes).
+ // We upload to a staging bucket, then start the async job.
+ const bucket = process.env.AWS_TEXTRACT_S3_BUCKET;
+ if (!bucket) {
+  throw new OCRProcessingError(
+   'AWS_TEXTRACT_S3_BUCKET is required for async PDF processing. ' +
+   'Set this environment variable to an S3 bucket name where Textract can read documents.',
+   'TEXTRACT_S3_MISSING'
+  );
+ }
+
+ // Upload bytes to S3 first, then start the async job
+ const s3 = new S3Client({
+  region: process.env.AWS_REGION!,
+  credentials: {
+   accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+  },
+ });
+
+ const key = `textract-input/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.pdf`;
+
+ await s3.send(
+  new PutObjectCommand({
+   Bucket: bucket,
+   Key: key,
+   Body: fileBytes,
+   ContentType: 'application/pdf',
+  })
+ );
+
+ const startCommand = new StartExpenseAnalysisCommand({
+  DocumentLocation: {
+   S3Object: { Bucket: bucket, Name: key },
+  },
+ });
+
+ try {
+  const response = await client.send(startCommand);
+
+  if (!response.JobId) {
+   throw new OCRProcessingError(
+    'Textract StartExpenseAnalysis returned no JobId',
+    'TEXTRACT_NO_JOB_ID'
+   );
+  }
+
+  return { jobId: response.JobId, s3Key: key, s3Bucket: bucket };
+ } catch (err: any) {
+  if (err instanceof OCRProcessingError) throw err;
+
+  const code = err.name || err.Code || '';
+  if (code === 'ThrottlingException' || code === 'ProvisionedThroughputExceededException') {
+   throw new OCRProcessingError(
+    'AWS Textract rate limit exceeded. Try again later.',
+    'TEXTRACT_THROTTLED',
+    { originalError: String(err) }
+   );
+  }
+  if (code === 'InvalidS3ObjectException' || code === 'UnsupportedDocumentException') {
+   throw new OCRProcessingError(
+    `Invalid document format: ${err.message}`,
+    'TEXTRACT_INVALID_DOCUMENT',
+    { originalError: String(err) }
+   );
+  }
+
+  throw new OCRProcessingError(
+   `Textract StartExpenseAnalysis failed: ${err.message}`,
+   'TEXTRACT_START_FAILED',
+   { originalError: String(err) }
+  );
+ }
 }
 
 /**
- * Poll for PDF analysis completion
- * TODO: Implement with AWS SDK v3
+ * Poll for expense analysis completion.
+ * Polls every 2 seconds, up to 90 seconds max (45 attempts).
+ * Paginates through all result pages on success.
  */
-async function pollTextractJob(_jobId: string): Promise<TextractResult> {
- // Placeholder - implement polling logic
- // const client = new TextractClient({ region: process.env.AWS_REGION });
- // while (true) {
- //  const command = new GetDocumentAnalysisCommand({ JobId: jobId });
- //  const response = await client.send(command);
- //  if (response.JobStatus === 'SUCCEEDED') {
- //   return parseTextractResponse(response);
- //  }
- //  await sleep(2000);
- // }
- 
- throw new Error('AWS Textract polling not implemented');
+async function pollTextractJob(jobId: string): Promise<TextractResult> {
+ const client = getTextractClient();
+ const maxAttempts = 45;
+ const pollInterval = 2000;
+
+ for (let attempt = 0; attempt < maxAttempts; attempt++) {
+  const command = new GetExpenseAnalysisCommand({ JobId: jobId });
+
+  try {
+   const response = await client.send(command);
+   const status = response.JobStatus;
+
+   if (status === 'SUCCEEDED') {
+    // Collect expense documents from all pages
+    let allExpenseDocuments: ExpenseDocument[] = response.ExpenseDocuments ?? [];
+    let nextToken = response.NextToken;
+
+    while (nextToken) {
+     const nextCommand = new GetExpenseAnalysisCommand({
+      JobId: jobId,
+      NextToken: nextToken,
+     });
+     const nextResponse = await client.send(nextCommand);
+     allExpenseDocuments = allExpenseDocuments.concat(nextResponse.ExpenseDocuments ?? []);
+     nextToken = nextResponse.NextToken;
+    }
+
+    return parseExpenseDocuments(allExpenseDocuments);
+   }
+
+   if (status === 'FAILED') {
+    throw new OCRProcessingError(
+     `Textract job failed: ${response.StatusMessage ?? 'Unknown error'}`,
+     'TEXTRACT_JOB_FAILED',
+     { jobId, statusMessage: response.StatusMessage }
+    );
+   }
+
+   // IN_PROGRESS or PARTIAL_SUCCESS — keep polling
+   await sleep(pollInterval);
+  } catch (err: any) {
+   if (err instanceof OCRProcessingError) throw err;
+
+   throw new OCRProcessingError(
+    `Textract polling error: ${err.message}`,
+    'TEXTRACT_POLL_ERROR',
+    { jobId, originalError: String(err) }
+   );
+  }
+ }
+
+ throw new OCRProcessingError(
+  `Textract job timed out after ${(maxAttempts * pollInterval) / 1000}s`,
+  'TEXTRACT_TIMEOUT',
+  { jobId }
+ );
 }
 
 /**
- * Analyze image synchronously
- * TODO: Implement with AWS SDK v3
+ * Synchronous expense analysis for single-page images.
+ * Uses AnalyzeExpenseCommand with inline bytes (no S3 needed).
+ * Extracts invoice fields: vendor, invoice number, date, line items, totals.
  */
-async function analyzeImage(_fileBytes: Uint8Array): Promise<TextractResult> {
- // Placeholder - implement AnalyzeDocument
- // const client = new TextractClient({ region: process.env.AWS_REGION });
- // const command = new AnalyzeDocumentCommand({
- //  Document: { Bytes: fileBytes },
- //  FeatureTypes: ['TABLES', 'FORMS']
- // });
- // const response = await client.send(command);
- // return parseTextractResponse(response);
- 
- throw new Error('AWS Textract not configured');
+async function analyzeImage(fileBytes: Uint8Array): Promise<TextractResult> {
+ const client = getTextractClient();
+
+ const command = new AnalyzeExpenseCommand({
+  Document: { Bytes: fileBytes },
+ });
+
+ try {
+  const response = await client.send(command);
+  return parseExpenseDocuments(response.ExpenseDocuments ?? []);
+ } catch (err: any) {
+  const code = err.name || err.Code || '';
+
+  if (code === 'ThrottlingException' || code === 'ProvisionedThroughputExceededException') {
+   throw new OCRProcessingError(
+    'AWS Textract rate limit exceeded. Try again later.',
+    'TEXTRACT_THROTTLED',
+    { originalError: String(err) }
+   );
+  }
+  if (code === 'UnsupportedDocumentException') {
+   throw new OCRProcessingError(
+    `Unsupported image format: ${err.message}`,
+    'TEXTRACT_INVALID_DOCUMENT',
+    { originalError: String(err) }
+   );
+  }
+  if (code === 'InvalidParameterException') {
+   throw new OCRProcessingError(
+    `Invalid document: ${err.message}`,
+    'TEXTRACT_INVALID_DOCUMENT',
+    { originalError: String(err) }
+   );
+  }
+
+  throw new OCRProcessingError(
+   `Textract AnalyzeExpense failed: ${err.message}`,
+   'TEXTRACT_ANALYZE_FAILED',
+   { originalError: String(err) }
+  );
+ }
 }
 
 /**
- * Parse Textract response to standard format
+ * Parse Textract ExpenseDocuments into the standard TextractResult format.
+ * Extracts summary fields and line items from the expense analysis response,
+ * mapping them into Block-like structures compatible with the rest of the pipeline.
  */
-function parseTextractResponse(response: any): TextractResult {
- const blocks = response.Blocks || [];
- const rawText = blocks
-  .filter((b: any) => b.BlockType === 'LINE')
-  .map((b: any) => b.Text)
-  .join('\n');
- 
- const confidences = blocks
-  .filter((b: any) => b.Confidence !== undefined)
-  .map((b: any) => b.Confidence);
- 
+function parseExpenseDocuments(expenseDocuments: ExpenseDocument[]): TextractResult {
+ const blocks: TextractBlock[] = [];
+ const textLines: string[] = [];
+ const confidences: number[] = [];
+
+ for (const doc of expenseDocuments) {
+  // Process summary fields (vendor, invoice number, date, totals, etc.)
+  for (const group of doc.SummaryFields ?? []) {
+   const fieldType = group.Type?.Text ?? '';
+   const fieldValue = group.ValueDetection?.Text ?? '';
+   const confidence = group.ValueDetection?.Confidence ?? 0;
+
+   if (fieldValue) {
+    const line = fieldType ? `${fieldType}: ${fieldValue}` : fieldValue;
+    blocks.push({
+     BlockType: 'LINE',
+     Text: line,
+     Confidence: confidence,
+     FieldType: fieldType,
+     FieldValue: fieldValue,
+    });
+    textLines.push(line);
+    confidences.push(confidence);
+   }
+  }
+
+  // Process line item groups (individual invoice rows)
+  for (const lineItemGroup of doc.LineItemGroups ?? []) {
+   for (const lineItem of lineItemGroup.LineItems ?? []) {
+    const parts: string[] = [];
+    for (const field of lineItem.LineItemExpenseFields ?? []) {
+     const fieldType = field.Type?.Text ?? '';
+     const fieldValue = field.ValueDetection?.Text ?? '';
+     const confidence = field.ValueDetection?.Confidence ?? 0;
+
+     if (fieldValue) {
+      parts.push(fieldValue);
+      confidences.push(confidence);
+     }
+    }
+
+    if (parts.length > 0) {
+     const lineText = parts.join(' ');
+     blocks.push({
+      BlockType: 'LINE',
+      Text: lineText,
+      Confidence: confidences.length > 0
+       ? confidences[confidences.length - 1]
+       : 0,
+      IsLineItem: true,
+     });
+     textLines.push(lineText);
+    }
+   }
+  }
+ }
+
  const modelConfidence = confidences.length > 0
-  ? confidences.reduce((a: number, b: number) => a + b, 0) / confidences.length
+  ? confidences.reduce((a, b) => a + b, 0) / confidences.length
   : 0;
 
  return {
   blocks,
-  rawText,
+  rawText: textLines.join('\n'),
   modelConfidence: Math.round(modelConfidence),
  };
 }

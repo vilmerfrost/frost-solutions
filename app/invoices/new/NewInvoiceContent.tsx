@@ -86,73 +86,70 @@ export default function NewInvoiceContent() {
   return date.toISOString().split('T')[0]
  })()
 
- // Fetch clients on mount
+ // Fetch clients and projects in parallel on mount
  useEffect(() => {
-  async function fetchClients() {
-   if (!tenantId) {
-    console.log('No tenantId, skipping client fetch')
-    return
-   }
+  if (!tenantId) {
+   console.log('No tenantId, skipping client/project fetch')
+   return
+  }
 
-   console.log('Fetching clients for tenant:', tenantId)
-   try {
-    // Try with org_number first
-    const result = await supabase
-     .from('clients')
-     .select('id, name, org_number')
-     .eq('tenant_id', tenantId as string)
-     .order('name', { ascending: true })
-    
-    let clientsData: any = result.data
-    let error: any = result.error
+  async function fetchClientsAndProjects() {
+   setLoadingProjects(true)
 
-    // If org_number column doesn't exist, retry without it
-    if (error && (error.code === '42703' || error.message?.includes('does not exist'))) {
-     const fallback: any = await supabase
+   const fetchClients = async () => {
+    console.log('Fetching clients for tenant:', tenantId)
+    try {
+     // Try with org_number first
+     const result = await supabase
       .from('clients')
-      .select('id, name')
+      .select('id, name, org_number')
       .eq('tenant_id', tenantId as string)
       .order('name', { ascending: true })
-     
-     if (!fallback.error && fallback.data) {
-      clientsData = fallback.data.map((c: any) => ({ ...c, org_number: null }))
-      error = null
+
+     let clientsData: any = result.data
+     let error: any = result.error
+
+     // If org_number column doesn't exist, retry without it
+     if (error && (error.code === '42703' || error.message?.includes('does not exist'))) {
+      const fallback: any = await supabase
+       .from('clients')
+       .select('id, name')
+       .eq('tenant_id', tenantId as string)
+       .order('name', { ascending: true })
+
+      if (!fallback.error && fallback.data) {
+       clientsData = fallback.data.map((c: any) => ({ ...c, org_number: null }))
+       error = null
+      }
      }
-    }
 
-    if (error) {
-     console.error('Error fetching clients:', error)
+     if (error) {
+      console.error('Error fetching clients:', error)
+      setClients([])
+     } else {
+      console.log('Clients fetched:', clientsData?.length || 0)
+      setClients(clientsData || [])
+     }
+    } catch (err) {
+     console.error('Unexpected error fetching clients:', err)
      setClients([])
-    } else {
-     console.log('Clients fetched:', clientsData?.length || 0)
-     setClients(clientsData || [])
     }
-   } catch (err) {
-    console.error('Unexpected error fetching clients:', err)
-    setClients([])
    }
+
+   const fetchProjects = async () => {
+    try {
+     const data = await apiFetch<{ projects?: any[] }>(`/api/projects/list?tenantId=${tenantId}`)
+     setProjects(data.projects || [])
+    } catch (err) {
+     console.error('Error fetching projects:', err)
+    }
+   }
+
+   await Promise.all([fetchClients(), fetchProjects()])
+   setLoadingProjects(false)
   }
 
-  fetchClients()
- }, [tenantId])
-
- // Fetch projects on mount
- useEffect(() => {
-  async function fetchProjects() {
-   if (!tenantId) return
-
-   setLoadingProjects(true)
-   try {
-    const data = await apiFetch<{ projects?: any[] }>(`/api/projects/list?tenantId=${tenantId}`)
-    setProjects(data.projects || [])
-   } catch (err) {
-    console.error('Error fetching projects:', err)
-   } finally {
-    setLoadingProjects(false)
-   }
-  }
-
-  fetchProjects()
+  fetchClientsAndProjects()
  }, [tenantId])
 
  useEffect(() => {
@@ -384,13 +381,20 @@ export default function NewInvoiceContent() {
         // Continue anyway - we can still mark entries as billed
        }
 
-       // Mark time entries as billed
-       await (supabase
-        .from('time_entries') as any)
-        .update({ is_billed: true })
-        .eq('project_id', projectId)
-        .eq('is_billed', false)
-        .eq('tenant_id', tenantId)
+       // Ask user before marking time entries as billed
+       const entryCount = entriesData.length
+       const shouldMarkBilled = window.confirm(
+        `Markera ${entryCount} tidrapporter som fakturerade?`
+       )
+
+       if (shouldMarkBilled) {
+        await (supabase
+         .from('time_entries') as any)
+         .update({ is_billed: true })
+         .eq('project_id', projectId)
+         .eq('is_billed', false)
+         .eq('tenant_id', tenantId)
+       }
       }
      } catch (err) {
       console.error('Error creating invoice lines:', err)

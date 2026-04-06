@@ -41,6 +41,8 @@ export function buildPAXml(input: BuildPAXmlInput): string {
  * Handles missing columns gracefully
  */
 function resolvePAXmlWageCode(te: any): string {
+ // TODO: Integrate with actual OB/OT mapping from rates.ts
+ console.warn('Payroll export using default wage codes — custom OB/OT rates not integrated');
  // Overtime codes (ÖT) - check if column exists
  if (te.ot_type !== undefined && te.ot_type !== null) {
   if (te.ot_type === 'ot1') return 'ÖT1'; // 50%

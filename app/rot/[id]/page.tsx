@@ -41,6 +41,8 @@ interface StatusHistory {
 
 const statusLabels: Record<string, string> = {
  draft: 'Utkast',
+ pending_submission: 'Väntar på inskick',
+ pending_integration: 'Väntar på integration',
  submitted: 'Inskickad',
  under_review: 'Under handläggning',
  approved: 'Godkänd',
@@ -51,6 +53,8 @@ const statusLabels: Record<string, string> = {
 
 const statusColors: Record<string, string> = {
  draft: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300',
+ pending_submission: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
+ pending_integration: 'bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300',
  submitted: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
  under_review: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
  approved: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
@@ -70,7 +74,6 @@ export default function RotApplicationDetailPage() {
  const [loading, setLoading] = useState(true)
  const [submitting, setSubmitting] = useState(false)
  const [checkingStatus, setCheckingStatus] = useState(false)
- const [showBankIdModal, setShowBankIdModal] = useState(false)
 
  // Move loadData outside useEffect so it can be called from other functions
  async function loadData() {
@@ -78,34 +81,29 @@ export default function RotApplicationDetailPage() {
 
   setLoading(true)
   try {
-   // Load application
-   const { data: appData, error: appError } = await supabase
-    .from('rot_applications')
-    .select(`
-     *,
-     projects(name),
-     clients(name)
-    `)
-    .eq('id', applicationId)
-    .eq('tenant_id', tenantId)
-    .single()
+   // Load application and status history in parallel
+   const [appResult, historyResult] = await Promise.all([
+    (supabase as any)
+     .from('rot_applications')
+     .select('*, projects(name), clients(name)')
+     .eq('id', applicationId)
+     .eq('tenant_id', tenantId)
+     .single(),
+    (supabase as any)
+     .from('rot_status_history')
+     .select('*')
+     .eq('rot_application_id', applicationId)
+     .order('created_at', { ascending: false }),
+   ])
 
-   if (appError || !appData) {
+   if (appResult.error || !appResult.data) {
     toast.error('Kunde inte ladda ROT-ansökan')
     setLoading(false)
     return
    }
 
-   setApplication(appData as RotApplication)
-
-   // Load status history
-   const { data: historyData } = await supabase
-    .from('rot_status_history')
-    .select('*')
-    .eq('rot_application_id', applicationId)
-    .order('created_at', { ascending: false })
-
-   setStatusHistory((historyData || []) as StatusHistory[])
+   setApplication(appResult.data as RotApplication)
+   setStatusHistory((historyResult.data ?? []) as StatusHistory[])
   } catch (err: any) {
    console.error('Error loading ROT application:', err)
    toast.error('Kunde inte ladda ROT-ansökan')
@@ -129,25 +127,25 @@ export default function RotApplicationDetailPage() {
    return
   }
 
-  // Show BankID modal first
-  setShowBankIdModal(true)
-  
-  // Then submit in background
   setSubmitting(true)
 
   try {
-   await apiFetch(`/api/rot/${applicationId}/submit`, {
+   const result = await apiFetch<{ submitted?: boolean; error?: string; status?: string }>(`/api/rot/${applicationId}/submit`, {
     method: 'POST',
    })
 
-   toast.success('Ansökan skickad till Skatteverket!')
+   if (result.submitted === false) {
+    // Integration not configured — show honest warning
+    toast.error(result.error || 'Skatteverket-integration saknas. Ansökan sparad lokalt.')
+   } else {
+    toast.success('Ansökan skickad till Skatteverket!')
+   }
    await loadData() // Reload to get updated status
   } catch (err: any) {
    console.error('Error submitting ROT application:', err)
    toast.error('Kunde inte skicka ansökan: ' + (err.message || 'Okänt fel'))
   } finally {
    setSubmitting(false)
-   setShowBankIdModal(false)
   }
  }
 
@@ -160,11 +158,15 @@ export default function RotApplicationDetailPage() {
   setCheckingStatus(true)
 
   try {
-   await apiFetch(`/api/rot/${applicationId}/status`, {
+   const result = await apiFetch<{ status?: string; message?: string }>(`/api/rot/${applicationId}/status`, {
     method: 'POST',
    })
 
-   toast.success('Status uppdaterad!')
+   if (result.status === 'pending_integration') {
+    toast.error(result.message || 'Statusuppdatering från Skatteverket är inte tillgänglig. Kontrollera manuellt på skatteverket.se.')
+   } else {
+    toast.success('Status uppdaterad!')
+   }
    await loadData()
   } catch (err: any) {
    console.error('Error checking status:', err)
@@ -302,7 +304,7 @@ export default function RotApplicationDetailPage() {
         </button>
        )}
        
-       {['submitted', 'under_review'].includes(application.status) && (
+       {['pending_submission', 'submitted', 'under_review'].includes(application.status) && (
         <button
          onClick={handleCheckStatus}
          disabled={checkingStatus}
@@ -467,9 +469,13 @@ export default function RotApplicationDetailPage() {
          rotAmount: application.work_cost_sek,
          rutAmount: undefined,
         }}
-        onSummaryGenerated={(summary) => {
-         // Optionally save to database
-         console.log('AI Summary generated:', summary);
+        onSummaryGenerated={async (summary) => {
+         try {
+          await (supabase as any).from('rot_applications').update({ ai_summary: summary }).eq('id', applicationId);
+         } catch (err) {
+          // ai_summary column may not exist yet — graceful degradation
+          console.warn('Could not persist AI summary:', err);
+         }
          toast.success('AI-sammanfattning genererad!');
         }}
        />
@@ -522,38 +528,6 @@ export default function RotApplicationDetailPage() {
     </div>
    </main>
 
-   {/* BankID Modal */}
-   {showBankIdModal && (
-    <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-     <div className="bg-gray-50 dark:bg-gray-900 rounded-[8px] shadow-xl max-w-md w-full p-6">
-      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-       BankID-autentisering krävs
-      </h3>
-      <p className="text-gray-600 dark:text-gray-400 mb-6">
-       För att skicka ROT-ansökan till Skatteverket behöver du logga in med BankID på Skatteverkets e-tjänst.
-      </p>
-      <div className="space-y-3">
-       <a
-        href="https://skatteverket.se/rotochrut"
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block w-full bg-primary-500 hover:bg-primary-600 text-gray-900 px-6 py-3 rounded-[8px] font-bold text-center shadow-md hover:shadow-xl transition-all"
-       >
-        Öppna Skatteverkets ROT/RUT-sida
-       </a>
-       <button
-        onClick={() => setShowBankIdModal(false)}
-        className="w-full px-6 py-3 rounded-[8px] border-2 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 font-semibold hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
-       >
-        Stäng
-       </button>
-      </div>
-      <p className="mt-4 text-xs text-gray-500 dark:text-gray-400 text-center">
-       Ansökan kommer att skickas automatiskt när du har autentiserat dig med BankID.
-      </p>
-     </div>
-    </div>
-   )}
   </div>
  )
 }

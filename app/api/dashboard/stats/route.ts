@@ -41,7 +41,7 @@ export async function GET(_req: NextRequest) {
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7)
   const oneWeekAgoStr = oneWeekAgo.toISOString().slice(0, 10)
 
-  // Fetch time entries (limit to employee if not admin)
+  // Build time entries query (scoped to employee if not admin)
   let timeEntriesQuery = admin
    .from('time_entries')
    .select('hours_total, hours, employee_id')
@@ -53,46 +53,33 @@ export async function GET(_req: NextRequest) {
    timeEntriesQuery = timeEntriesQuery.eq('employee_id', employeeId)
   }
 
-  const { data: timeEntries, error: timeError } = await timeEntriesQuery
+  // Run all 3 queries in parallel
+  const [
+   { data: timeEntries, error: timeError },
+   { data: projectsData, error: projectsError },
+   { data: invoiceRows, error: invoiceError },
+  ] = await Promise.all([
+   timeEntriesQuery,
+   admin.from('projects').select('id, status').eq('tenant_id', tenantId),
+   admin.from('invoices').select('id').eq('tenant_id', tenantId).eq('status', 'draft'),
+  ])
 
-  if (timeError) {
-   console.error('❌ Dashboard stats: error fetching time entries', timeError)
-  }
+  if (timeError) console.error('Dashboard stats: error fetching time entries', timeError)
+  if (projectsError) console.error('Dashboard stats: error fetching projects', projectsError)
+  if (invoiceError) console.error('Dashboard stats: error fetching invoices', invoiceError)
 
   const totalHours = (timeEntries ?? []).reduce(
    (sum, entry) => {
-    // hours_total is in SECONDS, convert to hours
     const seconds = Number(entry.hours_total ?? entry.hours ?? 0)
     return sum + (seconds / 3600.0)
    },
    0,
   )
 
-  // Active projects (not completed/archived)
-  const { data: projectsData, error: projectsError } = await admin
-   .from('projects')
-   .select('id, status')
-   .eq('tenant_id', tenantId)
-
-  if (projectsError) {
-   console.error('❌ Dashboard stats: error fetching projects', projectsError)
-  }
-
   const activeProjects = (projectsData ?? []).filter((project) => {
    const status = (project as any).status || null
    return status !== 'completed' && status !== 'archived'
   }).length
-
-  // Draft invoices count
-  const { data: invoiceRows, error: invoiceError } = await admin
-   .from('invoices')
-   .select('id')
-   .eq('tenant_id', tenantId)
-   .eq('status', 'draft')
-
-  if (invoiceError) {
-   console.error('❌ Dashboard stats: error fetching invoices', invoiceError)
-  }
 
   return NextResponse.json({
    success: true,

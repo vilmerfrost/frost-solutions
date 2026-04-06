@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
 import { useTenant } from '@/context/TenantContext'
 import { toast } from '@/lib/toast'
+import dynamic from 'next/dynamic'
 import FileUpload from '@/components/FileUpload'
 import FileList from '@/components/FileList'
 import ATA2Card from '@/components/ATA2Card'
@@ -12,13 +13,13 @@ import BudgetCard from '@/components/BudgetCard'
 import { ScheduleCalendar } from '@/components/scheduling/ScheduleCalendar'
 import { useAdmin } from '@/hooks/useAdmin'
 import { ExportToIntegrationButton } from '@/components/integrations/ExportToIntegrationButton'
-import { 
- Sparkles, 
- Clock, 
- DollarSign, 
- FileText, 
- Users, 
- Settings, 
+import {
+ Sparkles,
+ Clock,
+ DollarSign,
+ FileText,
+ Users,
+ Settings,
  Calendar,
  MapPin,
  Building,
@@ -32,11 +33,13 @@ import {
  Briefcase,
  Home
 } from 'lucide-react'
-import { BudgetAIPrediction } from '@/components/ai/BudgetAIPrediction'
-import { MaterialAIIdentifier } from '@/components/ai/MaterialAIIdentifier'
-import { ProjectAIPlanning } from '@/components/ai/ProjectAIPlanning'
-import { ProjectAnalytics } from '@/components/analytics/ProjectAnalytics'
 import { ProjectEmployeeManager } from '@/components/projects/ProjectEmployeeManager'
+
+// Lazy-load heavy AI/analytics components — only loaded when user scrolls to them
+const BudgetAIPrediction = dynamic(() => import('@/components/ai/BudgetAIPrediction').then(m => ({ default: m.BudgetAIPrediction })), { ssr: false, loading: () => <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" /> })
+const MaterialAIIdentifier = dynamic(() => import('@/components/ai/MaterialAIIdentifier').then(m => ({ default: m.MaterialAIIdentifier })), { ssr: false, loading: () => <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" /> })
+const ProjectAIPlanning = dynamic(() => import('@/components/ai/ProjectAIPlanning').then(m => ({ default: m.ProjectAIPlanning })), { ssr: false, loading: () => <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" /> })
+const ProjectAnalytics = dynamic(() => import('@/components/analytics/ProjectAnalytics').then(m => ({ default: m.ProjectAnalytics })), { ssr: false, loading: () => <div className="h-32 bg-gray-100 dark:bg-gray-800 rounded-lg animate-pulse" /> })
 import { apiFetch } from '@/lib/http/fetcher'
 import DetailLayout from '@/components/DetailLayout'
 import { StatCard } from '@/components/cards/StatCard'

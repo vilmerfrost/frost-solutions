@@ -6,7 +6,14 @@ import crypto from 'crypto'
 
 function verifyWebhookSignature(body: string, signature: string | null): boolean {
   const secret = process.env.IDURA_WEBHOOK_SECRET
-  if (!secret) return true // Skip verification if secret not configured
+  if (!secret) {
+    if (process.env.NODE_ENV === 'production') {
+      console.error('[signing/webhook] IDURA_WEBHOOK_SECRET is not configured in production — rejecting request')
+      return false
+    }
+    console.warn('[signing/webhook] IDURA_WEBHOOK_SECRET not configured — skipping signature verification (dev only)')
+    return true
+  }
   if (!signature) return false
 
   const expected = crypto.createHmac('sha256', secret).update(body).digest('hex')
@@ -51,11 +58,25 @@ export async function POST(req: NextRequest) {
           const signedDocs = await closeSigningOrder(event.signatureOrderId)
           const signedPdfBase64 = signedDocs[0]?.blob
 
-          // Store signed PDF URL (in production, upload to storage and store URL)
-          // For now, we mark the URL as a data URI placeholder
-          const signedPdfUrl = signedPdfBase64
-            ? `data:application/pdf;base64,${signedPdfBase64.substring(0, 50)}...`
-            : null
+          let signedPdfUrl: string | null = null
+
+          if (signedPdfBase64) {
+            const pdfBuffer = Buffer.from(signedPdfBase64, 'base64')
+            const storagePath = `${order.tenant_id}/${order.id}.pdf`
+
+            const { data: uploadData, error: uploadError } = await admin.storage
+              .from('signed-documents')
+              .upload(storagePath, pdfBuffer, {
+                contentType: 'application/pdf',
+                upsert: true,
+              })
+
+            if (uploadError) {
+              console.error('Failed to upload signed PDF:', uploadError)
+            } else {
+              signedPdfUrl = uploadData?.path ?? storagePath
+            }
+          }
 
           await admin
             .from('signing_orders')

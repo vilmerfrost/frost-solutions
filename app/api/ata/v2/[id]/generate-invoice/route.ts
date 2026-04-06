@@ -24,7 +24,22 @@ export async function POST(
     if (!ata) return apiError('ÄTA not found', 404)
 
     const currentStatus = ata.status_timeline?.[ata.status_timeline.length - 1]?.status ?? 'created'
-    const validation = validateTransition(currentStatus, 'invoice_generated')
+    const statusesToAppend =
+      currentStatus === 'customer_approved'
+        ? ['work_completed', 'invoice_generated']
+        : ['invoice_generated']
+
+    if (currentStatus === 'customer_approved') {
+      const completionValidation = validateTransition(currentStatus, 'work_completed')
+      if (!completionValidation.valid) return apiError(completionValidation.error!, 400)
+    }
+
+    const validation = validateTransition(
+      statusesToAppend[statusesToAppend.length - 1] === 'invoice_generated' && currentStatus === 'customer_approved'
+        ? 'work_completed'
+        : currentStatus,
+      'invoice_generated'
+    )
     if (!validation.valid) return apiError(validation.error!, 400)
 
     // Fetch project + client for invoice
@@ -53,6 +68,7 @@ export async function POST(
         client_id: project.client_id,
         invoice_number: invoiceNumber,
         amount: totalAmount,
+        total_amount: totalAmount,
         status: 'draft',
         due_date: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         items: [
@@ -84,9 +100,14 @@ export async function POST(
     }
 
     // Update ÄTA with invoice reference
+    const eventTimestamp = new Date().toISOString()
     const timeline = [
       ...(ata.status_timeline ?? []),
-      { status: 'invoice_generated', timestamp: new Date().toISOString(), user_id: auth.user.id },
+      ...statusesToAppend.map((status) => ({
+        status,
+        timestamp: eventTimestamp,
+        user_id: auth.user.id,
+      })),
     ]
 
     await auth.admin

@@ -5,14 +5,8 @@ import { ThemeProvider } from "@/context/ThemeContext";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { QueryProvider } from "@/providers/QueryProvider";
 import Toaster from "@/components/Toaster";
-import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
-import { SafeSyncComponents } from "@/components/SafeSyncComponents";
-import { SyncInitializer } from "@/components/SyncInitializer";
-import AIChatbotClient from "@/components/ai/AIChatbotClient";
-import { KeyboardShortcutsProvider } from "@/components/KeyboardShortcutsProvider";
 import { SkipLinks } from "@/components/SkipLinks";
-
-// INTE "use client"! Ingen useEffect här!
+import { ClientExtras } from "@/components/ClientExtras";
 
 export const metadata: Metadata = {
  title: "Frost Solutions",
@@ -39,21 +33,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
      <QueryProvider>
       <ThemeProvider>
        <TenantProvider>
-        <ErrorBoundary fallback={null}>
-         <SyncInitializer />
-        </ErrorBoundary>
-        <SafeSyncComponents />
         <main id="main-content">
          {children}
         </main>
         <Toaster />
-        <ServiceWorkerRegister />
-        <KeyboardShortcutsProvider />
-        <ErrorBoundary fallback={null}>
-         <div style={{ position: 'relative', zIndex: 1 }}>
-          <AIChatbotClient />
-         </div>
-        </ErrorBoundary>
+        <ClientExtras />
        </TenantProvider>
       </ThemeProvider>
      </QueryProvider>

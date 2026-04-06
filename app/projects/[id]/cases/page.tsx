@@ -111,7 +111,7 @@ export default function CasesKanbanPage() {
   async function fetchCases() {
     try {
       setLoading(true)
-      const res = await apiFetch(`/api/projects/${projectId}/cases`)
+      const res: any = await apiFetch(`/api/projects/${projectId}/cases`)
       setCases(res.cases || [])
     } catch (err: any) {
       toast.error(err.message)

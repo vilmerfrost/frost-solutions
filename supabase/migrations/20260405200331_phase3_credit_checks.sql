@@ -1,0 +1,4 @@
+ALTER TABLE public.clients
+  ADD COLUMN IF NOT EXISTS credit_score INTEGER,
+  ADD COLUMN IF NOT EXISTS credit_level TEXT,
+  ADD COLUMN IF NOT EXISTS credit_checked_at TIMESTAMPTZ;;

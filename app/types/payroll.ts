@@ -30,6 +30,8 @@ export interface PayrollExportResult {
  provider: 'fortnox' | 'visma';
  format: 'paxml' | 'csv';
  warnings?: PayrollValidationIssue[];
+ synced?: boolean;
+ message?: string;
 }
 
 export interface PayrollPeriodFilters {

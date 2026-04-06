@@ -1,4 +1,7 @@
-import { SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySupabaseClient = SupabaseClient<any, any, any>
 
 export const CASE_STATUSES = ['ny', 'pagaende', 'atgardad', 'godkand'] as const
 export type CaseStatus = typeof CASE_STATUSES[number]
@@ -33,7 +36,7 @@ export function isValidTransition(from: CaseStatus, to: CaseStatus): boolean {
 }
 
 export async function createCaseFromChecklistItem(
-  admin: SupabaseClient,
+  admin: AnySupabaseClient,
   opts: {
     tenantId: string
     projectId: string

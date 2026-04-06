@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter, useParams } from 'next/navigation'
 import supabase from '@/utils/supabase/supabaseClient'
+import { apiFetch } from '@/lib/http/fetcher'
 import { useTenant } from '@/context/TenantContext'
 import { useAdmin } from '@/hooks/useAdmin'
 import Sidebar from '@/components/Sidebar'
@@ -120,16 +121,10 @@ export default function EditInvoicePage() {
     due_date: formData.get('due_date')?.toString() || null,
    }
 
-   const { error } = await (supabase
-    .from('invoices') as any)
-    .update(updateData)
-    .eq('id', invoiceId)
-    .eq('tenant_id', tenantId)
-
-   if (error) {
-    const errorMessage = error.message || error.details || error.hint || error.code || 'Okänt fel'
-    throw new Error(errorMessage)
-   }
+   await apiFetch(`/api/invoices/${invoiceId}/update`, {
+    method: 'PATCH',
+    body: JSON.stringify({ ...updateData, tenant_id: tenantId }),
+   })
 
    toast.success('Faktura uppdaterad!')
    

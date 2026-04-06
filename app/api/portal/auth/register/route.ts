@@ -10,6 +10,7 @@ const RegisterSchema = z.object({
   name: z.string().min(1),
   tenant_id: z.string().uuid(),
   client_id: z.string().uuid(),
+  portal_user_type: z.enum(['customer', 'subcontractor']).default('customer'),
 })
 
 export async function POST(req: NextRequest) {
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
     const parsed = await parseBody(req, RegisterSchema)
     if (parsed.error) return parsed.error
 
-    const { email, password, name, tenant_id, client_id } = parsed.data
+    const { email, password, name, tenant_id, client_id, portal_user_type } = parsed.data
     const admin = createAdminClient()
 
     // Verify client exists in the tenant
@@ -54,6 +55,7 @@ export async function POST(req: NextRequest) {
         email,
         name,
         password_hash: passwordHash,
+        portal_user_type,
       })
       .select()
       .single()
@@ -68,7 +70,7 @@ export async function POST(req: NextRequest) {
       clientId: client_id,
       email,
       name,
-      portalUserType: 'customer',
+      portalUserType: portal_user_type,
     })
 
     return apiSuccess({ token, user: { id: user.id, email, name } }, 201)

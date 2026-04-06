@@ -1,0 +1,111 @@
+<h2>Nyheter-popup — Layout</h2>
+<p class="subtitle">Kompakt dialog med höjdpunkter. Vilken layout känns bäst?</p>
+
+<div class="cards">
+  <!-- Option A: Icon list -->
+  <div class="card" data-choice="a" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1a1a1a;border-radius:12px;padding:24px;font-family:Inter,sans-serif;max-width:420px;margin:0 auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:#fff;">🎉 Nyheter i Frost Solutions</div>
+            <div style="font-size:12px;color:#a8a29e;margin-top:2px;">Version 2.0 — April 2026</div>
+          </div>
+          <div style="width:28px;height:28px;border-radius:50%;background:#292524;display:flex;align-items:center;justify-content:center;color:#a8a29e;font-size:14px;cursor:pointer;">✕</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#D97706;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">📊</div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:#fff;">Rapporter & Analys</div>
+              <div style="font-size:12px;color:#a8a29e;">Lönsamhet, beläggning och kassaflöde i realtid</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#D97706;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">📋</div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:#fff;">ÄTA Kanban</div>
+              <div style="font-size:12px;color:#a8a29e;">Överblick av alla ÄTA-ärenden i pipeline-vy</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#D97706;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">📁</div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:#fff;">Dokumenthantering</div>
+              <div style="font-size:12px;color:#a8a29e;">BSAB-mappar, versionshantering och delning</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:12px;align-items:flex-start;">
+            <div style="width:36px;height:36px;border-radius:8px;background:#D97706;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🏗️</div>
+            <div>
+              <div style="font-size:14px;font-weight:600;color:#fff;">Materialpriser</div>
+              <div style="font-size:12px;color:#a8a29e;">Sök, jämför och bevaka priser från leverantörer</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:#D97706;text-align:center;padding-top:4px;cursor:pointer;">+ 6 fler nyheter</div>
+        </div>
+        <div style="margin-top:16px;">
+          <div style="background:#D97706;color:#1a1a1a;padding:10px;border-radius:8px;text-align:center;font-weight:600;font-size:14px;cursor:pointer;">Utforska nyheterna</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>A — Ikonlista</h3>
+      <p>Kompakta rader med ikoner, titel och kort beskrivning. Ren och scanbar.</p>
+    </div>
+  </div>
+
+  <!-- Option B: Category cards -->
+  <div class="card" data-choice="b" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div style="background:#1a1a1a;border-radius:12px;padding:24px;font-family:Inter,sans-serif;max-width:420px;margin:0 auto;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+          <div>
+            <div style="font-size:18px;font-weight:700;color:#fff;">🎉 Nyheter i Frost Solutions</div>
+            <div style="font-size:12px;color:#a8a29e;margin-top:2px;">Version 2.0 — April 2026</div>
+          </div>
+          <div style="width:28px;height:28px;border-radius:50%;background:#292524;display:flex;align-items:center;justify-content:center;color:#a8a29e;font-size:14px;cursor:pointer;">✕</div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:#292524;border-radius:10px;padding:14px;">
+            <div style="font-size:20px;margin-bottom:6px;">📊</div>
+            <div style="font-size:13px;font-weight:600;color:#fff;">Rapporter</div>
+            <div style="font-size:11px;color:#a8a29e;">Lönsamhet & kassaflöde</div>
+          </div>
+          <div style="background:#292524;border-radius:10px;padding:14px;">
+            <div style="font-size:20px;margin-bottom:6px;">📋</div>
+            <div style="font-size:13px;font-weight:600;color:#fff;">ÄTA Kanban</div>
+            <div style="font-size:11px;color:#a8a29e;">Pipeline-vy</div>
+          </div>
+          <div style="background:#292524;border-radius:10px;padding:14px;">
+            <div style="font-size:20px;margin-bottom:6px;">📁</div>
+            <div style="font-size:13px;font-weight:600;color:#fff;">Dokument</div>
+            <div style="font-size:11px;color:#a8a29e;">BSAB-mappar & delning</div>
+          </div>
+          <div style="background:#292524;border-radius:10px;padding:14px;">
+            <div style="font-size:20px;margin-bottom:6px;">🏗️</div>
+            <div style="font-size:13px;font-weight:600;color:#fff;">Material</div>
+            <div style="font-size:11px;color:#a8a29e;">Prisjämförelse</div>
+          </div>
+          <div style="background:#292524;border-radius:10px;padding:14px;">
+            <div style="font-size:20px;margin-bottom:6px;">📅</div>
+            <div style="font-size:13px;font-weight:600;color:#fff;">Schema</div>
+            <div style="font-size:11px;color:#a8a29e;">Veckoöversikt</div>
+          </div>
+          <div style="background:#292524;border-radius:10px;padding:14px;">
+            <div style="font-size:20px;margin-bottom:6px;">⚠️</div>
+            <div style="font-size:13px;font-weight:600;color:#fff;">Säkerhet</div>
+            <div style="font-size:11px;color:#a8a29e;">Riskbedömningar</div>
+          </div>
+        </div>
+        <div style="margin-top:16px;">
+          <div style="background:#D97706;color:#1a1a1a;padding:10px;border-radius:8px;text-align:center;font-weight:600;font-size:14px;cursor:pointer;">Börja utforska</div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>B — Kategori-grid</h3>
+      <p>2×3 rutnät med kort-ikoner. Visuellt, visar fler nyheter direkt men med mindre text.</p>
+    </div>
+  </div>
+</div>

@@ -4,7 +4,6 @@ import { randomBytes } from 'crypto'
 import { resolveAuthAdmin, parseBody, apiSuccess, apiError, handleRouteError } from '@/lib/api'
 import { validateTransition } from '@/lib/ata/workflow'
 import { logAtaEvent } from '@/lib/ata/audit'
-import { createSigningOrder } from '@/lib/signing/idura-client'
 
 const SendApprovalSchema = z.object({
   use_bankid: z.boolean().default(false),
@@ -45,40 +44,12 @@ export async function POST(
 
     let signingOrderId: string | null = null
 
-    // Optionally create BankID signing order
+    // BankID signing requires PDF generation which is not yet implemented.
     if (use_bankid) {
-      try {
-        const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000/app'
-        const pdfBase64 = Buffer.from(
-          `ÄTA Approval: ${ata.description}\nTotal: ${ata.cost_frame} SEK`
-        ).toString('base64')
-
-        const signingOrder = await createSigningOrder({
-          documentTitle: `ATA-${id}`,
-          documentPdfBase64: pdfBase64,
-          signatories: [{ reference: customer_name ?? 'customer' }],
-          webhookUrl: `${appUrl}/api/signing/webhook`,
-        })
-
-        // Store signing order
-        const { data: stored } = await auth.admin
-          .from('signing_orders')
-          .insert({
-            tenant_id: auth.tenantId,
-            idura_order_id: signingOrder.id,
-            document_type: 'ata',
-            document_id: id,
-            status: 'pending',
-            signatories: signingOrder.signatories,
-          })
-          .select()
-          .single()
-
-        signingOrderId = stored?.id ?? null
-      } catch (bankidError) {
-        // BankID is optional — continue without it
-        console.error('BankID signing order creation failed:', bankidError)
-      }
+      return apiError(
+        'BankID-signering är inte tillgänglig ännu. Skicka godkännande utan BankID.',
+        503
+      )
     }
 
     // Update ÄTA

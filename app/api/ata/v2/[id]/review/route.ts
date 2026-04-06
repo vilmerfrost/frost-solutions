@@ -37,10 +37,20 @@ export async function POST(
     // Determine current status from timeline
     const currentStatus = ata.status_timeline?.[ata.status_timeline.length - 1]?.status ?? 'created'
 
-    // Check photo requirement for unforeseen ÄTA
-    const photoCount = ata.ata_type === 'unforeseen'
-      ? (ata.status_timeline?.filter((e: { status: string }) => e.status === 'photos_added').length ?? 0)
-      : 1 // foreseen doesn't need photos, pass validation
+    let photoCount = 1
+    if (ata.ata_type === 'unforeseen') {
+      const { data: photoEvents } = await auth.admin
+        .from('ata_audit_trail')
+        .select('data')
+        .eq('ata_id', id)
+        .eq('tenant_id', auth.tenantId)
+        .eq('event_type', 'photos_added')
+
+      photoCount = (photoEvents ?? []).reduce((total, event) => {
+        const count = typeof event.data?.count === 'number' ? event.data.count : 0
+        return total + count
+      }, 0)
+    }
 
     const validation = validateTransition(currentStatus, 'admin_reviewed', {
       ataType: ata.ata_type ?? 'foreseen',

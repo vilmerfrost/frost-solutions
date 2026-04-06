@@ -282,9 +282,9 @@ export default function InvoicesPage() {
                   })
                   
                   toast.success('Faktura arkiverad!')
-                  
-                  // Refresh invoices list
-                  window.location.reload()
+
+                  // Refresh invoices list via React Query
+                  refetch()
                  } catch (err: any) {
                   toast.error('Fel: ' + (err.message || 'Okänt fel'))
                  }

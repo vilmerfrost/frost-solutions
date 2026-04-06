@@ -13,6 +13,8 @@ interface FAQItem {
  id?: string
 }
 
+// TODO: Move FAQ content to Supabase table or CMS for dynamic management
+// Current content is hardcoded and requires code deployment to update
 const faqs: FAQItem[] = [
  {
   category: 'Stämpelklocka',
@@ -577,7 +579,7 @@ export default function FAQPage() {
       </p>
       <div className="flex gap-3">
        <Link
-        href="/feedback"
+        href={`${BASE_PATH}/feedback`}
         className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-[8px] font-semibold transition-colors"
        >
         💬 Kontakta Support

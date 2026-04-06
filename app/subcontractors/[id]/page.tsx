@@ -122,8 +122,16 @@ export default function SubcontractorDetailPage() {
   async function handleVerifyFSkatt() {
     setVerifying(true)
     try {
-      await apiFetch(`/api/subcontractors/${id}/verify-fskatt`, { method: 'POST' })
-      toast.success('F-skatt verifierad!')
+      const res = await apiFetch<{
+        success: boolean
+        data: { verified: boolean; manual_check_required?: boolean; message?: string }
+      }>(`/api/subcontractors/${id}/verify-fskatt`, { method: 'POST' })
+
+      if (res.data?.manual_check_required) {
+        toast.error(res.data.message || 'Automatisk verifiering ej tillgänglig. Kontrollera manuellt på skatteverket.se.')
+      } else if (res.data?.verified) {
+        toast.success('F-skatt verifierad!')
+      }
       fetchData()
     } catch (err: any) {
       toast.error(err.message || 'Verifiering misslyckades')

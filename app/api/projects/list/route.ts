@@ -116,27 +116,19 @@ export async function GET(request: NextRequest) {
 
   console.log('✅ Projects/list: After verification:', verifiedProjects.length, 'projects')
 
-  // SECURITY: Verify that all projects have valid tenant_id that exists in tenants table
-  const { data: allTenants } = await supabase
+  // SECURITY: Verify the tenant itself exists (single query instead of loading all tenants)
+  const { data: tenantExists } = await supabase
    .from('tenants')
    .select('id')
-   .limit(1000)
-  
-  const validTenantIds = new Set((allTenants || []).map((t: any) => t.id))
-  
-  const validTenantProjects = verifiedProjects.filter((p: any) => {
-   if (!p.tenant_id) {
-    console.warn('⚠️ Project', p.id, p.name, 'has NULL tenant_id - filtering out')
-    return false
-   }
-   if (!validTenantIds.has(p.tenant_id)) {
-    console.error('❌ SECURITY: Project', p.id, p.name, 'has invalid tenant_id:', p.tenant_id, '- filtering out')
-    return false
-   }
-   return true
-  })
+   .eq('id', tenantId)
+   .maybeSingle()
 
-  console.log('✅ Projects/list: After tenant validation:', validTenantProjects.length, 'projects')
+  if (!tenantExists) {
+   return NextResponse.json({ error: 'Invalid tenant' }, { status: 403 })
+  }
+
+  // Projects are already filtered by tenant_id in the query above — just filter out nulls
+  const validTenantProjects = verifiedProjects.filter((p: any) => !!p.tenant_id)
 
   // Filter out completed/archived projects
   const filteredProjects = validTenantProjects.filter((p: any) => {

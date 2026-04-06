@@ -6,7 +6,11 @@ import { PayrollExportResult, PayrollValidationIssue } from '@/types/payroll';
 
 /**
  * Exports PAXml 2.2 to storage and returns signed URL.
- * For real-time POST to Fortnox Lön: use fortnoxClient (TODO).
+ *
+ * TODO: Real-time sync to Fortnox Lön API is NOT implemented.
+ * Currently exports are saved to Supabase Storage only.
+ * To enable: implement syncToFortnox() using the Fortnox API
+ * and call it after a successful export.
  */
 export async function exportFortnoxPAXml(opts: {
  tenantId: string;
@@ -70,15 +74,20 @@ export async function exportFortnoxPAXml(opts: {
   throw entriesError;
  }
 
- // Get company org number from tenant (TODO: add to tenants table)
  const { data: tenant } = await admin
   .from('tenants')
   .select('org_number, name')
   .eq('id', tenantId)
   .maybeSingle();
 
+ if (!tenant?.org_number) {
+  throw new Error(
+   'Organisationsnummer saknas. Lägg till det under Inställningar innan du exporterar lön.'
+  );
+ }
+
  const paxml = buildPAXml({
-  company: { orgNumber: (tenant as any)?.org_number || '000000-0000' },
+  company: { orgNumber: tenant.org_number },
   period: { start: period.start_date, end: period.end_date },
   employees: employees ?? [],
   entries: entries ?? []
@@ -104,7 +113,9 @@ export async function exportFortnoxPAXml(opts: {
   signedUrl,
   provider: 'fortnox' as const,
   format: 'paxml' as const,
-  warnings: warningList
+  warnings: warningList,
+  synced: false,
+  message: 'Export sparad. Automatisk synkning till Fortnox är inte aktiverad — importera filen manuellt.',
  };
 }
 

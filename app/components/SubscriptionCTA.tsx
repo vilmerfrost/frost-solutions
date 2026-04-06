@@ -16,7 +16,7 @@ export function SubscriptionCTA({ variant = 'default', showFeatures = false, pla
   const handleUpgrade = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/app/api/subscriptions/checkout', {
+      const res = await fetch('/api/subscriptions/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ planId }),

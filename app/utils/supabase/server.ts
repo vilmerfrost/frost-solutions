@@ -1,13 +1,16 @@
 // app/utils/supabase/server.ts
-import { cookies } from 'next/headers'
+import { cookies, headers } from 'next/headers'
 import { createServerClient, type CookieOptions } from '@supabase/ssr'
 
 export function createClient() {
  const cookieStorePromise = cookies() // <- Promise i Next 16
+  const headerStorePromise = headers()
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY
 
  return createServerClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  supabaseUrl!,
+  supabaseAnonKey!,
   {
    cookies: {
     async get(name: string) {
@@ -36,6 +39,22 @@ export function createClient() {
      }
     },
    },
+     global: {
+      fetch: async (input: RequestInfo | URL, init?: RequestInit) => {
+       const headerStore = await headerStorePromise
+       const requestAuthHeader = headerStore.get('authorization')
+       const mergedHeaders = new Headers(init?.headers ?? {})
+
+       if (requestAuthHeader && !mergedHeaders.has('Authorization')) {
+        mergedHeaders.set('Authorization', requestAuthHeader)
+       }
+
+       return fetch(input, {
+        ...init,
+        headers: mergedHeaders,
+       })
+      },
+     },
   }
  )
 }

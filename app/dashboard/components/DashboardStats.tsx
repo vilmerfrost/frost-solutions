@@ -16,26 +16,10 @@ interface DashboardStatsProps {
 
 export function DashboardStats({ tenantId, initialStats }: DashboardStatsProps) {
   const [dashboardStats, setDashboardStats] = useState<DashboardStatsData>(initialStats)
-  const [statsLoaded, setStatsLoaded] = useState(false)
 
   const fetchDashboardStats = useCallback(async () => {
-    const cacheKey = `dashboard-stats:${tenantId}`
     try {
-      if (typeof window !== 'undefined' && !navigator.onLine) {
-        const cached = window.localStorage.getItem(cacheKey)
-        if (cached) {
-          try {
-            const parsed = JSON.parse(cached) as DashboardStatsData
-            setDashboardStats(parsed)
-            setStatsLoaded(true)
-            return
-          } catch (parseErr) {
-            if (process.env.NODE_ENV === 'development') {
-              console.warn('Failed to parse cached dashboard stats', parseErr)
-            }
-          }
-        }
-      }
+      if (typeof window !== 'undefined' && !navigator.onLine) return
 
       const result = await apiFetch<{
         success?: boolean
@@ -43,48 +27,22 @@ export function DashboardStats({ tenantId, initialStats }: DashboardStatsProps) 
         error?: string
       }>('/api/dashboard/stats', { cache: 'no-store' })
 
-      if (!result.success || !result.data) {
-        throw new Error(result.error || 'Invalid dashboard stats response')
-      }
+      if (!result.success || !result.data) return
 
-      const newStats: DashboardStatsData = {
+      setDashboardStats({
         totalHours: Number(result.data.totalHours ?? 0),
         activeProjects: Number(result.data.activeProjects ?? 0),
         invoicesToSend: Number(result.data.invoicesToSend ?? 0),
-      }
-
-      setDashboardStats(newStats)
-
-      if (typeof window !== 'undefined') {
-        try {
-          window.localStorage.setItem(cacheKey, JSON.stringify(newStats))
-        } catch (cacheErr) {
-          if (process.env.NODE_ENV === 'development') {
-            console.warn('Failed to cache dashboard stats', cacheErr)
-          }
-        }
-      }
-
-      setStatsLoaded(true)
+      })
     } catch (err) {
-      console.error('Error fetching dashboard stats:', err)
-      setStatsLoaded(true)
+      // Silently fail — we already have initialStats from server
     }
   }, [tenantId])
 
   useEffect(() => {
     let cancelled = false
 
-    const doFetch = async () => {
-      if (!cancelled) {
-        await fetchDashboardStats()
-      }
-    }
-
     const handleTimeEntryUpdate = () => {
-      if (process.env.NODE_ENV === 'development') {
-        console.log('DashboardStats: Time entry updated, refreshing stats...')
-      }
       if (!cancelled) {
         setTimeout(() => fetchDashboardStats(), 500)
       }
@@ -94,11 +52,9 @@ export function DashboardStats({ tenantId, initialStats }: DashboardStatsProps) 
     window.addEventListener('timeEntryCreated', handleTimeEntryUpdate)
     window.addEventListener('timeEntryDeleted', handleTimeEntryUpdate)
 
-    // Poll every 2 minutes
+    // Poll every 2 minutes for background refresh
     const syncInterval = setInterval(() => {
-      if (!cancelled) {
-        fetchDashboardStats()
-      }
+      if (!cancelled) fetchDashboardStats()
     }, 120000)
 
     return () => {
@@ -109,19 +65,6 @@ export function DashboardStats({ tenantId, initialStats }: DashboardStatsProps) 
       window.removeEventListener('timeEntryDeleted', handleTimeEntryUpdate)
     }
   }, [fetchDashboardStats])
-
-  if (!statsLoaded) {
-    return (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="bg-white dark:bg-gray-700 rounded-[8px] border border-gray-200 dark:border-gray-600 p-5">
-            <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">Laddar...</div>
-            <div className="text-2xl font-bold text-gray-400 dark:text-gray-600">-</div>
-          </div>
-        ))}
-      </div>
-    )
-  }
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">

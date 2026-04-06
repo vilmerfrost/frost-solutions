@@ -1,4 +1,7 @@
-import { SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySupabaseClient = SupabaseClient<any, any, any>
 
 export interface ChecklistItemDef {
   label: string
@@ -16,7 +19,7 @@ export interface ChecklistTemplateStructure {
 }
 
 export async function instantiateChecklist(
-  admin: SupabaseClient,
+  admin: AnySupabaseClient,
   opts: {
     tenantId: string
     projectId: string

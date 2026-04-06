@@ -1,0 +1,85 @@
+<h2>Architecture Approach</h2>
+<p class="subtitle">How should binders, checklists, and cases relate in the database?</p>
+
+<div class="options">
+  <div class="option" data-choice="a" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Flat Tables — Keep It Simple</h3>
+      <p>Separate tables for binders, tabs, documents, checklists, checklist_items, cases. Linked by foreign keys. Similar to the current <code>project_documents</code> structure but with binder/tab layers added on top.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Simple to query and understand</li>
+            <li>Easy RLS policies (tenant_id on every table)</li>
+            <li>Fits your existing Supabase patterns</li>
+            <li>Fast to implement</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Many JOINs for nested views (binder → tab → documents)</li>
+            <li>Template system needs separate template tables that mirror the structure</li>
+            <li>More migrations as features grow</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="b" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>JSONB Hybrid — Flexible Structure</h3>
+      <p>Binders store their tab structure as JSONB (name, order, icon, permissions). Documents, checklists, and cases remain as relational tables referencing <code>binder_id</code> + <code>tab_key</code>. Templates are just JSONB snapshots.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Tab structure is flexible without migrations</li>
+            <li>Templates = copy the JSONB structure (trivial)</li>
+            <li>Fewer tables overall</li>
+            <li>Tab reordering/renaming is a single update</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Can't enforce FK constraints on tab_key</li>
+            <li>JSONB querying is less intuitive</li>
+            <li>Slightly harder to set per-tab RLS</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="option" data-choice="c" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Recommended: Relational Core + JSONB Config</h3>
+      <p>Binders and tabs are relational tables (proper FKs, RLS). But each tab has a JSONB <code>config</code> column for flexible metadata (icon, color, custom fields). Templates stored as a separate <code>binder_templates</code> table with a JSONB <code>structure</code> column that snapshots the tab layout.</p>
+      <div class="pros-cons">
+        <div class="pros">
+          <h4>Pros</h4>
+          <ul>
+            <li>Best of both: relational integrity + flexibility</li>
+            <li>RLS works naturally on binder/tab level</li>
+            <li>Templates are clean JSONB snapshots</li>
+            <li>Easy to extend without schema changes</li>
+            <li>Matches your existing patterns (relational + config)</li>
+          </ul>
+        </div>
+        <div class="cons">
+          <h4>Cons</h4>
+          <ul>
+            <li>Slightly more tables than option B</li>
+            <li>Need to keep JSONB config and relational data in sync</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

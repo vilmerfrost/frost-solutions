@@ -219,9 +219,13 @@ export class TemplatesAPI {
   }
  }
 
- static async get(id: string): Promise<QuoteTemplate> {
-  const result = await apiFetch<{ data: QuoteTemplate }>(`/api/quote-templates/${id}`)
-  return result.data
+ static async get(id: string): Promise<QuoteTemplate | null> {
+  try {
+   const result = await apiFetch<{ data: QuoteTemplate }>(`/api/quote-templates/${id}`)
+   return result.data ?? null
+  } catch {
+   return null
+  }
  }
 }
 

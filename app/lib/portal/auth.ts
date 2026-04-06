@@ -3,9 +3,28 @@ import bcrypt from 'bcryptjs'
 import { createAdminClient } from '@/utils/supabase/admin'
 import { apiError } from '@/lib/api/response'
 
-const PORTAL_JWT_SECRET = new TextEncoder().encode(
-  process.env.PORTAL_JWT_SECRET || 'portal-secret-change-in-production'
-)
+let cachedPortalJwtSecret: Uint8Array | null = null
+
+function getPortalJwtSecret(): Uint8Array {
+  const rawSecret = process.env.PORTAL_JWT_SECRET
+
+  if (rawSecret) {
+    if (!cachedPortalJwtSecret) {
+      cachedPortalJwtSecret = new TextEncoder().encode(rawSecret)
+    }
+    return cachedPortalJwtSecret
+  }
+
+  if (process.env.NODE_ENV === 'production') {
+    throw new Error('PORTAL_JWT_SECRET must be configured in production')
+  }
+
+  if (!cachedPortalJwtSecret) {
+    cachedPortalJwtSecret = new TextEncoder().encode('portal-secret-change-in-production')
+  }
+
+  return cachedPortalJwtSecret
+}
 
 export type PortalUserType = 'customer' | 'subcontractor'
 
@@ -27,6 +46,8 @@ export async function verifyPassword(password: string, hash: string): Promise<bo
 }
 
 export async function createPortalToken(user: PortalUser): Promise<string> {
+  const jwtSecret = getPortalJwtSecret()
+
   return new SignJWT({
     sub: user.id,
     tenant_id: user.tenantId,
@@ -38,12 +59,14 @@ export async function createPortalToken(user: PortalUser): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(PORTAL_JWT_SECRET)
+    .sign(jwtSecret)
 }
 
 export async function verifyPortalToken(token: string): Promise<PortalUser | null> {
+  const jwtSecret = getPortalJwtSecret()
+
   try {
-    const { payload } = await jwtVerify(token, PORTAL_JWT_SECRET)
+    const { payload } = await jwtVerify(token, jwtSecret)
     return {
       id: payload.sub as string,
       tenantId: payload.tenant_id as string,

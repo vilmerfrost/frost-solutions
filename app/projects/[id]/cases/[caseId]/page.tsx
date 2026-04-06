@@ -69,7 +69,7 @@ export default function CaseDetailPage() {
 
   async function fetchCase() {
     try {
-      const res = await apiFetch(`/api/projects/${projectId}/cases/${caseId}`)
+      const res: any = await apiFetch(`/api/projects/${projectId}/cases/${caseId}`)
       setCaseData(res.case || res)
     } catch (err: any) {
       toast.error(err.message)
@@ -84,7 +84,7 @@ export default function CaseDetailPage() {
     if (!nextStatus) return
     setSaving(true)
     try {
-      const res = await apiFetch(`/api/projects/${projectId}/cases/${caseId}`, {
+      const res: any = await apiFetch(`/api/projects/${projectId}/cases/${caseId}`, {
         method: 'PATCH',
         body: JSON.stringify({ status: nextStatus }),
       })
@@ -119,7 +119,7 @@ export default function CaseDetailPage() {
     if (!commentBody.trim()) return
     setSubmittingComment(true)
     try {
-      const res = await apiFetch(`/api/projects/${projectId}/cases/${caseId}/comments`, {
+      const res: any = await apiFetch(`/api/projects/${projectId}/cases/${caseId}/comments`, {
         method: 'POST',
         body: JSON.stringify({ body: commentBody.trim() }),
       })

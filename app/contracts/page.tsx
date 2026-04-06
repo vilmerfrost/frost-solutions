@@ -116,7 +116,6 @@ export default function ContractsPage() {
   const [selectedProject, setSelectedProject] = useState<string>('')
   const [generating, setGenerating] = useState(false)
   const [preview, setPreview] = useState<FilledTemplate | null>(null)
-  const [signing, setSigning] = useState(false)
 
   // Signing orders
   const [signingOrders, setSigningOrders] = useState<SigningOrder[]>([])
@@ -169,7 +168,7 @@ export default function ContractsPage() {
   // Generate contract
   async function handleGenerate() {
     if (!selectedTemplate || !selectedProject) {
-      toast.error('Valj mall och projekt')
+      toast.error('Välj mall och projekt')
       return
     }
     setGenerating(true)
@@ -191,28 +190,10 @@ export default function ContractsPage() {
     }
   }
 
-  // Sign with BankID
+  // Sign with BankID — currently disabled, BankID integration is not yet available.
   async function handleSign() {
-    if (!preview || !selectedProject) return
-    setSigning(true)
-    try {
-      const res = await apiFetch<{
-        success: boolean
-        data: { id: string; signingUrls: Array<{ url: string }> }
-      }>('/api/signing/create', {
-        method: 'POST',
-        body: JSON.stringify({ documentType: 'contract', documentId: selectedProject }),
-      })
-      toast.success('Signeringsorder skapad!')
-      fetchSigningOrders()
-      setPreview(null)
-      setSelectedTemplate(null)
-      setSelectedProject('')
-    } catch (err: any) {
-      toast.error(err.message || 'Kunde inte skapa signering')
-    } finally {
-      setSigning(false)
-    }
+    // BankID signing is not available yet; show informational toast.
+    toast.error('BankID-signering är inte tillgänglig ännu. Kommer snart.')
   }
 
   return (
@@ -230,7 +211,7 @@ export default function ContractsPage() {
                 Avtal & Signering
               </h1>
               <p className="text-gray-600 dark:text-gray-400">
-                Skapa avtal fran mallar och signera med BankID
+                Skapa avtal fran mallar och signera digitalt
               </p>
             </div>
           </div>
@@ -350,15 +331,12 @@ export default function ContractsPage() {
                 <div className="mt-4 flex justify-end">
                   <button
                     onClick={handleSign}
-                    disabled={signing}
-                    className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50 flex items-center gap-2"
+                    disabled={true}
+                    title="Kommer snart — BankID-signering är inte tillgänglig ännu"
+                    className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                   >
-                    {signing ? (
-                      <Loader2 className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <FileSignature className="w-4 h-4" />
-                    )}
-                    Signera med BankID
+                    <FileSignature className="w-4 h-4" />
+                    Signera med BankID (kommer snart)
                   </button>
                 </div>
               </div>

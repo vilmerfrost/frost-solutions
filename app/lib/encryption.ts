@@ -7,13 +7,24 @@
 
 import crypto from 'crypto';
 
-const key = Buffer.from(process.env.ENCRYPTION_KEY_256_BASE64 || '', 'base64');
-if (key.length !== 32) {
- // Medvetet hårt fel vid misconfig — säkrare.
- throw new Error('ENCRYPTION_KEY_256_BASE64 måste vara 32 bytes Base64.');
+let cachedKey: Buffer | null = null;
+
+function getEncryptionKey(): Buffer {
+ if (cachedKey) {
+  return cachedKey;
+ }
+
+ const key = Buffer.from(process.env.ENCRYPTION_KEY_256_BASE64 || '', 'base64');
+ if (key.length !== 32) {
+  throw new Error('ENCRYPTION_KEY_256_BASE64 måste vara 32 bytes Base64.');
+ }
+
+ cachedKey = key;
+ return cachedKey;
 }
 
 export function encryptJSON(obj: unknown): string {
+ const key = getEncryptionKey();
  const iv = crypto.randomBytes(12);
  const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
  const plaintext = Buffer.from(JSON.stringify(obj), 'utf8');
@@ -23,6 +34,7 @@ export function encryptJSON(obj: unknown): string {
 }
 
 export function decryptJSON<T = any>(b64: string): T {
+ const key = getEncryptionKey();
  const raw = Buffer.from(b64, 'base64');
  const iv = raw.subarray(0, 12);
  const tag = raw.subarray(12, 28);

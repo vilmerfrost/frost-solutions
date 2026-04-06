@@ -76,67 +76,86 @@ export default function AdminPage() {
    const currentTenantId = tenantId
    
    try {
-    // Employees
-    const { data: empData } = await supabase
-     .from('employees')
-     .select('id, name, full_name, role, email')
-     .eq('tenant_id', currentTenantId)
-    
-    if (cancelled) return
-    setEmployees((empData || []).map((e: any) => ({
-     id: e.id,
-     name: e.full_name || e.name || 'Okänd',
-     role: e.role,
-     email: e.email,
-    })))
+    // Run all three independent fetches in parallel
+    const [empResult, projResult, invResult] = await Promise.allSettled([
+     // Employees
+     supabase
+      .from('employees')
+      .select('id, name, full_name, role, email')
+      .eq('tenant_id', currentTenantId),
 
-    // Projects - Use API route for consistency and better error handling
-    try {
-     const projectsData = await apiFetch<{ projects?: any[] }>(`/api/projects/list?tenantId=${currentTenantId}`, { cache: 'no-store' })
-     if (cancelled) return
-     
+     // Projects - Use API route, with direct query fallback on failure
+     apiFetch<{ projects?: any[] }>(`/api/projects/list?tenantId=${currentTenantId}`, { cache: 'no-store' })
+      .catch(async (apiError) => {
+       console.error('Error fetching projects:', apiError)
+       // Fallback: Direct query
+       const { data: projData } = await supabase
+        .from('projects')
+        .select('id, name, status')
+        .eq('tenant_id', currentTenantId)
+       return { projects: projData || [] } as { projects: any[] }
+      }),
+
+     // Invoices - progressive fallback
+     (async () => {
+      let { data: invData, error: invError } = await supabase
+       .from('invoices')
+       .select('id, number, amount, status, customer_name')
+       .eq('tenant_id', currentTenantId)
+       .order('created_at', { ascending: false })
+       .limit(10)
+
+      // Fallback if created_at doesn't exist
+      if (invError && (invError.code === '42703' || invError.message?.includes('created_at'))) {
+       const fallback = await supabase
+        .from('invoices')
+        .select('id, number, amount, status, customer_name')
+        .eq('tenant_id', currentTenantId)
+        .limit(10)
+
+       if (!fallback.error) {
+        invData = fallback.data
+       }
+      }
+
+      return invData
+     })(),
+    ])
+
+    if (cancelled) return
+
+    // Process employees
+    if (empResult.status === 'fulfilled') {
+     const empData = empResult.value.data
+     setEmployees((empData || []).map((e: any) => ({
+      id: e.id,
+      name: e.full_name || e.name || 'Okänd',
+      role: e.role,
+      email: e.email,
+     })))
+    } else {
+     console.error('Error fetching employees:', empResult.reason)
+    }
+
+    // Process projects
+    if (projResult.status === 'fulfilled') {
+     const projectsData = projResult.value
      if (projectsData.projects) {
       console.log('✅ Admin: Fetched', projectsData.projects.length, 'projects')
       setProjects(projectsData.projects)
      } else {
       setProjects([])
      }
-    } catch (apiError) {
-     if (cancelled) return
-     console.error('Error fetching projects:', apiError)
-     // Fallback: Direct query
-     const { data: projData } = await supabase
-      .from('projects')
-      .select('id, name, status')
-      .eq('tenant_id', currentTenantId)
-     
-     if (cancelled) return
-     setProjects(projData || [])
+    } else {
+     console.error('Error fetching projects:', projResult.reason)
     }
 
-    // Invoices - progressive fallback
-    let { data: invData, error: invError } = await supabase
-     .from('invoices')
-     .select('id, number, amount, status, customer_name')
-     .eq('tenant_id', currentTenantId)
-     .order('created_at', { ascending: false })
-     .limit(10)
-    
-    // Fallback if created_at doesn't exist
-    if (invError && (invError.code === '42703' || invError.message?.includes('created_at'))) {
-     const fallback = await supabase
-      .from('invoices')
-      .select('id, number, amount, status, customer_name')
-      .eq('tenant_id', currentTenantId)
-      .limit(10)
-     
-     if (!fallback.error) {
-      invData = fallback.data
-     }
+    // Process invoices
+    if (invResult.status === 'fulfilled') {
+     setInvoices(invResult.value || [])
+    } else {
+     console.error('Error fetching invoices:', invResult.reason)
     }
-    
-    if (cancelled) return
-    setInvoices(invData || [])
    } catch (err) {
     if (cancelled) return
     console.error('Error fetching admin data:', err)

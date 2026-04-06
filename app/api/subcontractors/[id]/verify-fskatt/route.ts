@@ -21,18 +21,18 @@ export async function POST(
 
     if (!sub) return apiError('Subcontractor not found', 404)
 
-    // Stub: Skatteverket F-skatt API requires organizational certificate.
-    // For now, mark as verified with a timestamp.
-    console.log(`[F-skatt stub] Verification requested for ${sub.company_name} (org: ${sub.org_number ?? 'N/A'})`)
+    // Skatteverket F-skatt API requires organizational certificate — not yet integrated.
+    // Instead of faking verification, flag for manual check.
+    console.log(`[F-skatt] Automatic verification unavailable for ${sub.company_name} (org: ${sub.org_number ?? 'N/A'}) — flagging manual check`)
 
-    const verifiedAt = new Date().toISOString()
+    const now = new Date().toISOString()
 
     const { data, error } = await auth.admin
       .from('subcontractors')
       .update({
-        f_skatt_verified: true,
-        f_skatt_verified_at: verifiedAt,
-        updated_at: verifiedAt,
+        f_skatt_verified: false,
+        fskatt_status: 'manual_check_required',
+        updated_at: now,
       })
       .eq('id', id)
       .eq('tenant_id', auth.tenantId)
@@ -42,9 +42,9 @@ export async function POST(
     if (error) return apiError(error.message || 'Failed to update F-skatt status', 500)
 
     return apiSuccess({
-      verified: true,
-      verified_at: verifiedAt,
-      note: 'Stub response — Skatteverket API integration pending (requires organizational certificate)',
+      verified: false,
+      manual_check_required: true,
+      message: 'Automatisk F-skatt-verifiering är inte tillgänglig. Kontrollera F-skattsedel manuellt på skatteverket.se.',
       subcontractor: data,
     })
   } catch (error) {

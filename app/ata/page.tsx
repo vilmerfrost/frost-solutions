@@ -3,7 +3,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useTenant } from '@/context/TenantContext'
 import { apiFetch } from '@/lib/http/fetcher'
+import { uploadAtaPhotos } from '@/lib/ata/photoUploads'
+import { AtaPhotoPicker } from '@/components/ata/AtaPhotoPicker'
 import Sidebar from '@/components/Sidebar'
+import supabase from '@/utils/supabase/supabaseClient'
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -125,9 +128,10 @@ export default function AtaKanbanPage() {
     description: '',
     ata_type: 'foreseen' as 'foreseen' | 'unforeseen',
     urgency: 'normal' as 'normal' | 'urgent' | 'critical',
-    photos: [] as string[],
   })
+  const [newPhotos, setNewPhotos] = useState<File[]>([])
   const [creating, setCreating] = useState(false)
+  const [uploadingPhotos, setUploadingPhotos] = useState(false)
 
   /* ---------- load data ---------- */
 
@@ -194,8 +198,28 @@ export default function AtaKanbanPage() {
   /* ---------- create ---------- */
 
   async function handleCreate() {
+    if (!tenantId) {
+      alert('Kunde inte hitta företagets lagring för fotouppladdning')
+      return
+    }
+
     setCreating(true)
     try {
+      let uploadedPhotos: string[] | undefined
+
+      if (newPhotos.length > 0) {
+        setUploadingPhotos(true)
+        try {
+          uploadedPhotos = await uploadAtaPhotos({
+            tenantId,
+            files: newPhotos,
+            storage: supabase.storage,
+          })
+        } finally {
+          setUploadingPhotos(false)
+        }
+      }
+
       await apiFetch('/api/ata/v2/create', {
         method: 'POST',
         body: JSON.stringify({
@@ -203,15 +227,17 @@ export default function AtaKanbanPage() {
           description: newForm.description,
           ata_type: newForm.ata_type,
           urgency: newForm.urgency,
-          photos: newForm.photos.length > 0 ? newForm.photos : undefined,
+          photos: uploadedPhotos,
         }),
       })
       setShowNew(false)
-      setNewForm({ project_id: '', description: '', ata_type: 'foreseen', urgency: 'normal', photos: [] })
+      setNewForm({ project_id: '', description: '', ata_type: 'foreseen', urgency: 'normal' })
+      setNewPhotos([])
       await loadData()
     } catch (err: unknown) {
       alert(err instanceof Error ? err.message : 'Kunde inte skapa ÄTA')
     } finally {
+      setUploadingPhotos(false)
       setCreating(false)
     }
   }
@@ -617,36 +643,15 @@ export default function AtaKanbanPage() {
                   </div>
                 </div>
 
-                {/* Photos (URL input for now) */}
+                {/* Photos */}
                 <div>
-                  <label className="block text-sm font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                    Foton (URL){newForm.ata_type === 'unforeseen' && <span className="text-red-500 ml-1">*</span>}
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Klistra in bild-URL och tryck Enter"
-                    className="w-full px-3 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-900 text-stone-900 dark:text-stone-100 text-sm"
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault()
-                        const val = (e.target as HTMLInputElement).value.trim()
-                        if (val) {
-                          setNewForm(f => ({ ...f, photos: [...f.photos, val] }))
-                          ;(e.target as HTMLInputElement).value = ''
-                        }
-                      }
-                    }}
+                  <AtaPhotoPicker
+                    files={newPhotos}
+                    onChange={setNewPhotos}
+                    required={newForm.ata_type === 'unforeseen'}
+                    showRequiredWarning={newForm.ata_type === 'unforeseen' && newPhotos.length === 0}
+                    disabled={creating || uploadingPhotos}
                   />
-                  {newForm.photos.length > 0 && (
-                    <div className="mt-2 flex flex-wrap gap-1">
-                      {newForm.photos.map((url, i) => (
-                        <span key={i} className="text-xs bg-stone-100 dark:bg-stone-700 text-stone-600 dark:text-stone-300 px-2 py-0.5 rounded-full flex items-center gap-1">
-                          Foto {i + 1}
-                          <button onClick={() => setNewForm(f => ({ ...f, photos: f.photos.filter((_, j) => j !== i) }))} className="text-stone-400 hover:text-red-500">&times;</button>
-                        </span>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
 
@@ -660,10 +665,10 @@ export default function AtaKanbanPage() {
                 </button>
                 <button
                   onClick={handleCreate}
-                  disabled={creating || !newForm.project_id || !newForm.description || (newForm.ata_type === 'unforeseen' && newForm.photos.length === 0)}
+                  disabled={creating || uploadingPhotos || !newForm.project_id || !newForm.description || (newForm.ata_type === 'unforeseen' && newPhotos.length === 0)}
                   className="flex-1 bg-amber-500 hover:bg-amber-600 text-stone-900 px-4 py-2.5 rounded-lg font-bold transition-all text-sm disabled:opacity-50"
                 >
-                  {creating ? 'Skapar...' : 'Skapa ÄTA'}
+                  {uploadingPhotos ? 'Laddar foton...' : creating ? 'Skapar...' : 'Skapa ÄTA'}
                 </button>
               </div>
             </div>

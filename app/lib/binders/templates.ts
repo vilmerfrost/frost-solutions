@@ -1,4 +1,7 @@
-import { SupabaseClient } from '@supabase/supabase-js'
+import type { SupabaseClient } from '@supabase/supabase-js'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnySupabaseClient = SupabaseClient<any, any, any>
 
 export interface TabDefinition {
   name: string
@@ -24,7 +27,7 @@ export const BSAB_DEFAULT_STRUCTURE: BinderTemplateStructure = {
 }
 
 export async function createBinderFromTemplate(
-  admin: SupabaseClient,
+  admin: AnySupabaseClient,
   opts: {
     tenantId: string
     projectId: string
@@ -99,7 +102,7 @@ export async function createBinderFromTemplate(
 }
 
 export async function createEmptyBinder(
-  admin: SupabaseClient,
+  admin: AnySupabaseClient,
   opts: {
     tenantId: string
     projectId: string

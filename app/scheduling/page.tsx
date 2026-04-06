@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTenant } from '@/context/TenantContext'
 import Sidebar from '@/components/Sidebar'
 import { apiFetch } from '@/lib/http/fetcher'
+import { toast } from '@/lib/toast'
 import {
   CalendarDays, ChevronLeft, ChevronRight, Plus, X,
   AlertTriangle, CheckCircle2,
@@ -155,7 +156,10 @@ export default function SchedulingPage() {
     try {
       const res = await apiFetch<{ success: boolean; data: { employees?: Employee[] } }>('/api/employees/list')
       setEmployees(res.data?.employees || [])
-    } catch { /* silent */ }
+    } catch (err) {
+      console.error('Scheduling: Failed to load employees:', err)
+      toast.error('Kunde inte ladda data. Försök igen.')
+    }
   }, [tenantId])
 
   const fetchProjects = useCallback(async () => {
@@ -163,7 +167,10 @@ export default function SchedulingPage() {
     try {
       const data = await apiFetch<{ projects?: Project[] }>(`/api/projects/list?tenantId=${tenantId}`)
       setProjects(data.projects || [])
-    } catch { /* silent */ }
+    } catch (err) {
+      console.error('Scheduling: Failed to load projects:', err)
+      toast.error('Kunde inte ladda data. Försök igen.')
+    }
   }, [tenantId])
 
   const fetchSchedules = useCallback(async () => {
@@ -185,13 +192,23 @@ export default function SchedulingPage() {
 
   useEffect(() => {
     if (!tenantId) return
-    fetchEmployees()
-    fetchProjects()
+    let cancelled = false
+
+    async function loadStaticData() {
+      await Promise.all([fetchEmployees(), fetchProjects()])
+      if (cancelled) return
+    }
+
+    loadStaticData()
+    return () => { cancelled = true }
   }, [tenantId, fetchEmployees, fetchProjects])
 
   useEffect(() => {
     if (!tenantId) return
+    let cancelled = false
+
     fetchSchedules()
+    return () => { cancelled = true }
   }, [tenantId, fetchSchedules])
 
   // Compliance check
@@ -284,7 +301,10 @@ export default function SchedulingPage() {
       })
       setShowModal(false)
       fetchSchedules()
-    } catch { /* apiFetch throws */ }
+    } catch (err) {
+      console.error('Scheduling: Failed to save schedule:', err)
+      toast.error('Kunde inte ladda data. Försök igen.')
+    }
     finally { setSubmitting(false) }
   }
 
