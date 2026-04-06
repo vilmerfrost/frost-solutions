@@ -144,7 +144,14 @@ export async function runGoogleDocAI(
    '@google-cloud/documentai'
   );
 
-  const client = new DocumentProcessorServiceClient();
+  // On Vercel (serverless), GOOGLE_APPLICATION_CREDENTIALS file path won't work.
+  // Use GOOGLE_CREDENTIALS_BASE64 to pass credentials inline.
+  const credentialsBase64 = process.env.GOOGLE_CREDENTIALS_BASE64;
+  const clientOptions = credentialsBase64
+   ? { credentials: JSON.parse(Buffer.from(credentialsBase64, 'base64').toString('utf-8')) }
+   : {}; // Falls back to GOOGLE_APPLICATION_CREDENTIALS file path
+
+  const client = new DocumentProcessorServiceClient(clientOptions);
 
   const processorName = `projects/${projectId}/locations/${location}/processors/${processorId}`;
 

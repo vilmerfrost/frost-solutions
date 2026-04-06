@@ -10,12 +10,45 @@ const SearchSchema = z.object({
   category: z.string().optional(),
   supplier: z.string().optional(),
   page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(100).default(20),
+  limit: z.coerce.number().min(1).max(100).default(50),
 })
 
+// Map supplier_name in DB to the key the frontend uses
+const SUPPLIER_KEY_MAP: Record<string, string> = {
+  'Byggmax': 'byggmax',
+  'Beijer Bygg': 'beijer',
+  'XL-Bygg': 'xl_bygg',
+  'Ahlsell': 'ahlsell',
+}
+
+// Map frontend category keys to DB category values
+const CATEGORY_MAP: Record<string, string[]> = {
+  tra: ['virke', 'trall', 'trae'],
+  skruv: ['skruv'],
+  isolering: ['isolering'],
+  el: ['el'],
+  vvs: ['vvs'],
+}
+
+interface SupplierPrices {
+  byggmax?: number | null
+  beijer?: number | null
+  xl_bygg?: number | null
+  ahlsell?: number | null
+}
+
+interface PriceResult {
+  id: string
+  product_name: string
+  category: string
+  unit: string
+  prices: SupplierPrices
+  price_change_percent?: number | null
+}
+
 /**
- * GET /api/materials/prices?q=plywood&category=trä
- * Public catalog search — full-text search on supplier_catalog_items, sorted by price.
+ * GET /api/materials/prices?q=plywood&category=tra
+ * Returns grouped results with per-supplier prices for the frontend.
  */
 export async function GET(req: NextRequest) {
   try {
@@ -27,42 +60,80 @@ export async function GET(req: NextRequest) {
 
     let query = admin
       .from('supplier_catalog_items')
-      .select('*', { count: 'exact' })
+      .select('id, product_name, supplier_name, category, price_sek, unit, price_change_percent, scraped_at')
       .order('price_sek', { ascending: true })
+      .limit(500)
 
-    // Full-text search using the Swedish GIN index
+    // Full-text search
     if (q) {
-      // Use websearch_to_tsquery for user-friendly query parsing
       query = query.textSearch('product_name', q, { type: 'websearch', config: 'swedish' })
     }
 
-    if (category) {
-      query = query.eq('category', category)
+    // Category filter
+    if (category && category !== 'alla') {
+      const dbCategories = CATEGORY_MAP[category]
+      if (dbCategories) {
+        query = query.in('category', dbCategories)
+      } else {
+        query = query.eq('category', category)
+      }
     }
 
+    // Supplier filter
     if (supplier) {
-      query = query.eq('supplier_name', supplier)
+      const dbName = Object.entries(SUPPLIER_KEY_MAP).find(([, v]) => v === supplier)?.[0]
+      if (dbName) query = query.eq('supplier_name', dbName)
     }
 
-    const from = (page - 1) * limit
-    const to = from + limit - 1
-    query = query.range(from, to)
-
-    const { data, count, error } = await query
+    const { data: rows, error } = await query
 
     if (error) {
       console.error('Price search error:', error)
       return apiError('Failed to search prices', 500)
     }
 
+    // Group rows by product_name → merge supplier prices
+    const grouped = new Map<string, PriceResult>()
+
+    for (const row of rows ?? []) {
+      const key = row.product_name.toLowerCase().trim()
+      const supplierKey = SUPPLIER_KEY_MAP[row.supplier_name] ?? row.supplier_name.toLowerCase()
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          id: row.id,
+          product_name: row.product_name,
+          category: row.category ?? 'övrigt',
+          unit: row.unit ?? 'st',
+          prices: {},
+          price_change_percent: row.price_change_percent,
+        })
+      }
+
+      const entry = grouped.get(key)!
+      ;(entry.prices as Record<string, number | null>)[supplierKey] = row.price_sek
+    }
+
+    const results = Array.from(grouped.values())
+
+    // Paginate
+    const start = (page - 1) * limit
+    const paged = results.slice(start, start + limit)
+
+    // Metadata
+    const latestScrape = (rows ?? []).reduce<string | null>((latest, r) => {
+      if (!latest || r.scraped_at > latest) return r.scraped_at
+      return latest
+    }, null)
+
+    const changesToday = (rows ?? []).filter(
+      (r) => r.price_change_percent != null && r.price_change_percent !== 0
+    ).length
+
     return apiSuccess({
-      items: data ?? [],
-      meta: {
-        page,
-        limit,
-        total: count ?? 0,
-        totalPages: Math.ceil((count ?? 0) / limit),
-      },
+      results: paged,
+      updated_at: latestScrape ?? '',
+      changes_today: changesToday,
     })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error)

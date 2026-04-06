@@ -198,13 +198,11 @@ export const xlByggScraper: SupplierScraper = {
       totalPages = Math.min(data.num_pages ?? 1, 10)
 
       for (const p of data.products) {
-        // Price is in SEK öre (cents) — divide by 100
-        // Actually check: best_offer.price might be in öre or whole SEK
         const rawPrice = p.best_offer?.price
         if (!rawPrice || rawPrice <= 0) continue
 
-        // XL-Bygg stores prices in whole SEK with VAT included
-        const priceSek = rawPrice > 100000 ? rawPrice / 100 : rawPrice
+        // XL-Bygg prices are in whole SEK including VAT
+        const priceSek = rawPrice
 
         const slug = p.slug ?? ''
         const category = inferCategory(p.title ?? '')
