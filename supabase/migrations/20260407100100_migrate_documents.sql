@@ -2,14 +2,13 @@
 -- Migrate existing project_documents from folder-based to binder-based system.
 
 -- Step 1: Create binders for projects that have documents but no binder yet
-INSERT INTO public.binders (tenant_id, project_id, name, template_id, sort_order, created_by)
+INSERT INTO public.binders (tenant_id, project_id, name, template_id, sort_order)
 SELECT DISTINCT
   pd.tenant_id,
   pd.project_id,
   'BSAB Standard',
   bt.id,
-  0,
-  NULL
+  0
 FROM public.project_documents pd
 JOIN public.binder_templates bt ON bt.tenant_id = pd.tenant_id AND bt.is_default = true
 WHERE pd.binder_tab_id IS NULL
