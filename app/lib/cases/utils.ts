@@ -20,6 +20,12 @@ export const PRIORITY_LABELS: Record<CasePriority, string> = {
   critical: 'Kritisk',
 }
 
+const MANAGEMENT_ROLES: string[] = ['admin', 'Admin', 'supervisor']
+
+export function canManageCases(role: string | null): boolean {
+  return MANAGEMENT_ROLES.includes(role ?? '')
+}
+
 export function isValidTransition(from: CaseStatus, to: CaseStatus): boolean {
   const idx = CASE_STATUSES.indexOf(from)
   const toIdx = CASE_STATUSES.indexOf(to)
