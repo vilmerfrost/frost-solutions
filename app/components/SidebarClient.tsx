@@ -32,6 +32,9 @@ import {
  X,
  ChevronDown,
  ChevronRight,
+ ClipboardCheck,
+ AlertCircle,
+ LayoutTemplate,
  type LucideIcon,
 } from 'lucide-react'
 
@@ -66,6 +69,8 @@ const NAV_GROUPS: NavGroup[] = [
    { label: 'Projekt', href: '/projects', icon: FolderKanban, roles: ['admin', 'supervisor', 'worker'] },
    { label: 'Dokument', href: '/documents', icon: FileText, roles: ['admin', 'supervisor'] },
    { label: 'ATA-hantering', href: '/ata', icon: GitBranch, roles: ['admin', 'supervisor'] },
+   { label: 'Egenkontroller', href: '/checklists', icon: ClipboardCheck, roles: ['admin', 'supervisor', 'worker'] },
+   { label: 'Ärenden', href: '/cases', icon: AlertCircle, roles: ['admin', 'supervisor', 'worker'] },
   ],
  },
  {
@@ -100,6 +105,12 @@ const NAV_GROUPS: NavGroup[] = [
    { label: 'Avtal & Signering', href: '/contracts', icon: PenTool, roles: ['admin'] },
   ],
  },
+ {
+  title: 'INSTÄLLNINGAR',
+  items: [
+   { label: 'Mallar', href: '/settings/templates', icon: LayoutTemplate, roles: ['admin'] },
+  ],
+ },
 ]
 
 // ── Collapsed state persistence ────────────────────────
@@ -130,7 +141,7 @@ export default function SidebarClient() {
  const pathname = usePathname()
  const router = useRouter()
  const { theme, toggleTheme } = useTheme()
- const { isAdmin, loading: adminLoading } = useAdmin()
+ const { isAdmin, loading: adminLoading, role } = useAdmin()
  const [isOpen, setIsOpen] = useState(false)
  const [hydrated, setHydrated] = useState(false)
  const [collapsedGroups, setCollapsedGroups] = useState<Record<string, boolean>>({})
@@ -148,8 +159,13 @@ export default function SidebarClient() {
   })
  }, [])
 
- // Determine user role based on admin status
- const userRole: UserRole = isAdmin ? 'admin' : 'worker'
+ const normalizedRole = String(role || '').toLowerCase()
+ const userRole: UserRole =
+  normalizedRole === 'admin' || normalizedRole === 'administrator'
+   ? 'admin'
+   : normalizedRole === 'supervisor'
+     ? 'supervisor'
+     : 'worker'
 
  // Filter groups based on role
  const filteredGroups = NAV_GROUPS.map(group => ({
