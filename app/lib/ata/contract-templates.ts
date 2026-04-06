@@ -251,11 +251,119 @@ export const CONSUMER_TEMPLATE: ContractTemplate = {
   ],
 }
 
+// ---------------------------------------------------------------------------
+// Simple Client — Enkel kundavtal for smaller consumer/client jobs
+// ---------------------------------------------------------------------------
+
+export const SIMPLE_CLIENT_TEMPLATE: ContractTemplate = {
+  id: 'simple-client',
+  name: 'Enkel kundavtal',
+  standard: 'consumer',
+  description:
+    'Enkelt kundavtal lampat for mindre uppdrag dar ett forenklat avtal racker.',
+  sections: [
+    {
+      title: '1. Parter',
+      content:
+        'Bestallare: {{client_name}}\nEntreprenor: {{contractor_name}}\n\nProjektet avser: {{project_name}}',
+      required: true,
+    },
+    {
+      title: '2. Arbetsbeskrivning',
+      content:
+        'Entreprenoren ska utfora foljande arbeten:\n\n[Beskriv arbetet har — material, metod, omfattning]\n\nArbetet utfors pa: [adress]',
+      required: true,
+    },
+    {
+      title: '3. Pris och betalning',
+      content:
+        'Overenskommet pris: {{contract_sum}} SEK exklusive moms.\n\nBetalningsvillkor:\n- 30% vid kontraktsskrivning\n- 40% vid halvfardigt arbete\n- 30% vid godkand slutbesiktning\n\nBetalning sker inom 30 dagar fran fakturadatum.',
+      required: true,
+    },
+    {
+      title: '4. Tidplan',
+      content:
+        'Arbetet paborjas: {{start_date}}\nBeraknad fardighallning: {{end_date}}\n\nVid forsening som inte beror pa bestallaren har bestallaren ratt till skadestand.',
+      required: true,
+    },
+    {
+      title: '5. Garanti',
+      content:
+        'Entreprenoren garanterar utfort arbete i tva (2) ar fran godkand slutbesiktning.\nGarantin omfattar bade arbete och material.\nReklamation ska ske skriftligen inom skalig tid fran det att felet upptacktes.',
+      required: true,
+    },
+    {
+      title: '6. Ovrigt',
+      content:
+        'Andringar och tillagg till detta avtal ska godkannas skriftligen av bada parter.\nTvister avgorande sker genom forhandling i forsta hand, darefter allman domstol.',
+      required: true,
+    },
+  ],
+}
+
+// ---------------------------------------------------------------------------
+// Subcontractor — Underentreprenorsavtal (AB04-based)
+// ---------------------------------------------------------------------------
+
+export const SUBCONTRACTOR_TEMPLATE: ContractTemplate = {
+  id: 'subcontractor',
+  name: 'Underentreprenorsavtal',
+  standard: 'AB04',
+  description:
+    'Avtal mellan huvudentreprenor och underentreprenor for deluppdrag inom storre byggprojekt.',
+  sections: [
+    {
+      title: '1. Parter',
+      content:
+        'Huvudentreprenor: {{contractor_name}}\nUnderentreprenor: [UE-foretag]\nOrg.nr: [UE org.nr]\n\nProjektet avser: {{project_name}}\nBestallare: {{client_name}}',
+      required: true,
+    },
+    {
+      title: '2. Uppdragsbeskrivning',
+      content:
+        'Underentreprenoren ska utfora foljande arbeten:\n\n[Beskriv uppdraget i detalj — ytor, material, metoder]\n\nArbetet ska utforas fackmannamassigt och i enlighet med gaellande branschregler.',
+      required: true,
+    },
+    {
+      title: '3. Ersattning och betalning',
+      content:
+        'Overenskommen ersattning: {{contract_sum}} SEK exklusive moms.\n\nFakturering sker manadsvis baserat pa utfort arbete.\nBetalningsvillkor: 30 dagar netto.\nUnderentreprenoren ska ha godkand F-skattsedel.',
+      required: true,
+    },
+    {
+      title: '4. Tid och tillganglighet',
+      content:
+        'Arbetet paborjas: {{start_date}}\nBeraknad fardighallning: {{end_date}}\n\nUnderentreprenoren ska folja huvudentreprenarens tidplan.\nForsening ska meddelas omedelbart och kan medfora viteskrav.',
+      required: true,
+    },
+    {
+      title: '5. Forsakring och ansvar',
+      content:
+        'Underentreprenoren ska inneha:\n- Ansvarsforsakring (minst 5 MSEK)\n- Allriskforsakring for eget arbete och material\n- Olycksfallsforsakring for egen personal\n\nBevis pa forsakring ska uppvisas fore arbetets start.',
+      required: true,
+    },
+    {
+      title: '6. Arbetsmiljo och KMA',
+      content:
+        'Underentreprenoren ska:\n- Folja huvudentreprenarens arbetsmiljoplan\n- Tillhandahalla egen skyddsutrustning\n- Delta i skyddsronder och byggmoten\n- Rapportera tillbud och olyckor omedelbart\n- Ha ID06-kort for all personal pa arbetsplatsen',
+      required: true,
+    },
+    {
+      title: '7. Uppsagning',
+      content:
+        'Avtalet kan sagas upp med 14 dagars skriftligt varsel.\nVid uppsagning har underentreprenoren ratt till ersattning for utfort arbete.\nHuvudentreprenoren har ratt att hava avtalet med omedelbar verkan vid vasentligt avtalsbrott.',
+      required: true,
+    },
+  ],
+}
+
 /** All available contract templates. */
 export const CONTRACT_TEMPLATES: ContractTemplate[] = [
   AB04_TEMPLATE,
   ABT06_TEMPLATE,
   CONSUMER_TEMPLATE,
+  SIMPLE_CLIENT_TEMPLATE,
+  SUBCONTRACTOR_TEMPLATE,
 ]
 
 /**
