@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { resolveAuthAdmin, apiSuccess, apiError, handleRouteError } from '@/lib/api'
-import { isRestrictedFolder } from '@/lib/documents/folders'
+import { hasRestrictedFolderAccess, isRestrictedFolder } from '@/lib/documents/folders'
 
 export async function POST(
   req: NextRequest,
@@ -16,6 +16,7 @@ export async function POST(
     const file = formData.get('file') as File | null
     const folder = (formData.get('folder') as string) || '06-Foton'
     const description = formData.get('description') as string | null
+    const binderTabId = formData.get('binder_tab_id') as string | null
 
     if (!file) return apiError('No file provided', 400)
 
@@ -26,9 +27,9 @@ export async function POST(
         .select('role')
         .eq('auth_user_id', auth.user.id)
         .eq('tenant_id', auth.tenantId)
-        .single()
+        .maybeSingle()
 
-      if (empRole?.role !== 'admin') {
+      if (!hasRestrictedFolderAccess(empRole?.role)) {
         return apiError('Admin access required for restricted folders', 403)
       }
     }
@@ -43,7 +44,7 @@ export async function POST(
       .eq('file_name', file.name)
       .order('version', { ascending: false })
       .limit(1)
-      .single()
+      .maybeSingle()
 
     const newVersion = existing ? existing.version + 1 : 1
     const storagePath = `${auth.tenantId}/${projectId}/${folder}/${file.name}_v${newVersion}`
@@ -84,6 +85,7 @@ export async function POST(
         previous_version_id: existing?.id ?? null,
         uploaded_by: employee?.id ?? null,
         description: description ?? null,
+        binder_tab_id: binderTabId || null,
       })
       .select()
       .single()

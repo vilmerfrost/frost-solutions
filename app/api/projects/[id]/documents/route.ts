@@ -1,7 +1,7 @@
 import { NextRequest } from 'next/server'
 import { z } from 'zod'
 import { resolveAuthAdmin, parseBody, parseSearchParams, apiSuccess, apiError, handleRouteError } from '@/lib/api'
-import { isRestrictedFolder } from '@/lib/documents/folders'
+import { hasRestrictedFolderAccess, isRestrictedFolder } from '@/lib/documents/folders'
 
 const ListQuerySchema = z.object({
   folder: z.string().optional(),
@@ -38,9 +38,13 @@ export async function GET(
       .eq('tenant_id', auth.tenantId)
       .order('created_at', { ascending: false })
 
+    const binderTabId = new URL(req.url).searchParams.get('binder_tab_id')
+
     if (parsed.data.folder) {
       query = query.eq('folder', parsed.data.folder)
     }
+
+    if (binderTabId) query = query.eq('binder_tab_id', binderTabId)
 
     if (parsed.data.search) {
       query = query.ilike('file_name', `%${parsed.data.search}%`)
@@ -75,9 +79,9 @@ export async function POST(
         .select('role')
         .eq('auth_user_id', auth.user.id)
         .eq('tenant_id', auth.tenantId)
-        .single()
+        .maybeSingle()
 
-      if (employee?.role !== 'admin') {
+      if (!hasRestrictedFolderAccess(employee?.role)) {
         return apiError('Admin access required for restricted folders', 403)
       }
     }
