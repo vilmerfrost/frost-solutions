@@ -216,8 +216,13 @@ export default function ContractDetailPage() {
     }
   }
 
+  function updateItemLocal(itemId: string, field: string, value: any) {
+    setItems(prev => prev.map(i => i.id === itemId ? { ...i, [field]: value } : i))
+  }
+
   async function handleUpdateItem(item: ContractItem) {
     if (!contract) return
+    setItems(prev => prev.map(i => i.id === item.id ? item : i))
     try {
       await ContractsAPI.updateItem(contract.id, item)
     } catch (err: any) {
@@ -531,10 +536,9 @@ export default function ContractDetailPage() {
                           {isDraft ? (
                             <input
                               type="text"
-                              defaultValue={item.description}
-                              onBlur={(e) =>
-                                handleUpdateItem({ ...item, description: e.target.value })
-                              }
+                              value={item.description}
+                              onChange={(e) => updateItemLocal(item.id, 'description', e.target.value)}
+                              onBlur={() => handleUpdateItem(item)}
                               className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                             />
                           ) : (
@@ -545,13 +549,9 @@ export default function ContractDetailPage() {
                           {isDraft ? (
                             <input
                               type="number"
-                              defaultValue={item.quantity}
-                              onBlur={(e) =>
-                                handleUpdateItem({
-                                  ...item,
-                                  quantity: parseFloat(e.target.value) || 0,
-                                })
-                              }
+                              value={item.quantity}
+                              onChange={(e) => updateItemLocal(item.id, 'quantity', parseFloat(e.target.value) || 0)}
+                              onBlur={() => handleUpdateItem(item)}
                               className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                             />
                           ) : (
@@ -562,10 +562,9 @@ export default function ContractDetailPage() {
                           {isDraft ? (
                             <input
                               type="text"
-                              defaultValue={item.unit}
-                              onBlur={(e) =>
-                                handleUpdateItem({ ...item, unit: e.target.value })
-                              }
+                              value={item.unit}
+                              onChange={(e) => updateItemLocal(item.id, 'unit', e.target.value)}
+                              onBlur={() => handleUpdateItem(item)}
                               className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                             />
                           ) : (
@@ -576,13 +575,9 @@ export default function ContractDetailPage() {
                           {isDraft ? (
                             <input
                               type="number"
-                              defaultValue={item.unit_price}
-                              onBlur={(e) =>
-                                handleUpdateItem({
-                                  ...item,
-                                  unit_price: parseFloat(e.target.value) || 0,
-                                })
-                              }
+                              value={item.unit_price}
+                              onChange={(e) => updateItemLocal(item.id, 'unit_price', parseFloat(e.target.value) || 0)}
+                              onBlur={() => handleUpdateItem(item)}
                               className="w-full px-2 py-1.5 border border-gray-300 dark:border-gray-600 rounded bg-white dark:bg-gray-900 text-gray-900 dark:text-white text-sm focus:ring-1 focus:ring-primary-500 focus:border-transparent"
                             />
                           ) : (

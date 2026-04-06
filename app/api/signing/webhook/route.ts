@@ -74,7 +74,11 @@ export async function POST(req: NextRequest) {
             if (uploadError) {
               console.error('Failed to upload signed PDF:', uploadError)
             } else {
-              signedPdfUrl = uploadData?.path ?? storagePath
+              // Generate a long-lived signed URL for download
+              const { data: urlData } = await admin.storage
+                .from('signed-documents')
+                .createSignedUrl(storagePath, 60 * 60 * 24 * 365 * 10) // 10 years
+              signedPdfUrl = urlData?.signedUrl ?? storagePath
             }
           }
 

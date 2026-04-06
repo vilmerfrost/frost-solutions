@@ -71,7 +71,7 @@ export async function POST(
       webhookUrl: `${appUrl}/api/signing/webhook`,
     })
 
-    await auth.admin.from('signing_orders').insert({
+    const { error: insertError } = await auth.admin.from('signing_orders').insert({
       tenant_id: auth.tenantId,
       document_type: 'contract',
       document_id: id,
@@ -84,6 +84,10 @@ export async function POST(
         href: s.href,
       })),
     })
+
+    if (insertError) {
+      throw new Error('Failed to save signing order: ' + insertError.message)
+    }
 
     await auth.admin
       .from('contracts')

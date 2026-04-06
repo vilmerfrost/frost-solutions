@@ -134,7 +134,9 @@ export async function POST(req: NextRequest) {
         .insert(itemRows)
 
       if (itemsError) {
-        console.error('Failed to insert contract items:', itemsError)
+        // Roll back the contract on item insert failure
+        await auth.admin.from('contracts').delete().eq('id', contract.id)
+        throw itemsError
       }
     }
 

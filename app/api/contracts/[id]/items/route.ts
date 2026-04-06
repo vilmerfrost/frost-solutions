@@ -154,6 +154,10 @@ export async function DELETE(
     const auth = await resolveAuthAdmin()
     if (auth.error) return auth.error
 
+    if (!(await verifyContractOwnership(auth.admin, contractId, auth.tenantId))) {
+      return apiError('Contract not found', 404)
+    }
+
     let body: unknown
     try { body = await req.json() } catch { return apiError('Invalid JSON', 400) }
 

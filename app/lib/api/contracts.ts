@@ -18,10 +18,11 @@ export class ContractsAPI {
     if (filters?.page) params.set('page', String(filters.page))
     if (filters?.limit) params.set('limit', String(filters.limit))
 
-    const result = await apiFetch<ApiResponse<Contract[]>>(`/api/contracts?${params}`)
+    const result = await apiFetch<ApiResponse<{ data: Contract[]; meta: ContractMeta }>>(`/api/contracts?${params}`)
+    const payload = result.data
     return {
-      data: result.data || [],
-      meta: result.meta || { page: 1, limit: 20, count: 0 },
+      data: payload?.data || [],
+      meta: payload?.meta || { page: 1, limit: 20, count: 0 },
     }
   }
 
