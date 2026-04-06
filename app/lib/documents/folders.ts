@@ -1,3 +1,9 @@
+/**
+ * @deprecated This module is kept for backwards compatibility during migration.
+ * New code should use the binder system (app/lib/binders/templates.ts).
+ * The BSAB folder structure is now managed as a binder template in the database.
+ */
+
 export const BSAB_FOLDERS = [
   { key: '01-Ritningar', name: 'Ritningar', icon: 'blueprint', subfolders: ['A-Arkitekt', 'K-Konstruktion', 'E-El', 'VS-VVS'] },
   { key: '02-Beskrivningar', name: 'Beskrivningar', icon: 'file-text' },
@@ -11,10 +17,15 @@ export const BSAB_FOLDERS = [
 export type FolderKey = typeof BSAB_FOLDERS[number]['key']
 
 export function getFolderConfig(key: string) {
-  return BSAB_FOLDERS.find(f => f.key === key)
+  const normalizedKey = key.split('/')[0]
+  return BSAB_FOLDERS.find(f => f.key === normalizedKey)
 }
 
 export function isRestrictedFolder(key: string): boolean {
   const folder = getFolderConfig(key)
   return folder ? 'restricted' in folder && folder.restricted === true : false
+}
+
+export function hasRestrictedFolderAccess(role: string | null | undefined): boolean {
+  return String(role ?? '').toLowerCase() === 'admin'
 }
