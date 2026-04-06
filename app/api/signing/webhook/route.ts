@@ -87,6 +87,18 @@ export async function POST(req: NextRequest) {
               updated_at: new Date().toISOString(),
             })
             .eq('id', order.id)
+
+          // Sync contract status
+          if (order.document_type === 'contract') {
+            await admin
+              .from('contracts')
+              .update({
+                status: 'signed',
+                signed_pdf_url: signedPdfUrl,
+                updated_at: new Date().toISOString(),
+              })
+              .eq('id', order.document_id)
+          }
         } else {
           await admin
             .from('signing_orders')
@@ -113,6 +125,16 @@ export async function POST(req: NextRequest) {
             updated_at: new Date().toISOString(),
           })
           .eq('id', order.id)
+
+        if (order.document_type === 'contract') {
+          await admin
+            .from('contracts')
+            .update({
+              status: 'draft',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.document_id)
+        }
         break
       }
 
@@ -124,6 +146,16 @@ export async function POST(req: NextRequest) {
             updated_at: new Date().toISOString(),
           })
           .eq('id', order.id)
+
+        if (order.document_type === 'contract') {
+          await admin
+            .from('contracts')
+            .update({
+              status: 'draft',
+              updated_at: new Date().toISOString(),
+            })
+            .eq('id', order.document_id)
+        }
         break
       }
     }
