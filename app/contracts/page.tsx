@@ -1,199 +1,194 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import Sidebar from '@/components/Sidebar'
 import { useTenant } from '@/context/TenantContext'
-import { apiFetch } from '@/lib/http/fetcher'
+import { ContractsAPI } from '@/lib/api/contracts'
+import type { Contract, ContractFilters, ContractMeta, ContractStatus, ContractType } from '@/types/contracts'
 import { toast } from '@/lib/toast'
 import {
   PenTool,
-  Scale,
-  HardHat,
-  Home,
-  ChevronDown,
-  Loader2,
-  FileSignature,
-  Clock,
+  Plus,
+  Search,
+  FileText,
+  Send,
   CheckCircle2,
   XCircle,
-  AlertCircle,
-  ExternalLink,
-  FileText,
+  HardHat,
+  Users,
+  Loader2,
+  ChevronLeft,
+  ChevronRight,
+  ChevronDown,
 } from 'lucide-react'
 
 /* ------------------------------------------------------------------ */
-/* Types                                                               */
+/* Format helpers                                                       */
 /* ------------------------------------------------------------------ */
 
-interface Template {
-  id: string
-  name: string
-  standard: string
-  description: string
-  sectionCount: number
-}
-
-interface Project {
-  id: string
-  name: string
-}
-
-interface FilledTemplate {
-  id: string
-  name: string
-  standard: string
-  sections: Array<{ title: string; body: string }>
-}
-
-interface SigningOrder {
-  id: string
-  idura_order_id?: string
-  document_type: string
-  document_id: string
-  status: string
-  created_at: string
-}
-
-/* ------------------------------------------------------------------ */
-/* Helpers                                                             */
-/* ------------------------------------------------------------------ */
-
-const TEMPLATE_ICONS: Record<string, React.ReactNode> = {
-  ab04: <Scale className="w-8 h-8" />,
-  abt06: <HardHat className="w-8 h-8" />,
-  konsument: <Home className="w-8 h-8" />,
-}
-
-function statusBadge(status: string) {
-  switch (status) {
-    case 'signed':
-    case 'completed':
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
-          <CheckCircle2 className="w-3 h-3" /> Signerad
-        </span>
-      )
-    case 'rejected':
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
-          <XCircle className="w-3 h-3" /> Avvisad
-        </span>
-      )
-    case 'expired':
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-stone-100 dark:bg-stone-900/30 text-stone-700 dark:text-stone-300">
-          <AlertCircle className="w-3 h-3" /> Utgangen
-        </span>
-      )
-    default:
-      return (
-        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
-          <Clock className="w-3 h-3" /> Vantar
-        </span>
-      )
-  }
-}
-
-function formatDate(dateStr: string): string {
+function formatDate(d: string) {
   return new Intl.DateTimeFormat('sv-SE', {
     year: 'numeric',
     month: 'short',
     day: 'numeric',
-  }).format(new Date(dateStr))
+  }).format(new Date(d))
+}
+
+function formatCurrency(n: number) {
+  return new Intl.NumberFormat('sv-SE', {
+    style: 'currency',
+    currency: 'SEK',
+    maximumFractionDigits: 0,
+  }).format(n)
 }
 
 /* ------------------------------------------------------------------ */
-/* Page Component                                                      */
+/* Badges                                                              */
 /* ------------------------------------------------------------------ */
+
+function StatusBadge({ status }: { status: ContractStatus }) {
+  switch (status) {
+    case 'draft':
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300">
+          <FileText className="w-3 h-3" />
+          Utkast
+        </span>
+      )
+    case 'sent':
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+          <Send className="w-3 h-3" />
+          Skickad
+        </span>
+      )
+    case 'signed':
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+          <CheckCircle2 className="w-3 h-3" />
+          Signerad
+        </span>
+      )
+    case 'active':
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+          <CheckCircle2 className="w-3 h-3" />
+          Aktiv
+        </span>
+      )
+    case 'completed':
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-stone-100 dark:bg-stone-800 text-stone-700 dark:text-stone-300">
+          <CheckCircle2 className="w-3 h-3" />
+          Avslutad
+        </span>
+      )
+    case 'cancelled':
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300">
+          <XCircle className="w-3 h-3" />
+          Avbruten
+        </span>
+      )
+    default:
+      return null
+  }
+}
+
+function TypeBadge({ type }: { type: ContractType }) {
+  if (type === 'subcontractor') {
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300">
+        <HardHat className="w-3 h-3" />
+        UE
+      </span>
+    )
+  }
+  return (
+    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+      <Users className="w-3 h-3" />
+      Kund
+    </span>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/* Page                                                                */
+/* ------------------------------------------------------------------ */
+
+const STATUS_OPTIONS: { value: ContractStatus | ''; label: string }[] = [
+  { value: '', label: 'Alla' },
+  { value: 'draft', label: 'Utkast' },
+  { value: 'sent', label: 'Skickad' },
+  { value: 'signed', label: 'Signerad' },
+  { value: 'active', label: 'Aktiv' },
+  { value: 'completed', label: 'Avslutad' },
+  { value: 'cancelled', label: 'Avbruten' },
+]
+
+const TYPE_OPTIONS: { value: ContractType | ''; label: string }[] = [
+  { value: '', label: 'Alla' },
+  { value: 'client', label: 'Kundavtal' },
+  { value: 'subcontractor', label: 'UE-avtal' },
+]
 
 export default function ContractsPage() {
   const { tenantId } = useTenant()
+  const router = useRouter()
 
-  // Template section state
-  const [templates, setTemplates] = useState<Template[]>([])
-  const [projects, setProjects] = useState<Project[]>([])
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null)
-  const [selectedProject, setSelectedProject] = useState<string>('')
-  const [generating, setGenerating] = useState(false)
-  const [preview, setPreview] = useState<FilledTemplate | null>(null)
+  const [contracts, setContracts] = useState<Contract[]>([])
+  const [meta, setMeta] = useState<ContractMeta>({ page: 1, limit: 20, count: 0 })
+  const [loading, setLoading] = useState(true)
 
-  // Signing orders
-  const [signingOrders, setSigningOrders] = useState<SigningOrder[]>([])
-  const [loadingOrders, setLoadingOrders] = useState(true)
+  const [search, setSearch] = useState('')
+  const [filters, setFilters] = useState<ContractFilters>({ page: 1, limit: 20 })
 
-  // Fetch templates
-  useEffect(() => {
-    async function load() {
-      try {
-        const res = await apiFetch<{ success: boolean; data: Template[] }>('/api/contracts/templates')
-        setTemplates(res.data ?? [])
-      } catch {
-        // Templates are static, so this rarely fails
-      }
-    }
-    load()
-  }, [])
-
-  // Fetch projects
-  useEffect(() => {
+  const fetchContracts = useCallback(async () => {
     if (!tenantId) return
-    async function loadProjects() {
-      try {
-        const res = await apiFetch<{ projects?: Project[] }>(`/api/projects/list?tenantId=${tenantId}`)
-        setProjects(res.projects ?? [])
-      } catch { /* silent */ }
-    }
-    loadProjects()
-  }, [tenantId])
-
-  // Fetch signing orders
-  const fetchSigningOrders = useCallback(async () => {
-    if (!tenantId) return
-    setLoadingOrders(true)
+    setLoading(true)
     try {
-      const res = await apiFetch<{ data?: SigningOrder[] }>('/api/signing/orders')
-      setSigningOrders(res.data ?? [])
-    } catch {
-      // Silent — endpoint may not exist yet
-      setSigningOrders([])
-    } finally {
-      setLoadingOrders(false)
-    }
-  }, [tenantId])
-
-  useEffect(() => {
-    fetchSigningOrders()
-  }, [fetchSigningOrders])
-
-  // Generate contract
-  async function handleGenerate() {
-    if (!selectedTemplate || !selectedProject) {
-      toast.error('Välj mall och projekt')
-      return
-    }
-    setGenerating(true)
-    setPreview(null)
-    try {
-      const res = await apiFetch<{ success: boolean; data: { template: FilledTemplate } }>(
-        '/api/contracts/generate',
-        {
-          method: 'POST',
-          body: JSON.stringify({ templateId: selectedTemplate, projectId: selectedProject }),
-        }
-      )
-      setPreview(res.data.template)
-      toast.success('Avtal genererat!')
+      const result = await ContractsAPI.list({ ...filters, search: search || undefined })
+      setContracts(result.data)
+      setMeta(result.meta)
     } catch (err: any) {
-      toast.error(err.message || 'Kunde inte generera avtal')
+      toast.error(err.message || 'Kunde inte ladda avtal')
     } finally {
-      setGenerating(false)
+      setLoading(false)
     }
+  }, [tenantId, filters, search])
+
+  useEffect(() => {
+    fetchContracts()
+  }, [fetchContracts])
+
+  function handleStatusChange(value: string) {
+    setFilters((prev) => ({
+      ...prev,
+      page: 1,
+      status: value ? (value as ContractStatus) : undefined,
+    }))
   }
 
-  // Sign with BankID — currently disabled, BankID integration is not yet available.
-  async function handleSign() {
-    // BankID signing is not available yet; show informational toast.
-    toast.error('BankID-signering är inte tillgänglig ännu. Kommer snart.')
+  function handleTypeChange(value: string) {
+    setFilters((prev) => ({
+      ...prev,
+      page: 1,
+      contract_type: value ? (value as ContractType) : undefined,
+    }))
+  }
+
+  function handleSearchChange(value: string) {
+    setSearch(value)
+    setFilters((prev) => ({ ...prev, page: 1 }))
+  }
+
+  const totalPages = meta.totalPages ?? Math.ceil(meta.count / meta.limit)
+  const currentPage = meta.page
+
+  function goToPage(page: number) {
+    setFilters((prev) => ({ ...prev, page }))
   }
 
   return (
@@ -201,197 +196,127 @@ export default function ContractsPage() {
       <Sidebar />
       <main className="flex-1 w-full lg:ml-0 overflow-x-hidden">
         <div className="p-4 sm:p-6 lg:p-10 max-w-7xl mx-auto w-full">
+
           {/* Header */}
-          <div className="flex items-center gap-4 mb-8">
-            <div className="p-3 bg-primary-500 rounded-lg shadow-md">
-              <PenTool className="w-8 h-8 text-white" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary-500 rounded-lg shadow-md">
+                <PenTool className="w-8 h-8 text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Avtal</h1>
+                <p className="text-gray-600 dark:text-gray-400">Hantera kundavtal och UE-avtal</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-                Avtal & Signering
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
-                Skapa avtal fran mallar och signera digitalt
-              </p>
-            </div>
+            <Link
+              href="/contracts/new"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-lg font-semibold shadow-md hover:shadow-xl transition-all"
+            >
+              <Plus className="w-4 h-4" />
+              Nytt avtal
+            </Link>
           </div>
 
-          {/* ============ SKAPA AVTAL ============ */}
-          <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-md border border-gray-200 dark:border-gray-700 p-6 mb-6">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-              Skapa avtal
-            </h2>
-
-            {/* Template cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              {templates.map((t) => {
-                const isSelected = selectedTemplate === t.id
-                const iconKey = t.id.toLowerCase().replace(/[-_]/g, '')
-                return (
-                  <button
-                    key={t.id}
-                    onClick={() => setSelectedTemplate(t.id)}
-                    className={`text-left p-5 rounded-xl border-2 transition-all duration-200 ${
-                      isSelected
-                        ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md'
-                        : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600 hover:shadow-sm'
-                    }`}
-                  >
-                    <div className={`mb-3 ${isSelected ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400 dark:text-gray-500'}`}>
-                      {TEMPLATE_ICONS[iconKey] || <FileText className="w-8 h-8" />}
-                    </div>
-                    <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
-                      {t.name}
-                    </h3>
-                    <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
-                      {t.description}
-                    </p>
-                  </button>
-                )
-              })}
-              {templates.length === 0 && (
-                <>
-                  {/* Fallback static cards when API hasn't loaded */}
-                  {[
-                    { id: 'ab04', name: 'AB 04', desc: 'Allm. bestammelser for byggnads-, anlaggnings- och installationsentreprenader' },
-                    { id: 'abt06', name: 'ABT 06', desc: 'Allm. bestammelser for totalentreprenader' },
-                    { id: 'konsument', name: 'Konsument', desc: 'Konsumenttjanstlagen — smarre reparations- och ombyggnadsjobb' },
-                  ].map((t) => {
-                    const isSelected = selectedTemplate === t.id
-                    return (
-                      <button
-                        key={t.id}
-                        onClick={() => setSelectedTemplate(t.id)}
-                        className={`text-left p-5 rounded-xl border-2 transition-all duration-200 ${
-                          isSelected
-                            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 shadow-md'
-                            : 'border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300 dark:hover:border-gray-600'
-                        }`}
-                      >
-                        <div className={`mb-3 ${isSelected ? 'text-primary-600 dark:text-primary-400' : 'text-gray-400'}`}>
-                          {TEMPLATE_ICONS[t.id] || <FileText className="w-8 h-8" />}
-                        </div>
-                        <h3 className="font-semibold text-gray-900 dark:text-white mb-1">{t.name}</h3>
-                        <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">{t.desc}</p>
-                      </button>
-                    )
-                  })}
-                </>
-              )}
+          {/* Filters bar */}
+          <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-sm border border-gray-200 dark:border-gray-700 p-4 mb-4 flex flex-col sm:flex-row gap-3">
+            {/* Search */}
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Sok avtal..."
+                value={search}
+                onChange={(e) => handleSearchChange(e.target.value)}
+                className="w-full pl-9 pr-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+              />
             </div>
 
-            {/* Project selector + generate button */}
-            <div className="flex flex-col sm:flex-row gap-4">
-              <div className="relative flex-1">
-                <select
-                  value={selectedProject}
-                  onChange={(e) => setSelectedProject(e.target.value)}
-                  className="w-full appearance-none px-4 py-2.5 pr-10 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                >
-                  <option value="">Valj projekt...</option>
-                  {projects.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-              </div>
-              <button
-                onClick={handleGenerate}
-                disabled={!selectedTemplate || !selectedProject || generating}
-                className="px-6 py-2.5 bg-primary-500 hover:bg-primary-600 text-gray-900 rounded-lg font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+            {/* Status filter */}
+            <div className="relative">
+              <select
+                value={filters.status ?? ''}
+                onChange={(e) => handleStatusChange(e.target.value)}
+                className="appearance-none pl-4 pr-9 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
               >
-                {generating && <Loader2 className="w-4 h-4 animate-spin" />}
-                Generera avtal
-              </button>
+                {STATUS_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
             </div>
 
-            {/* Preview */}
-            {preview && (
-              <div className="mt-6">
-                <div className="bg-stone-50 dark:bg-stone-900/20 rounded-xl border border-stone-200 dark:border-stone-700 p-6 max-h-[400px] overflow-y-auto">
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-1">
-                    {preview.name}
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-4 uppercase tracking-wider">
-                    {preview.standard}
-                  </p>
-                  {preview.sections?.map((sec, i) => (
-                    <div key={i} className="mb-4">
-                      <h4 className="font-semibold text-gray-800 dark:text-gray-200 text-sm mb-1">
-                        {sec.title}
-                      </h4>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 whitespace-pre-wrap leading-relaxed">
-                        {sec.body}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <button
-                    onClick={handleSign}
-                    disabled={true}
-                    title="Kommer snart — BankID-signering är inte tillgänglig ännu"
-                    className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-semibold shadow-md hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                  >
-                    <FileSignature className="w-4 h-4" />
-                    Signera med BankID (kommer snart)
-                  </button>
-                </div>
-              </div>
-            )}
+            {/* Type filter */}
+            <div className="relative">
+              <select
+                value={filters.contract_type ?? ''}
+                onChange={(e) => handleTypeChange(e.target.value)}
+                className="appearance-none pl-4 pr-9 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
+              >
+                {TYPE_OPTIONS.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+            </div>
           </div>
 
-          {/* ============ AKTIVA SIGNERINGAR ============ */}
-          <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-md border border-gray-200 dark:border-gray-700">
-            <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-                Aktiva signeringar
-              </h2>
-            </div>
-
-            {loadingOrders ? (
-              <div className="p-8 text-center">
-                <Loader2 className="w-6 h-6 animate-spin text-primary-500 mx-auto" />
+          {/* Table card */}
+          <div className="bg-white dark:bg-gray-800 rounded-[8px] shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+            {loading ? (
+              <div className="p-16 flex justify-center">
+                <Loader2 className="w-8 h-8 animate-spin text-primary-500" />
               </div>
-            ) : signingOrders.length === 0 ? (
-              <div className="p-8 text-center text-gray-500 dark:text-gray-400">
-                <FileSignature className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                <p className="text-sm">Inga signeringsordrar annu</p>
+            ) : contracts.length === 0 ? (
+              <div className="p-16 flex flex-col items-center text-center text-gray-500 dark:text-gray-400">
+                <FileText className="w-12 h-12 mb-3 opacity-40" />
+                <p className="font-medium text-gray-700 dark:text-gray-300 mb-1">Inga avtal hittades</p>
+                <p className="text-sm">Skapa ett nytt avtal eller justera filtren</p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700">
-                      <th className="px-6 py-3">Dokument</th>
+                    <tr className="text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-900/40">
+                      <th className="px-6 py-3">Avtalsnr</th>
+                      <th className="px-6 py-3">Titel</th>
+                      <th className="px-6 py-3">Motpart</th>
                       <th className="px-6 py-3">Typ</th>
                       <th className="px-6 py-3">Status</th>
+                      <th className="px-6 py-3 text-right">Belopp</th>
                       <th className="px-6 py-3">Skapad</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100 dark:divide-gray-700">
-                    {signingOrders.map((order) => (
+                    {contracts.map((c) => (
                       <tr
-                        key={order.id}
-                        className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                        key={c.id}
+                        onClick={() => router.push(`/contracts/${c.id}`)}
+                        className="hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors cursor-pointer"
                       >
-                        <td className="px-6 py-3 font-medium text-gray-900 dark:text-white">
-                          {order.document_type}-{order.document_id.slice(0, 8)}
+                        <td className="px-6 py-4 font-mono text-xs text-gray-600 dark:text-gray-400 whitespace-nowrap">
+                          {c.contract_number}
                         </td>
-                        <td className="px-6 py-3 text-gray-600 dark:text-gray-400 capitalize">
-                          {order.document_type === 'contract'
-                            ? 'Avtal'
-                            : order.document_type === 'quote'
-                            ? 'Offert'
-                            : order.document_type === 'invoice'
-                            ? 'Faktura'
-                            : order.document_type}
+                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white max-w-[200px] truncate">
+                          {c.title}
                         </td>
-                        <td className="px-6 py-3">{statusBadge(order.status)}</td>
-                        <td className="px-6 py-3 text-gray-500 dark:text-gray-400">
-                          {formatDate(order.created_at)}
+                        <td className="px-6 py-4 text-gray-600 dark:text-gray-400 max-w-[160px] truncate">
+                          {c.counterparty_name || c.client?.name || '—'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <TypeBadge type={c.contract_type} />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <StatusBadge status={c.status} />
+                        </td>
+                        <td className="px-6 py-4 text-right font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                          {formatCurrency(c.total_amount)}
+                        </td>
+                        <td className="px-6 py-4 text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                          {formatDate(c.created_at)}
                         </td>
                       </tr>
                     ))}
@@ -399,7 +324,38 @@ export default function ContractsPage() {
                 </table>
               </div>
             )}
+
+            {/* Pagination */}
+            {!loading && meta.count > 0 && (
+              <div className="px-6 py-4 border-t border-gray-200 dark:border-gray-700 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {meta.count} avtal totalt
+                </p>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage <= 1}
+                    className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Foregaende sida"
+                  >
+                    <ChevronLeft className="w-4 h-4" />
+                  </button>
+                  <span className="text-sm text-gray-700 dark:text-gray-300 px-2">
+                    Sida {currentPage} av {totalPages || 1}
+                  </span>
+                  <button
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage >= (totalPages || 1)}
+                    className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    aria-label="Nasta sida"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
+
         </div>
       </main>
     </div>
